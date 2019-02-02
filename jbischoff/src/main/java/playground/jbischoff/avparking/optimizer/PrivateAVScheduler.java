@@ -24,8 +24,8 @@ package playground.jbischoff.avparking.optimizer;
 
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
@@ -63,13 +63,13 @@ public class PrivateAVScheduler extends TaxiScheduler {
 		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
 
-	public void moveIdleVehicle(Vehicle vehicle, VrpPathWithTravelData vrpPath) {
+	public void moveIdleVehicle(DvrpVehicle vehicle, VrpPathWithTravelData vrpPath) {
 		Schedule schedule = vehicle.getSchedule();
 		divertOrAppendDrive(schedule, vrpPath);
 		appendStayTask(vehicle);
 	}
 
-	public void stopCruisingVehicle(Vehicle vehicle) {
+	public void stopCruisingVehicle(DvrpVehicle vehicle) {
 		if (!taxiCfg.isVehicleDiversion()) {
 			throw new RuntimeException("Diversion must be on");
 		}

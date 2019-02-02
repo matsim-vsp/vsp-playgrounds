@@ -34,9 +34,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -133,7 +133,7 @@ public class RandomTaxiVehicleCreator {
 				log.info("#" + i);
 
 			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-					.id(Id.create("rt" + i, Vehicle.class))
+					.id(Id.create("rt" + i, DvrpVehicle.class))
 					.startLinkId(link.getId())
 					.capacity(5)
 					.serviceBeginTime(Math.round(1))

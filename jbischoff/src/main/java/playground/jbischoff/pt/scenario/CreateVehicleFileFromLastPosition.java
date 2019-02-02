@@ -30,9 +30,9 @@ import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -71,7 +71,8 @@ public static void main(String[] args) {
 				if (event.getActType().equals(VrpAgentLogic.AFTER_SCHEDULE_ACTIVITY_TYPE)){
 					Link l = network.getLinks().get(event.getLinkId());
 					DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-							.id(Id.create(Id.create(event.getPersonId().toString(), Vehicle.class), Vehicle.class))
+							.id(Id.create(Id.create(event.getPersonId().toString(), DvrpVehicle.class),
+									DvrpVehicle.class))
 							.startLinkId(l.getId())
 							.capacity(capacity)
 							.serviceBeginTime((double)t0)

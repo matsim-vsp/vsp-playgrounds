@@ -28,9 +28,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleGenerator;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.contrib.zone.Zone;
@@ -75,7 +75,7 @@ public class BerlinTaxiCreator implements VehicleGenerator.VehicleCreator
         if (RND.nextDouble() < evShare) {
             vehIdString = "e" + vehIdString;
         }
-        Id<Vehicle> vehId = Id.create(vehIdString, Vehicle.class);
+		Id<DvrpVehicle> vehId = Id.create(vehIdString, DvrpVehicle.class);
 
         Link link = getRandomLinkInLor(lorId);
 		DvrpVehicleSpecification vehicleSpecification = ImmutableDvrpVehicleSpecification.newBuilder()

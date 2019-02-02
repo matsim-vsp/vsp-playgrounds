@@ -27,9 +27,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -78,7 +78,7 @@ public class TaxiVehicleCreator {
 			Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
 			Link link = NetworkUtils.getNearestLinkExactly(((Network)scenario.getNetwork()), MGC.point2Coord(p));
 			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-					.id(Id.create(Id.create("rt" + i, Vehicle.class), Vehicle.class))
+					.id(Id.create(Id.create("rt" + i, DvrpVehicle.class), DvrpVehicle.class))
 					.startLinkId(link.getId())
 					.capacity(5)
 					.serviceBeginTime((double)Math.round(1))

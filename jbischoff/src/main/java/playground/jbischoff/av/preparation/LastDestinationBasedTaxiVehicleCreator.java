@@ -33,9 +33,9 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.core.config.ConfigUtils;
@@ -101,7 +101,7 @@ public class LastDestinationBasedTaxiVehicleCreator {
 		for (int i = 0 ; i< amount; i++){
 		Link link = scenario.getNetwork().getLinks().get(wrs.select());
 			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-					.id(Id.create(Id.create("rt" + i, Vehicle.class), Vehicle.class))
+					.id(Id.create(Id.create("rt" + i, DvrpVehicle.class), DvrpVehicle.class))
 					.startLinkId(link.getId())
 					.capacity(5)
 					.serviceBeginTime((double)Math.round(1))

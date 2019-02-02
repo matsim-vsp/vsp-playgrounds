@@ -38,10 +38,10 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetReader;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
@@ -160,7 +160,7 @@ public class ConvertOldNetworkToNew {
 			}
 			else {
 				DvrpVehicleSpecification newVehicle = ImmutableDvrpVehicleSpecification.newBuilder()
-						.id(Id.create(v.getId(), Vehicle.class))
+						.id(Id.create(v.getId(), DvrpVehicle.class))
 						.startLinkId(newLink.getId())
 						.capacity(v.getCapacity())
 						.serviceBeginTime(v.getServiceBeginTime())

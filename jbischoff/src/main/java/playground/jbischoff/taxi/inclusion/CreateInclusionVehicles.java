@@ -28,10 +28,10 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetReader;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.gbl.MatsimRandom;
@@ -66,7 +66,7 @@ public class CreateInclusionVehicles {
 
 				DvrpVehicleSpecification v = allVehicles.remove(z);
 				DvrpVehicleSpecification nv = ImmutableDvrpVehicleSpecification.newBuilder(v)
-						.id(Id.create("hc_" + v.getId().toString(), Vehicle.class))
+						.id(Id.create("hc_" + v.getId().toString(), DvrpVehicle.class))
 						.build();
 				newVehicles.add(nv);
 			}

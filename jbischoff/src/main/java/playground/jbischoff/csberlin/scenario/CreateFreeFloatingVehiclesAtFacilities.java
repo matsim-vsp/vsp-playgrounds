@@ -31,9 +31,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -96,7 +96,7 @@ public class CreateFreeFloatingVehiclesAtFacilities {
 					number.increment();
 					Link link = scenario.getNetwork().getLinks().get(Id.createLinkId(row[0]));
 					DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-							.id(Id.create(Id.create("ff" + number.intValue(), Vehicle.class), Vehicle.class))
+							.id(Id.create(Id.create("ff" + number.intValue(), DvrpVehicle.class), DvrpVehicle.class))
 							.startLinkId(link.getId())
 							.capacity(5)
 							.serviceBeginTime((double)Math.round(1))
@@ -114,7 +114,7 @@ public class CreateFreeFloatingVehiclesAtFacilities {
 		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
 		Link link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),MGC.point2Coord(p));
 			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-					.id(Id.create(Id.create("ff" + i, Vehicle.class), Vehicle.class))
+					.id(Id.create(Id.create("ff" + i, DvrpVehicle.class), DvrpVehicle.class))
 					.startLinkId(link.getId())
 					.capacity(5)
 					.serviceBeginTime((double)Math.round(1))

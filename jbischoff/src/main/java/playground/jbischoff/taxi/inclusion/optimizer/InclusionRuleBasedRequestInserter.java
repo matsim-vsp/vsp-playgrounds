@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.taxi.data.TaxiRequest;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
 import org.matsim.contrib.taxi.optimizer.UnplannedRequestInserter;
@@ -76,7 +76,7 @@ public class InclusionRuleBasedRequestInserter implements UnplannedRequestInsert
 			boolean barrierFreeRequest = req.getPassengerId().toString().startsWith(INCLUSION_CUSTOMER_PREFIX)
 					? true : false;
 
-			Stream<Vehicle> selectedVehs = idleTaxiRegistry.findNearestVehicles(req.getFromLink().getFromNode(),
+			Stream<DvrpVehicle> selectedVehs = idleTaxiRegistry.findNearestVehicles(req.getFromLink().getFromNode(),
 					Integer.MAX_VALUE, barrierFreeRequest ? this::isBarrierFree : null);
 
 			if (barrierFreeRequest) {
@@ -96,7 +96,7 @@ public class InclusionRuleBasedRequestInserter implements UnplannedRequestInsert
 		}
 	}
 
-	private boolean isBarrierFree(Vehicle vehicle) {
+	private boolean isBarrierFree(DvrpVehicle vehicle) {
 		return vehicle.getId().toString().startsWith(INCLUSION_TAXI_PREFIX);
 	}
 }
