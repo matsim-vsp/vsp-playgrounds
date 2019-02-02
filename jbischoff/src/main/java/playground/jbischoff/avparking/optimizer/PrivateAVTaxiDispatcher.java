@@ -27,8 +27,8 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
 import org.matsim.contrib.dvrp.path.VrpPaths;
@@ -106,7 +106,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, 60)) {
-			for (Vehicle veh : fleet.getVehicles().values()) {
+			for (DvrpVehicle veh : fleet.getVehicles().values()) {
 				if (veh.getSchedule().getStatus().equals(ScheduleStatus.STARTED)) {
 
 					if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())
@@ -160,7 +160,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	/**
 	 * @param veh
 	 */
-	private void findFreeSlotAndParkVehicle(Vehicle veh) {
+	private void findFreeSlotAndParkVehicle(DvrpVehicle veh) {
 		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
 			Link lastLink = Schedules.getLastLinkInSchedule(veh);
 			// AV is not parked
@@ -180,7 +180,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 
 	}
 
-	private void sendVehicleToGarage(Vehicle veh) {
+	private void sendVehicleToGarage(DvrpVehicle veh) {
 		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
 			Link lastLink = Schedules.getLastLinkInSchedule(veh);
 			Link garageLink = findClosestAVParking(lastLink);
@@ -212,7 +212,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 		return closestLink;
 	}
 
-	private void sendVehicleToCruise(Vehicle veh) {
+	private void sendVehicleToCruise(DvrpVehicle veh) {
 		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
 			Link lastLink = Schedules.getLastLinkInSchedule(veh);
 			Coord firstCircleCoord = new Coord(lastLink.getCoord().getX() - 500 - random.nextInt(1500),

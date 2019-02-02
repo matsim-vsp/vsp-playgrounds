@@ -26,9 +26,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleGenerator;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.util.random.RandomUtils;
@@ -65,7 +65,7 @@ public class AVGenerator {
 
 		@Override
 		public DvrpVehicleSpecification createVehicleSpecification(double t0, double t1) {
-			Id<Vehicle> vehId = Id.create("taxi" + currentVehicleId++, Vehicle.class);
+			Id<DvrpVehicle> vehId = Id.create("taxi" + currentVehicleId++, DvrpVehicle.class);
 
 			Coord coord = RandomUtils.getGlobalGenerator().nextDouble() < DENSITY_RELATION ?
 					randomCoordInBiggerRectangle() :

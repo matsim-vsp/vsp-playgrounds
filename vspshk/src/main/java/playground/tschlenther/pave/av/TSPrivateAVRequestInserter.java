@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPaths;
 import org.matsim.contrib.dvrp.schedule.Schedules;
@@ -73,8 +73,8 @@ public class TSPrivateAVRequestInserter implements UnplannedRequestInserter {
 		Iterator<TaxiRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {
 			TaxiRequest req = reqIter.next();
-			Id<Vehicle> personalAV = Id.create(req.getPassengerId().toString() + "_av", Vehicle.class);
-			Vehicle veh = fleet.getVehicles().get(personalAV);
+			Id<DvrpVehicle> personalAV = Id.create(req.getPassengerId().toString() + "_av", DvrpVehicle.class);
+			DvrpVehicle veh = fleet.getVehicles().get(personalAV);
 			if (veh == null) {
 				throw new RuntimeException("Vehicle " + personalAV.toString() + "does not exist.");
 			}

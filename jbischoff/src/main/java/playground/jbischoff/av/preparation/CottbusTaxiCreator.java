@@ -24,9 +24,9 @@ import java.util.List;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -44,7 +44,7 @@ public class CottbusTaxiCreator {
 		for (int i = 0; i<1000 ;i++){
 
 			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
-					.id(Id.create(Id.create("taxi_" + i, Vehicle.class), Vehicle.class))
+					.id(Id.create(Id.create("taxi_" + i, DvrpVehicle.class), DvrpVehicle.class))
 					.startLinkId(network.getLinks().get(Id.createLinkId(10617)).getId())
 					.capacity(4)
 					.serviceBeginTime(0.0)

@@ -44,7 +44,6 @@ import org.matsim.testcases.MatsimTestCase;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleReaderV1;
-import org.matsim.vehicles.VehicleUtils;
 
 /**
  * @author ikaddoura
@@ -53,7 +52,7 @@ import org.matsim.vehicles.VehicleUtils;
 public class InVehicleDelayHandlerTest extends MatsimTestCase {
 
 	private Id<Vehicle> vehicleId1 = Id.create("vehicleId1", Vehicle.class);
-//	private Id<Vehicle> vehicleId2 = Id.create("vehicleId2", Vehicle.class);
+	//	private Id<DvrpVehicle> vehicleId2 = Id.create("vehicleId2", DvrpVehicle.class);
 	private Id<Person> ptDriverId1 = Id.create("driverId1", Person.class);
 //	private Id<Person> ptDriverId2 = Id.create("driverId2", Person.class);
 	private Id<Person> testAgent1 = Id.create("testAgent1", Person.class);

@@ -24,7 +24,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy.Relocation;
 import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostRelocationCalculator;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
 
 /**
  * @author michalm
@@ -32,7 +32,7 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 public class SemiDisaggregatedMinCostRelocationCalculator implements MinCostRelocationCalculator {
 	@Override
 	public List<Relocation> calcRelocations(List<Pair<String, Integer>> supply, List<Pair<String, Integer>> demand,
-			Map<String, List<Vehicle>> rebalancableVehiclesPerZone) {
+			Map<String, List<DvrpVehicle>> rebalancableVehiclesPerZone) {
 
 		// The idea is to expand each supply node 's' into a sub-tree 't' consisting of edges (each of capacity 1)
 		// going from 's' to each rebalancable vehicle located in the zone represented by 's',

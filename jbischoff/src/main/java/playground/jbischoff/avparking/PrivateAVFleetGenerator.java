@@ -37,17 +37,13 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
+import org.matsim.contrib.dvrp.data.DvrpVehicleImpl;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.core.config.Config;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
-import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
-import org.matsim.core.controler.listener.IterationStartsListener;
 
 /**
  * @author  jbischoff
@@ -57,7 +53,7 @@ import org.matsim.core.controler.listener.IterationStartsListener;
 
 public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 
-	private Map<Id<Vehicle>,Vehicle> vehiclesForIteration;
+	private Map<Id<DvrpVehicle>, DvrpVehicle> vehiclesForIteration;
 
 	private final Population population;
 	
@@ -80,7 +76,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	
 	
 	@Override
-	public Map<Id<Vehicle>, ? extends Vehicle> getVehicles() {
+	public Map<Id<DvrpVehicle>, ? extends DvrpVehicle> getVehicles() {
 		return vehiclesForIteration;
 	}
 
@@ -89,7 +85,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	 */
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		Map<Id<Vehicle>,Vehicle> lastIterationVehicles = new HashMap<>();
+		Map<Id<DvrpVehicle>, DvrpVehicle> lastIterationVehicles = new HashMap<>();
 		lastIterationVehicles.putAll(vehiclesForIteration);
 		vehiclesForIteration.clear();
 		for (Person p : population.getPersons().values()){
@@ -105,7 +101,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 				}
 			}
 			if (vehicleStartLink!=null){
-				Id<Vehicle> vehicleId = Id.create(p.getId().toString()+"_av", Vehicle.class);
+				Id<DvrpVehicle> vehicleId = Id.create(p.getId().toString() + "_av", DvrpVehicle.class);
 				if (lastIterationVehicles.containsKey(vehicleId)){
 					Id<Link> lastParkingPosition = manager.getVehicleParkingLocation(Id.createVehicleId(vehicleId));
 					if (lastParkingPosition!=null){
@@ -113,11 +109,12 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 						lastIterationVehicles.remove(vehicleId);
 					}
 				}
-				Vehicle veh = new VehicleImpl(vehicleId, network.getLinks().get(vehicleStartLink), 4, 0, 30*3600);
+				DvrpVehicle veh = new DvrpVehicleImpl(vehicleId, network.getLinks().get(vehicleStartLink), 4, 0,
+						30 * 3600);
 				vehiclesForIteration.put(veh.getId(), veh);
 			}
 		}
-		for (Id<Vehicle> vid : lastIterationVehicles.keySet()){
+		for (Id<DvrpVehicle> vid : lastIterationVehicles.keySet()) {
 			Id<org.matsim.vehicles.Vehicle> vehicleId = Id.createVehicleId(vid);
 			Id<Link> parkLink = manager.getVehicleParkingLocation(vehicleId);
 			if (parkLink!=null){
