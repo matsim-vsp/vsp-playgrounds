@@ -30,8 +30,9 @@ import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
 import org.matsim.contrib.dvrp.data.file.VehicleWriter;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -50,8 +51,8 @@ public static void main(String[] args) {
 	String vehiclesFile = "D:/runs-svn/intermodal/4400/v4400_lastPosition.xml";
 	final int capacity = 4;
 	final int t0 = 0;
-	final int t1 = 36*3600; 
-	final List<Vehicle> vehicles = new ArrayList<Vehicle>();  
+	final int t1 = 36*3600;
+	final List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 	
 	EventsManager events = EventsUtils.createEventsManager();
 		 
@@ -68,14 +69,20 @@ public static void main(String[] args) {
 			@Override
 			public void handleEvent(ActivityStartEvent event) {
 				if (event.getActType().equals(VrpAgentLogic.AFTER_SCHEDULE_ACTIVITY_TYPE)){
-					Link l = network.getLinks().get(event.getLinkId()); 
-					Vehicle v = new VehicleImpl(Id.create(event.getPersonId().toString(),Vehicle.class), l , capacity , t0, t1);
+					Link l = network.getLinks().get(event.getLinkId());
+					DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+							.id(Id.create(Id.create(event.getPersonId().toString(), Vehicle.class), Vehicle.class))
+							.startLinkId(l.getId())
+							.capacity(capacity)
+							.serviceBeginTime((double)t0)
+							.serviceEndTime((double)t1)
+							.build();
 					vehicles.add(v);
 				}
 			}
 		});
 	new MatsimEventsReader(events).readFile(eventsFile);
-	new VehicleWriter(vehicles).write(vehiclesFile)	;
+	new VehicleWriter(vehicles.stream()).write(vehiclesFile);
 	
 }
 }
