@@ -36,7 +36,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.pt.PtConstants;
-import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
@@ -132,7 +131,7 @@ public class PTFareHandlerFelix implements ActivityStartEventHandler, PersonDepa
 			}
 			
 //	colectivo fares
-//			if(this.transitVehicles.getVehicles().get(vid).toString().contains("co")){
+			//			if(this.transitVehicles.getVehicleSpecifications().get(vid).toString().contains("co")){
 			
 			 if(this.transitVehicles.getVehicles().get(vid) == null){
 				// person is entering a non-transit vehicle; no fare to pay.

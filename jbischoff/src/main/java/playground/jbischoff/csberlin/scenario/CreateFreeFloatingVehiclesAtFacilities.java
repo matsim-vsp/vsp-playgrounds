@@ -27,13 +27,13 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
 import org.matsim.contrib.dvrp.data.file.VehicleWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -67,7 +67,7 @@ public class CreateFreeFloatingVehiclesAtFacilities {
 	private final Scenario scenario ;
 	private Geometry geometry;
 	private Random random = MatsimRandom.getRandom();
-    private List<Vehicle> vehicles = new ArrayList<>();
+	private List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 
 	
 	public static void main(String[] args) {
@@ -95,7 +95,13 @@ public class CreateFreeFloatingVehiclesAtFacilities {
 				for (int i = 0;i<ii;i++){
 					number.increment();
 					Link link = scenario.getNetwork().getLinks().get(Id.createLinkId(row[0]));
-			        Vehicle v = new VehicleImpl(Id.create("ff"+number.intValue(), Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
+					DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+							.id(Id.create(Id.create("ff" + number.intValue(), Vehicle.class), Vehicle.class))
+							.startLinkId(link.getId())
+							.capacity(5)
+							.serviceBeginTime((double)Math.round(1))
+							.serviceEndTime((double)Math.round(30 * 3600))
+							.build();
 			        vehicles.add(v);
 				}
 	
@@ -107,11 +113,17 @@ public class CreateFreeFloatingVehiclesAtFacilities {
 		for (int i = number.intValue() ; i< amount; i++){
 		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
 		Link link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),MGC.point2Coord(p));
-        Vehicle v = new VehicleImpl(Id.create("ff"+i, Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("ff" + i, Vehicle.class), Vehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime((double)Math.round(1))
+					.serviceEndTime((double)Math.round(30 * 3600))
+					.build();
         vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml");
+		new VehicleWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml");
 	}
 
 }

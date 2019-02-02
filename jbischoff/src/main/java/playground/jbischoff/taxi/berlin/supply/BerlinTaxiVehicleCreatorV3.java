@@ -19,20 +19,30 @@
 
 package playground.jbischoff.taxi.berlin.supply;
 
-import java.text.*;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.*;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.VehicleGenerator;
 import org.matsim.contrib.dvrp.data.file.VehicleWriter;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.tabularFileParser.*;
-import org.matsim.matrices.*;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
+import org.matsim.matrices.Entry;
+import org.matsim.matrices.Matrix;
 
 import playground.michalm.TaxiBerlin.TaxiBerlinZoneUtils;
 import playground.michalm.util.matrices.MatrixUtils;
@@ -42,7 +52,7 @@ public class BerlinTaxiVehicleCreatorV3
 {
     //used in status data
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
+
 	//used in many other files
 	private static final SimpleDateFormat ORG = new SimpleDateFormat("yyyyMMddHHmmss");
     private static final Logger log = Logger.getLogger(BerlinTaxiVehicleCreatorV3.class);
@@ -53,7 +63,7 @@ public class BerlinTaxiVehicleCreatorV3
 
     private Scenario scenario;
     private Map<Id<Zone>, Zone> zones;
-    private List<? extends Vehicle> vehicles;
+	private List<DvrpVehicleSpecification> vehicles;
 
     double evShare;
     double maxTime;
@@ -65,28 +75,23 @@ public class BerlinTaxiVehicleCreatorV3
     {
         //String dir = "C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/";
         String dir = "d:/svn-vsp/sustainability-w-michal-and-dlr/data/";
-        
-        
-//        String taxisOverTimeFile = dir + "taxi_berlin/2014_10_bahnstreik/VEH_IDs_2014-10/oct/oct_taxis.txt";
+
+		//        String taxisOverTimeFile = dir + "taxi_berlin/2014_10_bahnstreik/VEH_IDs_2014-10/oct/oct_taxis.txt";
 //        String taxisOverTimeFile = dir + "taxi_berlin/2013/status/taxisovertime.csv";
         String taxisOverTimeFile = dir + "taxi_berlin/2013/vehicles/taxisweekly.csv";
 
         //String networkFile = dir + "scenarios/2015_02_basic_scenario_v6/berlin_brb.xml";
         String networkFile = dir + "network/berlin.xml";//only Berlin!!!
-        
-        
-        
-        String zoneShpFile = dir + "shp_merged/zones.shp";
+
+		String zoneShpFile = dir + "shp_merged/zones.shp";
         String zoneXmlFile = dir + "shp_merged/zones.xml";
-        
+
         //String vehicleFile = dir + "scenarios/2015_02_basic_scenario_v6/taxis4to4_EV";
         String vehicleFile = dir + "scenarios/2015_08_only_berlin_v1/taxis4to4_EV";
-        
-        
-        String statusMatrixFile = dir + "taxi_berlin/2013/status/statusMatrixAvg.xml";
-        
-        
-        BerlinTaxiVehicleCreatorV3 btv = new BerlinTaxiVehicleCreatorV3();
+
+		String statusMatrixFile = dir + "taxi_berlin/2013/status/statusMatrixAvg.xml";
+
+		BerlinTaxiVehicleCreatorV3 btv = new BerlinTaxiVehicleCreatorV3();
         btv.evShare = 0.0;
         btv.minTime = 4.0 * 3600;
         btv.maxTime = 17.0 * 3600;
@@ -138,12 +143,12 @@ public class BerlinTaxiVehicleCreatorV3
     {
         if (start.getMinutes() != 30 || start.getSeconds() != 0) {
             //we want to obtain estimates for full hours, i.e. 4:00 or 5:00
-            //by calculating averages for 3:30-4:29:59 and 4:30-5:29:59  
+			//by calculating averages for 3:30-4:29:59 and 4:30-5:29:59
             throw new RuntimeException("Must start with hh:30:00");
         }
 
-        final int HOURS = 25;//we want to have vehicles for full 24 hours, e.g. 4am to 4am next day  
-        
+		final int HOURS = 25;//we want to have vehicles for full 24 hours, e.g. 4am to 4am next day
+
         long startTime = start.getTime() / 1000;//in seconds
         long endTime = startTime + HOURS * 3600;//in seconds
 
@@ -189,12 +194,12 @@ public class BerlinTaxiVehicleCreatorV3
         BerlinTaxiCreator btc = new BerlinTaxiCreator(scenario, zones, wrs, evShare);
         VehicleGenerator vg = new VehicleGenerator(4*3600, maxTime, btc);
         vg.generateVehicles(taxisOverTimeHourlyAverage, 4 * 3600, 3600);
-        vehicles = vg.getVehicles();
+		vehicles = vg.getVehicleSpecifications();
     }
 
 
     private void writeVehicles(String vehicleFile)
     {
-        new VehicleWriter(vehicles).write(vehicleFile + evShare + ".xml");
+		new VehicleWriter(vehicles.stream()).write(vehicleFile + evShare + ".xml");
     }
 }

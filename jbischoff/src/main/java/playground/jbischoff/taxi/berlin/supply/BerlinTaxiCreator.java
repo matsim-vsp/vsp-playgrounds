@@ -28,15 +28,18 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.VehicleGenerator;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.network.NetworkUtils;
 
+import com.vividsolutions.jts.geom.Point;
+
 import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
 import playground.michalm.TaxiBerlin.TaxiBerlinZoneUtils;
-
-import com.vividsolutions.jts.geom.Point;
 
 
 public class BerlinTaxiCreator implements VehicleGenerator.VehicleCreator
@@ -65,7 +68,7 @@ public class BerlinTaxiCreator implements VehicleGenerator.VehicleCreator
 
 
     @Override
-    public VehicleImpl createVehicle(double t0, double t1)
+	public DvrpVehicleSpecification createVehicleSpecification(double t0, double t1)
     {
         Id<Zone> lorId = lorSelection.select();
         String vehIdString = "t_" + lorId + "_" + (t0 / 3600) + "_" + currentVehicleId;
@@ -75,9 +78,15 @@ public class BerlinTaxiCreator implements VehicleGenerator.VehicleCreator
         Id<Vehicle> vehId = Id.create(vehIdString, Vehicle.class);
 
         Link link = getRandomLinkInLor(lorId);
-        VehicleImpl v = new VehicleImpl(vehId, link, PAXPERCAR, Math.round(t0), Math.round(t1));
+		DvrpVehicleSpecification vehicleSpecification = ImmutableDvrpVehicleSpecification.newBuilder()
+				.id(vehId)
+				.startLinkId(link.getId())
+				.capacity(PAXPERCAR)
+				.serviceBeginTime(Math.round(t0))
+				.serviceEndTime(Math.round(t1))
+				.build();
         currentVehicleId++;
-        return v;
+		return vehicleSpecification;
     }
 
 
