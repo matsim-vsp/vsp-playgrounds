@@ -32,7 +32,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.VehicleGenerator;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.config.ConfigUtils;
@@ -200,6 +200,6 @@ public class BerlinTaxiVehicleCreatorV3
 
     private void writeVehicles(String vehicleFile)
     {
-		new VehicleWriter(vehicles.stream()).write(vehicleFile + evShare + ".xml");
+		new FleetWriter(vehicles.stream()).write(vehicleFile + evShare + ".xml");
     }
 }

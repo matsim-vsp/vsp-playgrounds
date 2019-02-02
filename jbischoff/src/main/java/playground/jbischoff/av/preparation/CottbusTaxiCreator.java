@@ -27,7 +27,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
@@ -52,7 +52,7 @@ public class CottbusTaxiCreator {
 					.build();
 			taxis.add(v);
 		}
-		new VehicleWriter(taxis.stream()).write("C:/Users/Joschka/Desktop/av4cottbus/taxis.xml");
+		new FleetWriter(taxis.stream()).write("C:/Users/Joschka/Desktop/av4cottbus/taxis.xml");
 		
 	}
 

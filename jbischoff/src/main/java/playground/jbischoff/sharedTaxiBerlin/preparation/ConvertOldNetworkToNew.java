@@ -42,8 +42,8 @@ import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetReader;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
@@ -151,7 +151,7 @@ public class ConvertOldNetworkToNew {
 	private void convertTaxis(String oldfile, String newfile) {
 		FleetSpecificationImpl oldFleet = new FleetSpecificationImpl();
 		FleetSpecificationImpl newFleet = new FleetSpecificationImpl();
-		new VehicleReader(oldFleet).readFile(oldfile);
+		new FleetReader(oldFleet).readFile(oldfile);
 		for (DvrpVehicleSpecification v : oldFleet.getVehicleSpecifications().values()) {
 			Link newLink = newNet.getLinks().get(old2newId.get(v.getStartLinkId()));
 			if (newLink == null) {
@@ -169,7 +169,7 @@ public class ConvertOldNetworkToNew {
 				newFleet.addVehicleSpecification(newVehicle);
 			}
 		}
-		new VehicleWriter(newFleet.getVehicleSpecifications().values().stream()).write(newfile);
+		new FleetWriter(newFleet.getVehicleSpecifications().values().stream()).write(newfile);
 		
 	}
 	/**
