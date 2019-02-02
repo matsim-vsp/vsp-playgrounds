@@ -30,7 +30,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.DefaultFleetSpecification;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
@@ -53,10 +52,10 @@ public class CreateInclusionVehicles {
 		new CreateInclusionVehicles().run();
 	}
 	private void run(){
-		FleetSpecification data = new DefaultFleetSpecification();
+		DefaultFleetSpecification data = new DefaultFleetSpecification();
 		Network network = NetworkUtils.createNetwork();
-		new MatsimNetworkReader(network).readFile(DIR+"berlin_brb.xml.gz"); 
-		new VehicleReader(network,data).readFile(DIR+"orig_supply/taxis4to4_EV0.0.xml");
+		new MatsimNetworkReader(network).readFile(DIR+"berlin_brb.xml.gz");
+		new VehicleReader(data).readFile(DIR + "orig_supply/taxis4to4_EV0.0.xml");
 		Random random = MatsimRandom.getRandom();
 		for (int i = 50; i<=1000; i=i+50 ){
 			ArrayList<DvrpVehicleSpecification> allVehicles = new ArrayList<>();

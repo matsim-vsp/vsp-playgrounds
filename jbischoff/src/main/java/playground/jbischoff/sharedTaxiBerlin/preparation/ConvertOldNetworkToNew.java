@@ -40,7 +40,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.dvrp.data.DefaultFleetSpecification;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
@@ -150,9 +149,9 @@ public class ConvertOldNetworkToNew {
 	 * @param string2
 	 */
 	private void convertTaxis(String oldfile, String newfile) {
-		FleetSpecification oldFleet = new DefaultFleetSpecification();
+		DefaultFleetSpecification oldFleet = new DefaultFleetSpecification();
 		DefaultFleetSpecification newFleet = new DefaultFleetSpecification();
-		new VehicleReader(oldNet, oldFleet).readFile(oldfile);
+		new VehicleReader(oldFleet).readFile(oldfile);
 		for (DvrpVehicleSpecification v : oldFleet.getSpecifications().values()) {
 			Link newLink = newNet.getLinks().get(old2newId.get(v.getStartLinkId()));
 			if (newLink == null) {

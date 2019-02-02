@@ -30,8 +30,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
 import org.matsim.contrib.dvrp.data.file.VehicleWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -61,7 +62,7 @@ public class CreateTaxiVehicles {
 		int seats = 1;
 		String networkfile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT_ACCESS_LOOPS;
 		String taxisFile = FilePaths.PATH_BASE_DIRECTORY + "data/input/Berlin100pct/drt/DrtVehicles.100pct.DRT_" + numberofVehicles + "_Cap" + seats + ".xml";// FilePaths.PATH_DRT_VEHICLES_20_CAP1_BERLIN__10PCT;
-		List<Vehicle> vehicles = new ArrayList<>();
+		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 		Random random = MatsimRandom.getLocalInstance();
 		Geometry geometryStudyArea = JbUtils.readShapeFileAndExtractGeometry(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_AV_OPERATION_AREA_SHP, FilePaths.AV_OPERATION_AREA_SHP_KEY).get(FilePaths.AV_OPERATION_AREA_SHP_ELEMENT);
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkfile);
@@ -80,10 +81,16 @@ public class CreateTaxiVehicles {
 			}
 			while (!startLink.getAllowedModes().contains(TransportMode.car));
 			//for multi-modal networks: Only links where cars can ride should be used.
-			Vehicle v = new VehicleImpl(Id.create("DRT"+i, Vehicle.class), startLink, seats, operationStartTime, operationEndTime);
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create("DRT" + i, Vehicle.class))
+					.startLinkId(startLink.getId())
+					.capacity(seats)
+					.serviceBeginTime(operationStartTime)
+					.serviceEndTime(operationEndTime)
+					.build();
 		    vehicles.add(v);    
 		}
-		new VehicleWriter(vehicles).write(taxisFile);
+		new VehicleWriter(vehicles.stream()).write(taxisFile);
 	}
 
 }

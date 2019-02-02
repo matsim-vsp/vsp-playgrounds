@@ -39,7 +39,8 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEventHandler;
-import org.matsim.contrib.dvrp.data.FleetImpl;
+import org.matsim.contrib.dvrp.data.DefaultFleetSpecification;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
@@ -106,12 +107,12 @@ LinkEnterEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEvent
 	}
 	
 	private void initializeFromVehiclesFile(URL drtVehiclesFileUrl) {
-		FleetImpl fleet = new FleetImpl();
-		new VehicleReader(network, fleet).parse(drtVehiclesFileUrl);
-		for (org.matsim.contrib.dvrp.data.Vehicle veh : fleet.getVehicles().values()) {
-			drtVeh2CurrentLink.put(Id.createVehicleId(veh.getId()), veh.getStartLink().getId());
-			drtVeh2CurrentNumPassengers.put(Id.createVehicleId(veh.getId()), 0);
-			drtVeh2scheduleCounter.put(Id.createVehicleId(veh.getId()), 0);
+		DefaultFleetSpecification fleet = new DefaultFleetSpecification();
+		new VehicleReader(fleet).parse(drtVehiclesFileUrl);
+		for (DvrpVehicleSpecification s : fleet.getSpecifications().values()) {
+			drtVeh2CurrentLink.put(Id.createVehicleId(s.getId()), s.getStartLinkId());
+			drtVeh2CurrentNumPassengers.put(Id.createVehicleId(s.getId()), 0);
+			drtVeh2scheduleCounter.put(Id.createVehicleId(s.getId()), 0);
 		}
 	}
 	
