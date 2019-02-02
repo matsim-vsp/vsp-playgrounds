@@ -38,8 +38,8 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.dvrp.data.DefaultFleetSpecification;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
@@ -149,10 +149,10 @@ public class ConvertOldNetworkToNew {
 	 * @param string2
 	 */
 	private void convertTaxis(String oldfile, String newfile) {
-		DefaultFleetSpecification oldFleet = new DefaultFleetSpecification();
-		DefaultFleetSpecification newFleet = new DefaultFleetSpecification();
+		FleetSpecificationImpl oldFleet = new FleetSpecificationImpl();
+		FleetSpecificationImpl newFleet = new FleetSpecificationImpl();
 		new VehicleReader(oldFleet).readFile(oldfile);
-		for (DvrpVehicleSpecification v : oldFleet.getSpecifications().values()) {
+		for (DvrpVehicleSpecification v : oldFleet.getVehicleSpecifications().values()) {
 			Link newLink = newNet.getLinks().get(old2newId.get(v.getStartLinkId()));
 			if (newLink == null) {
 				System.out.println("hoop");
@@ -166,10 +166,10 @@ public class ConvertOldNetworkToNew {
 						.serviceBeginTime(v.getServiceBeginTime())
 						.serviceEndTime(v.getServiceEndTime())
 						.build();
-				newFleet.addSpecification(newVehicle);
+				newFleet.addVehicleSpecification(newVehicle);
 			}
 		}
-		new VehicleWriter(newFleet.getSpecifications().values().stream()).write(newfile);
+		new VehicleWriter(newFleet.getVehicleSpecifications().values().stream()).write(newfile);
 		
 	}
 	/**
