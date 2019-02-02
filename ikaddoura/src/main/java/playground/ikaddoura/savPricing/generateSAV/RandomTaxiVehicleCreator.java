@@ -37,7 +37,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -142,7 +142,7 @@ public class RandomTaxiVehicleCreator {
 			vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
+		new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
 	}
 
 	private static Point getRandomPointInFeature(Random rnd, Geometry g) {

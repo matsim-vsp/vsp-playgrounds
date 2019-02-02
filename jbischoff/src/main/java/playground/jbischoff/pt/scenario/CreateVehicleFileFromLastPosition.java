@@ -33,7 +33,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
@@ -82,7 +82,7 @@ public static void main(String[] args) {
 			}
 		});
 	new MatsimEventsReader(events).readFile(eventsFile);
-	new VehicleWriter(vehicles.stream()).write(vehiclesFile);
+	new FleetWriter(vehicles.stream()).write(vehiclesFile);
 	
 }
 }

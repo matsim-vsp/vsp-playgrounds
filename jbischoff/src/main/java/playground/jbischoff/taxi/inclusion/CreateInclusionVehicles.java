@@ -32,8 +32,8 @@ import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetReader;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -55,7 +55,7 @@ public class CreateInclusionVehicles {
 		FleetSpecificationImpl data = new FleetSpecificationImpl();
 		Network network = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(network).readFile(DIR+"berlin_brb.xml.gz");
-		new VehicleReader(data).readFile(DIR + "orig_supply/taxis4to4_EV0.0.xml");
+		new FleetReader(data).readFile(DIR + "orig_supply/taxis4to4_EV0.0.xml");
 		Random random = MatsimRandom.getRandom();
 		for (int i = 50; i<=1000; i=i+50 ){
 			ArrayList<DvrpVehicleSpecification> allVehicles = new ArrayList<>();
@@ -71,7 +71,7 @@ public class CreateInclusionVehicles {
 				newVehicles.add(nv);
 			}
 			newVehicles.addAll(allVehicles);
-			new VehicleWriter(newVehicles.stream()).write(DIR + "hc_vehicles" + i + ".xml.gz");
+			new FleetWriter(newVehicles.stream()).write(DIR + "hc_vehicles" + i + ".xml.gz");
 		}
 	}
 }

@@ -41,7 +41,7 @@ import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEventHandler;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
+import org.matsim.contrib.dvrp.data.file.FleetReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
@@ -108,7 +108,7 @@ LinkEnterEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEvent
 	
 	private void initializeFromVehiclesFile(URL drtVehiclesFileUrl) {
 		FleetSpecificationImpl fleet = new FleetSpecificationImpl();
-		new VehicleReader(fleet).parse(drtVehiclesFileUrl);
+		new FleetReader(fleet).parse(drtVehiclesFileUrl);
 		for (DvrpVehicleSpecification s : fleet.getVehicleSpecifications().values()) {
 			drtVeh2CurrentLink.put(Id.createVehicleId(s.getId()), s.getStartLinkId());
 			drtVeh2CurrentNumPassengers.put(Id.createVehicleId(s.getId()), 0);

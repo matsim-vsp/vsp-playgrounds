@@ -30,7 +30,7 @@ import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleGenerator;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.config.ConfigUtils;
@@ -119,7 +119,7 @@ public class AVGenerator {
 			AVCreator avc = new AVCreator(scenario);
 			VehicleGenerator vg = new VehicleGenerator(workTime, workTime, avc);
 			vg.generateVehicles(new double[] { i, i }, startTime, 30 * 3600);
-			new VehicleWriter(vg.getVehicleSpecifications().stream()).write(taxisFilePrefix + i + ".xml");
+			new FleetWriter(vg.getVehicleSpecifications().stream()).write(taxisFilePrefix + i + ".xml");
 		}
 	}
 }
