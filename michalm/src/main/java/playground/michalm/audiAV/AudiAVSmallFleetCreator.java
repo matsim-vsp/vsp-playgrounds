@@ -22,7 +22,6 @@ package playground.michalm.audiAV;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.DefaultFleetSpecification;
 import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecification;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
 import org.matsim.contrib.dvrp.data.file.VehicleWriter;
 import org.matsim.contrib.util.random.RandomUtils;
@@ -41,8 +40,8 @@ public class AudiAVSmallFleetCreator {
 
 		Network network = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(network).readFile(netFile);
-		FleetSpecification fleet = new DefaultFleetSpecification();
-		new VehicleReader(network, fleet).readFile(vehFile);
+		DefaultFleetSpecification fleet = new DefaultFleetSpecification();
+		new VehicleReader(fleet).readFile(vehFile);
 
 		UniformRandom uniform = RandomUtils.getGlobalUniform();
 		for (int i = 5; i <= 20; i++) {
