@@ -31,14 +31,13 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.router.MainModeIdentifierImpl;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
+import org.matsim.core.router.TripStructureUtils;
+import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -58,68 +57,11 @@ public class ModeAnalysis {
 	private Map<String, List<Double>> mode2TripEuclideanDistancesFiltered = new HashMap<>();		
 
 	private double totalTripsFiltered = 0.;
+	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction");
 
 	public ModeAnalysis(Scenario scenario, AgentAnalysisFilter filter) {
 		this.scenario = scenario;
 		this.filter = filter;
-	}
-
-	public static void main(String[] args) {
-		
-//		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
-//		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
-//		final String runId = "test";
-		
-		final String runId = "berlin-v5.2-10pct";
-		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
-		
-		// if iteration < 0 --> analysis of the final iteration
-		int iteration = -1;
-		
-		final String outputDirectory;
-		if (iteration >= 0) {
-			outputDirectory = runDirectory + "/modal-split-analysis_" + "it." + iteration + "/";
-		} else {
-			outputDirectory = runDirectory + "/modal-split-analysis/";
-		}
-		
-		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
-//		final String personAttributesFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_5_ik/population/personAttributes_500_10pct.xml.gz";
-		final String personAttributesFile = null;
-
-		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile, iteration);
-		
-		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
-		
-		filter.setSubpopulation("person");
-		
-		filter.setPersonAttribute("berlin");
-		filter.setPersonAttributeName("home-activity-zone");
-		
-		filter.setZoneFile(null);
-		filter.setRelevantActivityType(null);
-		
-		filter.preProcess(scenario);
-				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
-		analysis.run();
-		
-		File directory = new File(outputDirectory);
-		directory.mkdirs();
-		
-		analysis.writeModeShares(outputDirectory);
-		analysis.writeTripRouteDistances(outputDirectory);
-		analysis.writeTripEuclideanDistances(outputDirectory);
-		
-		final List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
-		distanceGroups.add(new Tuple<>(0., 1000.));
-		distanceGroups.add(new Tuple<>(1000., 3000.));
-		distanceGroups.add(new Tuple<>(3000., 5000.));
-		distanceGroups.add(new Tuple<>(5000., 10000.));
-		distanceGroups.add(new Tuple<>(10000., 20000.));
-		distanceGroups.add(new Tuple<>(20000., 100000.));
-		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
-		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}
 
 	public void run() {
@@ -127,94 +69,49 @@ public class ModeAnalysis {
 		int counter = 0;
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (counter%100000 == 0) {
+			if (counter % 100000 == 0) {
 				log.info("Person #" + counter);
 			}
 			
 			if (filter == null || filter.considerAgent(person)) {
-				Activity previousRealActivity = null;
-				
-				double currentLegTotalRouteDistance = 0.;
-				String currentLegMode = null;
+												
+				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements(), stageActivities)) {
+					totalTripsFiltered++;
 
-				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
-									
-					if (pE instanceof Leg) {
-						Leg leg = (Leg) pE;
+					double routeDistance = 0.;
+					for (Leg leg : trip.getLegsOnly()) {
+						routeDistance += leg.getRoute().getDistance();
+					}
+					
+					MainModeIdentifierImpl modeIdentifier = new MainModeIdentifierImpl();
+					String currentLegMode = modeIdentifier.identifyMainMode(trip.getTripElements());
+					
+					if (mode2TripCounterFiltered.containsKey(currentLegMode)) {
 						
-						currentLegTotalRouteDistance += leg.getRoute().getDistance();
+						mode2TripCounterFiltered.put(currentLegMode, mode2TripCounterFiltered.get(currentLegMode) + 1);
+						mode2TripRouteDistancesFiltered.get(currentLegMode).add(routeDistance);
 						
-						if (currentLegMode == null) {
-							// first leg after a 'real' activity
-							currentLegMode = leg.getMode();
-						} else {
-							// at least second leg after a 'real' activity
-							
-							if (currentLegMode.equals(leg.getMode())) {
-								// same mode, nothing to do
-								
-							} else {
-								
-								if (currentLegMode.equals(TransportMode.access_walk)
-										|| currentLegMode.equals(TransportMode.egress_walk)
-										|| currentLegMode.equals(TransportMode.transit_walk)) {
-									// update the current leg mode by the 'real' trip mode
-									currentLegMode = leg.getMode();
-									
-								} else if (leg.getMode().equals(TransportMode.access_walk)
-										|| leg.getMode().equals(TransportMode.egress_walk)
-										|| leg.getMode().equals(TransportMode.transit_walk)) {
-									// current leg mode already set to the 'real' trip mode
-									
-								} else {
-									log.warn("Two different leg modes found for the same trip (between two 'real' activities): " + leg.getMode() + " and " + currentLegMode + ".");
-								}
-							}
-						}
-											
-					} else if (pE instanceof Activity) {
-						Activity activity = (Activity) pE;
+						double euclideanDistance = CoordUtils.calcEuclideanDistance(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord());
+						mode2TripEuclideanDistancesFiltered.get(currentLegMode).add(euclideanDistance);
 						
-						if (activity.getType().contains("interaction")) {
-							// the actual trip is not completed
-						} else {
-																				
-							if (currentLegMode != null) {
-								
-								totalTripsFiltered++;
-
-								if (mode2TripCounterFiltered.containsKey(currentLegMode)) {
-									
-									mode2TripCounterFiltered.put(currentLegMode, mode2TripCounterFiltered.get(currentLegMode) + 1);
-									
-									mode2TripRouteDistancesFiltered.get(currentLegMode).add(currentLegTotalRouteDistance);
-									
-									double euclideanDistance = CoordUtils.calcEuclideanDistance(previousRealActivity.getCoord(), activity.getCoord());
-									mode2TripEuclideanDistancesFiltered.get(currentLegMode).add(euclideanDistance);
-									
-								} else {
-									
-									mode2TripCounterFiltered.put(currentLegMode, 1);
-									
-									List<Double> routeDistances = new ArrayList<>();
-									routeDistances.add(currentLegTotalRouteDistance);
-									mode2TripRouteDistancesFiltered.put(currentLegMode, routeDistances);
-									
-									List<Double> euclideanDistances = new ArrayList<>();
-									double euclideanDistance = CoordUtils.calcEuclideanDistance(previousRealActivity.getCoord(), activity.getCoord());
-									euclideanDistances.add(euclideanDistance);
-									mode2TripEuclideanDistancesFiltered.put(currentLegMode, euclideanDistances);
-								}
-								
-								currentLegMode = null;
-								currentLegTotalRouteDistance = 0.;
-							}
-							
-							previousRealActivity = activity;
-						}
+					} else {
+						
+						mode2TripCounterFiltered.put(currentLegMode, 1);
+						
+						List<Double> routeDistances = new ArrayList<>();
+						routeDistances.add(routeDistance);
+						mode2TripRouteDistancesFiltered.put(currentLegMode, routeDistances);
+						
+						List<Double> euclideanDistances = new ArrayList<>();
+						double euclideanDistance = CoordUtils.calcEuclideanDistance(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord());
+						euclideanDistances.add(euclideanDistance);
+						mode2TripEuclideanDistancesFiltered.put(currentLegMode, euclideanDistances);
 					}
 				}
+			} else {
+				// skip person
 			}			
+
 			counter++;
 		}
 	}
@@ -401,66 +298,6 @@ public class ModeAnalysis {
 		}
 		writeDistances(outputDirectory, outputFileName, distanceGroups, this.mode2TripRouteDistancesFiltered);
 
-	}
-
-	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFile, int iteration) {
-		Scenario scenario;
-		if (iteration < 0) {
-			if (runId == null) {
-				Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
-				config.network().setInputFile(null);
-				config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				config.vehicles().setVehiclesFile(null);
-				config.transit().setTransitScheduleFile(null);
-				config.transit().setVehiclesFile(null);
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-				
-			} else {
-				Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
-				config.network().setInputFile(null);
-				config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				config.vehicles().setVehiclesFile(null);
-				config.transit().setTransitScheduleFile(null);
-				config.transit().setVehiclesFile(null);
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-			}
-		} else {
-			Config config = ConfigUtils.createConfig();
-
-			if (runId == null) {
-				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-				
-			} else {
-				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-			}
-		}
-		
 	}
 		
 }

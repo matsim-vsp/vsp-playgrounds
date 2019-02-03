@@ -124,6 +124,10 @@ public class AgentAnalysisFilter implements AgentFilter {
 		
 		if (this.zoneFile != null && this.relevantActivityTypePrefix != null) {
 			
+			if (personId2homeCoord.get(person.getId()) == null) {
+				return false;
+			}
+			
 			// assuming the same CRS!
 			boolean pointWithinGeometry = false;
 			for (Geometry geometry : zoneFeatures.values()) {
@@ -143,7 +147,7 @@ public class AgentAnalysisFilter implements AgentFilter {
 		this.dataPreprocessed = true;
 		
 	    if (zoneFile != null) {
-	    		log.info("Getting persons' home coordinates...");
+	    	log.info("Getting persons' home coordinates...");
 			for (Person person : scenario.getPopulation().getPersons().values()) {
 				Activity act = (Activity) person.getSelectedPlan().getPlanElements().get(0);
 				if (act.getType().startsWith(relevantActivityTypePrefix)) {
