@@ -20,7 +20,11 @@
 package org.matsim.contrib.greedo.datastructures;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.utils.SetUtils;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -180,4 +184,22 @@ public class CountIndicatorUtils {
 	// return result;
 	// }
 
+	// 2019-01-31 for beta/delta heterogeneity
+
+	public static double populationAverageUnweightedIndividualChangeSum2(
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage) {
+		double sum2 = 0;
+		final Set<Id<Person>> allPersonIds = SetUtils.union(personId2physicalSlotUsage.keySet(),
+				personId2pseudoSimSlotUsage.keySet());
+		for (Id<Person> personId : allPersonIds) {
+			final SpaceTimeCounts<Id<?>> changes = new SpaceTimeCounts<>(personId2physicalSlotUsage.get(personId),
+					false);
+			changes.subtract(new SpaceTimeCounts<>(personId2pseudoSimSlotUsage.get(personId), false));
+			for (Map.Entry<?, Double> entry : changes.entriesView()) {
+				sum2 += Math.pow(entry.getValue(), 2.0);
+			}
+		}
+		return sum2 / allPersonIds.size();
+	}
 }

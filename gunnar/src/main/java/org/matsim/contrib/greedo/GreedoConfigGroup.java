@@ -271,6 +271,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.initialMeanReplanningRate = initialMeanReplanningRate;
 	}
 
+	// -------------------- targetReplanningRate --------------------
+
+	private double targetReplanningRate = 1.0;
+
+	@StringGetter("targetReplanningRate")
+	public double getTargetReplanningRate() {
+		return this.targetReplanningRate;
+	}
+
+	@StringSetter("targetReplanningRate")
+	public void setTargetReplanningRate(double targetReplanningRate) {
+		this.targetReplanningRate = targetReplanningRate;
+	}
+
 	// -------------------- replanningRateIterationExponent --------------------
 
 	private double replanningRateIterationExponent = 0.0;

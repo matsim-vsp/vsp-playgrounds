@@ -71,6 +71,7 @@ public class ReplannerIdentifier {
 	private final Ages ages;
 
 	private final double lambdaBar;
+	private final double lambdaTarget;
 	private final double beta;
 	private final double delta;
 
@@ -135,12 +136,29 @@ public class ReplannerIdentifier {
 				this.upcomingWeightedCounts);
 
 		this.lambdaBar = this.greedoConfig.getReplanningRate(greedoIteration);
+		this.lambdaTarget = this.greedoConfig.getTargetReplanningRate();
 
-		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 / this.totalWeightedUtilityChange;
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()
 						/ (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-				* this.sumOfWeightedCountDifferences2 / Math.pow(ages.getWeightAtAverageAge(), 2.0);
+				* CountIndicatorUtils.populationAverageUnweightedIndividualChangeSum2(personId2physicalSlotUsage,
+						personId2pseudoSimSlotUsage);
+
+		final double sumOfOneMinusAgeWeight2 = Math
+				.pow((1.0 - ages.getAverageWeight()) * population.getPersons().size(), 2.0);
+
+		this.beta = 2.0
+				* (this.lambdaBar * this.sumOfWeightedCountDifferences2
+						+ this.delta * (this.lambdaBar - this.lambdaTarget) * sumOfOneMinusAgeWeight2)
+				/ this.totalWeightedUtilityChange;
+
+		// this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 /
+		// this.totalWeightedUtilityChange;
+		// this.delta = Math
+		// .pow(this.greedoConfig.getRegularizationThreshold()
+		// / (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
+		// * this.sumOfWeightedCountDifferences2 /
+		// Math.pow(ages.getWeightAtAverageAge(), 2.0);
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -222,7 +240,9 @@ public class ReplannerIdentifier {
 		final DynamicData<Id<?>> interactionResiduals = CountIndicatorUtils
 				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambdaBar);
 		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalWeightedUtilityChange;
-		double regularizationResidual = 0;
+		// double regularizationResidual = 0;
+		double regularizationResidual = (this.lambdaBar - this.lambdaTarget) * (1.0 - this.ages.getAverageWeight())
+				* this.population.getPersons().size();
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
 		// Instantiate the re-planning recipe.
