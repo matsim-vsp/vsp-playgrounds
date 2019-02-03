@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import cadyts.utilities.misc.Time;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -32,7 +34,7 @@ import java.util.TreeMap;
 public class Person {
 
 	final String personId;
-	final SortedMap<Integer, Travel> travels;
+	final SortedMap<Integer, Trip> travels;
 
 	Person(final String personId) {
 		this.personId = personId;
@@ -40,14 +42,36 @@ public class Person {
 	}
 
 	void add(TravelSegment segment) {
-		Travel trip = this.travels.get(segment.travelId);
+		Trip trip = this.travels.get(segment.travelId);
 		if (trip == null) {
-			trip = new Travel(segment.travelId);
-			this.travels.put(trip.travelId, trip);
+			trip = new Trip(segment.travelId);
+			this.travels.put(trip.tripId, trip);
 		}
 		trip.add(segment);
 	}
-	
+
+	@Override
+	public String toString() {
+		final StringBuffer result = new StringBuffer();
+
+		result.append("Person " + this.personId + "\n");
+
+		List<Tour> tours = this.tours(this.startLocation());
+		if (tours != null) {
+			for (Tour tour : tours) {
+				result.append("  Tour (unique purpose=" + tour.uniquePurpose() + ")\n");
+				result.append(tour);
+			}
+		}
+		// for (Trip travel : this.travels.values()) {
+		// result.append(travel);
+		// }
+
+		return result.toString();
+	}
+
+	// -------------------- ANALYSIS BELOW --------------------
+
 	String startLocation() {
 		if (this.travels.size() == 0) {
 			return null;
@@ -55,7 +79,7 @@ public class Person {
 			return this.travels.get(this.travels.firstKey()).startLocation();
 		}
 	}
-	
+
 	String endLocation() {
 		if (this.travels.size() == 0) {
 			return null;
@@ -63,9 +87,56 @@ public class Person {
 			return this.travels.get(this.travels.lastKey()).endLocation();
 		}
 	}
-	
+
+	List<TravelSegment> segments() {
+		final List<TravelSegment> result = new ArrayList<>();
+		for (Trip trip : this.travels.values()) {
+			result.addAll(trip.segments);
+		}
+		return result;
+	}
+
+	List<Tour> tours(final String homeLocation) {
+
+		final List<Tour> tours = new ArrayList<>();
+		if (homeLocation == null) {
+			return tours;
+		}
+
+		Tour currentTour = null;
+		for (TravelSegment segment : this.segments()) {
+
+			if (homeLocation.equals(segment.startLocation)) {
+
+				if (currentTour != null) {
+					return new ArrayList<>(0);
+				}
+				currentTour = new Tour();
+				currentTour.segments.add(segment);
+
+			} else if (homeLocation.equals(segment.endLocation)) {
+
+				if (currentTour == null) {
+					return new ArrayList<>(0);
+				}
+				currentTour.segments.add(segment);
+				tours.add(currentTour);
+				currentTour = null;
+
+			} else {
+
+				if (currentTour != null) {
+					currentTour.segments.add(segment);
+				}
+
+			}
+		}
+
+		return tours;
+	}
+
 	boolean hasOnlySimpleTours() {
-		for (Travel travel : this.travels.values()) {
+		for (Trip travel : this.travels.values()) {
 			if (!travel.isSimpleTour()) {
 				return false;
 			}
@@ -76,23 +147,13 @@ public class Person {
 	boolean isRoundTrip() {
 		return ((this.travels.size() > 0) && this.startLocation().equals(this.endLocation()));
 	}
-	
+
 	List<String> purposeSeq() {
 		final List<String> result = new ArrayList<>(this.travels.size());
-		for (Travel travel : this.travels.values()) {
+		for (Trip travel : this.travels.values()) {
 			result.add(travel.purpose());
 		}
 		return result;
-	}
-	
-	@Override
-	public String toString() {
-		final StringBuffer result = new StringBuffer();
-		result.append("Person " + this.personId + "\n");
-		for (Travel travel : this.travels.values()) {
-			result.append(travel);
-		}
-		return result.toString();
 	}
 
 }
