@@ -27,13 +27,13 @@ import java.util.TreeSet;
  * @author Gunnar Flötteröd
  *
  */
-public class Travel implements Comparable<Travel> {
+public class Trip implements Comparable<Trip> {
 
-	final Integer travelId;
+	final Integer tripId;
 	final SortedSet<TravelSegment> segments;
 
-	Travel(final Integer travelId) {
-		this.travelId = travelId;
+	Trip(final Integer tripId) {
+		this.tripId = tripId;
 		this.segments = new TreeSet<>();
 	}
 
@@ -74,7 +74,7 @@ public class Travel implements Comparable<Travel> {
 	@Override
 	public String toString() {
 		final StringBuffer result = new StringBuffer();
-		result.append("  Travel " + travelId + "\n");
+		result.append("  Trip " + tripId + "\n");
 		for (TravelSegment segment : this.segments) {
 			result.append(segment);
 		}
@@ -82,8 +82,8 @@ public class Travel implements Comparable<Travel> {
 	}
 
 	@Override
-	public int compareTo(Travel o) {
-		return this.travelId.compareTo(o.travelId);
+	public int compareTo(Trip o) {
+		return this.tripId.compareTo(o.tripId);
 	}
 
 }
