@@ -134,7 +134,12 @@ public class DaganzoRunner {
 					//				inoutWriter.addInOutEventHandler(handler4);
 					//				inoutWriter.writeInOutChart(e.getServices().getControlerIO().getIterationPath(e.getIteration()), e.getIteration());
 
-					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
+//				DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
+				if ( true ) {
+					throw new RuntimeException( "The above fails after I made TravelTimeCalculator final.  But I don't think that it can have worked before since some " +
+											"other changes.  kai, feb'19" ) ;
+				}
+				DgTravelTimeCalculatorChart ttcalcChart = null ;
 					ttcalcChart.setStartTime(10.0);
 					ttcalcChart.setEndTime(3600.0 * 2.5);
 					List<Id<Link>> list = new ArrayList<>();

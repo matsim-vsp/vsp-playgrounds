@@ -86,7 +86,7 @@ public class JointCalibrationControler {
 		Config config = ConfigUtils.createConfig();
 
 		config.travelTimeCalculator().setFilterModes(true);
-		config.travelTimeCalculator().setAnalyzedModes(String.join(",", PatnaUtils.ALL_MAIN_MODES));
+		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",", PatnaUtils.ALL_MAIN_MODES ) );
 
 		if(args.length>0){
 			String dir = "/net/ils4/agarwal/patnaIndia/run108/";

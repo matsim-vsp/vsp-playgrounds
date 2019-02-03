@@ -112,7 +112,7 @@ public class VehicleInPrepareForSimTest {
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
         config.plansCalcRoute().setNetworkModes(networkModes);
-        config.travelTimeCalculator().setAnalyzedModes( StringUtils.join(networkModes, ",") );
+        config.travelTimeCalculator().setAnalyzedModesAsString( StringUtils.join(networkModes, "," ) );
         config.travelTimeCalculator().setSeparateModes(true);
 
         config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);

@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import javax.inject.Inject;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -574,7 +573,7 @@ public class CountsAndModalDistanceCadytsIT {
         config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
         config.vehicles().setVehiclesFile(EQUIL_DIR + "mode-vehicles.xml");
         
-        config.travelTimeCalculator().setAnalyzedModes("car,bicycle");
+        config.travelTimeCalculator().setAnalyzedModesAsString("car,bicycle" );
         config.travelTimeCalculator().setSeparateModes(true);
         config.travelTimeCalculator().setFilterModes(true);
         config.changeMode().setModes(modes);

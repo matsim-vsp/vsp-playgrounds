@@ -175,7 +175,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 
 		scenario.getConfig().plansCalcRoute().setNetworkModes(allowedMode);
 		scenario.getConfig().qsim().setMainModes(allowedMode);
-		scenario.getConfig().travelTimeCalculator().setAnalyzedModes("car,motorbike,bicycle");
+		scenario.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,motorbike,bicycle" );
 
 		scenario.getConfig().planCalcScore().getOrCreateModeParams("motorbike"); // this will set default scoring params for motorbike
 

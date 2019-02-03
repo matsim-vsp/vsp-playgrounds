@@ -177,7 +177,7 @@ public class PedestrianWithPTTest {
 		config.qsim().setMainModes(Arrays.asList("car",walkModeName)); // car is still necessary for PT simulation
 		config.qsim().setLinkDynamics(LinkDynamics.PassingQ);
 		config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
-		config.travelTimeCalculator().setAnalyzedModes(StringUtils.join(new String[] { walkModeName}, ","));
+		config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(new String[] { walkModeName}, "," ) );
 		config.travelTimeCalculator().setFilterModes(true);
 		config.plansCalcRoute().setNetworkModes(Arrays.asList(walkModeName));
 

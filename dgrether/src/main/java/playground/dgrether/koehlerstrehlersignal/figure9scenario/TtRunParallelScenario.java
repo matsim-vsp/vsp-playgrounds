@@ -99,7 +99,13 @@ public class TtRunParallelScenario {
 				handler58.iterationsEnds(e.getIteration());
 
 				if ( e.getIteration() % 10 == 0 ) {
-					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
+//					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
+					DgTravelTimeCalculatorChart ttcalcChart = null ;
+					if ( true ) {
+						throw new RuntimeException( "The above fails after I made TravelTimeCalculator final.  But I don't think that it can have worked before since some " +
+												"other changes.  kai, feb'19" ) ;
+					}
+
 					ttcalcChart.setStartTime(0.0);
 					ttcalcChart.setEndTime(3600.0 * 1.5);
 					List<Id<Link>> list = new ArrayList<>();

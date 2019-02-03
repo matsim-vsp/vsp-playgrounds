@@ -160,7 +160,7 @@ public class EquilMixedTrafficEmissionIT {
 		sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
 		sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
 
-		sc.getConfig().travelTimeCalculator().setAnalyzedModes("car,bicycle");
+		sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle" );
 		sc.getConfig().travelTimeCalculator().setFilterModes(true);
 
 		equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);

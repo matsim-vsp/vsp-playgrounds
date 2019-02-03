@@ -71,6 +71,8 @@ public class KNEventsAnalyzer {
 		// ===
 
 		Config config = ConfigUtils.createConfig() ;
+
+		config.global().setCoordinateSystem( null );
 		
 		String[] modes ={"car","commercial"};
 		config.qsim().setMainModes( Arrays.asList(modes) );

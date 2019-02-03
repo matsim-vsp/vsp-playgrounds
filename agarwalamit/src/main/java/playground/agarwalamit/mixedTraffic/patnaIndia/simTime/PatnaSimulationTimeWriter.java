@@ -288,7 +288,7 @@ public class PatnaSimulationTimeWriter {
 			config.plansCalcRoute().addModeRoutingParams(mrp);
 		}
 
-		config.travelTimeCalculator().setAnalyzedModes(String.join(",",PatnaUtils.URBAN_MAIN_MODES));
+		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",",PatnaUtils.URBAN_MAIN_MODES ) );
 		config.travelTimeCalculator().setFilterModes(true);
 
 		return config;
