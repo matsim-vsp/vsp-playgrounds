@@ -35,7 +35,9 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.dvrp.data.DvrpVehicle;
 import org.matsim.contrib.dvrp.data.DvrpVehicleImpl;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
@@ -86,8 +88,15 @@ public class TSPrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 					if (((Leg) pe).getMode().equals(mode)){
 						vehicleStartLink = ((Leg) pe).getRoute().getStartLinkId();
 						Id<DvrpVehicle> vehicleId = Id.create(p.getId().toString() + "_av", DvrpVehicle.class);
-						DvrpVehicle veh = new DvrpVehicleImpl(vehicleId, network.getLinks().get(vehicleStartLink), 4, 0,
-								30 * 3600);
+						Link startLink = network.getLinks().get(vehicleStartLink);
+						DvrpVehicleSpecification specification = ImmutableDvrpVehicleSpecification.newBuilder()
+								.id(vehicleId)
+								.startLinkId(startLink.getId())
+								.capacity(4)
+								.serviceBeginTime((double)0)
+								.serviceEndTime((double)(30 * 3600))
+								.build();
+						DvrpVehicle veh = new DvrpVehicleImpl(specification, startLink);
 						vehiclesForIteration.put(veh.getId(), veh);
 						break;
 					}
