@@ -21,6 +21,8 @@ package org.matsim.contrib.greedo.datastructures;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,14 +57,13 @@ public class Ages {
 	// -------------------- CONSTRUCTION --------------------
 
 	public Ages(final Set<Id<Person>> populationIds) {
-		this.personId2age = Collections
-				.unmodifiableMap(populationIds.stream().collect(Collectors.toMap(id -> id, id -> 0)));
+		this.personId2age = populationIds.stream().collect(Collectors.toMap(id -> id, id -> 0));
 		this.internalUpdate(new double[] { 1.0 });
 	}
 
 	// -------------------- INTERNALS --------------------
 
-	private void internalUpdate(final double[] ageWeights) {
+	/* package for testing */ void internalUpdate(final double[] ageWeights) {
 
 		this.sortedAges = new ArrayList<>(this.personId2age.values());
 		Collections.sort(this.sortedAges);
@@ -105,8 +106,42 @@ public class Ages {
 	public double getAverageWeight() {
 		return this.averageWeight;
 	}
-	
+
 	public double getWeightAtAverageAge() {
 		return this.weightAtAverageAge;
+	}
+
+	public List<Set<Id<Person>>> stratifyByAge(final int numberOfStrata) {
+
+		// Create a list of one empty list per possible age.
+		final List<List<Id<Person>>> allAgeGroups = new ArrayList<>(this.maxAge + 1);
+		for (int age = 0; age <= this.maxAge; age++) {
+			allAgeGroups.add(new ArrayList<>());
+		}
+
+		// Put all persons into the corresponding arrays.
+		for (Map.Entry<Id<Person>, Integer> entry : this.personId2age.entrySet()) {
+			allAgeGroups.get(entry.getValue()).add(entry.getKey());
+		}
+
+		// Shuffle the age-specific arrays and concatenate them in increasing age order.
+		final LinkedList<Id<Person>> allPersonsInAgeOrder = new LinkedList<>();
+		for (List<Id<Person>> ageGroup : allAgeGroups) {
+			Collections.shuffle(ageGroup);
+			allPersonsInAgeOrder.addAll(ageGroup);
+		}
+
+		// Now cut the concatenated array into strata of approximately equal size.
+		final List<Set<Id<Person>>> strata = new ArrayList<>(numberOfStrata);
+		for (int stratumIndex = 0; stratumIndex < numberOfStrata; stratumIndex++) {
+			final int stratumSize = allPersonsInAgeOrder.size() / (numberOfStrata - stratumIndex);
+			final Set<Id<Person>> stratum = new LinkedHashSet<>(stratumSize);
+			strata.add(stratum);
+			for (int personIndex = 0; personIndex < stratumSize; personIndex++) {
+				stratum.add(allPersonsInAgeOrder.removeFirst());
+			}
+		}
+
+		return strata;
 	}
 }

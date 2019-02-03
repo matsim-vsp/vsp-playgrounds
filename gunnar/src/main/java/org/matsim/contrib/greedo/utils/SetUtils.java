@@ -37,6 +37,12 @@ public class SetUtils {
 		return result;
 	}
 
+	public static <T> Set<T> intersect(final Set<? extends T> arg0, final Set<? extends T> arg1) {
+		final Set<T> result = new LinkedHashSet<>(arg0);
+		result.retainAll(arg1);
+		return result;
+	}
+
 	public static boolean disjoint(final Set<?> set1, final Set<?> set2) {
 		return (union(set1, set2).size() == (set1.size() + set2.size()));
 	}

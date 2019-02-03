@@ -22,6 +22,7 @@ package org.matsim.contrib.greedo.datastructures;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +30,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.greedo.datastructures.Ages;
 
 /**
  *
@@ -67,7 +67,7 @@ public class AgestTest {
 		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
 
 		// max age 1 after update
-		ages.update(new LinkedHashSet<>(), new double[] { 1.0, 0.5 }); 
+		ages.update(new LinkedHashSet<>(), new double[] { 1.0, 0.5 });
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
@@ -80,9 +80,9 @@ public class AgestTest {
 		expectedWeights.put(ben, 0.5);
 		expectedWeights.put(joe, 0.5);
 		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
-		
+
 		// max age 2 after update
-		ages.update(new LinkedHashSet<>(Arrays.asList(tom, ben)), new double[] { 1.0, 0.5, 0.25 }); 
+		ages.update(new LinkedHashSet<>(Arrays.asList(tom, ben)), new double[] { 1.0, 0.5, 0.25 });
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
@@ -95,9 +95,9 @@ public class AgestTest {
 		expectedWeights.put(ben, 1.0);
 		expectedWeights.put(joe, 0.25);
 		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
-		
+
 		// max age 1 after update
-		ages.update(new LinkedHashSet<>(Arrays.asList(joe)), new double[] { 1.0, 0.5 }); 
+		ages.update(new LinkedHashSet<>(Arrays.asList(joe)), new double[] { 1.0, 0.5 });
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
@@ -111,5 +111,43 @@ public class AgestTest {
 		expectedWeights.put(joe, 1.0);
 		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
 
+	}
+
+	@Test
+	public void testStratifyByAge() {
+
+		// set up
+
+		Ages ages = new Ages(new LinkedHashSet<>(Arrays.asList(Id.createPersonId("dummy"))));
+		ages.personId2age.clear(); // get rid of dummy
+
+		ages.personId2age.put(Id.createPersonId("1age0"), 0);
+		ages.personId2age.put(Id.createPersonId("2age0"), 0);
+		ages.personId2age.put(Id.createPersonId("3age0"), 0);
+
+		ages.personId2age.put(Id.createPersonId("1age1"), 1);
+
+		ages.personId2age.put(Id.createPersonId("1age2"), 2);
+		ages.personId2age.put(Id.createPersonId("2age2"), 2);
+		ages.personId2age.put(Id.createPersonId("3age2"), 2);
+		ages.personId2age.put(Id.createPersonId("4age2"), 2);
+
+		ages.personId2age.put(Id.createPersonId("1age3"), 3);
+
+		ages.internalUpdate(new double[] { 1e0, 1e-1, 1e-2, 1e-3 });
+
+		// check
+
+		final List<Set<Id<Person>>> strata = ages.stratifyByAge(2);
+		int maxAgeInFirstStratum = Integer.MIN_VALUE;
+		for (Id<Person> personId : strata.get(0)) {
+			maxAgeInFirstStratum = Math.max(maxAgeInFirstStratum, ages.personId2age.get(personId));
+		}
+		int minAgeInSecondStratum = Integer.MAX_VALUE;
+		for (Id<Person> personId : strata.get(1)) {
+			minAgeInSecondStratum = Math.min(minAgeInSecondStratum, ages.personId2age.get(personId));
+		}
+		Assert.assertTrue(maxAgeInFirstStratum <= minAgeInSecondStratum);
+		Assert.assertTrue(Math.abs(strata.get(0).size() - strata.get(1).size()) <= 1);
 	}
 }

@@ -67,6 +67,7 @@ public class ScoreUpdater<L> {
 	private double sumOfInteractionResiduals2;
 
 	final double meanLambda;
+	final double targetLambda;
 
 	final double ageWeight;
 
@@ -79,6 +80,7 @@ public class ScoreUpdater<L> {
 			final double individualUtilityChange, final double totalUtilityChange, Double sumOfInteractionResiduals2) {
 
 		this.meanLambda = meanLambda;
+		this.targetLambda = replParams.getTargetReplanningRate();
 		this.ageWeight = ageWeight;
 
 		this.interactionResiduals = interactionResiduals;
@@ -91,8 +93,8 @@ public class ScoreUpdater<L> {
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, true);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, true));
 		// {
 		// final Tuple<SpaceTimeCounts<L>, SpaceTimeCounts<L>>
 		// upcomingWeighedAndUnweighted = SpaceTimeCounts
@@ -123,7 +125,7 @@ public class ScoreUpdater<L> {
 
 		this.inertiaResidual -= (1.0 - meanLambda) * this.individualUtilityChange;
 
-		// Regularization residual is up-to-date!
+		this.regularizationResidual -= (meanLambda - this.targetLambda) * (1.0 - ageWeight);
 
 		// Compute individual score terms.
 
@@ -195,7 +197,9 @@ public class ScoreUpdater<L> {
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
-		this.regularizationResidual += (newLambda - this.meanLambda) * (1.0 - this.ageWeight);
+		// this.regularizationResidual += (newLambda - this.meanLambda) * (1.0 -
+		// this.ageWeight);
+		this.regularizationResidual += (newLambda - this.targetLambda) * (1.0 - this.ageWeight);
 	}
 
 	// -------------------- GETTERS --------------------
