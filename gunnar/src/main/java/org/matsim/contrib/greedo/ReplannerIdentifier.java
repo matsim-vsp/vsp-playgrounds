@@ -331,8 +331,7 @@ public class ReplannerIdentifier {
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
 
 			// regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
-			regularizationResiduals[this.ages.getAges().get(personId)] = scoreUpdater
-					.getUpdatedRegularizationResidual();
+			regularizationResiduals[ageStratumIndex] = scoreUpdater.getUpdatedRegularizationResidual();
 
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 		}

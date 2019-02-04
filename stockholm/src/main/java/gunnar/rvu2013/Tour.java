@@ -34,7 +34,7 @@ import org.matsim.core.utils.collections.Tuple;
  */
 public class Tour {
 
-	List<TravelSegment> segments = new ArrayList<>();
+	List<TripSegment> segments = new ArrayList<>();
 
 	String uniquePurpose() {
 		if (this.segments.size() == 0) {
@@ -55,7 +55,7 @@ public class Tour {
 		final Map<String, Integer> location2firstArrival_s = new LinkedHashMap<>();
 		final Map<String, Integer> location2lastDeparture_s = new LinkedHashMap<>();
 
-		for (TravelSegment segment : this.segments) {
+		for (TripSegment segment : this.segments) {
 			if (!location2firstArrival_s.containsKey(segment.endLocation)) {
 				location2firstArrival_s.put(segment.endLocation, segment.endTime_s);
 			}
@@ -70,21 +70,36 @@ public class Tour {
 				dur_s = candDur_s;
 				start_s = location2firstArrival_s.get(loc);
 			}
-			dur_s = Math.max(dur_s, candDur_s);
-		}	
-		
+		}
+
 		if (dur_s >= 0 && start_s >= 0) {
 			return new Tuple<>(start_s, dur_s);
 		} else {
 			return null;
 		}
-		
+
+	}
+
+	public Integer startTime_s() {
+		if (this.segments.size() == 0) {
+			return null;
+		} else {
+			return this.segments.get(0).startTime_s;
+		}
+	}
+
+	public Integer endTime_s() {
+		if (this.segments.size() == 0) {
+			return null;
+		} else {
+			return this.segments.get(this.segments.size() - 1).endTime_s;
+		}
 	}
 
 	@Override
 	public String toString() {
 		final StringBuffer result = new StringBuffer();
-		for (TravelSegment segment : this.segments) {
+		for (TripSegment segment : this.segments) {
 			result.append(segment.toString());
 		}
 		return result.toString();
