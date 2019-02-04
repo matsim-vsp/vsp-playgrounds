@@ -41,7 +41,7 @@ public class SampersParameterUtils {
 	};
 
 	public enum ActivityAttribute {
-		duration_h, opens_h, closes_h
+		start_h, duration_h, opens_h, closes_h
 	}
 
 	// -------------------- DO NOT INSTANTIATE --------------------
