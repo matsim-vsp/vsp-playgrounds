@@ -798,11 +798,11 @@ public class IHOP4ProductionRunner {
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		 if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
-		 throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
-		 }
-		 run(config);
+		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
+			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
+		}
+		run(config);
 
-//		runWithSampersDynamics(config);
+		// runWithSampersDynamics(config);
 	}
 }

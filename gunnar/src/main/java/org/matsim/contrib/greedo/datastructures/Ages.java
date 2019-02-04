@@ -95,6 +95,10 @@ public class Ages {
 		return Collections.unmodifiableList(this.sortedAges);
 	}
 
+	public Map<Id<Person>, Integer> getAges() {
+		return this.personId2age;
+	}
+	
 	public Map<Id<Person>, Double> getPersonWeights() {
 		return this.personId2weight;
 	}
