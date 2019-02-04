@@ -113,11 +113,7 @@ public class AgestTest {
 
 	}
 
-	@Test
-	public void testStratifyByAge() {
-
-		// set up
-
+	private static Ages createAges() {
 		Ages ages = new Ages(new LinkedHashSet<>(Arrays.asList(Id.createPersonId("dummy"))));
 		ages.personId2age.clear(); // get rid of dummy
 
@@ -136,9 +132,42 @@ public class AgestTest {
 
 		ages.internalUpdate(new double[] { 1e0, 1e-1, 1e-2, 1e-3 });
 
-		// check
+		return ages;
+	}
 
-		final List<Set<Id<Person>>> strata = ages.stratifyByAge(2);
+	@Test
+	public void testStratifyByAgeWithMinumStrataSize() {
+
+		final Ages ages = createAges();
+
+		List<Set<Id<Person>>> strata;
+		for (int minStratumSize = 1; minStratumSize <= 5; minStratumSize++) {
+			strata = ages.stratifyByAgeWithMinumStratumSize(minStratumSize);
+			int sumOfStratumSizes = 0;
+			Integer prevMaxAge = null;
+			for (Set<Id<Person>> stratum : strata) {
+				sumOfStratumSizes += stratum.size();
+				Assert.assertTrue((stratum.size() >= minStratumSize) || (ages.personId2age.size() < minStratumSize));
+				int minAge = Integer.MAX_VALUE;
+				int maxAge = Integer.MIN_VALUE;
+				for (Id<Person> personId : stratum) {
+					minAge = Math.min(minAge, ages.personId2age.get(personId));
+					maxAge = Math.max(maxAge, ages.personId2age.get(personId));
+				}
+				Assert.assertTrue((prevMaxAge == null) || (prevMaxAge <= minAge));
+				prevMaxAge = maxAge;
+			}
+			Assert.assertEquals(ages.personId2age.size(), sumOfStratumSizes);
+		}
+	}
+
+	@Test
+	@Deprecated
+	public void testStratifyByAgeUniformly() {
+
+		final Ages ages = createAges();
+
+		final List<Set<Id<Person>>> strata = ages.stratifyByAgeUniformly(2);
 		int maxAgeInFirstStratum = Integer.MIN_VALUE;
 		for (Id<Person> personId : strata.get(0)) {
 			maxAgeInFirstStratum = Math.max(maxAgeInFirstStratum, ages.personId2age.get(personId));
