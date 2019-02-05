@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.rvu2013;
+package gunnar.ihop4.rvu2013;
 
 import floetteroed.utilities.Time;
 

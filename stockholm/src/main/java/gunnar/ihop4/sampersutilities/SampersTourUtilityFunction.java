@@ -21,7 +21,8 @@ package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Person;
 
-import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
+import floetteroed.utilities.Units;
+import gunnar.ihop4.sampersutilities.SampersUtilityParameters.Purpose;
 
 /**
  *
@@ -44,45 +45,80 @@ class SampersTourUtilityFunction {
 
 	// -------------------- INTERNALS --------------------
 
-	private double earlyArrivalTimeLoss_min(final SampersTour tour) {
-		return Math.max(0.0,
-				SampersParameterUtils.getActivityOpens_min(tour) - SampersParameterUtils.getActivityStart_min(tour));
-	}
+	// private double earlyArrivalTimeLoss_min(final SampersTour tour) {
+	// return Math.max(0.0,
+	// SampersParameterUtils.getActivityOpens_min(tour) -
+	// SampersParameterUtils.getActivityStart_min(tour));
+	// }
+	//
+	// private double lateDepartureTimeLoss_min(final SampersTour tour) {
+	// return Math.max(0.0,
+	// SampersParameterUtils.getActivityEnd_min(tour) -
+	// SampersParameterUtils.getActivityCloses_min(tour));
+	// }
 
-	private double lateDepartureTimeLoss_min(final SampersTour tour) {
-		return Math.max(0.0,
-				SampersParameterUtils.getActivityEnd_min(tour) - SampersParameterUtils.getActivityCloses_min(tour));
+	double getScheduleDelayCost(final SampersTour tour, final Double income_SEK_yr) {
+		final Purpose purpose = tour.getPurpose();
+		double result = 0.0;
+
+		final Double plannedStart_h = SampersAttributeUtils.getPlannedActivityStart_h(tour);
+		if (plannedStart_h != null) {
+			final double plannedStart_min = Units.MIN_PER_H * plannedStart_h;
+			final double realizedStart_min = Units.MIN_PER_S * tour.getRealizedStartTime_s();
+			result += this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK_yr)
+					* Math.max(0.0, plannedStart_min - realizedStart_min)
+					+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK_yr)
+							* Math.max(0.0, realizedStart_min - plannedStart_min);
+		}
+
+		final Double plannedDuration_h = SampersAttributeUtils.getPlannedActivityDuration_h(tour);
+		if (plannedDuration_h != null) {
+			final double plannedDuration_min = Units.MIN_PER_H * plannedDuration_h;
+			final double realizedDuration_min = Units.MIN_PER_S * (tour.getRealizedActivityDuration_s());
+			result += this.utlParams.getScheduleDelayCostTooShort_1_min(purpose, income_SEK_yr)
+					* Math.max(0.0, plannedDuration_min - realizedDuration_min)
+					+ this.utlParams.getScheduleDelayCostTooLong_1_min(purpose, income_SEK_yr)
+							* Math.max(0.0, realizedDuration_min - plannedDuration_min);
+		}
+
+		return result;
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
 	double getStuckScore(final Person person) {
-		return this.utlParams.getStuckScore(SampersParameterUtils.Purpose.work, 
-				SampersParameterUtils.getIncome_SEK_yr(person));
+		return this.utlParams.getStuckScore(SampersUtilityParameters.Purpose.work,
+				SampersAttributeUtils.getIncome_SEK_yr(person));
 	}
-	
+
 	double getUtility(final SampersTour tour, final Person person) {
 
 		final Purpose purpose = tour.getPurpose();
-		final double income_SEK = SampersParameterUtils.getIncome_SEK_yr(person);
+		final double income_SEK_yr = SampersAttributeUtils.getIncome_SEK_yr(person);
 
-		double result = this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK)
-				* this.earlyArrivalTimeLoss_min(tour)
-				+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK)
-						* this.lateDepartureTimeLoss_min(tour);
+		/*
+		 * Schedule delay.
+		 */
+		double result = this.getScheduleDelayCost(tour, income_SEK_yr);
 
-		final double travelTime_min = tour.getTravelTime_min();
-		if (travelTime_min > eps) {
-			result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_SEK) * travelTime_min;
-		}
+		/*
+		 * Time.
+		 */
+		result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_SEK_yr) * tour.getRealizedTravelTime_min();
 
-		final double cost_SEK = -tour.getMoney_SEK();
+		/*
+		 * Monetary cost.
+		 * 
+		 * TODO: The per-distance or per-time cost is not yet included (and not even
+		 * extracted from the legs) , i.e. the model only reacts to the toll.
+		 */
+		final double cost_SEK = -tour.getRealizedMoney_SEK();
 		if (cost_SEK < 0) {
 			throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
 		}
 		if (cost_SEK > eps) {
-			result += this.utlParams.getLinMoneyCoeff_1_SEK(purpose, income_SEK) * cost_SEK
-					+ this.utlParams.getLnMoneyCoeff_lnArgInSEK(purpose, income_SEK) * Math.log(cost_SEK);
+			result += this.utlParams.getLinMoneyCoeff_1_SEK(purpose, income_SEK_yr) * cost_SEK
+					+ this.utlParams.getLnMoneyCoeff_lnArgInSEK(purpose, income_SEK_yr) * Math.log(cost_SEK);
 		}
 
 		return result;
