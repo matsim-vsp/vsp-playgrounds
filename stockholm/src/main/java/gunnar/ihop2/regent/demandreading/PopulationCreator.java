@@ -73,7 +73,7 @@ public class PopulationCreator {
 	// TODO NEW 2018-12-06
 	public static final String INTERMEDIATE_HOME = "intermediate_home";
 
-	public static final String MATSIM_INCOME = "income_SEK_yr";
+	public static final String income_SEK_yr = "income_SEK_yr";
 
 	public static final int REFERENCE_YEAR = 2015;
 
@@ -200,7 +200,7 @@ public class PopulationCreator {
 		PersonUtils.setSex(person, this.attr(personId, "sex").toString());
 		PersonUtils.setCarAvail(person, this.attr(personId, "car").toString());
 		PersonUtils.setAge(person, REFERENCE_YEAR - (Integer) this.attr(personId, "birthyear"));
-		person.getAttributes().putAttribute(MATSIM_INCOME, this.attr(personId, "income"));
+		person.getAttributes().putAttribute(income_SEK_yr, this.attr(personId, "income"));
 
 		final Plan plan = this.scenario.getPopulation().getFactory().createPlan();
 		person.addPlan(plan);

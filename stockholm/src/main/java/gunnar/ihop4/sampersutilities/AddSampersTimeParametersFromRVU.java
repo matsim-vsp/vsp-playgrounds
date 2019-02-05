@@ -19,6 +19,9 @@
  */
 package gunnar.ihop4.sampersutilities;
 
+import static gunnar.ihop4.sampersutilities.SampersAttributeUtils.setPlannedActivityDuration_h;
+import static gunnar.ihop4.sampersutilities.SampersAttributeUtils.setPlannedActivityStart_h;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -40,9 +43,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import cadyts.utilities.misc.Units;
 import gunnar.ihop2.regent.demandreading.PopulationCreator;
-import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
-import gunnar.rvu2013.RVU2013Analyzer;
-import gunnar.rvu2013.TourSequenceTimeStructures.TimeStructure;
+import gunnar.ihop4.rvu2013.RVU2013Analyzer;
+import gunnar.ihop4.rvu2013.TourSequenceTimeStructures.TimeStructure;
 
 /**
  *
@@ -51,27 +53,45 @@ import gunnar.rvu2013.TourSequenceTimeStructures.TimeStructure;
  */
 public class AddSampersTimeParametersFromRVU {
 
+	// -------------------- MEMBERS --------------------
+
 	private final RVU2013Analyzer rvuAnalyzer;
+
+	private final Map<List<String>, LinkedList<TimeStructure>> purposes2timeStructures;
+
+	// -------------------- CONSTRUCTION --------------------
 
 	public AddSampersTimeParametersFromRVU(final String rvuFile) {
 		this.rvuAnalyzer = new RVU2013Analyzer(rvuFile);
+		this.purposes2timeStructures = new LinkedHashMap<>();
 	}
 
-	private final Map<List<String>, LinkedList<TimeStructure>> purposes2timeStructures = new LinkedHashMap<>();
+	// ---------- INTERNALS: VARIANCE-REDUCED TIME STRUCTURE SAMPLING ----------
 
-	private TimeStructure drawTimeStructure(final String... purposes) {
-		final List<String> purposeList = Arrays.asList(purposes);
-		LinkedList<TimeStructure> timeStructures = this.purposes2timeStructures.get(purposeList);
+	private TimeStructure drawTimeStructure(final String... purposesArray) {
+		final List<String> purposesList = Arrays.asList(purposesArray);
+		LinkedList<TimeStructure> timeStructures = this.purposes2timeStructures.get(purposesList);
 		if (timeStructures == null || timeStructures.size() == 0) {
-			timeStructures = new LinkedList<>(this.rvuAnalyzer.getTimeStructures().getTimeStructures(purposes));
+			timeStructures = new LinkedList<>(this.rvuAnalyzer.getTimeStructures().getTimeStructures(purposesArray));
 			Collections.shuffle(timeStructures);
-			this.purposes2timeStructures.put(purposeList, timeStructures);
+			this.purposes2timeStructures.put(purposesList, timeStructures);
 		}
 		return timeStructures.removeFirst();
 	}
 
+	// -------------------- IMPLEMENTATION --------------------
+
 	public void enrich(final Plan plan) {
 
+		/*
+		 * The following is hard-coded for only the following tour sequences:
+		 * 
+		 * work, other, work-other.
+		 * 
+		 * Will most likely go wrong if the plan contains a different travel pattern.
+		 */
+
+		// Figure out what tours are contained in the plan. Ordering is unique anyway.
 		boolean containsWork = false;
 		boolean containsOther = false;
 		for (PlanElement pe : plan.getPlanElements()) {
@@ -82,47 +102,40 @@ public class AddSampersTimeParametersFromRVU {
 			}
 		}
 
+		// Draw a suitable time structure.
 		final TimeStructure timeStructure;
 		{
 			if (containsWork && !containsOther) {
-				timeStructure = this.drawTimeStructure(Purpose.work.toString());
+				timeStructure = this.drawTimeStructure(PopulationCreator.WORK);
 			} else if (!containsWork && containsOther) {
-				timeStructure = this.drawTimeStructure(Purpose.other.toString());
+				timeStructure = this.drawTimeStructure(PopulationCreator.OTHER);
 			} else if (containsWork && containsOther) {
-				timeStructure = this.drawTimeStructure(Purpose.work.toString(), Purpose.other.toString());
+				timeStructure = this.drawTimeStructure(PopulationCreator.WORK, PopulationCreator.OTHER);
 			} else {
-				throw new RuntimeException("containsWork = " + containsWork + ", containsOsther = " + containsOther);
+				throw new RuntimeException("containsWork = " + containsWork + ", containsOther = " + containsOther);
 			}
 		}
 
+		// Insert the time structure into the plan.
 		for (PlanElement pe : plan.getPlanElements()) {
 			if (pe instanceof Activity) {
 				final Activity act = (Activity) pe;
-
 				if (PopulationCreator.INTERMEDIATE_HOME.equals(act.getType())) {
-
-					act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString(),
-							Units.H_PER_S * timeStructure.intermedHomeDur_s(0));
-
+					final double dur_s = timeStructure.intermedHomeDur_s(0);
+					setPlannedActivityStart_h(act, null);
+					setPlannedActivityDuration_h(act, Units.H_PER_S * dur_s);
+				} else if (PopulationCreator.WORK.equals(act.getType())) {
+					setPlannedActivityStart_h(act, Units.H_PER_S * timeStructure.start_s(0));
+					final double dur_s = timeStructure.duration_s(0);
+					setPlannedActivityDuration_h(act, Units.H_PER_S * dur_s);
+				} else if (PopulationCreator.OTHER.equals(act.getType())) {
+					final int otherTourIndex = (containsWork ? 1 : 0);
+					final double dur_s = timeStructure.duration_s(otherTourIndex);
+					setPlannedActivityStart_h(act, Units.H_PER_S * timeStructure.start_s(otherTourIndex));
+					setPlannedActivityDuration_h(act, Units.H_PER_S * dur_s);
 				} else {
-
-					if (Purpose.work.toString().equals(act.getType())) {
-
-						act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.start_h.toString(),
-								Units.H_PER_S * timeStructure.start_s(0));
-						act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString(),
-								Units.H_PER_S * timeStructure.duration_s(0));
-
-					} else if (Purpose.other.toString().equals(act.getType())) {
-
-						int otherTourIndex = (containsWork ? 1 : 0);
-
-						act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.start_h.toString(),
-								Units.H_PER_S * timeStructure.start_s(otherTourIndex));
-						act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString(),
-								Units.H_PER_S * timeStructure.duration_s(otherTourIndex));
-
-					}
+					setPlannedActivityStart_h(act, null);
+					setPlannedActivityDuration_h(act, null);
 				}
 			}
 		}
@@ -130,12 +143,11 @@ public class AddSampersTimeParametersFromRVU {
 
 	public void enrich(final Population population) {
 		for (Person person : population.getPersons().values()) {
-
-			if (person.getAttributes()
-					.getAttribute(SampersParameterUtils.PersonAttribute.income_SEK_yr.toString()) == null) {
-				person.getAttributes().putAttribute(SampersParameterUtils.PersonAttribute.income_SEK_yr.toString(), 0);
+			// Ensure a non-null income.
+			if (person.getAttributes().getAttribute(PopulationCreator.income_SEK_yr) == null) {
+				person.getAttributes().putAttribute(PopulationCreator.income_SEK_yr, 0);
 			}
-
+			// Keep and enrich only the selected plan.
 			PersonUtils.removeUnselectedPlans(person);
 			this.enrich(person.getSelectedPlan());
 		}
@@ -152,8 +164,6 @@ public class AddSampersTimeParametersFromRVU {
 		enricher.enrich(scenario.getPopulation());
 
 		PopulationUtils.writePopulation(scenario.getPopulation(),
-				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/1PctAllModes_enriched.xml");
-
+				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched-population_TMP.xml");
 	}
-
 }
