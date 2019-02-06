@@ -99,7 +99,7 @@ public class BerlinSpatialPlots {
 		config.plans().setInputFile(null);
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        double binSize = config.qsim().getEndTime() - config.qsim().getStartTime(); // this results in only one time bin
+        double binSize = 200000; // make the bin size bigger than the scenario has seconds
         Network network = scenario.getNetwork();
 
         EmissionGridAnalyzer analyzer = new EmissionGridAnalyzer.Builder()
