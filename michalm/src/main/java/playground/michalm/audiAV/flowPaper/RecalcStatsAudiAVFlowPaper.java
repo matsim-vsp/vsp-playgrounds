@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.taxi.schedule.reconstruct.ScheduleReconstructor;
 import org.matsim.contrib.taxi.util.stats.TaxiHistogramsWriter;
 import org.matsim.contrib.taxi.util.stats.TaxiStatsCalculator;

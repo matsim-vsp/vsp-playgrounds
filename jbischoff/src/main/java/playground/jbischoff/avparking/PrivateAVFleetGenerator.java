@@ -37,11 +37,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.dvrp.data.DvrpVehicle;
-import org.matsim.contrib.dvrp.data.DvrpVehicleImpl;
-import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleImpl;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.Fleet;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
@@ -135,7 +135,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 
 
 	/* (non-Javadoc)
-	 * @see org.matsim.contrib.dvrp.data.Fleet#resetSchedules()
+	 * @see org.matsim.contrib.dvrp.fleet.Fleet#resetSchedules()
 	 */
 	@Override
 	public void resetSchedules() {
