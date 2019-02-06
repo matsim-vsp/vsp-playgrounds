@@ -104,14 +104,4 @@ public class TSPrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 			}
 		}
 	}
-
-
-	/* (non-Javadoc)
-	 * @see org.matsim.contrib.dvrp.fleet.Fleet#resetSchedules()
-	 */
-	@Override
-	public void resetSchedules() {
-		// TODO Auto-generated method stub
-		
-	}
 }
