@@ -21,11 +21,11 @@ package playground.jbischoff.taxi.emissions;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.data.DvrpVehicle;
-import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
 import org.matsim.contrib.dvrp.data.file.FleetReader;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
 import org.matsim.contrib.emissions.HbefaVehicleAttributes;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.core.config.Config;
