@@ -19,16 +19,17 @@
 
 package playground.ikaddoura.savPricing.runSetupB;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
+import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
@@ -55,11 +56,12 @@ import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
 import org.matsim.sav.runTaxi.RunBerlinTaxiScenarioA;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinNetworkModification;
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinPlansModificationSplitTrips;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class starts a simulation run with taxis.
@@ -155,10 +157,10 @@ public final class RunBerlinTaxiScenarioB {
 				DvrpQSimComponents.activateModes(TaxiConfigGroup.get(controler.getConfig()).getMode()));
 
 		// reject taxi requests outside the service area
-		controler.addOverridingModule(new AbstractModule() {	
+		controler.addOverridingQSimModule(new AbstractDvrpModeQSimModule(TaxiConfigGroup.get(config).getMode()) {
 			@Override
-			public void install() {
-				this.bind(DvrpModes.key(PassengerRequestValidator.class, TransportMode.taxi))
+			protected void configureQSim() {
+				bindModal(PassengerRequestValidator.class)
 						.toInstance(new ServiceAreaRequestValidator(RunBerlinTaxiScenarioA.taxiServiceAreaAttribute));
 			}
 		});
