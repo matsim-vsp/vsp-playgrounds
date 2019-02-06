@@ -31,8 +31,8 @@ import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigs;
 import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
+import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.core.config.Config;
@@ -153,10 +153,10 @@ public final class RunBerlinDrtScenarioB {
 				DvrpQSimComponents.activateModes(DrtConfigGroup.get(controler.getConfig()).getMode()));
 
 		// reject drt requests outside the service area
-		controler.addOverridingModule(new AbstractModule() {
+		controler.addOverridingQSimModule(new AbstractDvrpModeQSimModule(DrtConfigGroup.get(config).getMode()) {
 			@Override
-			public void install() {
-				this.bind(PassengerRequestValidator.class).annotatedWith(DvrpModes.mode(TransportMode.drt))
+			protected void configureQSim() {
+				bindModal(PassengerRequestValidator.class)
 						.toInstance(new ServiceAreaRequestValidator(RunBerlinDrtScenarioA.drtServiceAreaAttribute));
 			}
 		});
