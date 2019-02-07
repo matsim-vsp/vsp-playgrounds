@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.rvu2013;
+package gunnar.ihop4.rvu2013;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,35 +32,50 @@ import java.util.Map;
  */
 public class TourSequenceTimeStructures {
 
+	// -------------------- INNER CLASS --------------------
+
 	public static class TimeStructure {
 
 		private final int[] startTimes_s;
 		private final int[] durations_s;
+		private final int[] intermediateHomeDurations;
 
 		private TimeStructure(final int start_s, final int duration_s) {
 			this.startTimes_s = new int[] { start_s };
 			this.durations_s = new int[] { duration_s };
+			this.intermediateHomeDurations = new int[] {};
 		}
 
-		private TimeStructure(final int start1_s, final int duration1_s, final int start2_s, final int duration2_s) {
+		private TimeStructure(final int start1_s, final int duration1_s, final int start2_s, final int duration2_s,
+				final int intermediateHomeDuration_s) {
 			this.startTimes_s = new int[] { start1_s, start2_s };
 			this.durations_s = new int[] { duration1_s, duration2_s };
+			this.intermediateHomeDurations = new int[] { intermediateHomeDuration_s };
 		}
 
 		public double start_s(int tourIndex) {
-			return startTimes_s[tourIndex];
+			return this.startTimes_s[tourIndex];
 		}
 
 		public double duration_s(int tourIndex) {
-			return durations_s[tourIndex];
+			return this.durations_s[tourIndex];
 		}
 
+		public double intermedHomeDur_s(int precedingTourIndex) {
+			return this.intermediateHomeDurations[precedingTourIndex];
+		}
 	}
+
+	// -------------------- MEMBERS --------------------
 
 	private Map<List<String>, List<TimeStructure>> purposes2timeStructures = new LinkedHashMap<>();
 
+	// -------------------- CONSTRUCTION --------------------
+
 	public TourSequenceTimeStructures() {
 	}
+
+	// -------------------- IMPLEMENTATION --------------------
 
 	public List<TimeStructure> getTimeStructures(final String... purposes) {
 		final List<String> purposeList = Arrays.asList(purposes);
@@ -77,8 +92,9 @@ public class TourSequenceTimeStructures {
 	}
 
 	public void add(final String purpose1, final int start1_s, final int dur1_s, final String purpose2,
-			final int start2_s, final int dur2_s) {
-		this.getTimeStructures(purpose1, purpose2).add(new TimeStructure(start1_s, dur1_s, start2_s, dur2_s));
+			final int start2_s, final int dur2_s, final int intermediateHomeDur_s) {
+		this.getTimeStructures(purpose1, purpose2)
+				.add(new TimeStructure(start1_s, dur1_s, start2_s, dur2_s, intermediateHomeDur_s));
 	}
 
 	@Override
@@ -89,5 +105,4 @@ public class TourSequenceTimeStructures {
 		}
 		return result.toString();
 	}
-
 }

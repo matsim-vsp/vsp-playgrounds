@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.rvu2013;
+package gunnar.ihop4.rvu2013;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,31 +30,17 @@ import java.util.TreeSet;
 public class Trip implements Comparable<Trip> {
 
 	final Integer tripId;
-	final SortedSet<TravelSegment> segments;
+	final SortedSet<TripSegment> segments;
 
 	Trip(final Integer tripId) {
 		this.tripId = tripId;
 		this.segments = new TreeSet<>();
 	}
 
-	void add(TravelSegment segment) {
+	void add(TripSegment segment) {
 		this.segments.add(segment);
 	}
 
-	boolean isSimpleTour() {
-		return ((this.segments.size() == 2)
-				&& (this.segments.first().startLocation.equals(this.segments.last().endLocation))
-				&& (this.segments.first().endTime_s < this.segments.last().startTime_s));
-	}
-	
-	String purpose() {
-		if (this.segments == null) {
-			return null;
-		} else {
-			return this.segments.last().purpose;
-		}
-	}
-	
 	String startLocation() {
 		if (this.segments == null) {
 			return null;
@@ -75,7 +61,7 @@ public class Trip implements Comparable<Trip> {
 	public String toString() {
 		final StringBuffer result = new StringBuffer();
 		result.append("  Trip " + tripId + "\n");
-		for (TravelSegment segment : this.segments) {
+		for (TripSegment segment : this.segments) {
 			result.append(segment);
 		}
 		return result.toString();

@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.rvu2013;
+package gunnar.ihop4.rvu2013;
 
 import floetteroed.utilities.Time;
 
@@ -26,9 +26,9 @@ import floetteroed.utilities.Time;
  * @author Gunnar Flötteröd
  *
  */
-class TravelSegment implements Comparable<TravelSegment> {
+class TripSegment implements Comparable<TripSegment> {
 
-	final Integer travelId;
+	final Integer tripId;
 	final Integer segmentId;
 	final int startTime_s;
 	final int endTime_s;
@@ -37,9 +37,9 @@ class TravelSegment implements Comparable<TravelSegment> {
 	final String startLocation;
 	final String endLocation;
 
-	TravelSegment(final String tripId, final String segmentId, final String startTime, final String endTime,
+	TripSegment(final String tripId, final String segmentId, final String startTime, final String endTime,
 			final String travelDur, final String purpose, final String startLocation, final String endLocation) {
-		this.travelId = Integer.parseInt(tripId);
+		this.tripId = Integer.parseInt(tripId);
 		this.segmentId = Integer.parseInt(segmentId);
 		this.travelDur = travelDur;
 		this.purpose = purpose;
@@ -65,7 +65,7 @@ class TravelSegment implements Comparable<TravelSegment> {
 	}
 
 	@Override
-	public int compareTo(TravelSegment o) {
+	public int compareTo(TripSegment o) {
 		return this.segmentId.compareTo(o.segmentId);
 	}
 

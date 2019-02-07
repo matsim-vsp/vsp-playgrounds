@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.rvu2013;
+package gunnar.ihop4.rvu2013;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +31,20 @@ import cadyts.utilities.misc.Time;
  * @author Gunnar Flötteröd
  *
  */
-public class Person {
+public class Traveler {
 
 	final String personId;
 	final SortedMap<Integer, Trip> travels;
 
-	Person(final String personId) {
+	Traveler(final String personId) {
 		this.personId = personId;
 		this.travels = new TreeMap<>();
 	}
 
-	void add(TravelSegment segment) {
-		Trip trip = this.travels.get(segment.travelId);
+	void add(TripSegment segment) {
+		Trip trip = this.travels.get(segment.tripId);
 		if (trip == null) {
-			trip = new Trip(segment.travelId);
+			trip = new Trip(segment.tripId);
 			this.travels.put(trip.tripId, trip);
 		}
 		trip.add(segment);
@@ -88,8 +88,8 @@ public class Person {
 		}
 	}
 
-	List<TravelSegment> segments() {
-		final List<TravelSegment> result = new ArrayList<>();
+	List<TripSegment> segments() {
+		final List<TripSegment> result = new ArrayList<>();
 		for (Trip trip : this.travels.values()) {
 			result.addAll(trip.segments);
 		}
@@ -104,11 +104,11 @@ public class Person {
 		}
 
 		Tour currentTour = null;
-		for (TravelSegment segment : this.segments()) {
+		for (TripSegment segment : this.segments()) {
 
 			if (homeLocation.equals(segment.startLocation)) {
 
-				if (currentTour != null) {
+				if (currentTour != null) { // probably too conservative
 					return new ArrayList<>(0);
 				}
 				currentTour = new Tour();
@@ -116,7 +116,7 @@ public class Person {
 
 			} else if (homeLocation.equals(segment.endLocation)) {
 
-				if (currentTour == null) {
+				if (currentTour == null) { // probably too conservative
 					return new ArrayList<>(0);
 				}
 				currentTour.segments.add(segment);
@@ -134,26 +134,4 @@ public class Person {
 
 		return tours;
 	}
-
-	boolean hasOnlySimpleTours() {
-		for (Trip travel : this.travels.values()) {
-			if (!travel.isSimpleTour()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	boolean isRoundTrip() {
-		return ((this.travels.size() > 0) && this.startLocation().equals(this.endLocation()));
-	}
-
-	List<String> purposeSeq() {
-		final List<String> result = new ArrayList<>(this.travels.size());
-		for (Trip travel : this.travels.values()) {
-			result.add(travel.purpose());
-		}
-		return result;
-	}
-
 }

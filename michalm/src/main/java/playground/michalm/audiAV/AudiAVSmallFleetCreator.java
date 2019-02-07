@@ -20,10 +20,10 @@
 package playground.michalm.audiAV;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
-import org.matsim.contrib.dvrp.data.FleetSpecificationImpl;
-import org.matsim.contrib.dvrp.data.file.FleetReader;
-import org.matsim.contrib.dvrp.data.file.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetReader;
+import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.network.NetworkUtils;

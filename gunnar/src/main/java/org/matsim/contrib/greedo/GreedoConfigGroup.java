@@ -273,14 +273,17 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- targetReplanningRate --------------------
 
+	@Deprecated
 	private double targetReplanningRate = 1.0;
 
 	@StringGetter("targetReplanningRate")
+	@Deprecated
 	public double getTargetReplanningRate() {
 		return this.targetReplanningRate;
 	}
 
 	@StringSetter("targetReplanningRate")
+	@Deprecated
 	public void setTargetReplanningRate(double targetReplanningRate) {
 		this.targetReplanningRate = targetReplanningRate;
 	}
@@ -339,6 +342,24 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("adjustStrategyWeights")
 	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
 		this.adjustStrategyWeights = adjustStrategyWeights;
+	}
+
+	// -------------------- relativeAgeStratumSize --------------------
+
+	private double relativeAgeStratumSize = 0.1;
+
+	@StringGetter("relativeAgeStratumSize")
+	public double getRelativeAgeStratumSize() {
+		return this.relativeAgeStratumSize;
+	}
+
+	@StringSetter("relativeAgeStratumSize")
+	public void setRelativeAgeStratumSize(double relativeAgeStratumSize) {
+		this.relativeAgeStratumSize = relativeAgeStratumSize;
+	}
+
+	public int getMinStratumSize() {
+		return (int) (this.relativeAgeStratumSize * this.populationSize);
 	}
 
 	// --------------- cheapStrategies, expensiveStrategies ---------------
