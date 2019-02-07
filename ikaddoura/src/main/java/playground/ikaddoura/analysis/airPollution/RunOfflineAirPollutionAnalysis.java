@@ -58,12 +58,6 @@ public class RunOfflineAirPollutionAnalysis {
 //	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-3d/";	
 //	final static String runId = "savA-3d";
 	
-//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-2/";	
-//	final static String runId = "savA-2";
-	
-//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-3/";	
-//	final static String runId = "savA-3";
-	
 	final static String hbefaFileCold = "shared-svn/projects/detailedEval/matsim-input-files/hbefa-files/v3.2/EFA_ColdStart_vehcat_2005average.txt";
 	final static String hbefaFileWarm = "shared-svn/projects/detailedEval/matsim-input-files/hbefa-files/v3.2/EFA_HOT_vehcat_2005average.txt";
 	
