@@ -18,11 +18,10 @@
  * *********************************************************************** */
 package playground.ikaddoura.analysis.airPollution;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.log4j.Logger;
@@ -36,10 +35,9 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * @author amit, ihab
@@ -48,35 +46,14 @@ import java.util.Map;
 public class BerlinSpatialPlots {
 	private static final Logger log = Logger.getLogger(BerlinSpatialPlots.class);
 
-    //private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
-    //private final String runId = "berlin-v5.2-1pct";
-	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
-//	private final String runId = "bc-0";
-
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
-//	private final String runId = "bc-0";
-	
-//	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
-//	private final String runId = "berlin-v5.2-1pct";
-	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
-//	private final String runId = "savA-0d";
-	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
-//	private final String runId = "savA-2d";
-	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
-//	private final String runId = "savA-3d";
-
     private final double countScaleFactor;
     private final double gridSize;
     private final double smoothingRadius;
 
-	private static final double xMin = 4565039.;
-	private static final double xMax = 4632739.; 
-	private static final double yMin = 5801108.;
-    private static final double yMax = 5845708.;
+	private static final double xMin = 4565039. - 125.;
+	private static final double xMax = 4632739. + 125.; 
+	private static final double yMin = 5801108. - 125.;
+    private static final double yMax = 5845708. + 125.;
 
     private BerlinSpatialPlots(final double gridSize, final double smoothingRadius, final double countScaleFactor) {
         this.gridSize = gridSize;
@@ -85,15 +62,39 @@ public class BerlinSpatialPlots {
     }
 
 	public static void main(String[] args) {
+        
+        final double gridSize = 250.;
+        final double smoothingRadius = 500.;
+        final double countScaleFactor = 10.;
+        
+        final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+    	final String runId = "bc-0";
 
-        InputArguments inputArguments = new InputArguments();
-        JCommander.newBuilder().addObject(inputArguments).build().parse(args);
+//    	final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+//    	 final String runId = "bc-0";
+    	
+//    	 final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+//    	 final String runId = "berlin-v5.2-1pct";
+    	
+//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
+//    	 final String runId = "savA-0d";
+    	
+//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
+//    	 final String runId = "savA-2d";
+    	
+//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
+//    	 final String runId = "savA-3d";
 
-        BerlinSpatialPlots plots = new BerlinSpatialPlots(inputArguments.gridSize, inputArguments.smoothingRadius, inputArguments.countScaleFactor);
-        plots.writeEmissionsToCSV(inputArguments.config, inputArguments.events, inputArguments.outputFile);
+        BerlinSpatialPlots plots = new BerlinSpatialPlots(gridSize, smoothingRadius, countScaleFactor);
+        
+        final String configFile = runDir + runId + ".output_config.xml";
+		final String events = runDir + runId + ".200.emission.events.offline_2019-02-07.xml.gz";
+		final String outputFile = runDir + runId + ".200.NOx_2019-02-07.csv";
+		
+		plots.writeEmissionsToCSV(configFile , events, outputFile);
     }
 
-    private void writeEmissionsToCSV(Path configPath, Path eventsPath, Path outputPath) {
+    private void writeEmissionsToCSV(String configPath, String eventsPath, String outputPath) {
 
         Config config = ConfigUtils.loadConfig(configPath.toString());
 		config.plans().setInputFile(null);
@@ -118,7 +119,7 @@ public class BerlinSpatialPlots {
         writeGridToCSV(timeBins, Pollutant.NOX, outputPath);
     }
 
-    private void writeGridToCSV(TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant, Path outputPath) {
+    private void writeGridToCSV(TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant, String outputPath) {
 
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(outputPath.toString()), CSVFormat.TDF)) {
             printer.printRecord("timeBinStartTime", "centroidX", "centroidY", "weight");
@@ -141,26 +142,5 @@ public class BerlinSpatialPlots {
                 new Coordinate(xMax, yMax), new Coordinate(xMin, yMax),
                 new Coordinate(xMin, yMin)
         });
-    }
-
-    private static class InputArguments {
-
-        @Parameter(names = {"-gridSize", "-gs"})
-        private double gridSize = 250;
-
-        @Parameter(names = {"-smoothingRadius", "-sr"})
-        private double smoothingRadius = 500;
-
-        @Parameter(names = {"-countScaleFactor", "-csf"})
-        private double countScaleFactor = 10;
-
-        @Parameter(names = {"-events"}, required = true)
-        private Path events;
-
-        @Parameter(names = {"-config"}, required = true)
-        private Path config;
-
-        @Parameter(names = {"-output"}, required = true)
-        private Path outputFile;
     }
 }
