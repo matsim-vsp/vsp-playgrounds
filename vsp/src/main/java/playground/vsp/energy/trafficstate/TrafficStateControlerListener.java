@@ -21,7 +21,6 @@ package playground.vsp.energy.trafficstate;
 
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
@@ -71,22 +70,27 @@ public class TrafficStateControlerListener implements StartupListener, Iteration
 	}
 
 	private TrafficState calculateTrafficState() {
+
+		throw new RuntimeException("Below code doesn't match changes in TravelTimeCalculator. Someone should fix this.");
+/*
 		TrafficState ts = new TrafficState();
-	  int numSlots = this.ttcalc.getNumSlots();
-    int binSize = this.ttcalc.getTimeSlice();
-    
-    for (Link link : scenario.getNetwork().getLinks().values()){
-    	EdgeInfo info = new EdgeInfo(link.getId());
-    	ts.addEdgeInfo(info);
-    	for (int i = 0; i < numSlots; i++){
-    		double time_sec = i * binSize;
-    		double tt = this.ttcalc.getLinkTravelTime(link, time_sec);
-    		TimeBin bin = new TimeBin(time_sec, (i+1)*binSize, link.getLength()/tt);
-    		info.getTimeBins().add(bin);
-    	}
-    }
+		int numSlots = this.ttcalc.getNumSlots();
+		int binSize = this.ttcalc.getTimeSlice();
+
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			EdgeInfo info = new EdgeInfo(link.getId());
+			ts.addEdgeInfo(info);
+			for (int i = 0; i < numSlots; i++) {
+				double time_sec = i * binSize;
+				double tt = this.ttcalc.getLinkTravelTime(link, time_sec);
+				TimeBin bin = new TimeBin(time_sec, (i + 1) * binSize, link.getLength() / tt);
+				info.getTimeBins().add(bin);
+			}
+		}
 		return ts;
+*/
 	}
+
 
 
 }
