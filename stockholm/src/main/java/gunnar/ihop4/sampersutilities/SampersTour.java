@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
+import cadyts.utilities.misc.Units;
 import gunnar.ihop4.sampersutilities.SampersUtilityParameters.Purpose;
 
 /**
@@ -116,12 +117,17 @@ class SampersTour {
 	}
 
 	double getRealizedTravelTime_min() {
-		System.out.println(this.buildStatus());
+		// System.out.println(this.buildStatus());
 		// legs contain travel time in seconds
 		return (this.firstLeg.getTravelTime() + this.secondLeg.getTravelTime()) / 60.0;
 	}
 
-	double getRealizedMoney_SEK() {
-		return this.money_SEK;
+	double getRealizedTravelDistance_km() {
+		// TODO Make sure that the distance unit is indeed meters!
+		return Units.KM_PER_M * (this.firstLeg.getRoute().getDistance() + this.secondLeg.getRoute().getDistance());
+	}
+
+	double getEventBasedCost_SEK() {
+		return -this.money_SEK; // a cost, hence positive
 	}
 }

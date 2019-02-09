@@ -239,4 +239,9 @@ public class SampersUtilityParameters {
 		// TODO Revisit!
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money) * 24 * 60;
 	}
+
+	public double getMonetaryDistanceCost_SEK_km() {
+		// https://www.skatteverket.se/foretagochorganisationer/arbetsgivare/lonochersattning/traktamente.4.361dc8c15312eff6fd1703e.html?q=milers%C3%A4ttning+bil
+		return 1.85;
+	}
 }

@@ -21,7 +21,6 @@ package org.matsim.contrib.greedo;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -104,16 +103,27 @@ public class ReplannerIdentifier {
 		this.ageStrata = ages.stratifyByAgeWithMinumStratumSize(greedoConfig.getMinStratumSize());
 
 		this.personId2unweightedUtilityChange = personId2UtilityChange;
-		this.personId2weightedUtilityChange = new LinkedHashMap<>(personId2UtilityChange.size());
-		personId2UtilityChange.entrySet().stream().forEach(entry -> {
-			final Id<Person> personId = entry.getKey();
-			final double weightedUtilityChange = ages.getPersonWeights().get(personId) * entry.getValue();
-			this.personId2weightedUtilityChange.put(personId, weightedUtilityChange);
-		});
-		this.totalWeightedUtilityChange = this.personId2weightedUtilityChange.values().stream()
-				.mapToDouble(utlChange -> utlChange).sum();
 		this.totalUnweightedUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange)
 				.sum();
+
+		// >>>>> REMOVING THE UTILITY WEIGHTING >>>>>
+
+		this.personId2weightedUtilityChange = this.personId2unweightedUtilityChange;
+		this.totalWeightedUtilityChange = this.totalUnweightedUtilityChange;
+
+		// this.personId2weightedUtilityChange = new
+		// LinkedHashMap<>(personId2UtilityChange.size());
+		// personId2UtilityChange.entrySet().stream().forEach(entry -> {
+		// final Id<Person> personId = entry.getKey();
+		// final double weightedUtilityChange = ages.getPersonWeights().get(personId) *
+		// entry.getValue();
+		// this.personId2weightedUtilityChange.put(personId, weightedUtilityChange);
+		// });
+		// this.totalWeightedUtilityChange =
+		// this.personId2weightedUtilityChange.values().stream()
+		// .mapToDouble(utlChange -> utlChange).sum();
+
+		// <<<<< REMOVING THE UTILITY WEIGHTING <<<<<
 
 		final DynamicData<Id<?>> currentUnweightedCounts;
 		{
@@ -140,7 +150,10 @@ public class ReplannerIdentifier {
 		this.lambdaBar = this.greedoConfig.getReplanningRate(greedoIteration);
 		// this.lambdaTarget = this.greedoConfig.getTargetReplanningRate();
 
-		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 / this.totalWeightedUtilityChange;
+		this.beta = 2.0 * this.lambdaBar
+				* (this.greedoConfig.getUseAgeWeightedBeta() ? this.sumOfWeightedCountDifferences2
+						: this.sumOfUnweightedCountDifferences2)
+				/ this.totalWeightedUtilityChange;
 
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()
