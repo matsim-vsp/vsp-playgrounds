@@ -37,6 +37,12 @@
 			<scope>compile</scope>
 		</dependency>
   
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim-examples</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+		
   		<!-- <<<<< FIXING MATSIM VERSION NUMBER <<<<< -->
   
 	  	<dependency>
