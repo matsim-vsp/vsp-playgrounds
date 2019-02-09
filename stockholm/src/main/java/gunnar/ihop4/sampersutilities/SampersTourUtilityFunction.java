@@ -108,11 +108,9 @@ class SampersTourUtilityFunction {
 
 		/*
 		 * Monetary cost.
-		 * 
-		 * TODO: The per-distance or per-time cost is not yet included (and not even
-		 * extracted from the legs) , i.e. the model only reacts to the toll.
 		 */
-		final double cost_SEK = -tour.getRealizedMoney_SEK();
+		final double cost_SEK = tour.getEventBasedCost_SEK()
+				+ this.utlParams.getMonetaryDistanceCost_SEK_km() * tour.getRealizedTravelDistance_km();
 		if (cost_SEK < 0) {
 			throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
 		}
