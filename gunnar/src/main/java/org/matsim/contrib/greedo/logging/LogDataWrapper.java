@@ -40,14 +40,6 @@ public class LogDataWrapper {
 		this.identifier = identifier;
 	}
 
-	public Integer getDriversInPhysicalSim() {
-		return this.accelerator.getDriversInPhysicalSim();
-	}
-
-	public Integer getDriversInPseudoSim() {
-		return this.accelerator.getDriversInPseudoSim();
-	}
-
 	public Double getLambdaRealized() {
 		return this.accelerator.getLambdaRealized();
 	}

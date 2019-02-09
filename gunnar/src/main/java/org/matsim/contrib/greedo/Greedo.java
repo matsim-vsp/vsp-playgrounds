@@ -21,20 +21,14 @@ package org.matsim.contrib.greedo;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.corelisteners.PlansReplanning;
 
 import com.google.inject.Singleton;
 
-import ch.ethz.matsim.ier.IERReplanning;
-import ch.ethz.matsim.ier.emulator.AgentEmulator;
-import ch.ethz.matsim.ier.emulator.FirstSimpleSimulationEmulator;
-import ch.ethz.matsim.ier.emulator.SimulationEmulator;
+import ch.ethz.matsim.ier.IERModule;
 
 /**
  *
@@ -52,10 +46,6 @@ public class Greedo extends AbstractModule {
 	private Config config = null;
 
 	private Scenario scenario = null;
-
-	// private GreedoProgressListener greedoProgressListener = new
-	// GreedoProgressListener() {
-	// };
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -95,16 +85,6 @@ public class Greedo extends AbstractModule {
 		}
 
 		/*
-		 * Use the event manager that does not check for event order. Essential for
-		 * PSim, which generates events person-after-person.
-		 * 
-		 * TODO The original pSim code also called
-		 * config.parallelEventHandling().setNumberOfThreads(1), which seems to be a
-		 * performance bottleneck. Why would it be necessary? Gunnar 2019-01-23.
-		 */
-		// config.parallelEventHandling().setSynchronizeOnSimSteps(false);
-
-		/*
 		 * Preliminary analysis of innovation strategies.
 		 */
 		int expensiveStrategyCnt = 0;
@@ -123,17 +103,6 @@ public class Greedo extends AbstractModule {
 				}
 			}
 		}
-
-		/*
-		 * Ensure a valid PSim configuration; fall back to default values if not
-		 * available.
-		 */
-		// if (!config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
-		// log.warn("Config module " + PSimConfigGroup.GROUP_NAME + " is missing,
-		// falling back to default values.");
-		// }
-		// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config,
-		// PSimConfigGroup.class);
 
 		/*
 		 * Adjust number of PSim iterations per cycle to number and type of innovation
@@ -215,15 +184,6 @@ public class Greedo extends AbstractModule {
 				throw new RuntimeException("The sum of all strategy probabilities is " + probaSum + ".");
 			}
 		}
-
-		/*
-		 * Add a strategy that decides which of the better-response re-planning
-		 * decisions coming out of the pSim is allowed to be implemented.
-		 */
-//		final StrategySettings acceptIntendedReplanningStrategySettings = new StrategySettings();
-//		acceptIntendedReplanningStrategySettings.setStrategyName(AcceptIntendedReplanningStrategy.STRATEGY_NAME);
-//		acceptIntendedReplanningStrategySettings.setWeight(0.0); // changed dynamically
-//		config.strategy().addStrategySettings(acceptIntendedReplanningStrategySettings);
 	}
 
 	public void meet(final Scenario scenario) {
@@ -245,46 +205,20 @@ public class Greedo extends AbstractModule {
 	@Override
 	public void install() {
 
-		// TODO C&P from IERModule, perhaps not ideal.
-		bind(PlansReplanning.class).to(IERReplanning.class);
-		bind(AgentEmulator.class);
-		// We choose the simple emulator for now.
-		bind(SimulationEmulator.class).to(FirstSimpleSimulationEmulator.class);
-
-//		this.bind(MobSimSwitcher.class);
-//		this.addControlerListenerBinding().to(MobSimSwitcher.class);
-//		this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
-//		this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
-//		this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-
-		// TODO This is probably needed because the QSimProvider otherwise somehow gets
-		// shadowed by the SwitchingMobsimProvider. Gunnar 2019-01-23.
-//		this.bind(QSimProvider.class);
-
 		// TODO For now only car traffic!
-//		if (this.config.transit().isUseTransit()) {
-//			// TODO See warning below.
-//			log.warn("Transit is included -- this is only tested with deterministic SBB transit.");
-//			this.bind(FifoTransitPerformance.class);
-//			this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-//			this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-//		} else {
-			this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-//		}
+		// if (this.config.transit().isUseTransit()) {
+		// // TODO See warning below.
+		// log.warn("Transit is included -- this is only tested with deterministic SBB
+		// transit.");
+		// this.bind(FifoTransitPerformance.class);
+		// this.addEventHandlerBinding().to(FifoTransitPerformance.class);
+		// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
+		// } else {
+		// this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+		// }
 
-//		this.bind(GreedoProgressListener.class).toInstance(this.greedoProgressListener);
 		this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
-//		this.addControlerListenerBinding().to(WireGreedoIntoMATSimControlerListener.class);
 		this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
-		// this.addPlanStrategyBinding(AcceptIntendedReplanningStrategy.STRATEGY_NAME)
-		// .toProvider(AcceptIntendedReplanningStragetyProvider.class);
+		(new IERModule(WireGreedoIntoMATSimControlerListener.class)).install();
 	}
-
-	// -------------------- FURTHER CONFIGURATION --------------------
-
-	// Just for debugging.
-//	public void setGreedoProgressListener(final GreedoProgressListener greedoProgressListener) {
-//		this.greedoProgressListener = greedoProgressListener;
-//	}
-
 }
