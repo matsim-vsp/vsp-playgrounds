@@ -261,6 +261,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binCnt = binCnt;
 	}
 
+	// -------------------- binCnt_s --------------------
+
+	private int iterationsPerCycle;
+
+	@StringGetter("iterationsPerCycle")
+	public int getIterationsPerCycle() {
+		return this.iterationsPerCycle;
+	}
+
+	@StringSetter("iterationsPerCycle")
+	public void setIterationsPerCycle(int iterationsPerCycle) {
+		this.iterationsPerCycle = iterationsPerCycle;
+	}
+
 	// -------------------- meanReplanningRate --------------------
 
 	private double initialMeanReplanningRate = 0.2;

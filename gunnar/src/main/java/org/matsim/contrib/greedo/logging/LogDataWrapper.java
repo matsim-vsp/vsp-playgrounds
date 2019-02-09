@@ -35,13 +35,9 @@ public class LogDataWrapper {
 
 	private final ReplannerIdentifier identifier;
 
-	private final Integer driversInPseudoSim;
-
-	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator, final ReplannerIdentifier identifier,
-			final Integer driversInPseudoSim) {
+	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator, final ReplannerIdentifier identifier) {
 		this.accelerator = accelerator;
 		this.identifier = identifier;
-		this.driversInPseudoSim = driversInPseudoSim;
 	}
 
 	public Integer getDriversInPhysicalSim() {
@@ -49,7 +45,7 @@ public class LogDataWrapper {
 	}
 
 	public Integer getDriversInPseudoSim() {
-		return this.driversInPseudoSim;
+		return this.accelerator.getDriversInPseudoSim();
 	}
 
 	public Double getLambdaRealized() {

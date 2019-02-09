@@ -17,30 +17,22 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo;
+package ch.ethz.matsim.ier.replannerselection;
 
-import org.matsim.core.replanning.PlanStrategy;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import org.matsim.core.events.handler.EventHandler;
 
 /**
- * 
+ *
  * @author Gunnar Flötteröd
  *
  */
-public class AcceptIntendedReplanningStragetyProvider implements Provider<PlanStrategy> {
+public interface ReplannerSelector {
 
-	// -------------------- MEMBERS --------------------
+	public void beforeReplanning();
+	
+	public void afterReplanning();
 
-	@Inject
-	private WireGreedoIntoMATSimControlerListener greedoInMATSim;
-
-	// -------------------- IMPLEMENTATION OF Provider --------------------
-
-	@Override
-	public PlanStrategy get() {
-		return new AcceptIntendedReplanningStrategy(this.greedoInMATSim);
-	}
-
+	public EventHandler getHandlerForHypotheticalNetworkExperience();
+	
 }
+

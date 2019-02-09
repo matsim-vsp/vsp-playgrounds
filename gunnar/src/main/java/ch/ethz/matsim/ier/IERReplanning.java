@@ -14,6 +14,7 @@ import org.matsim.core.config.groups.GlobalConfigGroup;
 import org.matsim.core.controler.corelisteners.PlansReplanning;
 import org.matsim.core.controler.events.ReplanningEvent;
 import org.matsim.core.controler.listener.ReplanningListener;
+import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.replanning.ReplanningContext;
 import org.matsim.core.replanning.StrategyManager;
 
@@ -22,6 +23,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import ch.ethz.matsim.ier.emulator.AgentEmulator;
+import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 
 /**
  * This class replaces the standard MATSim replanning. It fullfills a number of
@@ -68,20 +70,43 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	private final StrategyManager strategyManager;
 	private final Population population;
 	private final Provider<AgentEmulator> agentEmulatorProvider;
+	private final ReplannerSelector replannerSelector;
 
 	@Inject
 	IERReplanning(StrategyManager strategyManager, Population population,
 			Provider<ReplanningContext> replanningContextProvider, GlobalConfigGroup globalConfig,
-			Provider<AgentEmulator> agentEmulatorProvider) {
+			Provider<AgentEmulator> agentEmulatorProvider, ReplannerSelector replannerSelector) {
 		this.population = population;
 		this.strategyManager = strategyManager;
 		this.replanningContextProvider = replanningContextProvider;
 		this.numberOfThreads = globalConfig.getNumberOfThreads();
 		this.agentEmulatorProvider = agentEmulatorProvider;
+		this.replannerSelector = replannerSelector;
 	}
 
 	public void notifyReplanning(ReplanningEvent event) {
 		try {
+
+			/*
+			 * TODO This handler observes the network experience of all agents with their
+			 * new proposed plans (i.e. the result of the numberOfIterations replanning
+			 * iterations *prior* to the call to this.replannerSelector.afterReplanning().
+			 * 
+			 * Necessary events for car traffic: LinkEnterEvent, VehicleEntersTrafficEvent,
+			 * VehicleLeavesTrafficEvent.
+			 * 
+			 * Necessary events for public transport: PersonEntersVehicleEvent.
+			 * 
+			 */
+			EventHandler handlerForLastReplanningIteration = this.replannerSelector
+					.getHandlerForHypotheticalNetworkExperience();
+
+			/*
+			 * This memorizes the plans and network experiences of the population prior to
+			 * the replanning.
+			 */
+			this.replannerSelector.beforeReplanning();
+
 			ReplanningContext replanningContext = replanningContextProvider.get();
 
 			for (int i = 0; i < numberOfIterations; i++) {
@@ -93,11 +118,19 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				// We emulate the whole population in parallel
 				emulateInParallel(population, event.getIteration());
 
-				/*
-				 * I guess here is where most of the magic will happen.
-				 */
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, numberOfIterations));
 			}
+
+			/*
+			 * TODO Before the following call, feed the handlerForLastReplanningIteration.
+			 * 
+			 * afterReplanning() compares the plans and (hypothetical) network experiences
+			 * of the population before and after the replanning and resets the plans of
+			 * agents that are not allowed to replan to what was memorized in the call to
+			 * beforeReplanning().
+			 */
+			this.replannerSelector.afterReplanning();
+
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
