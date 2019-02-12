@@ -103,8 +103,22 @@ class EventsToBeelinDistanceRange {
 
         double beelineDistance = beelineDistanceFactor *
                 NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
+        try {
+            return DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
+        } catch (Exception e) {
+            LOG.error("getDistanceRange threw an error");
+            LOG.error("desired distance was: " + beelineDistance);
+            LOG.error("desired mode was: " + mode);
 
-        return DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
+            Set<DistanceBin.DistanceRange> ranges = this.inputDistanceDistribution.getDistanceRanges(mode);
+            LOG.error("the distance ranges for mode " + mode + " says the following on toString() " + ranges.toString());
+
+            if (ranges != null) {
+                LOG.error("the following distance ranges were found for mode: " + mode);
+                ranges.forEach(range -> LOG.error(range.toString()));
+            }
+            throw new RuntimeException(e);
+        }
     }
 
     public void handleEvent(PersonDepartureEvent event) {
@@ -129,7 +143,7 @@ class EventsToBeelinDistanceRange {
     }
 
     public void handleEvent(PersonStuckEvent event) {
-        LOG.warn("Stuck event# "+String.valueOf(++stuckEventsCounter)+" : "+ event);
+        LOG.warn("Stuck event# " + ++stuckEventsCounter + " : " + event);
         LOG.warn("This means, all trips are not included in the output distance distribution.");
     }
 
