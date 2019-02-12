@@ -19,16 +19,7 @@
 
 package playground.jbischoff.networkChange;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.math.DoubleMath;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -44,7 +35,11 @@ import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
 
-import com.google.common.math.DoubleMath;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author jbischoff
@@ -192,7 +187,7 @@ public class CreateMonthlyTravelTimes {
 			}
 			log.info("bin no:" + currentTimeBin + "day: " + currentDay + " time: " + Time.writeTime(time));
 			for (Link link : network.getLinks().values()) {
-				double tt = ttc.getLinkTravelTime(link, time);
+                double tt = ttc.getLinkTravelTimes().getLinkTravelTime(link, time, null, null);
 				this.traveltimes.get(link.getId())[currentTimeBin] = tt;
 			}
 
