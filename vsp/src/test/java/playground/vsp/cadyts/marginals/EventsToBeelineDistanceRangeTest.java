@@ -37,18 +37,7 @@ public class EventsToBeelineDistanceRangeTest {
 
         MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
-        Network network = NetworkUtils.createNetwork();
-        Node from = network.getFactory().createNode(Id.createNodeId("from-node"), new Coord(1000, 0));
-        Node to = network.getFactory().createNode(Id.createNodeId("to-node"), new Coord(2000, 0));
-        Link link = network.getFactory().createLink(DEFAULT_LINK_ID, from, to);
-        link.setLength(1000);
-        link.setFreespeed(12.333);
-        link.setCapacity(2000);
-        link.setNumberOfLanes(1);
-        network.addNode(from);
-        network.addNode(to);
-        network.addLink(link);
-        scenario.setNetwork(network);
+        scenario.setNetwork(createNetwork());
 
         ActivityFacility home = scenario.getActivityFacilities().getFactory().createActivityFacility(Id.create("home", ActivityFacility.class), new Coord(0, 0));
         ActivityFacility work = scenario.getActivityFacilities().getFactory().createActivityFacility(Id.create("work", ActivityFacility.class), new Coord(3000, 0));
@@ -86,5 +75,20 @@ public class EventsToBeelineDistanceRangeTest {
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes(TransportMode.car, 1.0);
         inputDistanceDistribution.addToDistribution(TransportMode.car, new DistanceBin.DistanceRange(0, 10000), 1234);
         return inputDistanceDistribution;
+    }
+
+    private Network createNetwork() {
+        Network network = NetworkUtils.createNetwork();
+        Node from = network.getFactory().createNode(Id.createNodeId("from-node"), new Coord(1000, 0));
+        Node to = network.getFactory().createNode(Id.createNodeId("to-node"), new Coord(2000, 0));
+        Link link = network.getFactory().createLink(DEFAULT_LINK_ID, from, to);
+        link.setLength(1000);
+        link.setFreespeed(12.333);
+        link.setCapacity(2000);
+        link.setNumberOfLanes(1);
+        network.addNode(from);
+        network.addNode(to);
+        network.addLink(link);
+        return network;
     }
 }
