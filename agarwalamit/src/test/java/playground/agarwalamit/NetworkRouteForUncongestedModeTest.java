@@ -18,7 +18,6 @@
  * *********************************************************************** */
 package playground.agarwalamit;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.junit.Assert;
@@ -35,6 +34,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -52,8 +52,6 @@ public class NetworkRouteForUncongestedModeTest {
 
 	@Rule public MatsimTestUtils helper = new MatsimTestUtils();
 
-	private final static URL EQUIL_NETWORK = IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("equil"), "network.xml");
-
 	/**
 	 * Every link must allow car and ride mode if networkModes are car and ride. 
 	 * Using overriding modules to get network route for ride mode.  
@@ -61,12 +59,12 @@ public class NetworkRouteForUncongestedModeTest {
 	@Test
 	public void testWithAllowedModesOnLink(){
 
-		Scenario sc = createSceanrio();
+		Scenario sc = createScenario();
 		sc.getConfig().controler().setOutputDirectory(helper.getOutputDirectory());
-		
+
 		// set allowed modes on each link
-		for (Link l : sc.getNetwork().getLinks().values()) {
-			l.setAllowedModes(new HashSet<>(Arrays.asList("car","ride")));
+		for (Link link : sc.getNetwork().getLinks().values()) {
+			link.setAllowedModes(new HashSet<>(Arrays.asList("car","ride")));
 		}
 		
 		Controler controler = new Controler(sc);
@@ -84,9 +82,9 @@ public class NetworkRouteForUncongestedModeTest {
 		Assert.assertTrue(true);
 	}
 
-	private Scenario createSceanrio () {
+	private Scenario createScenario() {
 		Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(EQUIL_NETWORK.toString());
+		config.network().setInputFile( IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("equil" ), "network.xml" ).toString() );
 		config.controler().setLastIteration(1);
 
 		{
