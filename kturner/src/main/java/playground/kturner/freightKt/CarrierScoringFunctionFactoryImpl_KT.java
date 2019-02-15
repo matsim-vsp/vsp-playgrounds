@@ -90,7 +90,7 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
         	if(selectedPlan != null) {
         		for(ScheduledTour tour : selectedPlan.getScheduledTours()){
         			if(!tour.getTour().getTourElements().isEmpty()){
-        				double fixCosts= tour.getVehicle().getVehicleType().getVehicleCostInformation().fix;
+        				double fixCosts= tour.getVehicle().getVehicleType().getVehicleCostInformation().getFix();
         				fixCostWriter.addAmountToWriter(fixCosts);
         				fixCostWriter.writeMoneyToFile(fixCosts);
         				score += (-1)*fixCosts;
@@ -118,11 +118,11 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		WriteLegs legWriter = new WriteLegs(new File(outputDir + "#LegsForScoringInfor.txt"), carrier); //KT
 
 		private double getTimeParameter(CarrierVehicle vehicle) {
-            return vehicle.getVehicleType().getVehicleCostInformation().perTimeUnit;
+            return vehicle.getVehicleType().getVehicleCostInformation().getPerTimeUnit();
         }
 
         private double getDistanceParameter(CarrierVehicle vehicle) {
-            return vehicle.getVehicleType().getVehicleCostInformation().perDistanceUnit;
+            return vehicle.getVehicleType().getVehicleCostInformation().getPerDistanceUnit();
         }
 
         private CarrierVehicle getVehicle(Id<?> vehicleId) {

@@ -57,6 +57,8 @@ import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
 import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
+import org.matsim.contrib.freight.carrier.CarrierVehicleType;
+import org.matsim.contrib.freight.carrier.CarrierVehicleType.VehicleCostInformation;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeWriter;
@@ -117,6 +119,8 @@ import playground.kturner.utils.MoveDirVisitor;
  * 
  */
 
+
+
 /**
  * @author kturner
  *
@@ -126,19 +130,28 @@ public class KTFreight_v3_simple {
 	private static final Logger log = Logger.getLogger(KTFreight_v3_simple.class);
 	private static final Level loggingLevel = Level.INFO; 		//Set to info to avoid all Debug-Messages, e.g. from VehicleRountingAlgorithm, but can be set to other values if needed. KMT feb/18. 
 
+	 enum CostsModififier {av, avFix110pct, avDist110pct}
+	 final static CostsModififier costsModififier = CostsModififier.avDist110pct ;
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
-	private static final String INPUT_DIR = "../../freight-dfg17/scenarios/CEP/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/CEP-Wilmersdorf_Bike/MultipleTours/" ;
+//	private static final String INPUT_DIR = "../../freight-dfg17/scenarios/CEP/" ;
+	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/";
+	
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_III_DistC10pctUp_Shipments/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 
 	//Dateinamen
-	private static final String NETFILE_NAME = "network.xml.gz" ;
+	private static final String NETFILE_NAME = "network.xml" ;
+//	private static final String VEHTYPEFILE_NAME = "vehicleTypes_AVFC.xml" ;
+	private static final String CARRIERFILE_NAME = "CarriersWShipmentsOneTW/I-Base_carrierLEH_v2_withFleet_Shipment_OneTW.xml";
+	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
+	
+//	private static final String NETFILE_NAME = "network.xml.gz" ;
 	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
 //	private static final String CARRIERFILE_NAME = "DHL_carriers_Wilmersdorf_wihtBicycle.xml"; //Based on services
-	private static final String CARRIERFILE_NAME = "DHL_carriers_Wilmersdorf_withBicycle_Shipment.xml"; //Based on shipments for multiple tours
-	private static final String ALGORITHMFILE_NAME = "initialPlanAlgorithm.xml" ;
+//	private static final String CARRIERFILE_NAME = "DHL_carriers_Wilmersdorf_withBicycle_Shipment.xml"; //Based on shipments for multiple tours
+//	private static final String ALGORITHMFILE_NAME = "initialPlanAlgorithm.xml" ;
 
 
 
@@ -153,7 +166,7 @@ public class KTFreight_v3_simple {
 	// Einstellungen für den Run	
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
-	private static final int MAX_JSPRIT_ITERATION = 10000;
+	private static final int MAX_JSPRIT_ITERATION = 500;
 	private static final int NU_OF_TOTAL_RUNS = 1;	
 
 	
@@ -253,6 +266,7 @@ public class KTFreight_v3_simple {
 
 	private static Carriers jspritRun(Config config, Network network) throws InvalidAttributeValueException {
 		CarrierVehicleTypes vehicleTypes = createVehicleTypes();
+		vehicleTypes = modifyVehicleTypes(vehicleTypes);
 
 		Carriers carriers = createCarriers(vehicleTypes);
 
@@ -267,6 +281,30 @@ public class KTFreight_v3_simple {
 		new WriteCarrierScoreInfos(carriers, new File(TEMP_DIR +  "#JspritCarrierScoreInformation.txt"), runIndex);
 
 		return carriers;
+	}
+
+	private static CarrierVehicleTypes modifyVehicleTypes(CarrierVehicleTypes vehicleTypes) {
+		for (CarrierVehicleType vt : vehicleTypes.getVehicleTypes().values()) {
+			VehicleCostInformation vehicleCostInformation = vt.getVehicleCostInformation();
+
+			switch (costsModififier) {
+			case av:
+				vehicleCostInformation.setPerTimeUnit(0.0);
+				break;
+			case avDist110pct:
+				vehicleCostInformation.setPerTimeUnit(0.0);
+				vehicleCostInformation.setPerDistanceUnit(vehicleCostInformation.getPerDistanceUnit() * 1.1);
+				break;
+			case avFix110pct:
+				vehicleCostInformation.setPerTimeUnit(0.0);
+				vehicleCostInformation.setFix(vehicleCostInformation.getFix() * 1.1);
+				break;
+			default:
+				log.info("No or unspecified modification for carrierVehicleTypeCosts selected" );
+			}
+			vt.setVehicleCostInformation(vehicleCostInformation );
+		}
+		return vehicleTypes;
 	}
 
 	private static Carriers createCarriers(CarrierVehicleTypes vehicleTypes) {

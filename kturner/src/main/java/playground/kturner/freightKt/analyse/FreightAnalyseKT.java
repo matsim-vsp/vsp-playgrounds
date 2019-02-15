@@ -33,8 +33,12 @@ public class FreightAnalyseKT {
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIa-CityMautE/Run_1/" ;; 	//City-Maut mit electro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleToursSingleTimeWindow/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleToursSingleTimeWindow/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
 
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_Referenz_Shipments/Run_1/"; 	
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_Base_Shipments/Run_1/"; 
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_II_FC10pctUp_Shipments/Run_1/"; 
+	
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
@@ -85,12 +89,12 @@ public class FreightAnalyseKT {
 			log.info("Reading the event file... Done.");
 			
 			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
-//			for (Carrier carrier : carriers.getCarriers().values()){
-//				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
-//				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
-//			}
-//			
-//			tripWriter.writeResultsPerVehicleTypes();
+			for (Carrier carrier : carriers.getCarriers().values()){
+				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
+				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
+			}
+			
+			tripWriter.writeResultsPerVehicleTypes();
 			tripWriter.writeTourResultsAllCarrier();
 			
 			
