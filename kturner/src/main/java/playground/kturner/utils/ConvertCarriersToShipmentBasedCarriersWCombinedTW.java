@@ -31,8 +31,6 @@ import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.utils.FreightUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 
-import playground.kturner.freightKt.FreightWithShipments;
-
 /**
  * Converts a given carriers file to a carrier file with only shipments
  * 
@@ -44,7 +42,7 @@ import playground.kturner.freightKt.FreightWithShipments;
  */
 public class ConvertCarriersToShipmentBasedCarriersWCombinedTW {
 
-	private static final Logger log = Logger.getLogger(FreightWithShipments.class);
+	private static final Logger log = Logger.getLogger(ConvertCarriersToShipmentBasedCarriers.class);
 
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/CarriersWShipments/" ;
 	private static final String OUTPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/CarriersWShipmentsOneTW/";

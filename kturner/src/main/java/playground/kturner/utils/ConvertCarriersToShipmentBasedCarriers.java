@@ -31,8 +31,6 @@ import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.utils.FreightUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 
-import playground.kturner.freightKt.FreightWithShipments;
-
 /**
  * Converts a given carriers file to a carrier file with only shipments
  * 
@@ -44,7 +42,7 @@ import playground.kturner.freightKt.FreightWithShipments;
  */
 public class ConvertCarriersToShipmentBasedCarriers {
 	
-	private static final Logger log = Logger.getLogger(FreightWithShipments.class);
+	private static final Logger log = Logger.getLogger(ConvertCarriersToShipmentBasedCarriers.class);
 
 	private static final String INPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/CEP-Wilmersdorf_Bike/SingleTour/" ;
 	private static final String OUTPUT_DIR = "../../freight-dfg17/scenarios/CEP/";
