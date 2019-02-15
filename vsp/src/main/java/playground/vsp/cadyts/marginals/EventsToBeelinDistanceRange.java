@@ -76,9 +76,14 @@ class EventsToBeelinDistanceRange {
         if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return null;
 
         String mode  = personToMode.get(event.getPersonId());
-        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty() && !warnedAboutExclusion.contains(mode)) {
-            warnedAboutExclusion.add(mode);
-            LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()) {
+
+            // warn on the first occurence
+            if (!warnedAboutExclusion.contains(mode)) {
+                warnedAboutExclusion.add(mode);
+                LOG.warn("The distance range for mode " + mode + " in the input distance distribution is empty. This will be excluded from the calibration.");
+            }
+            // always skip
             return null;
         }
 
@@ -113,10 +118,8 @@ class EventsToBeelinDistanceRange {
             Set<DistanceBin.DistanceRange> ranges = this.inputDistanceDistribution.getDistanceRanges(mode);
             LOG.error("the distance ranges for mode " + mode + " says the following on toString() " + ranges.toString());
 
-            if (ranges != null) {
                 LOG.error("the following distance ranges were found for mode: " + mode);
                 ranges.forEach(range -> LOG.error(range.toString()));
-            }
             throw new RuntimeException(e);
         }
     }
