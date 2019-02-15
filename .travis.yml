@@ -11,7 +11,7 @@ install: true
 
 # define the order of the stages:
 stages:
-  - deploy
+  - deploy_only_vsp
   - package
   - test
 
@@ -22,8 +22,8 @@ jobs:
   include:
     - stage: package
       script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
-    - stage: deploy
-      script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean failsafe:integration-test failsafe:verify deploy"
+    - stage: deploy_only_vsp
+      script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean deploy"
       skip_cleanup: true
 
 env:
