@@ -37,17 +37,14 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.dvrp.data.FleetImpl;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
-import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetReader;
+import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -152,21 +149,27 @@ public class ConvertOldNetworkToNew {
 	 * @param string2
 	 */
 	private void convertTaxis(String oldfile, String newfile) {
-		FleetImpl oldFleet = new FleetImpl();
-		FleetImpl newFleet = new FleetImpl();
-		new VehicleReader(oldNet, oldFleet).readFile(oldfile);
-		for (Vehicle v: oldFleet.getVehicles().values()){
-			Link newLink = newNet.getLinks().get(old2newId.get(v.getStartLink().getId()));
+		FleetSpecificationImpl oldFleet = new FleetSpecificationImpl();
+		FleetSpecificationImpl newFleet = new FleetSpecificationImpl();
+		new FleetReader(oldFleet).readFile(oldfile);
+		for (DvrpVehicleSpecification v : oldFleet.getVehicleSpecifications().values()) {
+			Link newLink = newNet.getLinks().get(old2newId.get(v.getStartLinkId()));
 			if (newLink == null) {
 				System.out.println("hoop");
-				
+
 			}
 			else {
-			Vehicle newVehicle = new VehicleImpl(v.getId(), newLink, v.getCapacity(), v.getServiceBeginTime(), v.getServiceEndTime());
-			newFleet.addVehicle(newVehicle);
+				DvrpVehicleSpecification newVehicle = ImmutableDvrpVehicleSpecification.newBuilder()
+						.id(Id.create(v.getId(), DvrpVehicle.class))
+						.startLinkId(newLink.getId())
+						.capacity(v.getCapacity())
+						.serviceBeginTime(v.getServiceBeginTime())
+						.serviceEndTime(v.getServiceEndTime())
+						.build();
+				newFleet.addVehicleSpecification(newVehicle);
 			}
 		}
-		new VehicleWriter(newFleet.getVehicles().values()).write(newfile);
+		new FleetWriter(newFleet.getVehicleSpecifications().values().stream()).write(newfile);
 		
 	}
 	/**

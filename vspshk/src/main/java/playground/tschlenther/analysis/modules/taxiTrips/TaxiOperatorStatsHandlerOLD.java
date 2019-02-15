@@ -1,14 +1,28 @@
 package playground.tschlenther.analysis.modules.taxiTrips;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.jfree.util.Log;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.*;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
+import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
+import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.vehicles.Vehicle;
@@ -121,7 +135,7 @@ import org.matsim.vehicles.Vehicle;
 	    	}
 	        if (isMonitoredVehicle(vehID)){
 	        	if(isOccupied(vehID)){
-	        		log.error("PersonEntersVehicleEvent for an occupied Vehicle. ID: " + vehID  
+					log.error("PersonEntersVehicleEvent for an occupied Vehicle. ID: " + vehID
 	        				/*	+ " why is this happening? several passengers in one taxi ?? Drivers changing?? Driver entering after passenger??"*/);
 	        		this.errors.add("PersonEntersVehicleEvent for an occupied Vehicle. ID: " + vehID);
 	        	}

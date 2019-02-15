@@ -21,7 +21,7 @@ package playground.jbischoff.av.run;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
@@ -50,7 +50,7 @@ public class EventsAnalyser {
 		events.addHandler(twc);
 		for (int i = 0; i<10000;i++){
 			String v = "rt"+i;
-			Id<Vehicle> m = Id.create(v,Vehicle.class);
+			Id<DvrpVehicle> m = Id.create(v, DvrpVehicle.class);
 			tdtc.addAgent(m);
 		}
 		events.addHandler(tdtc);

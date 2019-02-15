@@ -26,12 +26,12 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -75,7 +75,7 @@ public class PopulationBasedTaxiVehicleCreator
 	private Scenario scenario ;
 	Map<String,Geometry> geometry;
 	private Random random = MatsimRandom.getRandom();
-    private List<Vehicle> vehicles = new ArrayList<>();
+		private List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
     private final WeightedRandomSelection<String> wrs;
     CoordinateTransformation ct; 
 
@@ -124,12 +124,18 @@ public class PopulationBasedTaxiVehicleCreator
 			Link link ;
 		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry.get(wrs.select()));
 		link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),ct.transform( MGC.point2Coord(p)));
-		
-        Vehicle v = new VehicleImpl(Id.create("rt"+i, Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
+
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("rt" + i, DvrpVehicle.class), DvrpVehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime((double)Math.round(1))
+					.serviceEndTime((double)Math.round(30 * 3600))
+					.build();
         vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml.gz");
+		new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
 	}
 	
 

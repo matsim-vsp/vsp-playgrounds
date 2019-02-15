@@ -19,15 +19,23 @@
  * *********************************************************************** */
 package playground.jbischoff.taxi.emissions;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
-import org.matsim.contrib.emissions.types.*;
-import org.matsim.core.config.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetReader;
+import org.matsim.contrib.dvrp.fleet.FleetSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
+import org.matsim.contrib.emissions.HbefaVehicleAttributes;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.*;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
 
 /**
@@ -41,22 +49,22 @@ public class TaxiToEmissionVehicleConverter {
         Config config = ConfigUtils.createConfig();
 		Scenario scenario = ScenarioUtils.createScenario(config);
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(dir+"scenarios/2014_10_basic_scenario_v4/berlin_brb.xml");
-		FleetImpl vrpData = new FleetImpl();
-        new VehicleReader(scenario.getNetwork(), vrpData).readFile(dir+"/scenarios/2014_10_basic_scenario_v4/taxis4to4_EV0.0.xml");
+		FleetSpecificationImpl vrpData = new FleetSpecificationImpl();
+		new FleetReader(vrpData).readFile(dir + "/scenarios/2014_10_basic_scenario_v4/taxis4to4_EV0.0.xml");
         new TaxiToEmissionVehicleConverter().convert(vrpData,dir+"/scenarios/2014_10_basic_scenario_v4/+emissionVehicles.xml"); 
 
 }
 
-	public void convert(Fleet vrpData, String emissionVehicleFile) {
+	public void convert(FleetSpecification vrpData, String emissionVehicleFile) {
 		Vehicles outputVehicles = VehicleUtils.createVehiclesContainer();
 
 		HbefaVehicleCategory vehicleCategory;
 		HbefaVehicleAttributes vehicleAttributes;
 		//We are using passenger car fleet average for Germany. May or may not true for taxis, but considering HBEFA has neither hybrids nor natural gas vehicles, 
 		//it might be the way to go 
-		for(org.matsim.contrib.dvrp.data.Vehicle vrpVeh : vrpData.getVehicles().values()){
-			
-			Id<org.matsim.contrib.dvrp.data.Vehicle> personId = vrpVeh.getId();
+		for (DvrpVehicleSpecification vrpVeh : vrpData.getVehicleSpecifications().values()) {
+
+			Id<DvrpVehicle> personId = vrpVeh.getId();
 		
 			vehicleCategory = HbefaVehicleCategory.PASSENGER_CAR;
 			

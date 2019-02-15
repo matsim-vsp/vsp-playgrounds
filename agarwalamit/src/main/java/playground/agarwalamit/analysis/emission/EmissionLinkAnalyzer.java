@@ -18,37 +18,28 @@
  * *********************************************************************** */
 package playground.agarwalamit.analysis.emission;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
+import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.agarwalamit.analysis.emission.filtering.FilteredColdEmissionHandler;
 import playground.agarwalamit.analysis.emission.filtering.FilteredWarmEmissionHandler;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
-import playground.agarwalamit.utils.AreaFilter;
-import playground.agarwalamit.utils.FileUtils;
-import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.agarwalamit.utils.MapUtils;
-import playground.agarwalamit.utils.PersonFilter;
-import playground.vsp.airPollution.CombinedEmissionEventsReader;
+import playground.agarwalamit.utils.*;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author amit
@@ -134,7 +125,7 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	@Override
 	public void preProcessData() {
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
+		EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
 		eventsManager.addHandler(this.warmHandler);
 		eventsManager.addHandler(this.coldHandler);
 		reader.readFile(this.emissionEventsFile);

@@ -19,20 +19,20 @@
 
 package playground.michalm.taxi.data.file;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Stack;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.*;
-import org.matsim.contrib.dvrp.data.file.ReaderUtils;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
 
-import playground.michalm.taxi.data.*;
+import playground.michalm.taxi.data.TaxiRank;
+import playground.michalm.taxi.data.TaxiRankDataImpl;
 
 public class TaxiRankReader extends MatsimXmlParser {
 	private final static String RANK = "rank";
-
-	private final static int DEFAULT_RANK_CAPACITY = Integer.MAX_VALUE;
 
 	private final TaxiRankDataImpl data;
 	private Map<Id<Link>, ? extends Link> links;
@@ -55,9 +55,9 @@ public class TaxiRankReader extends MatsimXmlParser {
 
 	private TaxiRank createRank(Attributes atts) {
 		Id<TaxiRank> id = Id.create(atts.getValue("id"), TaxiRank.class);
-		String name = ReaderUtils.getString(atts, "name", id + "");
+		String name = atts.getValue("name");
 		Link link = links.get(Id.createLinkId(atts.getValue("link")));
-		int capacity = ReaderUtils.getInt(atts, "capacity", DEFAULT_RANK_CAPACITY);
+		int capacity = Integer.parseInt(atts.getValue("capacity"));
 		return new TaxiRank(id, name, link, capacity);
 	}
 }

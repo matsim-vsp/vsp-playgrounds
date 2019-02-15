@@ -21,7 +21,6 @@ package org.matsim.contrib.greedo;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +68,10 @@ public class ReplannerIdentifier {
 	private final double totalUnweightedUtilityChange; // TODO only for logging/debugging
 
 	private final Ages ages;
+	private final List<Set<Id<Person>>> ageStrata;
 
 	private final double lambdaBar;
+	// private final double lambdaTarget;
 	private final double beta;
 	private final double delta;
 
@@ -99,18 +100,30 @@ public class ReplannerIdentifier {
 		this.personId2pseudoSimSlotUsage = personId2pseudoSimSlotUsage;
 		this.population = population;
 		this.ages = ages;
+		this.ageStrata = ages.stratifyByAgeWithMinumStratumSize(greedoConfig.getMinStratumSize());
 
 		this.personId2unweightedUtilityChange = personId2UtilityChange;
-		this.personId2weightedUtilityChange = new LinkedHashMap<>(personId2UtilityChange.size());
-		personId2UtilityChange.entrySet().stream().forEach(entry -> {
-			final Id<Person> personId = entry.getKey();
-			final double weightedUtilityChange = ages.getPersonWeights().get(personId) * entry.getValue();
-			this.personId2weightedUtilityChange.put(personId, weightedUtilityChange);
-		});
-		this.totalWeightedUtilityChange = this.personId2weightedUtilityChange.values().stream()
-				.mapToDouble(utlChange -> utlChange).sum();
 		this.totalUnweightedUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange)
 				.sum();
+
+		// >>>>> REMOVING THE UTILITY WEIGHTING >>>>>
+
+		this.personId2weightedUtilityChange = this.personId2unweightedUtilityChange;
+		this.totalWeightedUtilityChange = this.totalUnweightedUtilityChange;
+
+		// this.personId2weightedUtilityChange = new
+		// LinkedHashMap<>(personId2UtilityChange.size());
+		// personId2UtilityChange.entrySet().stream().forEach(entry -> {
+		// final Id<Person> personId = entry.getKey();
+		// final double weightedUtilityChange = ages.getPersonWeights().get(personId) *
+		// entry.getValue();
+		// this.personId2weightedUtilityChange.put(personId, weightedUtilityChange);
+		// });
+		// this.totalWeightedUtilityChange =
+		// this.personId2weightedUtilityChange.values().stream()
+		// .mapToDouble(utlChange -> utlChange).sum();
+
+		// <<<<< REMOVING THE UTILITY WEIGHTING <<<<<
 
 		final DynamicData<Id<?>> currentUnweightedCounts;
 		{
@@ -135,12 +148,26 @@ public class ReplannerIdentifier {
 				this.upcomingWeightedCounts);
 
 		this.lambdaBar = this.greedoConfig.getReplanningRate(greedoIteration);
+		// this.lambdaTarget = this.greedoConfig.getTargetReplanningRate();
 
-		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 / this.totalWeightedUtilityChange;
+		this.beta = 2.0 * this.lambdaBar
+				* (this.greedoConfig.getUseAgeWeightedBeta() ? this.sumOfWeightedCountDifferences2
+						: this.sumOfUnweightedCountDifferences2)
+				/ this.totalWeightedUtilityChange;
+
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()
 						/ (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-				* this.sumOfWeightedCountDifferences2 / Math.pow(ages.getWeightAtAverageAge(), 2.0);
+				* CountIndicatorUtils.populationAverageUnweightedIndividualChangeSum2(personId2physicalSlotUsage,
+						personId2pseudoSimSlotUsage); // TODO Check efficiency.
+
+		// this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 /
+		// this.totalWeightedUtilityChange;
+		// this.delta = Math
+		// .pow(this.greedoConfig.getRegularizationThreshold()
+		// / (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
+		// * this.sumOfWeightedCountDifferences2 /
+		// Math.pow(ages.getWeightAtAverageAge(), 2.0);
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -222,7 +249,13 @@ public class ReplannerIdentifier {
 		final DynamicData<Id<?>> interactionResiduals = CountIndicatorUtils
 				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambdaBar);
 		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalWeightedUtilityChange;
-		double regularizationResidual = 0;
+		// double regularizationResidual = 0;
+
+		double[] regularizationResiduals = new double[this.ageStrata.size()];
+		// double regularizationResidual = (this.lambdaBar - this.lambdaTarget) * (1.0 -
+		// this.ages.getAverageWeight())
+		// * this.population.getPersons().size();
+
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
 		// Instantiate the re-planning recipe.
@@ -266,12 +299,20 @@ public class ReplannerIdentifier {
 
 		for (Id<Person> personId : allPersonIdsShuffled) {
 
+			// TODO Inefficient.
+			Integer ageStratumIndex = null;
+			for (int i = 0; ageStratumIndex == null; i++) {
+				if (this.ageStrata.get(i).contains(personId)) {
+					ageStratumIndex = i;
+				}
+			}
+
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
 					this.personId2pseudoSimSlotUsage.get(personId), this.lambdaBar,
 					this.ages.getPersonWeights().get(personId), this.beta, this.delta, interactionResiduals,
-					inertiaResidual, regularizationResidual, this.greedoConfig,
+					inertiaResidual, regularizationResiduals[ageStratumIndex], this.greedoConfig,
 					this.personId2weightedUtilityChange.get(personId), this.totalWeightedUtilityChange,
-					sumOfInteractionResiduals2);
+					sumOfInteractionResiduals2, this.ageStrata.get(ageStratumIndex).size());
 
 			final boolean replanner = recipe.isReplanner(personId, scoreUpdater.getScoreChangeIfOne(),
 					scoreUpdater.getScoreChangeIfZero());
@@ -301,7 +342,10 @@ public class ReplannerIdentifier {
 			// interaction residuals are updated by reference
 			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0);
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
-			regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
+
+			// regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
+			regularizationResiduals[ageStratumIndex] = scoreUpdater.getUpdatedRegularizationResidual();
+
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 		}
 

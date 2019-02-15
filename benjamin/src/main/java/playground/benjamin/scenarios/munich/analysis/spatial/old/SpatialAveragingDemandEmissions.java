@@ -34,7 +34,7 @@
 //import org.matsim.contrib.emissions.events.EmissionEventsReader;
 //import org.matsim.contrib.emissions.types.ColdPollutant;
 //import org.matsim.contrib.emissions.types.WarmPollutant;
-//import org.matsim.contrib.emissions.utils.EmissionUtils;
+//import org.matsim.contrib.emissions.EmissionUtils;
 //import org.matsim.core.api.experimental.events.EventsManager;
 //import org.matsim.core.config.Config;
 //import org.matsim.core.config.ConfigUtils;

@@ -20,7 +20,7 @@ import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 
 import javax.inject.Inject;
 
-public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactory {
+public final class AssignmentEmulatingQLaneNetworkFactory implements QNetworkFactory {
 	
 	private QNodeImpl.Builder nodeBuilder;
 	private QLinkImpl.Builder linkBuilder;
@@ -35,7 +35,7 @@ public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactor
 	}
 
 	@Override
-	void initializeFactory(AgentCounter agentCounter1, MobsimTimer mobsimTimer1, NetsimInternalInterface netsimEngine) {
+	public void initializeFactory( AgentCounter agentCounter1, MobsimTimer mobsimTimer1, NetsimInternalInterface netsimEngine ) {
 		QSimConfigGroup qsimConfig = scenario.getConfig().qsim() ;
 		Network network = scenario.getNetwork() ;
 

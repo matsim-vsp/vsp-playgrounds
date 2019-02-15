@@ -23,7 +23,8 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
-import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
+import cadyts.utilities.misc.Units;
+import gunnar.ihop4.sampersutilities.SampersUtilityParameters.Purpose;
 
 /**
  *
@@ -71,7 +72,7 @@ class SampersTour {
 		if ((this.firstLeg != null) && (this.activity == null) && (this.secondLeg == null)) {
 			this.activity = activity;
 			this.activityAttributes = activityAttributes;
-			this.purpose = SampersParameterUtils.Purpose.valueOf(activity.getType());
+			this.purpose = SampersUtilityParameters.Purpose.valueOf(activity.getType());
 		} else {
 			throw new RuntimeException("Cannot add an activity: " + this.buildStatus());
 		}
@@ -99,11 +100,7 @@ class SampersTour {
 		return this.secondLeg;
 	}
 
-	Activity getActivity() {
-		return this.activity;
-	}
-
-	Attributes getActivityAttrs() {
+	Attributes getActivityAttributes() {
 		return this.activityAttributes;
 	}
 
@@ -111,13 +108,26 @@ class SampersTour {
 		return this.purpose;
 	}
 
-	double getTravelTime_min() {
-		System.out.println(this.buildStatus());
+	Double getRealizedStartTime_s() {
+		return this.activity.getStartTime();
+	}
+
+	double getRealizedActivityDuration_s() {
+		return (this.activity.getEndTime() - this.activity.getStartTime());
+	}
+
+	double getRealizedTravelTime_min() {
+		// System.out.println(this.buildStatus());
 		// legs contain travel time in seconds
 		return (this.firstLeg.getTravelTime() + this.secondLeg.getTravelTime()) / 60.0;
 	}
 
-	double getMoney_SEK() {
-		return this.money_SEK;
+	double getRealizedTravelDistance_km() {
+		// TODO Make sure that the distance unit is indeed meters!
+		return Units.KM_PER_M * (this.firstLeg.getRoute().getDistance() + this.secondLeg.getRoute().getDistance());
+	}
+
+	double getEventBasedCost_SEK() {
+		return -this.money_SEK; // a cost, hence positive
 	}
 }

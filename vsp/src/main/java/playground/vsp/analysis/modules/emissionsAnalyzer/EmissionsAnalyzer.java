@@ -27,8 +27,8 @@ package playground.vsp.analysis.modules.emissionsAnalyzer;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
@@ -104,7 +104,7 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 			throw new RuntimeException("function below is no longer there; don't know what to do.  kai, dec'18") ;
 		}
 //		this.person2totalEmissions = EmissionUtils.sumUpEmissionsPerId(person2warmEmissions, person2coldEmissions);
-		this.totalEmissions = EmissionUtils.getTotalEmissions(this.person2totalEmissions);
+		this.totalEmissions = EmissionUtils.getTotalEmissions(this.person2totalEmissions );
 	}
 
 	// TODO: should probably also write out person2totalEmissions...

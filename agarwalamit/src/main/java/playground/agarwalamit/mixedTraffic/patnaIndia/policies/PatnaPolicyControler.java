@@ -19,10 +19,6 @@
 
 package playground.agarwalamit.mixedTraffic.patnaIndia.policies;
 
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -47,13 +43,8 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
 import playground.agarwalamit.analysis.StatsWriter;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
@@ -61,6 +52,16 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.Pa
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.VehicleUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
@@ -125,7 +126,7 @@ public class PatnaPolicyControler {
 		config.controler().setWriteEventsInterval(50);
 
 		config.travelTimeCalculator().setFilterModes(true);
-		config.travelTimeCalculator().setAnalyzedModes(String.join(",", PatnaUtils.ALL_MAIN_MODES));
+		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",", PatnaUtils.ALL_MAIN_MODES));
 
 		if( addBikeTrack) config.network().setInputFile(inputDir + "/networkWithOptimizedConnectors_halfLength.xml.gz"); // must be after getting optimum number of connectors
 		else config.network().setInputFile(inputDir+"/network.xml.gz");

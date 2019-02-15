@@ -19,11 +19,6 @@
 
 package playground.agarwalamit.emissions.flatEmissions;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,12 +30,9 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.events.ColdEmissionEvent;
-import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
-import org.matsim.contrib.emissions.events.WarmEmissionEvent;
-import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.events.*;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
+import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -54,7 +46,10 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 
-import playground.vsp.airPollution.CombinedEmissionEventsReader;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -159,7 +154,7 @@ public class EmissionEventsTest {
 
         // check
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
+        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
         eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(outputEventsFile);
@@ -173,7 +168,7 @@ public class EmissionEventsTest {
         if (! isWritingEmissionsEvents) return; // no combined emission events file
         try {
             EventsManager eventsManagerCombinedEvents = EventsUtils.createEventsManager();
-            CombinedEmissionEventsReader combinedMatsimEventsReader = new CombinedEmissionEventsReader(eventsManagerCombinedEvents);
+            EmissionEventsReader combinedMatsimEventsReader = new EmissionEventsReader(eventsManagerCombinedEvents);
             eventsManagerCombinedEvents.addHandler(new MyEventsCatcher());
             combinedMatsimEventsReader.readFile(outputEventsFile);
         } catch (RuntimeException e) {
@@ -227,7 +222,7 @@ public class EmissionEventsTest {
         String eventsFile = outputDirectory + "/ITERS/it."+lastItr+"/"+lastItr+".events.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
+        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
         eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(eventsFile);

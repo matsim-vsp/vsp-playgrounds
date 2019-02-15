@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -31,8 +31,8 @@ public class TaxiOperatorStatsHandler implements LinkLeaveEventHandler, PersonEn
 PersonLeavesVehicleEventHandler, ActivityStartEventHandler, ActivityEndEventHandler {
 
 	private final static Logger log = Logger.getLogger(TaxiOperatorStatsHandlerOLD.class);
-	
-//	private List<Id<Vehicle>> registeredTaxis;
+
+	//	private List<Id<DvrpVehicle>> registeredTaxis;
     private Map<Id<Vehicle>, Double> taxiTravelDistance;
     private Map<Id<Vehicle>, Double> taxiTravelDistancesWithPassenger;
     private Network network;
@@ -59,7 +59,7 @@ PersonLeavesVehicleEventHandler, ActivityStartEventHandler, ActivityEndEventHand
         this.network = network;
         this.startTimes = new HashMap<Id<Person>, Double>();
         this.endTimes = new HashMap<Id<Person>, Double>();
-//        this.registeredTaxis = new ArrayList<Id<Vehicle>>();
+		//        this.registeredTaxis = new ArrayList<Id<DvrpVehicle>>();
         this.errors = new ArrayList<String>();	}
     
 	

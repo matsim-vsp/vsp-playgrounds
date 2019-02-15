@@ -156,10 +156,10 @@ public class ModalSplitUserTypeControlerListener implements StartupListener, Ite
 		
 		// others--
 		chart1.addMatsimLogo();
-        chart1.saveAsPng(outputDir+"/modalSplit_berlin.png", 800, 600);
+        chart1.saveAsPng(outputDir + "/" + scenario.getConfig().controler().getRunId() + ".modalSplit_berlin.png", 800, 600);
         
         chart2.addMatsimLogo();
-        chart2.saveAsPng(outputDir+"/modalSplit_all.png", 800, 600);
+        chart2.saveAsPng(outputDir + "/" + scenario.getConfig().controler().getRunId() + ".modalSplit_all.png", 800, 600);
         
         
 	}

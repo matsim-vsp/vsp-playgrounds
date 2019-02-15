@@ -52,11 +52,11 @@ public class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final boolean weighted) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
 				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
-					this.add(newKey(visit.spaceObject, timeBin), visit.weight);
+					this.add(newKey(visit.spaceObject, timeBin), weighted ? visit.weight : 1.0);
 				}
 			}
 		}

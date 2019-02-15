@@ -190,9 +190,13 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public double[] getAgeWeights(final int greedoIteration) {
 		final double[] ageWeights = new double[greedoIteration + 1];
-		ageWeights[0] = 1.0;
-		for (int age = 1; age < ageWeights.length; age++) {
-			ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+		if (this.getUseAgeWeights()) {
+			ageWeights[0] = 1.0;
+			for (int age = 1; age < ageWeights.length; age++) {
+				ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+			}
+		} else {
+			Arrays.fill(ageWeights, 1.0);
 		}
 		return ageWeights;
 	}
@@ -271,6 +275,23 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.initialMeanReplanningRate = initialMeanReplanningRate;
 	}
 
+	// -------------------- targetReplanningRate --------------------
+
+	@Deprecated
+	private double targetReplanningRate = 1.0;
+
+	@StringGetter("targetReplanningRate")
+	@Deprecated
+	public double getTargetReplanningRate() {
+		return this.targetReplanningRate;
+	}
+
+	@StringSetter("targetReplanningRate")
+	@Deprecated
+	public void setTargetReplanningRate(double targetReplanningRate) {
+		this.targetReplanningRate = targetReplanningRate;
+	}
+
 	// -------------------- replanningRateIterationExponent --------------------
 
 	private double replanningRateIterationExponent = 0.0;
@@ -313,6 +334,34 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
 	}
 
+	// -------------------- useAgeWeights --------------------
+
+	private boolean useAgeWeights = true;
+
+	@StringGetter("useAgeWeights")
+	public boolean getUseAgeWeights() {
+		return this.useAgeWeights;
+	}
+
+	@StringSetter("useAgeWeights")
+	public void setUseAgeWeights(final boolean useAgeWeights) {
+		this.useAgeWeights = useAgeWeights;
+	}
+
+	// -------------------- useAgeWeightedBeta --------------------
+
+	private boolean useAgeWeightedBeta = true;
+
+	@StringGetter("useAgeWeightedBeta")
+	public boolean getUseAgeWeightedBeta() {
+		return this.useAgeWeightedBeta;
+	}
+
+	@StringSetter("useAgeWeightedBeta")
+	public void setUseAgeWeightedBeta(final boolean useAgeWeightedBeta) {
+		this.useAgeWeightedBeta = useAgeWeightedBeta;
+	}
+
 	// -------------------- adjustStrategyWeights --------------------
 
 	private boolean adjustStrategyWeights = true;
@@ -325,6 +374,24 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("adjustStrategyWeights")
 	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
 		this.adjustStrategyWeights = adjustStrategyWeights;
+	}
+
+	// -------------------- relativeAgeStratumSize --------------------
+
+	private double relativeAgeStratumSize = 0.1;
+
+	@StringGetter("relativeAgeStratumSize")
+	public double getRelativeAgeStratumSize() {
+		return this.relativeAgeStratumSize;
+	}
+
+	@StringSetter("relativeAgeStratumSize")
+	public void setRelativeAgeStratumSize(double relativeAgeStratumSize) {
+		this.relativeAgeStratumSize = relativeAgeStratumSize;
+	}
+
+	public int getMinStratumSize() {
+		return (int) (this.relativeAgeStratumSize * this.populationSize);
 	}
 
 	// --------------- cheapStrategies, expensiveStrategies ---------------

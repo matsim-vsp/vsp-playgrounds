@@ -26,7 +26,7 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 import org.matsim.facilities.Facility;
 
 public class TaxiRank implements Facility, Identifiable<TaxiRank> {
@@ -35,7 +35,7 @@ public class TaxiRank implements Facility, Identifiable<TaxiRank> {
 	private final Link link;
 	private final int capacity;
 
-	private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
+	private final Map<Id<DvrpVehicle>, DvrpVehicle> taxis = new HashMap<>();
 
 	public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity) {
 		this.id = id;
@@ -62,7 +62,7 @@ public class TaxiRank implements Facility, Identifiable<TaxiRank> {
 		return link;
 	}
 
-	public boolean addTaxi(Vehicle veh) {
+	public boolean addTaxi(DvrpVehicle veh) {
 		if (taxis.size() == this.capacity) {
 			throw new IllegalStateException();
 		}
@@ -71,7 +71,7 @@ public class TaxiRank implements Facility, Identifiable<TaxiRank> {
 		return true;
 	}
 
-	public void removeTaxi(Vehicle veh) {
+	public void removeTaxi(DvrpVehicle veh) {
 		taxis.remove(veh.getId());
 	}
 

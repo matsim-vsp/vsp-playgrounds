@@ -24,9 +24,10 @@ import java.util.List;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
@@ -37,15 +38,21 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 public class CottbusTaxiCreator {
 
 	public static void main(String[] args) {
-		List<Vehicle> taxis = new ArrayList<>();
+		List<DvrpVehicleSpecification> taxis = new ArrayList<>();
 		Network network = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(network).readFile("C:/Users/Joschka/Desktop/av4cottbus/cb02/output_network.xml.gz");
 		for (int i = 0; i<1000 ;i++){
 
-			Vehicle v = new VehicleImpl(Id.create("taxi_"+i, Vehicle.class),network.getLinks().get(Id.createLinkId(10617)) , 4, 0.0, 25*3600);
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("taxi_" + i, DvrpVehicle.class), DvrpVehicle.class))
+					.startLinkId(network.getLinks().get(Id.createLinkId(10617)).getId())
+					.capacity(4)
+					.serviceBeginTime(0.0)
+					.serviceEndTime((double)(25 * 3600))
+					.build();
 			taxis.add(v);
 		}
-		new VehicleWriter(taxis).write("C:/Users/Joschka/Desktop/av4cottbus/taxis.xml");
+		new FleetWriter(taxis.stream()).write("C:/Users/Joschka/Desktop/av4cottbus/taxis.xml");
 		
 	}
 

@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -44,7 +45,6 @@ import org.matsim.vehicles.Vehicle;
 import playground.agarwalamit.analysis.emission.filtering.FilteredEmissionPersonEventHandler;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.MapUtils;
-import playground.vsp.airPollution.CombinedEmissionEventsReader;
 
 /**
  *
@@ -101,7 +101,7 @@ public class BerlinEmissionAnalyzer {
             }
         });
 
-        CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
+        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
         reader.readFile(eventsFileWithEmissionEvents);
 
         Map<String, Map<String, Double>> vehicleType2Emissions = new HashMap<>(); // required vehicle types only

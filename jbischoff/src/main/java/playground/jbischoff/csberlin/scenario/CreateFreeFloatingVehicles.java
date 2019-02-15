@@ -30,9 +30,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -43,8 +44,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import playground.jbischoff.av.preparation.ScenarioPreparator;
-import playground.jbischoff.av.preparation.TaxiVehicleCreator;
 import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
 import playground.jbischoff.utils.JbUtils;
 
@@ -64,7 +63,7 @@ public class CreateFreeFloatingVehicles {
 	private Scenario scenario ;
 	private Geometry geometry;
 	private Random random = MatsimRandom.getRandom();
-    private List<Vehicle> vehicles = new ArrayList<>();
+	private List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 
 	
 	public static void main(String[] args) {
@@ -83,11 +82,17 @@ public class CreateFreeFloatingVehicles {
 		for (int i = 0 ; i< amount; i++){
 		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
 		Link link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),MGC.point2Coord(p));
-        Vehicle v = new VehicleImpl(Id.create("ff"+i, Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("ff" + i, DvrpVehicle.class), DvrpVehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime((double)Math.round(1))
+					.serviceEndTime((double)Math.round(30 * 3600))
+					.build();
         vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml");
+		new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml");
 	}
 
 }

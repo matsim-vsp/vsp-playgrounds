@@ -21,14 +21,20 @@ package gunnar.ihop4.sampersutilities;
 
 import static java.lang.Double.POSITIVE_INFINITY;
 
-import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
+import gunnar.ihop2.regent.demandreading.PopulationCreator;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-class SampersUtilityParameters {
+public class SampersUtilityParameters {
+
+	// -------------------- CONSTANTS --------------------
+
+	public enum Purpose {
+		work, recreation, regularShopping, rareShopping, gymnasium, adultEducation, visit, businessFromHome, giveARide, service, other
+	};
 
 	// ----- INNER CLASS DEFINING PARAMETERS THROUGH A CHAIN OF COMMAND -----
 
@@ -94,9 +100,20 @@ class SampersUtilityParameters {
 	private final ParameterPerStratum scheduleDelayCostEarly_1_min = new ParameterPerStratum();
 	private final ParameterPerStratum scheduleDelayCostLate_1_min = new ParameterPerStratum();
 
+	private final ParameterPerStratum scheduleDelayTooShort_1_min = new ParameterPerStratum();
+	private final ParameterPerStratum scheduleDelayTooLong_1_min = new ParameterPerStratum();
+
 	// -------------------- CONSTRUCTION --------------------
 
-	SampersUtilityParameters() {
+	public SampersUtilityParameters() {
+
+		if (!Purpose.work.toString().equals(PopulationCreator.WORK)) {
+			throw new RuntimeException("Purpose.work has different String representation from PopulationCreator.WORK");
+		}
+		if (!Purpose.other.toString().equals(PopulationCreator.OTHER)) {
+			throw new RuntimeException(
+					"Purpose.other has different String representation from PopulationCreator.OTHER");
+		}
 
 		this.linTimeCoeff_1_min.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -0.039));
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(Purpose.work, 0, 200 * 1000, -0.019));
@@ -173,82 +190,58 @@ class SampersUtilityParameters {
 		this.lnCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.other, 200 * 1000, POSITIVE_INFINITY, +0.3382));
 
-		// TODO Below invented schedule delay costs; these should probably be derived
-		// from activity-specific travel costs.
+		// Below invented schedule delay costs; these should probably be derived from
+		// activity-specific travel costs. TODO Revisit!
 
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.rareShopping, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.gymnasium, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.giveARide, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.service, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0.0, POSITIVE_INFINITY, -1.0));
-
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.rareShopping, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.gymnasium, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.giveARide, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.service, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0.0, POSITIVE_INFINITY, -1.0));
+		for (Purpose purpose : Purpose.values()) {
+			this.scheduleDelayCostEarly_1_min
+					.addNext(new ConcreteParameterPerStratum(purpose, 0.0, POSITIVE_INFINITY, -1.0));
+			this.scheduleDelayCostLate_1_min
+					.addNext(new ConcreteParameterPerStratum(purpose, 0.0, POSITIVE_INFINITY, -1.0));
+			this.scheduleDelayTooShort_1_min
+					.addNext(new ConcreteParameterPerStratum(purpose, 0.0, POSITIVE_INFINITY, -1.0));
+			this.scheduleDelayTooLong_1_min
+					.addNext(new ConcreteParameterPerStratum(purpose, 0.0, POSITIVE_INFINITY, -1.0));
+		}
 	}
 
 	// -------------------- PARAMETER GETTERS --------------------
 
-	double getLinTimeCoeff_1_min(final Purpose purpose, final double income_money) {
+	public double getLinTimeCoeff_1_min(final Purpose purpose, final double income_money) {
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
 
-	double getLinMoneyCoeff_1_SEK(final Purpose purpose, final double income_money) {
+	public double getLinMoneyCoeff_1_SEK(final Purpose purpose, final double income_money) {
 		return this.linCostCoeff_1_SEK.getOrZero(purpose, income_money);
 	}
 
-	double getLnMoneyCoeff_lnArgInSEK(final Purpose purpose, final double income_money) {
+	public double getLnMoneyCoeff_lnArgInSEK(final Purpose purpose, final double income_money) {
 		return this.lnCostCoeff_lnArgInSEK.getOrZero(purpose, income_money);
 	}
 
-	double getScheduleDelayCostEarly_1_min(final Purpose purpose, final Double income_money) {
-		// A hopefully not completely nonsensical guess.
+	public double getScheduleDelayCostEarly_1_min(final Purpose purpose, final Double income_money) {
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
 
-	double getScheduleDelayCostLate_1_min(final Purpose purpose, final Double income_money) {
-		// A hopefully not completely nonsensical guess.
+	public double getScheduleDelayCostLate_1_min(final Purpose purpose, final Double income_money) {
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
 
-	double getStuckScore(final Purpose purpose, final Double income_money) {
-		// A hopefully not completely nonsensical guess.
+	public double getScheduleDelayCostTooShort_1_min(final Purpose purpose, final Double income_money) {
+		return this.scheduleDelayTooShort_1_min.getOrZero(purpose, income_money);
+	}
+
+	public double getScheduleDelayCostTooLong_1_min(final Purpose purpose, final Double income_money) {
+		return this.scheduleDelayTooLong_1_min.getOrZero(purpose, income_money);
+	}
+
+	public double getStuckScore(final Purpose purpose, final Double income_money) {
+		// TODO Revisit!
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money) * 24 * 60;
-	}	
+	}
+
+	public double getMonetaryDistanceCost_SEK_km() {
+		// https://www.skatteverket.se/foretagochorganisationer/arbetsgivare/lonochersattning/traktamente.4.361dc8c15312eff6fd1703e.html?q=milers%C3%A4ttning+bil
+		return 1.85;
+	}
 }

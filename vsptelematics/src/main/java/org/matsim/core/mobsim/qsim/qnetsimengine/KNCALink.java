@@ -84,7 +84,7 @@ public class KNCALink {
 		}
 	}
 
-	static class MyQNetworkFactory extends QNetworkFactory {
+	static class MyQNetworkFactory implements QNetworkFactory {
 		private final class QLaneIExtension implements QLaneI {
 			private final class VisDataImplementation implements VisData {
 				@Override public Collection<AgentSnapshotInfo> addAgentSnapshotInfo( Collection<AgentSnapshotInfo> positions, double now) {
@@ -433,7 +433,8 @@ public class KNCALink {
 		private NetsimInternalInterface netsimEngine;
 		private AgentSnapshotInfoFactory snapshotInfoFactory;
 
-		@Override void initializeFactory(AgentCounter agentCounter, MobsimTimer mobsimTimer, NetsimInternalInterface netsimEngine1) {
+		@Override
+		public void initializeFactory( AgentCounter agentCounter, MobsimTimer mobsimTimer, NetsimInternalInterface netsimEngine1 ) {
 			double effectiveCellSize = ((Network)network).getEffectiveCellSize() ;
 
 			SnapshotLinkWidthCalculator linkWidthCalculator = new SnapshotLinkWidthCalculator();
@@ -449,12 +450,14 @@ public class KNCALink {
 
 			this.netsimEngine = netsimEngine1 ;
 		}
-		@Override QNodeI createNetsimNode(Node node) {
+		@Override
+		public QNodeI createNetsimNode( Node node ) {
 			QNodeImpl.Builder builder = new QNodeImpl.Builder( netsimEngine, context ) ;
 			return builder.build( node ) ;
 
 		}
-		@Override QLinkI createNetsimLink(Link link, QNodeI queueNode) {
+		@Override
+		public QLinkI createNetsimLink( Link link, QNodeI queueNode ) {
 
 			QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
 			linkBuilder.setLaneFactory( new LaneFactory(){

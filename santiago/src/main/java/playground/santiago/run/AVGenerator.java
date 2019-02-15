@@ -26,10 +26,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.DvrpVehicle;
+import org.matsim.contrib.dvrp.data.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.data.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.data.VehicleGenerator;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.data.file.FleetWriter;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.config.ConfigUtils;
@@ -63,14 +64,21 @@ public class AVGenerator {
 		}
 
 		@Override
-		public VehicleImpl createVehicle(double t0, double t1) {
-			Id<Vehicle> vehId = Id.create("taxi" + currentVehicleId++, Vehicle.class);
+		public DvrpVehicleSpecification createVehicleSpecification(double t0, double t1) {
+			Id<DvrpVehicle> vehId = Id.create("taxi" + currentVehicleId++, DvrpVehicle.class);
 
-			Coord coord = RandomUtils.getGlobalGenerator().nextDouble() < DENSITY_RELATION
-					? randomCoordInBiggerRectangle() : randomCoordInSmallerRectangle();
+			Coord coord = RandomUtils.getGlobalGenerator().nextDouble() < DENSITY_RELATION ?
+					randomCoordInBiggerRectangle() :
+					randomCoordInSmallerRectangle();
 
 			Link link = NetworkUtils.getNearestLinkExactly(network, coord);
-			return new VehicleImpl(vehId, link, PAX_PER_CAR, Math.round(t0), Math.round(t1));
+			return ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(vehId)
+					.startLinkId(link.getId())
+					.capacity(PAX_PER_CAR)
+					.serviceBeginTime(Math.round(t0))
+					.serviceEndTime(Math.round(t1))
+					.build();
 		}
 
 		private Coord randomCoordInSmallerRectangle() {
@@ -82,11 +90,13 @@ public class AVGenerator {
 
 		private Coord randomCoordInBiggerRectangle() {
 			UniformRandom uniform = RandomUtils.getGlobalUniform();
-			for (;;) {
+			for (; ; ) {
 				double x = uniform.nextDouble(MIN_COORD_BIGGER_RECTANGLE.getX(), MAX_COORD_BIGGER_RECTANGLE.getX());
 				double y = uniform.nextDouble(MIN_COORD_BIGGER_RECTANGLE.getY(), MAX_COORD_BIGGER_RECTANGLE.getY());
-				if (x < MIN_COORD_SMALLER_RECTANGLE.getX() || x > MAX_COORD_SMALLER_RECTANGLE.getX()
-						|| y < MIN_COORD_SMALLER_RECTANGLE.getY() || y > MAX_COORD_SMALLER_RECTANGLE.getY()) {
+				if (x < MIN_COORD_SMALLER_RECTANGLE.getX()
+						|| x > MAX_COORD_SMALLER_RECTANGLE.getX()
+						|| y < MIN_COORD_SMALLER_RECTANGLE.getY()
+						|| y > MAX_COORD_SMALLER_RECTANGLE.getY()) {
 					return new Coord(x, y);
 				}
 			}
@@ -109,7 +119,7 @@ public class AVGenerator {
 			AVCreator avc = new AVCreator(scenario);
 			VehicleGenerator vg = new VehicleGenerator(workTime, workTime, avc);
 			vg.generateVehicles(new double[] { i, i }, startTime, 30 * 3600);
-			new VehicleWriter(vg.getVehicles()).write(taxisFilePrefix + i + ".xml");
+			new FleetWriter(vg.getVehicleSpecifications().stream()).write(taxisFilePrefix + i + ".xml");
 		}
 	}
 }

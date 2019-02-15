@@ -19,7 +19,7 @@
 
 package playground.michalm.audiAV.electric;
 
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
@@ -59,7 +59,7 @@ public class RunEAVBenchmark {
 		return controler;
 	}
 
-	private static boolean isServingCustomer(Vehicle vehicle) {
+	private static boolean isServingCustomer(DvrpVehicle vehicle) {
 		Schedule schedule = vehicle.getSchedule();
 		if (schedule.getStatus() == ScheduleStatus.STARTED) {
 			switch (((TaxiTask)schedule.getCurrentTask()).getTaxiTaskType()) {

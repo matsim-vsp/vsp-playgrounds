@@ -39,8 +39,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-
 import playground.jbischoff.pt.strategy.ChangeSingleLegModeWithPredefinedFromModesModule;
+
+import java.util.Collections;
 
 /**
  * @author jbischoff

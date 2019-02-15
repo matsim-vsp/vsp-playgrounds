@@ -42,7 +42,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 
 /**

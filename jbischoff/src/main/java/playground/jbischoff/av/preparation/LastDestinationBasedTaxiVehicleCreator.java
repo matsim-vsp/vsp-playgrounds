@@ -33,9 +33,10 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -96,13 +97,19 @@ public class LastDestinationBasedTaxiVehicleCreator {
 		
 	}
 	 void create(int amount) {
-	    List<Vehicle> vehicles = new ArrayList<>();
+		 List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 		for (int i = 0 ; i< amount; i++){
 		Link link = scenario.getNetwork().getLinks().get(wrs.select());
-        Vehicle v = new VehicleImpl(Id.create("rt"+i, Vehicle.class), link, 5, Math.round(1), Math.round(25*3600));
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("rt" + i, DvrpVehicle.class), DvrpVehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime((double)Math.round(1))
+					.serviceEndTime((double)Math.round(25 * 3600))
+					.build();
         vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml.gz");
+		 new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
 	}
 }

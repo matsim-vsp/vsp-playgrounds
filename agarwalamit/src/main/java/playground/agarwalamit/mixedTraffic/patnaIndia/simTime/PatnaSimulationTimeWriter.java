@@ -18,9 +18,6 @@
  * *********************************************************************** */
 package playground.agarwalamit.mixedTraffic.patnaIndia.simTime;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.PopulationWriter;
@@ -43,6 +40,10 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.UrbanDemandGen
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author amit
@@ -288,7 +289,7 @@ public class PatnaSimulationTimeWriter {
 			config.plansCalcRoute().addModeRoutingParams(mrp);
 		}
 
-		config.travelTimeCalculator().setAnalyzedModes(String.join(",",PatnaUtils.URBAN_MAIN_MODES));
+		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",", PatnaUtils.URBAN_MAIN_MODES));
 		config.travelTimeCalculator().setFilterModes(true);
 
 		return config;

@@ -20,10 +20,10 @@
 package playground.michalm.audiAV;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.FleetImpl;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.file.VehicleReader;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetReader;
+import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -40,15 +40,15 @@ public class AudiAVSmallFleetCreator {
 
 		Network network = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(network).readFile(netFile);
-		FleetImpl fleet = new FleetImpl();
-		new VehicleReader(network, fleet).readFile(vehFile);
+		FleetSpecificationImpl fleet = new FleetSpecificationImpl();
+		new FleetReader(fleet).readFile(vehFile);
 
 		UniformRandom uniform = RandomUtils.getGlobalUniform();
 		for (int i = 5; i <= 20; i++) {
 			double fraction = (double)i / 10_000;
-			ImmutableList<Vehicle> fractVehs = fleet.getVehicles().values().stream()
+			ImmutableList<DvrpVehicleSpecification> fractVehs = fleet.getVehicleSpecifications().values().stream()
 					.filter(v -> uniform.trueOrFalse(fraction)).collect(ImmutableList.toImmutableList());
-			new VehicleWriter(fractVehs).write(fractVehFilePrefix + fractVehs.size() + ".xml.gz");
+			new FleetWriter(fractVehs.stream()).write(fractVehFilePrefix + fractVehs.size() + ".xml.gz");
 		}
 	}
 }

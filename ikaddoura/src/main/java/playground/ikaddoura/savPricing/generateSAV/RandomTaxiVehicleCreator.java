@@ -34,9 +34,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -52,10 +53,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-
 /**
- * @author  ikaddoura
- *
+ * @author ikaddoura
  */
 public class RandomTaxiVehicleCreator {
 	private static final Logger log = Logger.getLogger(RandomTaxiVehicleCreator.class);
@@ -64,7 +63,7 @@ public class RandomTaxiVehicleCreator {
 	private final CoordinateTransformation ct;
 	private final Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
 
-	private final Scenario scenario ;
+	private final Scenario scenario;
 	private final Random random = MatsimRandom.getRandom();
 	private final String consideredMode = "car";
 
@@ -72,49 +71,52 @@ public class RandomTaxiVehicleCreator {
 
 		String networkFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/berlin-v5.0.network.xml.gz";
 		String shapeFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
-		
+
 		String vehiclesFilePrefix = "/Users/ihab/Desktop/taxi-files/taxis-berlin_";
-	    CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.DHDN_GK4, TransformationFactory.DHDN_GK4); 
-		
+		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.DHDN_GK4,
+				TransformationFactory.DHDN_GK4);
+
 		RandomTaxiVehicleCreator tvc = new RandomTaxiVehicleCreator(networkFile, shapeFile, vehiclesFilePrefix, ct);
-		
-		for (int i = 0; i<=5000 ; i=i+50 ){
+
+		for (int i = 0; i <= 5000; i = i + 50) {
 			System.out.println(i);
 			tvc.run(i);
 		}
-}
+	}
 
-	public RandomTaxiVehicleCreator(String networkfile, String shapeFile, String vehiclesFilePrefix, CoordinateTransformation ct) {
+	public RandomTaxiVehicleCreator(String networkfile, String shapeFile, String vehiclesFilePrefix,
+			CoordinateTransformation ct) {
 		this.vehiclesFilePrefix = vehiclesFilePrefix;
 		this.ct = ct;
-		
+
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkfile);
-		
+
 		Set<String> modes = new HashSet<>();
 		modes.add(consideredMode);
 		new MultimodalNetworkCleaner(scenario.getNetwork()).run(modes);
-		
+
 		// change nodes in a way that pt links are not taken into consideration
-		
+
 		for (Link link : scenario.getNetwork().getLinks().values()) {
 			if (link.getId().toString().startsWith("pt_")) {
-				link.getFromNode().setCoord(new Coord(4449458.462246102,4708888.241959611));
-				link.getToNode().setCoord(new Coord(4449458.462246102,4708888.241959611));
+				link.getFromNode().setCoord(new Coord(4449458.462246102, 4708888.241959611));
+				link.getToNode().setCoord(new Coord(4449458.462246102, 4708888.241959611));
 			}
-		}		
-		loadShapeFile(shapeFile);		
+		}
+		loadShapeFile(shapeFile);
 	}
-	
-	private void run(int amount) {
-		List<Vehicle> vehicles = new ArrayList<>();
 
-		for (int i = 0 ; i< amount; i++) {
+	private void run(int amount) {
+		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
+
+		for (int i = 0; i < amount; i++) {
 			Link link = null;
-			
+
 			while (link == null) {
 				Point p = getRandomPointInFeature(random, zoneId2geometry.get(random.nextInt(zoneId2geometry.size())));
-				link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()), ct.transform( MGC.point2Coord(p)));
+				link = NetworkUtils.getNearestLinkExactly(((Network)scenario.getNetwork()),
+						ct.transform(MGC.point2Coord(p)));
 				if (isCoordInArea(link.getFromNode().getCoord()) && isCoordInArea(link.getToNode().getCoord())) {
 					if (link.getAllowedModes().contains(consideredMode)) {
 						// ok
@@ -126,47 +128,52 @@ public class RandomTaxiVehicleCreator {
 					link = null;
 				}
 			}
-			
-			if (i%5000 == 0) log.info("#"+i);
-		
-        Vehicle v = new VehicleImpl(Id.create("rt"+i, Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
-        vehicles.add(v);
+
+			if (i % 5000 == 0)
+				log.info("#" + i);
+
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create("rt" + i, DvrpVehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime(Math.round(1))
+					.serviceEndTime(Math.round(30 * 3600))
+					.build();
+			vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml.gz");
+		new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
 	}
-	
-	private static Point getRandomPointInFeature(Random rnd, Geometry g)
-    {
-        Point p = null;
-        double x, y;
-        do {
-            x = g.getEnvelopeInternal().getMinX() + rnd.nextDouble()
-                    * (g.getEnvelopeInternal().getMaxX() - g.getEnvelopeInternal().getMinX());
-            y = g.getEnvelopeInternal().getMinY() + rnd.nextDouble()
-                    * (g.getEnvelopeInternal().getMaxY() - g.getEnvelopeInternal().getMinY());
-            p = MGC.xy2Point(x, y);
-        }
-        while (!g.contains(p));
-        return p;
-    }
-	
-	private void loadShapeFile(String shapeFile) {		
+
+	private static Point getRandomPointInFeature(Random rnd, Geometry g) {
+		Point p = null;
+		double x, y;
+		do {
+			x = g.getEnvelopeInternal().getMinX() + rnd.nextDouble() * (g.getEnvelopeInternal().getMaxX()
+					- g.getEnvelopeInternal().getMinX());
+			y = g.getEnvelopeInternal().getMinY() + rnd.nextDouble() * (g.getEnvelopeInternal().getMaxY()
+					- g.getEnvelopeInternal().getMinY());
+			p = MGC.xy2Point(x, y);
+		} while (!g.contains(p));
+		return p;
+	}
+
+	private void loadShapeFile(String shapeFile) {
 		Collection<SimpleFeature> features;
 		features = ShapeFileReader.getAllFeatures(shapeFile);
 		int featureCounter = 0;
 		for (SimpleFeature feature : features) {
-			zoneId2geometry.put(featureCounter, (Geometry) feature.getDefaultGeometry());
+			zoneId2geometry.put(featureCounter, (Geometry)feature.getDefaultGeometry());
 			featureCounter++;
 		}
 		log.info("features: " + featureCounter);
 	}
-	
+
 	private boolean isCoordInArea(Coord coord) {
 		boolean coordInArea = false;
 		for (Geometry geometry : zoneId2geometry.values()) {
-			Point p = MGC.coord2Point(coord); 
-			
+			Point p = MGC.coord2Point(coord);
+
 			if (p.within(geometry)) {
 				coordInArea = true;
 			}

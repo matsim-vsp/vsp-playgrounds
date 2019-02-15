@@ -27,9 +27,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -43,48 +44,50 @@ import com.vividsolutions.jts.geom.Point;
 import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
 
 /**
- * @author  jbischoff
- *
+ * @author jbischoff
  */
-public class TaxiVehicleCreator
-	{
-
+public class TaxiVehicleCreator {
 
 	private String networkFile = "C:/Users/Joschka/Documents/shared-svn/projects/audi_av/scenario/networkc.xml.gz";
 	private String shapeFile = "C:/Users/Joschka/Documents/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private String vehiclesFilePrefix = "C:/Users/Joschka/Documents/shared-svn/projects/audi_av/scenario/taxi_vehicles_";
-	
-	private Scenario scenario ;
+
+	private Scenario scenario;
 	private Geometry geometry;
 	private Random random = MatsimRandom.getRandom();
-    private List<Vehicle> vehicles = new ArrayList<>();
+	private List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 
-	
 	public static void main(String[] args) {
 		TaxiVehicleCreator tvc = new TaxiVehicleCreator();
-		for (int i = 10000; i<25100 ; i=i+1000 ){
+		for (int i = 10000; i < 25100; i = i + 1000) {
 			System.out.println(i);
 			tvc.run(i);
 		}
-}
+	}
 
 	public TaxiVehicleCreator() {
-				
+
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
-		this.geometry = ScenarioPreparator.readShapeFileAndExtractGeometry(shapeFile);	
+		this.geometry = ScenarioPreparator.readShapeFileAndExtractGeometry(shapeFile);
 	}
+
 	private void run(int amount) {
-	    
-		for (int i = 0 ; i< amount; i++){
-		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
-		Link link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),MGC.point2Coord(p));
-        Vehicle v = new VehicleImpl(Id.create("rt"+i, Vehicle.class), link, 5, Math.round(1), Math.round(48*3600));
-        vehicles.add(v);
+
+		for (int i = 0; i < amount; i++) {
+			Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry);
+			Link link = NetworkUtils.getNearestLinkExactly(((Network)scenario.getNetwork()), MGC.point2Coord(p));
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(Id.create("rt" + i, DvrpVehicle.class), DvrpVehicle.class))
+					.startLinkId(link.getId())
+					.capacity(5)
+					.serviceBeginTime((double)Math.round(1))
+					.serviceEndTime((double)Math.round(48 * 3600))
+					.build();
+			vehicles.add(v);
 
 		}
-		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml.gz");
+		new FleetWriter(vehicles.stream()).write(vehiclesFilePrefix + amount + ".xml.gz");
 	}
 
-	
 }

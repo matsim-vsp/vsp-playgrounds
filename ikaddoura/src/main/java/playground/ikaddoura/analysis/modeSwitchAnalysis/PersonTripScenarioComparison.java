@@ -107,6 +107,17 @@ public class PersonTripScenarioComparison {
     		log.info("Getting activity coordinates from plans... Done.");
 	}
 
+	public PersonTripScenarioComparison(String homeActivity,
+    		String analysisOutputDirectory,
+    		Scenario scenario1,
+    		BasicPersonTripAnalysisHandler basicHandler1,
+    		Scenario scenarioToCompareWith,
+    		BasicPersonTripAnalysisHandler basicHandlerToCompareWith,
+    		List<String> modes) {
+		
+		this(null, homeActivity, analysisOutputDirectory, scenario1, basicHandler1, scenarioToCompareWith, basicHandlerToCompareWith, modes);
+	}
+
 	public void analyzeByMode() throws IOException {
     	
 		Map<String, Map<String, Coord>> switchAndCoordType2Coord = new HashMap<>();

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -39,7 +40,6 @@ import com.google.inject.Inject;
 
 import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.agarwalamit.utils.MapUtils;
-import playground.vsp.airPollution.CombinedEmissionEventsReader;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.IntervalHandler;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
@@ -96,7 +96,7 @@ public class AirPollutionExposureAnalysisControlerListener implements  ShutdownL
         {
             EventsManager events = EventsUtils.createEventsManager();
             events.addHandler(this.emissionCostHandler);
-            CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(events);
+            EmissionEventsReader reader = new EmissionEventsReader(events);
             reader.readFile(eventsFile);
         }
 

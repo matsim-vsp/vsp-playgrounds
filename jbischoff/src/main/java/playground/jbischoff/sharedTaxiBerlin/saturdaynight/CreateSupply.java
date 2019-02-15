@@ -23,15 +23,15 @@
 package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.data.VehicleImpl;
-import org.matsim.contrib.dvrp.data.file.VehicleWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
@@ -67,18 +67,24 @@ public class CreateSupply {
 		int capacity = 3;
 		double serviceBeginTime = 17*3600;
 		double serviceEndTime = 31*3600;
-		
-		List<Vehicle> vehicles = new ArrayList<>();
+
+		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 		int z = 0;
 		for (Id<Link> l : startLinks){
 		for (int i = 0; i<noOfVehiclesPerRank;i++){
-			Id<Vehicle> id = Id.create("taxi_"+z,Vehicle.class);
-			Vehicle v = new VehicleImpl(id, network.getLinks().get(l), capacity, serviceBeginTime, serviceEndTime);
+			Id<DvrpVehicle> id = Id.create("taxi_" + z, DvrpVehicle.class);
+			DvrpVehicleSpecification v = ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create(id, DvrpVehicle.class))
+					.startLinkId(network.getLinks().get(l).getId())
+					.capacity(capacity)
+					.serviceBeginTime(serviceBeginTime)
+					.serviceEndTime(serviceEndTime)
+					.build();
 			vehicles.add(v);
 			z++;
 		}
 		}
-		new VehicleWriter(vehicles).write(folder+"/vehicles_"+(z++)+".xml");
+		new FleetWriter(vehicles.stream()).write(folder + "/vehicles_" + (z++) + ".xml");
 			
 		
 		
