@@ -2,8 +2,7 @@ package playground.vsp.airPollution.flatEmissions;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static playground.vsp.airPollution.flatEmissions.EmissionCostFactors.*;
+import static playground.vsp.airPollution.flatEmissions.EmissionCostFactors.NOX;
 
 public class EmissionCostFactorsTest{
 
@@ -14,11 +13,14 @@ public class EmissionCostFactorsTest{
 
 		System.out.println( "noxFactor=" + EmissionCostFactors.getCostFactor( "NOX" ) ) ;
 
-		System.out.println( "factor that does not exist=" + EmissionCostFactors.getCostFactor( "dummy" )) ;
-
 //		for( EmissionCostFactors factor : values() ){
 //			System.out.println( "name=" + factor.name() + "; factor=" + factor.getCostFactor() ) ;
 //		}
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void test_unknownParameter() {
+		System.out.println("factor that does not exist=" + EmissionCostFactors.getCostFactor("dummy"));
 	}
 
 }

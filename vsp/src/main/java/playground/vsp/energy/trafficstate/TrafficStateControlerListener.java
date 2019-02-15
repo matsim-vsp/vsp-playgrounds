@@ -72,8 +72,8 @@ public class TrafficStateControlerListener implements StartupListener, Iteration
 	private TrafficState calculateTrafficState() {
 
 		throw new RuntimeException("Below code doesn't match changes in TravelTimeCalculator. Someone should fix this.");
-/*
-		TrafficState ts = new TrafficState();
+
+		/*TrafficState ts = new TrafficState();
 		int numSlots = this.ttcalc.getNumSlots();
 		int binSize = this.ttcalc.getTimeSlice();
 

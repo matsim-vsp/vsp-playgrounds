@@ -19,6 +19,7 @@
  * *********************************************************************** */
 package playground.vsp.energy.trafficstate;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.core.controler.Controler;
@@ -36,8 +37,9 @@ public class TrafficStateTest {
 
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
-	
+
 	@Test
+	@Ignore
 	public final void testTrafficState() {
 //		File f = new File("file");
 //		System.out.println(f.getAbsolutePath());
@@ -52,9 +54,7 @@ public class TrafficStateTest {
         controler.getConfig().controler().setWriteEventsInterval(0);
 		controler.getConfig().controler().setWritePlansInterval(0);
 		controler.getConfig().controler().setOverwriteFileSetting(
-				true ?
-						OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles :
-						OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+				OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		controler.addControlerListener(new TrafficStateControlerListener());
 		controler.run();
 		
