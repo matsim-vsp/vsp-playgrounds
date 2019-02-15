@@ -23,7 +23,7 @@ jobs:
     - stage: package
       script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
     - stage: deploy_only_vsp
-      script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean deploy"
+      script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean ailsafe:integration-test failsafe:verify -Dmaven.test.redirectTestOutputToFile deploy"
       skip_cleanup: true
 
 env:
