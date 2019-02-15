@@ -130,14 +130,14 @@ public class KTFreight_v3_simple {
 	private static final Logger log = Logger.getLogger(KTFreight_v3_simple.class);
 	private static final Level loggingLevel = Level.INFO; 		//Set to info to avoid all Debug-Messages, e.g. from VehicleRountingAlgorithm, but can be set to other values if needed. KMT feb/18. 
 
-	 enum CostsModififier {av, avFix110pct, avDist110pct}
-	 final static CostsModififier costsModififier = CostsModififier.avDist110pct ;
+	 enum CostsModififier {av, avFix110pct, avDist110pct, avVehCapUp}
+	 final static CostsModififier costsModififier = CostsModififier.avVehCapUp ;
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
 //	private static final String INPUT_DIR = "../../freight-dfg17/scenarios/CEP/" ;
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/";
 	
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_III_DistC10pctUp_Shipments/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_IV_VehCaptUp_Shipments/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 
@@ -299,6 +299,13 @@ public class KTFreight_v3_simple {
 				vehicleCostInformation.setPerTimeUnit(0.0);
 				vehicleCostInformation.setFix(vehicleCostInformation.getFix() * 1.1);
 				break;
+			case avVehCapUp:
+				vehicleCostInformation.setPerTimeUnit(0.0);
+				if (vt.getId().toString().endsWith("_frozen")) {
+					vt.setCarrierVehicleCapacity(vt.getCarrierVehicleCapacity() + 14);
+				} else {
+					vt.setCarrierVehicleCapacity(vt.getCarrierVehicleCapacity() + 2);		// two additional palates instead of the drivers cabin
+				}
 			default:
 				log.info("No or unspecified modification for carrierVehicleTypeCosts selected" );
 			}

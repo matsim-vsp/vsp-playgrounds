@@ -37,7 +37,8 @@ public class FreightAnalyseKT {
 
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_Referenz_Shipments/Run_1/"; 	
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_Base_Shipments/Run_1/"; 
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_II_FC10pctUp_Shipments/Run_1/"; 
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_III_DistC10pctUp_Shipments/Run_1/";
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/AV_Single_500it/Demo_IV_VehCaptUp_Shipments/Run_1/";	
 	
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
 	
