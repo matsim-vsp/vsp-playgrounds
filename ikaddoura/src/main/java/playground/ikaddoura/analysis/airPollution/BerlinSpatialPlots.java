@@ -67,23 +67,20 @@ public class BerlinSpatialPlots {
         final double smoothingRadius = 500.;
         final double countScaleFactor = 10.;
         
-        final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
-    	final String runId = "bc-0";
-
-//    	final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
-//    	 final String runId = "bc-0";
+//        final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+//    	final String runId = "bc-0";
     	
-//    	 final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
-//    	 final String runId = "berlin-v5.2-1pct";
+//    	final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+//    	final String runId = "berlin-v5.2-1pct";
     	
-//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
-//    	 final String runId = "savA-0d";
+//    	final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
+//    	final String runId = "savA-0d";
     	
-//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
-//    	 final String runId = "savA-2d";
+//    	final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
+//    	final String runId = "savA-2d";
     	
-//    	 final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
-//    	 final String runId = "savA-3d";
+    	final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
+    	final String runId = "savA-3d";
 
         BerlinSpatialPlots plots = new BerlinSpatialPlots(gridSize, smoothingRadius, countScaleFactor);
         

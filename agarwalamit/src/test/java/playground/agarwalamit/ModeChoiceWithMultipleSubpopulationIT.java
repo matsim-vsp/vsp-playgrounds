@@ -17,11 +17,6 @@ package playground.agarwalamit;/* **********************************************
  *                                                                         *
  * *********************************************************************** */
 
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -46,6 +41,12 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * See a simple example {@link tutorial.programming.example18MultipleSubpopulations.RunSubpopulationsExample} without mode choice
@@ -175,7 +176,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 
 		scenario.getConfig().plansCalcRoute().setNetworkModes(allowedMode);
 		scenario.getConfig().qsim().setMainModes(allowedMode);
-		scenario.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,motorbike,bicycle" );
+		scenario.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,motorbike,bicycle");
 
 		scenario.getConfig().planCalcScore().getOrCreateModeParams("motorbike"); // this will set default scoring params for motorbike
 

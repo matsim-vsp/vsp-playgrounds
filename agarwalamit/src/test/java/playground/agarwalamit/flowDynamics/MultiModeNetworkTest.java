@@ -19,12 +19,6 @@
 
 package playground.agarwalamit.flowDynamics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -39,11 +33,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -59,6 +49,8 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
+
+import java.util.*;
 
 /**
  * Created by amit on 18.11.17.
@@ -136,7 +128,7 @@ public class MultiModeNetworkTest {
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
         config.plansCalcRoute().setNetworkModes(networkModes);
-        config.travelTimeCalculator().setAnalyzedModesAsString( StringUtils.join(networkModes, "," ) );
+        config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 
         config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);
@@ -251,7 +243,7 @@ public class MultiModeNetworkTest {
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
         config.plansCalcRoute().setNetworkModes(networkModes);
-        config.travelTimeCalculator().setAnalyzedModesAsString( StringUtils.join(networkModes, "," ) );
+        config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 
         config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);

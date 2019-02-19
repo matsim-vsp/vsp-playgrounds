@@ -19,12 +19,7 @@
 
 package playground.agarwalamit.flowDynamics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.inject.CreationException;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -42,12 +37,7 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -64,21 +54,11 @@ import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.pt.transitSchedule.api.Departure;
-import org.matsim.pt.transitSchedule.api.TransitLine;
-import org.matsim.pt.transitSchedule.api.TransitRoute;
-import org.matsim.pt.transitSchedule.api.TransitRouteStop;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
-import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.pt.transitSchedule.api.*;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.Vehicles;
-import org.matsim.vehicles.VehiclesFactory;
+import org.matsim.vehicles.*;
 
-import com.google.inject.CreationException;
+import java.util.*;
 
 /**
  * @author amit copy of {@link CarPassingBusTest}
@@ -177,7 +157,7 @@ public class PedestrianWithPTTest {
 		config.qsim().setMainModes(Arrays.asList("car",walkModeName)); // car is still necessary for PT simulation
 		config.qsim().setLinkDynamics(LinkDynamics.PassingQ);
 		config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
-		config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(new String[] { walkModeName}, "," ) );
+		config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(new String[]{walkModeName}, ","));
 		config.travelTimeCalculator().setFilterModes(true);
 		config.plansCalcRoute().setNetworkModes(Arrays.asList(walkModeName));
 

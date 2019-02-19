@@ -19,8 +19,6 @@
 
 package playground.agarwalamit.emissions.flatEmissions;
 
-import java.text.DecimalFormat;
-import java.util.*;
 import com.google.inject.name.Names;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -39,13 +37,13 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.types.WarmPollutant;
-import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -61,6 +59,9 @@ import org.matsim.vehicles.Vehicles;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
+
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Just setting up the equil scenario to get emissions for a mixed traffic conditions.
@@ -160,7 +161,7 @@ public class EquilMixedTrafficEmissionIT {
 		sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
 		sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
 
-		sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle" );
+		sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle");
 		sc.getConfig().travelTimeCalculator().setFilterModes(true);
 
 		equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);

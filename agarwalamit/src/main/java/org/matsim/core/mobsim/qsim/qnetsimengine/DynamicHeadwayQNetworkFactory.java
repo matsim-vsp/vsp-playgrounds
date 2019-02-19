@@ -20,7 +20,6 @@
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -32,6 +31,8 @@ import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
+
+import javax.inject.Inject;
 
 
 /**
@@ -60,7 +61,7 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 	}
 
 	@Override
-	public void initializeFactory( AgentCounter agentCounter, MobsimTimer mobsimTimer, QNetsimEngine.NetsimInternalInterface netsimEngine1 ) {
+	public void initializeFactory(AgentCounter agentCounter, MobsimTimer mobsimTimer, QNetsimEngine.NetsimInternalInterface netsimEngine1) {
 		this.netsimEngine = netsimEngine1;
 		double effectiveCellSize = network.getEffectiveCellSize() ;
 		SnapshotLinkWidthCalculator linkWidthCalculator = new SnapshotLinkWidthCalculator();
@@ -72,7 +73,7 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		context = new NetsimEngineContext( events, effectiveCellSize, agentCounter, agentSnapshotInfoBuilder, qsimConfig, mobsimTimer, linkWidthCalculator );
 	}
 	@Override
-	public QLinkI createNetsimLink( final Link link, final QNodeI toQueueNode ) {
+	public QLinkI createNetsimLink(final Link link, final QNodeI toQueueNode) {
 		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context) ;
 
 		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
@@ -82,7 +83,7 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		return linkBuilder.build(link, toQueueNode) ;
 	}
 	@Override
-	public QNodeI createNetsimNode( final Node node ) {
+	public QNodeI createNetsimNode(final Node node) {
 		QNodeImpl.Builder builder = new QNodeImpl.Builder( netsimEngine, context ) ;
 
 		builder.setTurnAcceptanceLogic( this.turnAcceptanceLogic ) ;

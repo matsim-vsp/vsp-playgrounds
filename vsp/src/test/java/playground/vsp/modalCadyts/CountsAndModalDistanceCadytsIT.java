@@ -18,10 +18,6 @@
 
 package playground.vsp.modalCadyts;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import javax.inject.Inject;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,11 +51,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+import org.matsim.core.scoring.functions.*;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
@@ -72,6 +64,12 @@ import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
+
+import javax.inject.Inject;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 @RunWith(Parameterized.class)
 public class CountsAndModalDistanceCadytsIT {
@@ -572,8 +570,7 @@ public class CountsAndModalDistanceCadytsIT {
         
         config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
         config.vehicles().setVehiclesFile(EQUIL_DIR + "mode-vehicles.xml");
-        
-        config.travelTimeCalculator().setAnalyzedModesAsString("car,bicycle" );
+		config.travelTimeCalculator().setAnalyzedModes(new HashSet<>((Arrays.asList(modes))));
         config.travelTimeCalculator().setSeparateModes(true);
         config.travelTimeCalculator().setFilterModes(true);
         config.changeMode().setModes(modes);
