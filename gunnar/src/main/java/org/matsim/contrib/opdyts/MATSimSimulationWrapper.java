@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.macrostate.SimulationMacroStateAnalyzer;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactory;
@@ -22,6 +23,7 @@ import floetteroed.opdyts.trajectorysampling.TrajectorySampler;
  * @author Gunnar modified this since 2015.
  */
 class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorState> implements Simulator<U, X> {
+	private static final Logger log = Logger.getLogger( MATSimSimulationWrapper.class ) ;
 
 	// -------------------- MEMBERS --------------------
 
@@ -100,6 +102,9 @@ class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorSta
 
 	@Override
 	public SimulatorState run(final TrajectorySampler<U, X> trajectorySampler) {
+		final String divider = "###########################################";
+		log.info( divider ) ;
+		log.info( "### starting run(...)") ;
 
 		/*
 		 * (1) This function is called in many iterations. Each time, it executes a
@@ -152,6 +157,9 @@ class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorSta
 
 		controler.run();
 		this.numberOfCompletedSimulationRuns++;
+
+		log.info( "### done with run(...)") ;
+		log.info( divider ) ;
 
 		return wireOpdytsIntoMATSimControlerListener.getFinalState();
 	}

@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -70,6 +72,12 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 
 	@Inject
 	private OpdytsProgressListener opdytsProgressListener;
+
+	@Inject
+	private Map<String,TravelTime> travelTimes;
+
+	@Inject
+	private Network net;
 
 	private LinkedList<Vector> stateList = null;
 
@@ -278,19 +286,13 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 		this.finalState = this.newState();
 	}
 
-	@Inject
-	private TravelTime travelTime;
-
-	@Inject
-	private Network net;
-
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		// >>> TESTING >>>
 		try {
 			double ttSum = 0;
 			for (Link link : this.net.getLinks().values()) {
-				ttSum += this.travelTime.getLinkTravelTime(link, 8 * 3600, null, null);
+				ttSum += this.travelTimes.get( TransportMode.car ).getLinkTravelTime(link, 8 * 3600, null, null );
 			}
 			FileUtils.writeStringToFile(
 					new File(event.getServices().getControlerIO().getOutputFilename("statestats.log")), ttSum + "\n",

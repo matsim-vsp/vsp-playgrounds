@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,13 +66,14 @@ import org.matsim.testcases.MatsimTestUtils;
  */
 
 public class EquilOpdytsIT {
+	private static final Logger log = Logger.getLogger( EquilOpdytsIT.class ) ;
 
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     private static URL EQUIL_DIR = ExamplesUtils.getTestScenarioURL("equil-mixedTraffic");
 
-    // @Test
+     @Test
     public void runTest(){
         List<String> modes2consider = Arrays.asList("car","bicycle");
 
@@ -95,6 +97,7 @@ public class EquilOpdytsIT {
     }
 
     private void runOpdyts(final List<String> modes2consider, final Scenario scenario){
+     	log.info("### Entering runOpdyts ...") ;
 
         String outputDirectory = scenario.getConfig().controler().getOutputDirectory();
         double stepSize = 1.0;
@@ -110,11 +113,13 @@ public class EquilOpdytsIT {
         opdytsConfigGroup.setUseAllWarmUpIterations(false);
         opdytsConfigGroup.setWarmUpIterations(5); //this should be tested (parametrized).
 //        opdytsConfigGroup.setPopulationSize(2);
+
+	    opdytsConfigGroup.setConvergenceCriterion( OpdytsConfigGroup.ConvergenceCriterionType.fixed );
         
         OpdytsExperimentalConfigGroup opdytsExperimentalConfigGroup = new OpdytsExperimentalConfigGroup();
         opdytsExperimentalConfigGroup.setDecisionVariableStepSize(stepSize);        
         opdytsExperimentalConfigGroup.setPopulationSize(2);
-        
+
 //        MATSimOpdytsRunner<ModeChoiceDecisionVariable> runner = new MATSimOpdytsRunner<>(scenario);
 //
 //        MATSimSimulationWrapper<ModeChoiceDecisionVariable> simulator = new MATSimSimulationWrapper<ModeChoiceDecisionVariable>(new MATSimStateFactoryImpl<>(), scenario);
@@ -142,6 +147,7 @@ public class EquilOpdytsIT {
       
         ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(), scenario);
         ModeChoiceObjectiveFunction modeChoiceObjectiveFunction = new ModeChoiceObjectiveFunction(new MainModeIdentifier() {
+        	// yyyy replace by TransportationPlanningMainModeIdentifier?  kai, feb'19
             @Override
             public String identifyMainMode(List<? extends PlanElement> tripElements) {
                 for (PlanElement pe : tripElements) {
@@ -254,7 +260,8 @@ public class EquilOpdytsIT {
         return 0.;
     }
 
-    private void relaxPlansAndUpdateConfig(final Config config, final List<String> modes2consider){
+    private static void relaxPlansAndUpdateConfig(final Config config, final List<String> modes2consider){
+	    log.info("### Entering relaxPlansAndUpdateConfig ...") ;
         String relaxedDir = config.controler().getOutputDirectory() ;
         config.controler().setOutputDirectory(relaxedDir);
         config.controler().setLastIteration(10);
@@ -273,6 +280,7 @@ public class EquilOpdytsIT {
 
         Controler controler = new Controler(scenarioPlansRelaxor);
         controler.run();
+        log.info("### ... done with relaxPlansAndUpdateConfig.") ;
     }
 
     private Config setUpAndReturnConfig(final List<String> modes2consider){

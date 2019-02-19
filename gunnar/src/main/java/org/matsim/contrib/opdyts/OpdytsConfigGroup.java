@@ -262,7 +262,7 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 
 	// ==================== CONVERGENCE CRITERION ====================
 
-	private enum ConvergenceCriterionType {
+	public enum ConvergenceCriterionType {
 		fixed, ar1
 	};
 

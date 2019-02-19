@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.macrostate.DifferentiatedLinkOccupancyAnalyzer;
 import org.matsim.contrib.opdyts.macrostate.SimulationMacroStateAnalyzer;
@@ -38,6 +39,7 @@ import floetteroed.utilities.TimeDiscretization;
  *
  */
 public class MATSimOpdytsRunner<U extends DecisionVariable, X extends MATSimState> {
+	private static final Logger log = Logger.getLogger( MATSimOpdytsRunner.class ) ;
 
 	// -------------------- CONSTANTS --------------------
 
