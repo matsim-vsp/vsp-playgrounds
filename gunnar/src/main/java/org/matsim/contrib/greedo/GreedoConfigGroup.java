@@ -190,9 +190,13 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public double[] getAgeWeights(final int greedoIteration) {
 		final double[] ageWeights = new double[greedoIteration + 1];
-		ageWeights[0] = 1.0;
-		for (int age = 1; age < ageWeights.length; age++) {
-			ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+		if (this.getUseAgeWeights()) {
+			ageWeights[0] = 1.0;
+			for (int age = 1; age < ageWeights.length; age++) {
+				ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+			}
+		} else {
+			Arrays.fill(ageWeights, 1.0);
 		}
 		return ageWeights;
 	}
@@ -328,6 +332,34 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("binomialNumberOfReplanners")
 	public void setBinomialNumberOfReplanners(final boolean binomialNumberOfReplanners) {
 		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
+	}
+
+	// -------------------- useAgeWeights --------------------
+
+	private boolean useAgeWeights = true;
+
+	@StringGetter("useAgeWeights")
+	public boolean getUseAgeWeights() {
+		return this.useAgeWeights;
+	}
+
+	@StringSetter("useAgeWeights")
+	public void setUseAgeWeights(final boolean useAgeWeights) {
+		this.useAgeWeights = useAgeWeights;
+	}
+
+	// -------------------- useAgeWeightedBeta --------------------
+
+	private boolean useAgeWeightedBeta = true;
+
+	@StringGetter("useAgeWeightedBeta")
+	public boolean getUseAgeWeightedBeta() {
+		return this.useAgeWeightedBeta;
+	}
+
+	@StringSetter("useAgeWeightedBeta")
+	public void setUseAgeWeightedBeta(final boolean useAgeWeightedBeta) {
+		this.useAgeWeightedBeta = useAgeWeightedBeta;
 	}
 
 	// -------------------- adjustStrategyWeights --------------------

@@ -570,9 +570,7 @@ public class CountsAndModalDistanceCadytsIT {
         
         config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
         config.vehicles().setVehiclesFile(EQUIL_DIR + "mode-vehicles.xml");
-
-
-		config.travelTimeCalculator().setAnalyzedModes(new HashSet<>(Arrays.asList("car", "bicycle")));
+		config.travelTimeCalculator().setAnalyzedModes(new HashSet<>((Arrays.asList(modes))));
         config.travelTimeCalculator().setSeparateModes(true);
         config.travelTimeCalculator().setFilterModes(true);
         config.changeMode().setModes(modes);

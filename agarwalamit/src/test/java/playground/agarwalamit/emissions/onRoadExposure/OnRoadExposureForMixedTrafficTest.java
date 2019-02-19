@@ -19,12 +19,6 @@
 
 package playground.agarwalamit.emissions.onRoadExposure;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -37,12 +31,12 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -54,6 +48,9 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.utils.MapUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 14.11.17.
@@ -204,7 +201,7 @@ public class OnRoadExposureForMixedTrafficTest {
         sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
         sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
 
-        sc.getConfig().travelTimeCalculator().setAnalyzedModes("car,bicycle");
+        sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle");
         sc.getConfig().travelTimeCalculator().setFilterModes(true);
 
         equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);

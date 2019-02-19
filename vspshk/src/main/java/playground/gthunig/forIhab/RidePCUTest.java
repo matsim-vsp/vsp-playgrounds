@@ -24,7 +24,7 @@ public class RidePCUTest {
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.qsim().setMainModes(Arrays.asList(TransportMode.car, TransportMode.ride));
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
-        config.travelTimeCalculator().setAnalyzedModes(TransportMode.car + "," + TransportMode.ride);
+        config.travelTimeCalculator().setAnalyzedModesAsString(TransportMode.car + "," + TransportMode.ride);
         config.plansCalcRoute().setNetworkModes(Arrays.asList(TransportMode.car, TransportMode.ride));
         config.plansCalcRoute().removeModeRoutingParams(TransportMode.ride);
         PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams("ride");
