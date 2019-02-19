@@ -100,6 +100,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			 */
 			EventHandler handlerForLastReplanningIteration = this.replannerSelector
 					.getHandlerForHypotheticalNetworkExperience();
+			
+			EventHandler handlerForOtherReplanningIterations = new EventHandler() {
+			};
 
 			/*
 			 * This memorizes the plans and network experiences of the population prior to
@@ -114,9 +117,15 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 				// We run replanning on all agents (exactly as it is defined in the config)
 				strategyManager.run(population, replanningContext);
+				
+				EventHandler currentEventHandler = handlerForOtherReplanningIterations;
+				
+				if (i == numberOfIterations - 1) {
+					currentEventHandler = handlerForLastReplanningIteration;
+				}
 
 				// We emulate the whole population in parallel
-				emulateInParallel(population, event.getIteration());
+				emulateInParallel(population, event.getIteration(), currentEventHandler);
 
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, numberOfIterations));
 			}
@@ -136,7 +145,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		}
 	}
 
-	private void emulateInParallel(Population population, int iteration) throws InterruptedException {
+	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler) throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
 		List<Thread> threads = new LinkedList<>();
 
@@ -167,7 +176,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					// And here we send all the agents to the emulator. The score will be written to
 					// the plan directly.
 					for (Person person : batch) {
-						agentEmulator.emulate(person, person.getSelectedPlan());
+						agentEmulator.emulate(person, person.getSelectedPlan(), eventHandler);
 					}
 
 					processedNumberOfPersons.addAndGet(batch.size());
