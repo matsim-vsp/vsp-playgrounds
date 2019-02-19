@@ -7,7 +7,7 @@ import static playground.vsp.airPollution.flatEmissions.EmissionCostFactors.NOX;
 
 public class EmissionCostFactorsTest{
 
-	@Test(expected = IllegalArgumentException.class)
+    @Test
 	public void test() {
 
 		System.out.println( "name=" + NOX.name() + "; factor=" + NOX.getCostFactor() );
