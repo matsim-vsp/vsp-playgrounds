@@ -18,8 +18,6 @@
  * *********************************************************************** */
 package playground.vsp.airPollution.flatEmissions;
 
-import java.util.Arrays;
-
 /**
  * @author amit
  * These values are taken from Maibach et al. (2008)
@@ -47,14 +45,13 @@ public enum EmissionCostFactors {
 	/**
 	 * This is (since feb/2019) deliberately programmed such that it throws an exception when the string cannot be resolved.
 	 *
-	 * @param pollutant
 	 * @return cost factor
 	 */
 	public static double getCostFactor ( String pollutant ) {
 		return EmissionCostFactors.valueOf( pollutant ).getCostFactor() ;
 	}
-	
-	private EmissionCostFactors(double firstArg){
+
+    EmissionCostFactors(double firstArg) {
 		this.costFactor = firstArg;
 	}
 }
