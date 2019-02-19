@@ -37,61 +37,69 @@ import org.matsim.core.replanning.selectors.WorstPlanForRemovalSelector;
  *
  * Created by amit on 11.06.18.
  */
-
+@Deprecated 	// yyyy The central WorstPlanForRemovalSelector has exactly the same functionality as this one here, based on plan.getType().  !!!  kai, feb'19
 public class InitialPlanKeeperPlanRemoval implements PlanSelector<Plan, Person> {
 
-    public static final String initial_plans_keeper_plan_remover = "INITIAL_PLANS_KEEPER_REMOVAL";
-    public static final String plan_attribute_name = "initial_plan_attribute_name";
-    public static final String plan_attribute_prefix = "initial_plan_attribute_";
+	public static final String initial_plans_keeper_plan_remover = "INITIAL_PLANS_KEEPER_REMOVAL";
+	public static final String plan_attribute_name = "initial_plan_attribute_name";
+	public static final String plan_attribute_prefix = "initial_plan_attribute_";
 
-    private final WorstPlanForRemovalSelector delegate;
+	private final WorstPlanForRemovalSelector delegate;
 
-    @Inject
-    public InitialPlanKeeperPlanRemoval(StrategyConfigGroup strategyConfigGroup, Population population){
-        this.delegate = new WorstPlanForRemovalSelector();
-        if ( strategyConfigGroup.getMaxAgentPlanMemorySize() < 12) {
-            Logger.getLogger(InitialPlanKeeperPlanRemoval.class).warn("A plans remover is used which keeps the initial plans or at least their copy \n " +
-                    "and maximum number of plans in the choice set is limited to "+ strategyConfigGroup.getMaxAgentPlanMemorySize()+
-            ".\n Lower number of plans in choice set is likely to end up in infinite loop. Setting it to 15.");
-            strategyConfigGroup.setMaxAgentPlanMemorySize(15);
-        }
+	@Inject
+	public InitialPlanKeeperPlanRemoval(StrategyConfigGroup strategyConfigGroup, Population population){
+		this.delegate = new WorstPlanForRemovalSelector();
+		if ( strategyConfigGroup.getMaxAgentPlanMemorySize() < 12) {
+			Logger.getLogger(InitialPlanKeeperPlanRemoval.class).warn("A plans remover is used which keeps the initial plans or at least their copy \n " +
+														"and maximum number of plans in the choice set is limited to "+ strategyConfigGroup.getMaxAgentPlanMemorySize()+
+														".\n Lower number of plans in choice set is likely to end up in infinite loop. Setting it to 15.");
+			strategyConfigGroup.setMaxAgentPlanMemorySize(15);
+		}
 
-        for (Person person : population.getPersons().values()){
-            for (int index =0; index < person.getPlans().size(); index++) {
-                Plan plan = person.getPlans().get(index);
-                plan.getAttributes().putAttribute( InitialPlanKeeperPlanRemoval.plan_attribute_name, InitialPlanKeeperPlanRemoval.plan_attribute_prefix+index);
-            }
-        }
-    }
+		for (Person person : population.getPersons().values()){
+			for (int index =0; index < person.getPlans().size(); index++) {
+				Plan plan = person.getPlans().get(index);
+				Object current = plan.getAttributes().getAttribute( InitialPlanKeeperPlanRemoval.plan_attribute_name );
+				if ( current == null ){
+					plan.getAttributes().putAttribute( InitialPlanKeeperPlanRemoval.plan_attribute_name, InitialPlanKeeperPlanRemoval.plan_attribute_prefix + index );
+				}
+			}
+		}
+	}
 
-    @Override
-    public Plan selectPlan(HasPlansAndId<Plan, Person> member) {
-        List<Plan> temporarilyRemovedPlans = new ArrayList<>();
+	@Override
+	public Plan selectPlan(HasPlansAndId<Plan, Person> member) {
+		List<Plan> temporarilyRemovedPlans = new ArrayList<>();
 
-        // WorstPlansForRemovalSelector will always return same plan if no change to choice set.
-        // let's remove it --> store it --> get next worst plan remove it
-        // repeat the process until a suitable plan is found.
-        //put all plans back to the choice set.
-        // Imp: putting plans back may change the positions of the plans in the choice set, assuming that it will not change the behaviour somewhere else.
-        while ( true ) {
-            Plan planForRemoval = delegate.selectPlan(member);
+		// WorstPlansForRemovalSelector will always return same plan if no change to choice set.
+		// let's remove it --> store it --> get next worst plan remove it
+		// repeat the process until a suitable plan is found.
+		//put all plans back to the choice set.
+		// Imp: putting plans back may change the positions of the plans in the choice set, assuming that it will not change the behaviour somewhere else.
+		while ( true ) {
+			Plan planForRemoval = delegate.selectPlan(member);
+			// (this will select the worst plan)
 
-            Object value = planForRemoval.getAttributes().getAttribute(plan_attribute_name);
-            if (value==null) throw new RuntimeException("The value for the attribute key "+plan_attribute_name+" does not exist in the plan for person "+ member.getId().toString()+".");
+			Object value = planForRemoval.getAttributes().getAttribute(plan_attribute_name);
+			if (value==null) throw new RuntimeException("The value for the attribute key "+plan_attribute_name+" does not exist in the plan for person "+ member.getId().toString()+".");
 
-            // check if there exists a plan with same index
-            int occurrences = (int) member.getPlans()
-                                          .stream()
-                                          .filter(pl -> Objects.equals(pl.getAttributes().getAttribute(plan_attribute_name),
-                                                  value))
-                                          .count();
-            if (occurrences <= 1) { // occurrences could also be zero
-                temporarilyRemovedPlans.add(planForRemoval);
-                member.getPlans().remove(planForRemoval);
-            } else {
-                temporarilyRemovedPlans.forEach(member::addPlan);
-                return planForRemoval;
-            }
-        }
-    }
+			// check if there exists a plan with same index
+			int occurrences = (int) member.getPlans()
+								.stream()
+								.filter(pl -> Objects.equals(pl.getAttributes().getAttribute(plan_attribute_name),
+									  value))
+								.count();
+			if (occurrences <= 1) { // occurrences could also be zero
+				temporarilyRemovedPlans.add(planForRemoval);
+				member.getPlans().remove(planForRemoval);
+				// (if we can't remove this plan since it would be the last, we remove it temporarily and then continue in the while loop)
+				// yy I would prefer to avoid touching the central data structure. kai, feb'19
+			} else {
+				temporarilyRemovedPlans.forEach(member::addPlan);
+				// (re-add all the temporarily removed plans)
+
+				return planForRemoval;
+			}
+		}
+	}
 }
