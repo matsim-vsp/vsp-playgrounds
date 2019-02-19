@@ -19,6 +19,7 @@
 package playground.vsp.modalCadyts;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,8 +97,10 @@ public class CountsAndModalDistanceCadytsIT {
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
 
-    
-    @Test
+
+	// TODO: Think about a better integration test. E.g. synthetic network with three routes
+	@Test
+	@Ignore
     public final void simultaneousMarginalsAndCountCalibrationTest() {
         double beelineDistanceFactorForNetworkModes = 1.0;
 
