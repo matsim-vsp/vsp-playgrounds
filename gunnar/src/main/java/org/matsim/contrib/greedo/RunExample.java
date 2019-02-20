@@ -57,7 +57,6 @@ public class RunExample {
 			controller.addOverridingModule(greedo);
 			controller.addOverridingModule(new IERModule(WireGreedoIntoMATSimControlerListener.class));
 
-
 			controller.run();
 		}
 }
