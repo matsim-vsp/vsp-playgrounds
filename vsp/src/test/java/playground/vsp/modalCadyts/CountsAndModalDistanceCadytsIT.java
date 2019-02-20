@@ -37,6 +37,7 @@ import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ChangeModeConfigGroup.Behavior;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
@@ -96,8 +97,9 @@ public class CountsAndModalDistanceCadytsIT {
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
 
-    
-    @Test
+
+	// TODO: Think about a better integration test. E.g. synthetic network with three routes
+	@Test
     public final void simultaneousMarginalsAndCountCalibrationTest() {
         double beelineDistanceFactorForNetworkModes = 1.0;
 
@@ -579,6 +581,8 @@ public class CountsAndModalDistanceCadytsIT {
 
         config.planCalcScore().getOrCreateModeParams("car").setConstant(-2);
         config.planCalcScore().getOrCreateModeParams("bicycle");
+
+		config.controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
         
 		return config;
 	}
