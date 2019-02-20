@@ -47,19 +47,58 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class ModifyPopulation {
 
-	private static final String INPUT_BASE_DIR = "../../runs-svn/berlin_scenario_2016/be_218/";
+//	private static final String INPUT_BASE_DIR = "../../runs-svn/berlin_scenario_2016/be_218/";
+	private static final String INPUT_BASE_DIR = "../../runs-svn/cottbus/createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/";
 	
 	public static void main(String[] args) {
 		
 		Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(INPUT_BASE_DIR + "be_218.output_network.xml.gz");
-		config.plans().setInputFile(INPUT_BASE_DIR + "be_218.output_plans.xml.gz");
+//		config.network().setInputFile(INPUT_BASE_DIR + "be_218.output_network.xml.gz");
+//		config.plans().setInputFile(INPUT_BASE_DIR + "be_218.output_plans.xml.gz");
+		
+		config.global().setCoordinateSystem("EPSG:25833");
+//		config.network().setInputFile(INPUT_BASE_DIR + "1000.output_network.xml.gz");
+		config.plans().setInputFile(INPUT_BASE_DIR + "1000.output_plans.xml.gz");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
 //		removeAllLinkInfos(scenario.getPopulation());		
 		
-		new PopulationWriter(onlyKeepSelectedPlanAndCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_218.output_plans_selected_carOnly.xml.gz");
+//		new PopulationWriter(onlyKeepSelectedPlanAndCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_218.output_plans_selected_carOnly.xml.gz");
+		
+		new PopulationWriter(onlyKeepMorningPeak(scenario.getPopulation())).write(INPUT_BASE_DIR + "1000.output_plans_morningPeak.xml.gz");
+	}
+	
+	public static Population onlyKeepMorningPeak(Population population) {
+		Population newPop = PopulationUtils.createPopulation(ConfigUtils.createConfig());
+		// remove work-home trips. keep only home-work as dummy-dummy
+		for (Person p : population.getPersons().values()){
+			Person newP = newPop.getFactory().createPerson(p.getId());
+			newPop.addPerson(newP);
+			Plan reducedPlan = newPop.getFactory().createPlan();
+			newP.addPlan(reducedPlan);
+			
+			// consider only the selected plan
+			Plan plan = p.getSelectedPlan();			
+			boolean firstLeg = true;
+			for (PlanElement pe : plan.getPlanElements()){
+				if (pe instanceof Activity) {
+					Activity act = (Activity) pe;
+					if (act.getType().equals("home") && firstLeg) {
+						act.setType("dummy");
+						reducedPlan.addActivity(act);
+					} else if (act.getType().equals("work")) {
+						act.setType("dummy");
+						reducedPlan.addActivity(act);
+					}
+				} else if (pe instanceof Leg && firstLeg){
+					reducedPlan.addLeg((Leg) pe);
+					
+					firstLeg = false;
+				}
+			}
+		}
+		return newPop;
 	}
 	
 	public static Population onlyKeepSelectedPlanAndCarUsers(Population population){
