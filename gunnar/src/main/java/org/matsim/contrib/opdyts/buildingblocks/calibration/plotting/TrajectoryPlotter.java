@@ -48,7 +48,7 @@ public class TrajectoryPlotter implements IterationEndsListener {
 
 	// -------------------- CONSTANTS --------------------
 
-	private final Config config;
+	private final String outputDirectory;
 
 	private final int logInterval;
 
@@ -60,9 +60,13 @@ public class TrajectoryPlotter implements IterationEndsListener {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public TrajectoryPlotter(final Config config, final int logInterval) {
-		this.config = config;
+	public TrajectoryPlotter(final String outputDirectory, final int logInterval) {
+		this.outputDirectory = outputDirectory;
 		this.logInterval = logInterval;
+	}
+
+	public TrajectoryPlotter(final Config config, final int logInterval) {
+		this(config.controler().getOutputDirectory(), logInterval);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -116,12 +120,11 @@ public class TrajectoryPlotter implements IterationEndsListener {
 			for (TrajectoryDataSummarizer summarizer : this.summarizers) {
 				summarizer.clear();
 			}
-			final Path path = Paths.get(
-					this.config.controler().getOutputDirectory() + "/trajectories." + event.getIteration() + ".data");
+			final Path path = Paths.get(this.outputDirectory + "/trajectories." + event.getIteration() + ".data");
 			this.writeToFile(path);
 		}
 	}
-	
+
 	public void writeToFile(final Path path) {
 		try {
 			final PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));

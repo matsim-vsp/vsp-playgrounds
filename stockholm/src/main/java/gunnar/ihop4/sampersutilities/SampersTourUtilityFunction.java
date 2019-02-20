@@ -66,9 +66,9 @@ class SampersTourUtilityFunction {
 			final double plannedStart_min = Units.MIN_PER_H * plannedStart_h;
 			final double realizedStart_min = Units.MIN_PER_S * tour.getRealizedStartTime_s();
 			result += this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK_yr)
-					* Math.max(0.0, plannedStart_min - realizedStart_min)
-					+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK_yr)
-							* Math.max(0.0, realizedStart_min - plannedStart_min);
+					* Math.max(0.0, (plannedStart_min - realizedStart_min) - this.utlParams.getScheduleDelaySlack_min())
+					+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK_yr) * Math.max(0.0,
+							(realizedStart_min - plannedStart_min) - this.utlParams.getScheduleDelaySlack_min());
 		}
 
 		final Double plannedDuration_h = SampersAttributeUtils.getPlannedActivityDuration_h(tour);

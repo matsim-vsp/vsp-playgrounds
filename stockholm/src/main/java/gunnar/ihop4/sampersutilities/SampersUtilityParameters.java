@@ -244,4 +244,10 @@ public class SampersUtilityParameters {
 		// https://www.skatteverket.se/foretagochorganisationer/arbetsgivare/lonochersattning/traktamente.4.361dc8c15312eff6fd1703e.html?q=milers%C3%A4ttning+bil
 		return 1.85;
 	}
+	
+	public double getScheduleDelaySlack_min() {
+		// meaning that realized start times may deviate by up \pm 30 min without schedule delay cost.
+		return 60.0;
+	}
+	
 }

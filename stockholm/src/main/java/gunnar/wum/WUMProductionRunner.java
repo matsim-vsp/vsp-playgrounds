@@ -20,6 +20,7 @@
 package gunnar.wum;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Leg;
@@ -75,7 +76,7 @@ public class WUMProductionRunner {
 		}
 	}
 
-	static void removeModeInformation(final Scenario scenario) {
+	public static void removeModeInformation(final Scenario scenario) {
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			for (Plan plan : person.getPlans()) {
 				for (PlanElement planElement : plan.getPlanElements()) {
@@ -89,9 +90,7 @@ public class WUMProductionRunner {
 		}
 	}
 
-	static void runProductionScenario() {
-
-		final boolean runLocally = false;
+	static void runProductionScenario(final boolean runLocally) {
 
 		final String configFileName;
 		if (runLocally) {
@@ -101,8 +100,8 @@ public class WUMProductionRunner {
 		}
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup(),
-				new GreedoConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
+
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -120,9 +119,12 @@ public class WUMProductionRunner {
 
 		final Greedo greedo;
 		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
+			Logger.getLogger(WUMProductionRunner.class).info("Using greedo.");
+			config.addModule(new GreedoConfigGroup());
 			greedo = new Greedo();
 			greedo.meet(config);
 		} else {
+			Logger.getLogger(WUMProductionRunner.class).info("NOT using greedo.");
 			greedo = null;
 		}
 
@@ -165,7 +167,8 @@ public class WUMProductionRunner {
 
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
-		runProductionScenario();
+		final boolean runLocally = false;
+		runProductionScenario(runLocally);
 		System.out.println("... DONE");
 	}
 

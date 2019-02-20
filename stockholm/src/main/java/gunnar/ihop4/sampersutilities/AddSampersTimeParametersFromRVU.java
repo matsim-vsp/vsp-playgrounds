@@ -155,15 +155,31 @@ public class AddSampersTimeParametersFromRVU {
 
 	public static void main(String[] args) {
 
-		final Config config = ConfigUtils
-				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
-		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		// final Config config = ConfigUtils
+		// .loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
+		// final Scenario scenario = ScenarioUtils.loadScenario(config);
+		//
+		// final AddSampersTimeParametersFromRVU enricher = new
+		// AddSampersTimeParametersFromRVU(
+		// "/Users/GunnarF/OneDrive - VTI/My
+		// Data/ihop4/rvu2013/MDRE_1113_original.csv");
+		// enricher.enrich(scenario.getPopulation());
+		//
+		// PopulationUtils.writePopulation(scenario.getPopulation(),
+		// "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched-population_TMP.xml");
 
-		final AddSampersTimeParametersFromRVU enricher = new AddSampersTimeParametersFromRVU(
-				"/Users/GunnarF/OneDrive - VTI/My Data/ihop4/rvu2013/MDRE_1113_original.csv");
-		enricher.enrich(scenario.getPopulation());
+		for (String frac : new String[] { "1", "5", "25" }) {
 
-		PopulationUtils.writePopulation(scenario.getPopulation(),
-				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched-population_TMP.xml");
+			Config config = ConfigUtils.createConfig();
+			config.plans().setInputFile("/Users/GunnarF/OneDrive - VTI/My Data/ihop4/" + frac + "PctAllModes.xml");
+			Scenario scenario = ScenarioUtils.loadScenario(config);
+
+			AddSampersTimeParametersFromRVU enricher = new AddSampersTimeParametersFromRVU(
+					"/Users/GunnarF/OneDrive - VTI/My Data/ihop4/rvu2013/MDRE_1113_original.csv");
+			enricher.enrich(scenario.getPopulation());
+
+			PopulationUtils.writePopulation(scenario.getPopulation(),
+					"/Users/GunnarF/OneDrive - VTI/My Data/ihop4/" + frac + "PctAllModes_enriched.xml");
+		}
 	}
 }
