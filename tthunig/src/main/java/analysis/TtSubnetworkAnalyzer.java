@@ -121,8 +121,8 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
-		if (vehiclesInSubNetwork.contains(event.getVehicleId())) {
-			double currentDelay = event.getTime() - veh2earliestLinkExitTime.get(event.getVehicleId());
+		if (subNetwork.getLinks().containsKey(event.getLinkId())) {
+			double currentDelay = event.getTime() - veh2earliestLinkExitTime.remove(event.getVehicleId());
 			totalDelaySubnetwork += currentDelay;
 			totalTtSubnetwork += currentDelay;
 		}
@@ -135,20 +135,23 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 		if (vehiclesInSubNetwork.contains(event.getVehicleId())) {
 			vehiclesInSubNetwork.remove(event.getVehicleId());
 			
-			// consider delay on last link
-			double currentDelay = event.getTime() - veh2earliestLinkExitTime.get(event.getVehicleId());
-			totalDelaySubnetwork += currentDelay;
-			totalTtSubnetwork += currentDelay;
+			// consider delay on last link if link belongs to the subnetwork
+			if (subNetwork.getLinks().containsKey(event.getLinkId())) {
+				double currentDelay = event.getTime() - veh2earliestLinkExitTime.remove(event.getVehicleId());
+				totalDelaySubnetwork += currentDelay;
+				totalTtSubnetwork += currentDelay;
+			}
 		}
 	}
 
 	@Override
 	public void reset(int iteration) {
-		this.vehiclesInSubNetwork.clear();
 		this.numberOfTripsInSubnetwork = 0;
 		this.numberOfTripsInTotal = 0;
-		this.totalDistanceSubnetwork = 0.0;
-		this.totalTtSubnetwork = 0.0;
+		this.totalDistanceSubnetwork = 0.;
+		this.totalTtSubnetwork = 0.;
+		this.totalDelaySubnetwork = 0.;
+		this.vehiclesInSubNetwork.clear();
 		this.pers2lastDepatureTime.clear();
 		this.veh2earliestLinkExitTime.clear();
 	}
