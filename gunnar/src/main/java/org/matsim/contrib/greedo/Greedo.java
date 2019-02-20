@@ -21,6 +21,8 @@ package org.matsim.contrib.greedo;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -214,11 +216,11 @@ public class Greedo extends AbstractModule {
 		// this.addEventHandlerBinding().to(FifoTransitPerformance.class);
 		// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
 		// } else {
-		// this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+		this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
 		// }
 
-		this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
+		this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class); // is a singleton anyway
 		this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
-		(new IERModule(WireGreedoIntoMATSimControlerListener.class)).install();
+		// (new IERModule(WireGreedoIntoMATSimControlerListener.class)).install();
 	}
 }

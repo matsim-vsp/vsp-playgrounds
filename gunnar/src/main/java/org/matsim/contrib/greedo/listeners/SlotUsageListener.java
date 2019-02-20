@@ -90,22 +90,22 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	}
 
 	@Override
-	public void handleEvent(final VehicleEntersTrafficEvent event) {
+	public synchronized void handleEvent(final VehicleEntersTrafficEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final LinkEnterEvent event) {
+	public synchronized void handleEvent(final LinkEnterEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final PersonEntersVehicleEvent event) {
+	public synchronized void handleEvent(final PersonEntersVehicleEvent event) {
 		this.transitVehicleUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final VehicleLeavesTrafficEvent event) {
+	public synchronized void handleEvent(final VehicleLeavesTrafficEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 }

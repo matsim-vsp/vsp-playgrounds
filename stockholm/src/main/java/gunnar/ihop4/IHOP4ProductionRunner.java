@@ -465,7 +465,7 @@ public class IHOP4ProductionRunner {
 		final Greedo greedo;
 		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
-			greedo.setGreedoProgressListener(progressListener);
+			// greedo.setGreedoProgressListener(progressListener);
 			greedo.meet(config);
 		} else {
 			greedo = null;
