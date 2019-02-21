@@ -166,7 +166,7 @@ public class KTFreight_v3_simple {
 	// Einstellungen für den Run	
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
-	private static final int MAX_JSPRIT_ITERATION = 500;
+	private static final int MAX_JSPRIT_ITERATION = 1;
 	private static final int NU_OF_TOTAL_RUNS = 1;	
 
 	
@@ -289,6 +289,7 @@ public class KTFreight_v3_simple {
 
 			switch (costsModififier) {
 			case av:
+				vt = new CarrierVehicleType.Builder(vt.getId(), vt).build();
 				vehicleCostInformation.setPerTimeUnit(0.0);
 				break;
 			case avDist110pct:
