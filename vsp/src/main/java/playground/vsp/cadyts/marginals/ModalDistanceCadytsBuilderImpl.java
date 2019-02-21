@@ -51,6 +51,8 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		cadytsConfig.setVarianceScale( 100. );
+		// yyyy I think that this will operate both on the marginals and on the counts.  (Currently not on the marginals since I have now set stddev individually per
+		// measurement.) kai, feb'19
 
 		AnalyticalCalibrator<T> matsimCalibrator = ModalDistanceCadytsBuilderImpl.buildCalibrator(config);
 
@@ -66,7 +68,9 @@ public final class ModalDistanceCadytsBuilderImpl {
 			}
 			DistanceBin bin = entry.getValue();
 			//only one measurement per day.
-			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+//			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), 1000.*10., SingleLinkMeasurement.TYPE.COUNT_VEH);
+			// (stddev scheint quadratisch einzugehen, also wenn man die Messwerte einen Faktor 10 kleiner haben will, muss man hier mit sqrt(10) multiplizieren. kai, feb'19)
 			numberOfAddedMeasurements++;
 		}
 
