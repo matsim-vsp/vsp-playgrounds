@@ -26,12 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import javax.management.InvalidAttributeValueException;
 
-import com.google.inject.Inject;
-import com.graphhopper.jsprit.analysis.toolbox.AlgorithmSearchProgressChartListener;
 import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
@@ -39,26 +35,18 @@ import com.graphhopper.jsprit.core.algorithm.listener.VehicleRoutingAlgorithmLis
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.util.Solutions;
-import com.graphhopper.jsprit.io.algorithm.AlgorithmConfig;
-import com.graphhopper.jsprit.io.algorithm.VehicleRoutingAlgorithms;
-import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
 import com.graphhopper.jsprit.analysis.toolbox.StopWatch;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
 import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleType;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType.VehicleCostInformation;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeWriter;
@@ -72,7 +60,6 @@ import org.matsim.contrib.freight.jsprit.MatsimJspritFactory;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.contrib.freight.jsprit.NetworkRouter;
-import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
 import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
 import org.matsim.core.config.Config;
@@ -82,30 +69,14 @@ import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.OutputDirectoryLogging;
-import org.matsim.core.controler.events.ReplanningEvent;
-import org.matsim.core.controler.listener.ReplanningListener;
-import org.matsim.core.network.LinkFactory;
-import org.matsim.core.network.NetworkChangeEvent;
-import org.matsim.core.network.NetworkChangeEvent.ChangeType;
-import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.replanning.GenericStrategyManager;
-import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.utils.io.IOUtils;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.vehicles.VehicleType;
 import playground.kturner.utils.MergeFileVisitor;
 import playground.kturner.utils.MoveDirVisitor;
 
@@ -285,32 +256,42 @@ public class KTFreight_v3_simple {
 
 	private static CarrierVehicleTypes modifyVehicleTypes(CarrierVehicleTypes vehicleTypes) {
 		for (CarrierVehicleType vt : vehicleTypes.getVehicleTypes().values()) {
-			VehicleCostInformation vehicleCostInformation = vt.getVehicleCostInformation();
+//			VehicleCostInformation vehicleCostInformation = vt.getVehicleCostInformation();
 
 			switch (costsModififier) {
 			case av:
-				vt = new CarrierVehicleType.Builder(vt.getId(), vt).build();
-				vehicleCostInformation.setPerTimeUnit(0.0);
+				vt = CarrierVehicleType.Builder.newInstance(vt.getId(), vt)
+					.setCostPerTimeUnit(0.0)
+					.build();
 				break;
 			case avDist110pct:
-				vehicleCostInformation.setPerTimeUnit(0.0);
-				vehicleCostInformation.setPerDistanceUnit(vehicleCostInformation.getPerDistanceUnit() * 1.1);
+				vt = CarrierVehicleType.Builder.newInstance(vt.getId(), vt)
+				.setCostPerTimeUnit(0.0)
+				.setCostPerDistanceUnit(vt.getVehicleCostInformation().getPerDistanceUnit() *1.1)
+				.build();
 				break;
 			case avFix110pct:
-				vehicleCostInformation.setPerTimeUnit(0.0);
-				vehicleCostInformation.setFix(vehicleCostInformation.getFix() * 1.1);
+				vt = CarrierVehicleType.Builder.newInstance(vt.getId(), vt)
+				.setCostPerTimeUnit(0.0)
+				.setFixCost(vt.getVehicleCostInformation().getFix() *1.1)
+				.build();
 				break;
 			case avVehCapUp:
-				vehicleCostInformation.setPerTimeUnit(0.0);
 				if (vt.getId().toString().endsWith("_frozen")) {
-					vt.setCarrierVehicleCapacity(vt.getCarrierVehicleCapacity() + 14);
+					vt = CarrierVehicleType.Builder.newInstance(vt.getId(), vt)
+							.setCostPerTimeUnit(0.0)
+							.setCapacity(vt.getCarrierVehicleCapacity() + 14)			// two more trolleys instead of the drivers cabin
+							.build();
 				} else {
-					vt.setCarrierVehicleCapacity(vt.getCarrierVehicleCapacity() + 2);		// two additional palates instead of the drivers cabin
+					vt = CarrierVehicleType.Builder.newInstance(vt.getId(), vt)
+							.setCostPerTimeUnit(0.0)
+							.setCapacity(vt.getCarrierVehicleCapacity() + 2)			// two additional palates instead of the drivers cabin
+							.build();
 				}
 			default:
 				log.info("No or unspecified modification for carrierVehicleTypeCosts selected" );
 			}
-			vt.setVehicleCostInformation(vehicleCostInformation );
+//			vt.setVehicleCostInformation(vehicleCostInformation );
 		}
 		return vehicleTypes;
 	}
