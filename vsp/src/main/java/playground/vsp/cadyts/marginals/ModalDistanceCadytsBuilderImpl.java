@@ -50,6 +50,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 		}
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
+		cadytsConfig.setVarianceScale( 100. );
 
 		AnalyticalCalibrator<T> matsimCalibrator = ModalDistanceCadytsBuilderImpl.buildCalibrator(config);
 

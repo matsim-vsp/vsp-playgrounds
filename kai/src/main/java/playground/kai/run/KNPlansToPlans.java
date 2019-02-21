@@ -76,18 +76,18 @@ class KNPlansToPlans {
 		Population pop = sc.getPopulation() ;
 
 		// remove unselected plans:
-		for ( Person person : pop.getPersons().values() ) {
-			for ( Iterator<? extends Plan> it = person.getPlans().iterator() ; it.hasNext() ; ) {
-				Plan plan = it.next();
-				if ( plan.equals( person.getSelectedPlan() ) ) {
-					continue;
-				}
-				it.remove();
-			}
-		}
+//		for ( Person person : pop.getPersons().values() ) {
+//			for ( Iterator<? extends Plan> it = person.getPlans().iterator() ; it.hasNext() ; ) {
+//				Plan plan = it.next();
+//				if ( plan.equals( person.getSelectedPlan() ) ) {
+//					continue;
+//				}
+//				it.remove();
+//			}
+//		}
 
-		PlansFilterByLegMode pf = new PlansFilterByLegMode( TransportMode.pt, FilterType.keepAllPlansWithMode ) ;
-		pf.run(pop) ;
+//		PlansFilterByLegMode pf = new PlansFilterByLegMode( TransportMode.pt, FilterType.keepAllPlansWithMode ) ;
+//		pf.run(pop) ;
 
 //		PlanMutateTimeAllocation pm = new PlanMutateTimeAllocation( 60, new Random() ) ;
 //		for (Person person : pop.getPersons().values()) {
@@ -97,7 +97,7 @@ class KNPlansToPlans {
 		
 //		final StageActivityTypes stageActivities = activityType -> activityType.contains( " interaction " );
 //		final MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl() ;
-//		for ( Iterator<? extends Person> personIt = pop.getPersons().values().iterator() ; personIt.hasNext() ; )  {
+		//		for ( Iterator<? extends Person> personIt = pop.getPersons().values().iterator() ; personIt.hasNext() ; )  {
 //
 //			Person person = personIt.next() ;
 //
@@ -116,7 +116,14 @@ class KNPlansToPlans {
 //			}
 //
 //		}
-		
+
+		for ( Iterator<? extends Person> personIt = pop.getPersons().values().iterator() ; personIt.hasNext() ; ){
+			personIt.next() ;
+			if ( Math.random() < 0.9 ) {
+				personIt.remove();
+			}
+		}
+
 
 		PopulationWriter popwriter = new PopulationWriter(pop,sc.getNetwork()) ;
 		popwriter.write( outputPopFilename ) ;
