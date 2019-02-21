@@ -77,10 +77,19 @@ public class LinkEntryCounter implements LinkEnterEventHandler, AfterMobsimListe
 	public void notifyAfterMobsim(final AfterMobsimEvent event) {
 		if (event.getIteration() % this.simulatedDataExtractionInterval == 0) {
 			this.lastExtractedIteration = event.getIteration();
-			this.countsOfLastExtractedIteration = new int[this.counter.getData().length];
-			System.arraycopy(this.counter.getData(), 0, this.countsOfLastExtractedIteration, 0,
-					this.counter.getData().length);
+			// Pulled out this functionality in order to be able to bypass the event listening
+			this.consolidateData();
+			// this.countsOfLastExtractedIteration = new int[this.counter.getData().length];
+			// System.arraycopy(this.counter.getData(), 0,
+			// this.countsOfLastExtractedIteration, 0,
+			// this.counter.getData().length);
 		}
+	}
+
+	public void consolidateData() {
+		this.countsOfLastExtractedIteration = new int[this.counter.getData().length];
+		System.arraycopy(this.counter.getData(), 0, this.countsOfLastExtractedIteration, 0,
+				this.counter.getData().length);
 	}
 
 	// -------------------- CONTENT ACCESS --------------------

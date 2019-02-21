@@ -52,13 +52,14 @@ public class RunEAVBenchmark {
 			@Override
 			public void install() {
 				bind(AuxEnergyConsumption.Factory.class).toInstance(
-						new DvrpAuxConsumptionFactory(mode, () -> TEMPERATURE, RunEAVBenchmark::isServingCustomer));
+						new DvrpAuxConsumptionFactory(mode, () -> TEMPERATURE, (vehicle, time) -> (time >= vehicle.getServiceBeginTime() && time <= vehicle.getServiceEndTime())));
 			}
 		});
 
 		return controler;
 	}
 
+	//not sure if that actually makes sense: at least the vw guys say that AVs will have some aux consumption even if idle
 	private static boolean isServingCustomer(DvrpVehicle vehicle) {
 		Schedule schedule = vehicle.getSchedule();
 		if (schedule.getStatus() == ScheduleStatus.STARTED) {

@@ -81,6 +81,10 @@ public class LinkEntryCountDeviationObjectiveFunction
 		return this.simulationCounter.getSpecification();
 	}
 
+	public void consolidateData() {
+		this.simulationCounter.consolidateData();
+	}
+	
 	// -------------------- IMPLEMENTATION OF ObjectiveFunction --------------------
 
 	@Override

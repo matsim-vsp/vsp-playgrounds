@@ -58,7 +58,9 @@ public class IHOP2ProductionRunner {
 		final String laneConnectorsFile = path + "network-input/Lane Connectors.csv";
 		final String linksFile = path + "network-input/Links.csv";
 
-		final String matsimNetworkFile = path + "network-output/network.xml";
+		// final String matsimNetworkFile = path + "network-output/network.xml";
+		final String matsimNetworkFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/Stockholm.xml.gz";
+
 		final String matsimFullNetworkFile = path + "network-output/network-full.xml";
 		final String linkAttributesFile = path + "network-output/link-attributes.xml";
 		final String matsimLanesFile = path + "network-output/lanes.xml";
@@ -68,8 +70,9 @@ public class IHOP2ProductionRunner {
 		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
 		final String populationFileName = path + "demand-input/trips.xml";
 
-		final double populationSample = 0.01;
-		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes_NONSENSE.xml";
+		final double populationSample = 0.25;
+		final String initialPlansFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/25PctAllModes.xml";
+		//final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;
@@ -83,8 +86,8 @@ public class IHOP2ProductionRunner {
 		 * DECIDE WHAT TO ACTUALLY DO
 		 */
 
-		final boolean doNetworkConversion = false;
-		final boolean doPopulationGeneration = true;
+		final boolean doNetworkConversion = false;		
+		final boolean doPopulationGeneration = false;
 		final boolean checkPopulation = false;
 		final boolean runMATSim = false;
 

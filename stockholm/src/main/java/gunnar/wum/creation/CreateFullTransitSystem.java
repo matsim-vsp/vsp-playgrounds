@@ -22,6 +22,7 @@ package gunnar.wum.creation;
 import java.time.LocalDate;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.gtfs.RunGTFS2MATSim;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -44,23 +45,26 @@ public class CreateFullTransitSystem {
 
 		// input data
 
-		String gtfsZipFile = "/Users/GunnarF/NoBackup/data-workspace/pt/data/input/sweden-20180424.zip";
+		// String gtfsZipFile =
+		// "/Users/GunnarF/NoBackup/data-workspace/pt/data/input/sweden-20180424.zip";
+		String gtfsZipFile = "/Users/GunnarF/OneDrive - VTI/My Data/sweden/sweden-20190214.zip";
+
 		CoordinateTransformation ct = StockholmTransformationFactory.getCoordinateTransformation(
 				TransformationFactory.WGS84, StockholmTransformationFactory.WGS84_SWEREF99);
 		// CoordinateTransformation ct = new IdentityTransformation();
-		LocalDate date = LocalDate.parse("2018-04-24");
+		LocalDate date = LocalDate.parse("2019-02-14");
 
 		// output files
 
-		String scheduleFile = "/Users/GunnarF/NoBackup/data-workspace/pt/data/output/transitSchedule.xml.gz";
+		String scheduleFile = "/Users/GunnarF/OneDrive - VTI/My Data/sweden/transitSchedule-sweden-20190214.xml.gz";
 		// String networkFile = "network.xml.gz";
-		String transitVehiclesFile = "/Users/GunnarF/NoBackup/data-workspace/pt/data/output/transitVehicles.xml.gz";
+		String transitVehiclesFile = "/Users/GunnarF/OneDrive - VTI/My Data/sweden/transitVehicles-20190214.xml.gz";
 
 		// Convert GTFS
 
-		System.out.println("Commented out line to make this compile.");
-		System.exit(0);
-//		RunGTFS2MATSim.convertGtfs(gtfsZipFile, scheduleFile, date, ct, false);
+		 System.out.println("Commented out line to make this compile.");
+		 System.exit(0);
+		RunGTFS2MATSim.convertGtfs(gtfsZipFile, scheduleFile, date, ct, false);
 
 		// Parse the schedule again
 

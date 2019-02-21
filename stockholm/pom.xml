@@ -25,6 +25,8 @@
 	</repositories>
   
 	<dependencies>
+	
+		
   
 		<!-- >>>>> FIXING MATSIM VERSION NUMBER >>>>> -->
 	
@@ -48,13 +50,11 @@
  	</dependency>
  	-->
  
- 		<!-- 
   		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>matsim-gtfs</artifactId>
 			<version>0.10.0</version>
   		</dependency>
-  		 -->
 
 		<!--    		 
 		<dependency>
