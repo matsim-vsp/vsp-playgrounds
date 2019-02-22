@@ -612,7 +612,10 @@ public class IHOP4ProductionRunner {
 			});
 			if (greedo != null) {
 				// runner.addWantsControlerReferenceBeforeInjection(greedo);
-				runner.addOverridingModule(greedo);
+				// runner.addOverridingModule(greedo);
+				for (AbstractModule module : greedo.getModules()) {
+					runner.addOverridingModule(module);
+				}
 			}
 
 			// >>>> TODO FOR TESTING >>>>
@@ -721,7 +724,10 @@ public class IHOP4ProductionRunner {
 				}
 			});
 			if (greedo != null) {
-				controler.addOverridingModule(greedo);
+				// controler.addOverridingModule(greedo);
+				for (AbstractModule module : greedo.getModules()) {
+					controler.addOverridingModule(module);
+				}
 			}
 
 			// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
@@ -786,7 +792,11 @@ public class IHOP4ProductionRunner {
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersScoringFunctionModule());
-		controler.addOverridingModule(greedo);
+
+		// controler.addOverridingModule(greedo);
+		for (AbstractModule module : greedo.getModules()) {
+			controler.addOverridingModule(module);
+		}
 
 		controler.run();
 
@@ -798,11 +808,11 @@ public class IHOP4ProductionRunner {
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
-			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
-		}
-		run(config);
+//		 if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
+//		 throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
+//		 }
+//		 run(config);
 
-		// runWithSampersDynamics(config);
+		 runWithSampersDynamics(config);
 	}
 }

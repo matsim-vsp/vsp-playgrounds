@@ -181,7 +181,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	public int getGreedoIteration(final int matsimIteration) {
-		return (matsimIteration / this.pSimIterations);
+		return matsimIteration;
+		// return (matsimIteration / this.pSimIterations);
 	}
 
 	public double getReplanningRate(int greedoIteration) {

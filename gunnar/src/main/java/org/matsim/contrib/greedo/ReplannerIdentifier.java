@@ -153,7 +153,7 @@ public class ReplannerIdentifier {
 		this.beta = 2.0 * this.lambdaBar
 				* (this.greedoConfig.getUseAgeWeightedBeta() ? this.sumOfWeightedCountDifferences2
 						: this.sumOfUnweightedCountDifferences2)
-				/ this.totalWeightedUtilityChange;
+				/ Math.max(this.totalWeightedUtilityChange, 1e-8); // TODO revisit
 
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()

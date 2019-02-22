@@ -30,7 +30,14 @@ public final class AgentEmulator {
 	public AgentEmulator(Scenario scenario, ScoringFunctionFactory scoringFunctionFactory,
 			SimulationEmulator simulationEmulator, ReplanningContext context) {
 		this.eventsManager = EventsUtils.createEventsManager();
-		this.eventsToScore = EventsToScore.createWithoutScoreUpdating(scenario, scoringFunctionFactory, eventsManager);
+
+		// We do want to keep track of the (hypothetical) scores obtained in the
+		// emulation. They form part of the performance expectation based on which the
+		// decision who gets to replan or not is based.
+		// this.eventsToScore = EventsToScore.createWithoutScoreUpdating(scenario,
+		// scoringFunctionFactory, eventsManager);
+		this.eventsToScore = EventsToScore.createWithScoreUpdating(scenario, scoringFunctionFactory, eventsManager);
+
 		this.simulationEmulator = simulationEmulator;
 		this.iteration = context.getIteration();
 
@@ -50,7 +57,7 @@ public final class AgentEmulator {
 		eventsManager.removeHandler(eventHandler);
 		eventsManager.finishProcessing();
 	}
-	
+
 	public void writeScores() {
 		eventsToScore.finish();
 	}

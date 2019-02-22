@@ -132,6 +132,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
+
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
 
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
@@ -184,6 +185,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 	@Override
 	public void beforeReplanning() {
+		
 		this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
 	}
 
@@ -212,7 +214,14 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 				this.hypotheticalSlotUsageListener.getNewIndicatorView(), this.services.getScenario().getPopulation(),
 				utilityStatsBeforeReplanning.personId2currentDeltaUtility, this.ages);
 		final Set<Id<Person>> replanners = replannerIdentifier.drawReplanners();
+
+		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			if (!replanners.contains(person.getId())) {
+				this.lastPhysicalPopulationState.set(person);
+			}
+		}
 		
+		this.numberOfReplanners = replanners.size();
 		this.ages.update(replanners, this.greedoConfig.getAgeWeights(this.iteration + 1));
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 

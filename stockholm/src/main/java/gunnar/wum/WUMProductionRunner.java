@@ -157,7 +157,10 @@ public class WUMProductionRunner {
 		});
 
 		if (greedo != null) {
-			controler.addOverridingModule(greedo);
+			// controler.addOverridingModule(greedo);
+			for (AbstractModule module : greedo.getModules()) {
+				controler.addOverridingModule(module);
+			}
 		}
 
 		controler.run();

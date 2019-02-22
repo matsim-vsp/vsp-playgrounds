@@ -37,7 +37,7 @@ import ch.ethz.matsim.ier.IERModule;
  * @author Gunnar Flötteröd
  *
  */
-public class Greedo extends AbstractModule {
+public class Greedo {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -107,8 +107,8 @@ public class Greedo extends AbstractModule {
 		}
 
 		/*
-		 * Adjust number of PSim iterations per cycle to number and type of innovation
-		 * strategies.
+		 * Adjust number of emulated iterations per cycle to number and type of
+		 * innovation strategies.
 		 */
 		{
 			final int originalIterationsPerCycle = accelerationConfig.getIterationsPerCycle();
@@ -127,7 +127,7 @@ public class Greedo extends AbstractModule {
 				}
 			}
 			if (accelerationConfig.getIterationsPerCycle() != originalIterationsPerCycle) {
-				log.warn("Adjusted number of pSim iterations per cycle from " + originalIterationsPerCycle + " to "
+				log.warn("Adjusted number of emulated iterations per cycle from " + originalIterationsPerCycle + " to "
 						+ accelerationConfig.getIterationsPerCycle() + ".");
 			}
 		}
@@ -135,20 +135,27 @@ public class Greedo extends AbstractModule {
 		/*
 		 * Adjust iteration numbers to pSim iteration overhead.
 		 */
-		config.controler()
-				.setLastIteration(config.controler().getLastIteration() * accelerationConfig.getIterationsPerCycle());
-		config.controler().setWriteEventsInterval(
-				config.controler().getWriteEventsInterval() * accelerationConfig.getIterationsPerCycle());
-		config.controler().setWritePlansInterval(
-				config.controler().getWritePlansInterval() * accelerationConfig.getIterationsPerCycle());
-		config.controler().setWriteSnapshotsInterval(
-				config.controler().getWriteSnapshotsInterval() * accelerationConfig.getIterationsPerCycle());
-		log.warn("Adjusting iteration numbers in config.controler() "
-				+ "under the assumption that pSim iteration were so far not accounted for:");
-		log.warn("  lastIteration = " + config.controler().getLastIteration());
-		log.warn("  writeEventsInterval = " + config.controler().getWriteEventsInterval());
-		log.warn("  writeSnapshotsInterval = " + config.controler().getWriteSnapshotsInterval());
-		log.warn("  writePlansInterval = " + config.controler().getWritePlansInterval());
+		// config.controler()
+		// .setLastIteration(config.controler().getLastIteration() *
+		// accelerationConfig.getIterationsPerCycle());
+		// config.controler().setWriteEventsInterval(
+		// config.controler().getWriteEventsInterval() *
+		// accelerationConfig.getIterationsPerCycle());
+		// config.controler().setWritePlansInterval(
+		// config.controler().getWritePlansInterval() *
+		// accelerationConfig.getIterationsPerCycle());
+		// config.controler().setWriteSnapshotsInterval(
+		// config.controler().getWriteSnapshotsInterval() *
+		// accelerationConfig.getIterationsPerCycle());
+		// log.warn("Adjusting iteration numbers in config.controler() "
+		// + "under the assumption that pSim iteration were so far not accounted for:");
+		// log.warn(" lastIteration = " + config.controler().getLastIteration());
+		// log.warn(" writeEventsInterval = " +
+		// config.controler().getWriteEventsInterval());
+		// log.warn(" writeSnapshotsInterval = " +
+		// config.controler().getWriteSnapshotsInterval());
+		// log.warn(" writePlansInterval = " +
+		// config.controler().getWritePlansInterval());
 
 		/*
 		 * Use minimal choice set and always remove the worse plan. This probably as
@@ -162,7 +169,7 @@ public class Greedo extends AbstractModule {
 		log.warn("  planSelectorForRemoval = worstPlanSelector");
 
 		/*
-		 * Keep only plan innovation strategies. Re-weight for maximum pSim efficiency.
+		 * Keep only plan innovation strategies. Re-weight for maximum emulation efficiency.
 		 * 
 		 */
 		if (accelerationConfig.getAdjustStrategyWeights()) {
@@ -202,25 +209,28 @@ public class Greedo extends AbstractModule {
 				this.scenario.getTransitVehicles().getVehicles().keySet());
 	}
 
-	// -------------------- Overriding of AbstractModule --------------------
+	public AbstractModule[] getModules() {
+		final AbstractModule greedoModule = new AbstractModule() {
+			@Override
+			public void install() {
+				// TODO For now only car traffic!
+				// if (this.config.transit().isUseTransit()) {
+				// // TODO See warning below.
+				// log.warn("Transit is included -- this is only tested with deterministic SBB
+				// transit.");
+				// this.bind(FifoTransitPerformance.class);
+				// this.addEventHandlerBinding().to(FifoTransitPerformance.class);
+				// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
+				// } else {
+				log.warn("Experimental code; no transit emulation!");
+				this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+				// }
 
-	@Override
-	public void install() {
-
-		// TODO For now only car traffic!
-		// if (this.config.transit().isUseTransit()) {
-		// // TODO See warning below.
-		// log.warn("Transit is included -- this is only tested with deterministic SBB
-		// transit.");
-		// this.bind(FifoTransitPerformance.class);
-		// this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-		// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-		// } else {
-		this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-		// }
-
-		this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class); // is a singleton anyway
-		this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
-		// (new IERModule(WireGreedoIntoMATSimControlerListener.class)).install();
+				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class); // is a singleton anyway
+				this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
+			}			
+		};
+		final AbstractModule ierModule = new IERModule(WireGreedoIntoMATSimControlerListener.class);
+		return new AbstractModule[] {greedoModule, ierModule}; // TODO Is it not possible to combine them?
 	}
 }

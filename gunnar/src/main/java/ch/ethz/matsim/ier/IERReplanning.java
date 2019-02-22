@@ -43,12 +43,12 @@ import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 public final class IERReplanning implements PlansReplanning, ReplanningListener {
 	private final static Logger logger = Logger.getLogger(IERReplanning.class);
 
-	// All of the parmeters are hardcoded now, but we can make it configurable.
+	// All of the parameters are hardcoded now, but we can make it configurable.
 
 	/**
 	 * Number of replanning + scoring iterations.
 	 */
-	private final int numberOfIterations = 10;
+	private final int numberOfIterations = 3; // TODO
 
 	/**
 	 * Number of threads on which the emulation of plans is happening. Currently, we
