@@ -19,7 +19,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.util.Map;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.measurements.SingleLinkMeasurement;
 import org.apache.log4j.Logger;
@@ -31,6 +30,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.Time;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
+
+import java.util.Map;
 
 /**
  * @author nagel
@@ -51,6 +52,10 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 
+		// set the variance scale to a bigger value, so that corrections don't get cut of at '15.0'. The counts weight
+		// must be set accordingly
+		cadytsConfig.setVarianceScale(100);
+
 		AnalyticalCalibrator<T> matsimCalibrator = ModalDistanceCadytsBuilderImpl.buildCalibrator(config);
 
 		//add counts data into calibrator
@@ -65,7 +70,11 @@ public final class ModalDistanceCadytsBuilderImpl {
 			}
 			DistanceBin bin = entry.getValue();
 			//only one measurement per day.
-			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+			// set the standard deviation for marginals to a 'big' value to avoid the cadyts correction being cut of at
+			// '15.0' for all bins. When all bins pull with a correction of '15.0' all corrections cancel out each other.
+			// The correction factor is calculated as followed: (expectedValue - simulatedValue) / stddev^2
+			// the stddev can also be set globally for cadyts but then it would also affect the counts calibration
+			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getCount(), 1000 * 10, SingleLinkMeasurement.TYPE.COUNT_VEH);
 			numberOfAddedMeasurements++;
 		}
 
