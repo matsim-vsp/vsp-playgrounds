@@ -2,30 +2,15 @@ package ch.ethz.matsim.ier.emulator;
 
 import java.util.List;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.ActivityEndEvent;
-import org.matsim.api.core.v01.events.ActivityStartEvent;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.utils.misc.Time;
-import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
@@ -54,10 +39,10 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 		double time = 0.0;
 
 		for (int i = 0; i < elements.size(); i++) {
-			PlanElement element = elements.get(i);
+			final PlanElement element = elements.get(i);
 
-			boolean isFirstElement = i == 0;
-			boolean isLastElement = i == elements.size() - 1;
+			final boolean isFirstElement = (i == 0);
+			final boolean isLastElement = (i == (elements.size() - 1));
 
 			if (element instanceof Activity) {
 				/*
@@ -69,21 +54,27 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 
 				Activity activity = (Activity) element;
 
-				if (!isFirstElement) {
-					eventsManager.processEvent(new ActivityStartEvent(time, person.getId(), activity.getLinkId(),
-							activity.getFacilityId(), activity.getType()));
-				}
+				time += (new ActivityEmulatorImpl(eventsManager)).emulateActivityAndReturnEndTime_s(activity, person,
+						time, isFirstElement, isLastElement);
 
-				if (!Time.isUndefinedTime(activity.getEndTime())) {
-					time = Math.max(time, activity.getEndTime());
-				} else {
-					time += activity.getMaximumDuration();
-				}
+				// if (!isFirstElement) {
+				// eventsManager.processEvent(new ActivityStartEvent(time, person.getId(),
+				// activity.getLinkId(),
+				// activity.getFacilityId(), activity.getType()));
+				// }
+				//
+				// if (!Time.isUndefinedTime(activity.getEndTime())) {
+				// time = Math.max(time, activity.getEndTime());
+				// } else {
+				// time += activity.getMaximumDuration();
+				// }
+				//
+				// if (!isLastElement) {
+				// eventsManager.processEvent(new ActivityEndEvent(time, person.getId(),
+				// activity.getLinkId(),
+				// activity.getFacilityId(), activity.getType()));
+				// }
 
-				if (!isLastElement) {
-					eventsManager.processEvent(new ActivityEndEvent(time, person.getId(), activity.getLinkId(),
-							activity.getFacilityId(), activity.getType()));
-				}
 			} else if (element instanceof Leg) {
 				/*
 				 * Same is true for legs. We need to generate departure and arrival events and
@@ -95,62 +86,85 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 				Activity previousActivity = (Activity) elements.get(i - 1);
 				Activity followingActivity = (Activity) elements.get(i + 1);
 
-				eventsManager.processEvent(
-						new PersonDepartureEvent(time, person.getId(), previousActivity.getLinkId(), leg.getMode()));
+				time += (new CarLegEmulatorImpl(eventsManager, this.network, this.travelTime))
+						.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity, time);
 
-				// ============================================================
-
-				Route route = leg.getRoute();
-
-				if (route instanceof NetworkRoute) {
-					
-					
-					NetworkRoute networkRoute = (NetworkRoute) route;
-					if (!networkRoute.getStartLinkId().equals(networkRoute.getEndLinkId())) {
-
-						Id<Vehicle> vehicleId = Id.createVehicleId(person.getId());
-						
-						double routeTime_s = time;
-						Link link = this.network.getLinks().get(networkRoute.getStartLinkId());
-						eventsManager.processEvent(new VehicleEntersTrafficEvent(routeTime_s, person.getId(),
-								link.getId(), vehicleId, leg.getMode(), 0.0));
-						routeTime_s += this.travelTime.getLinkTravelTime(link, routeTime_s, person, null);
-						eventsManager.processEvent(new LinkLeaveEvent(routeTime_s, vehicleId, link.getId()));
-
-						for (Id<Link> linkId : networkRoute.getLinkIds()) {
-							link = this.network.getLinks().get(linkId);
-							eventsManager.processEvent(new LinkEnterEvent(routeTime_s, vehicleId, link.getId()));
-							routeTime_s += this.travelTime.getLinkTravelTime(link, routeTime_s, person, null);
-							eventsManager.processEvent(new LinkLeaveEvent(routeTime_s, vehicleId, link.getId()));
-						}
-
-						// TODO first a LinkEnterEvent?
-						eventsManager.processEvent(new VehicleLeavesTrafficEvent(routeTime_s, person.getId(),
-								networkRoute.getEndLinkId(), vehicleId, leg.getMode(), 0.0));
-					}
-					
-				} else {
-
-					// Here we currently only add a teleportation event. For vehicular modes like
-					// car
-					// or pt we would probably like to add more events here. (Like
-					// PersonEntersVehicle). The important question is which events do we actually
-					// need to create to make the scoring consistent.
-
-					double travelTime = leg.getTravelTime();
-					if (Time.isUndefinedTime(travelTime)) {
-						// For some reason some legs don't have a proper travel time in equil scenario.
-						// Not sure why, but I don't think it has to do with this whole setup here.
-						travelTime = 3600.0;
-					}
-					eventsManager.processEvent(
-							new TeleportationArrivalEvent(time, person.getId(), leg.getRoute().getDistance()));
-				}
-
-				
-				time += leg.getTravelTime();
-				eventsManager.processEvent(
-						new PersonArrivalEvent(time, person.getId(), followingActivity.getLinkId(), leg.getMode()));
+				// eventsManager.processEvent(
+				// new PersonDepartureEvent(time, person.getId(), previousActivity.getLinkId(),
+				// leg.getMode()));
+				//
+				// // ============================================================
+				//
+				// final Route route = leg.getRoute();
+				// if (route instanceof NetworkRoute) {
+				//
+				// final NetworkRoute networkRoute = (NetworkRoute) route;
+				// if (!networkRoute.getStartLinkId().equals(networkRoute.getEndLinkId())) {
+				//
+				// final Id<Vehicle> vehicleId = Id.createVehicleId(person.getId());
+				//
+				// double routeTime_s = time;
+				// Link link = this.network.getLinks().get(networkRoute.getStartLinkId());
+				// eventsManager.processEvent(new VehicleEntersTrafficEvent(routeTime_s,
+				// person.getId(),
+				// link.getId(), vehicleId, leg.getMode(), 0.0));
+				// routeTime_s += this.travelTime.getLinkTravelTime(link, routeTime_s, person,
+				// null);
+				// eventsManager.processEvent(new LinkLeaveEvent(routeTime_s, vehicleId,
+				// link.getId()));
+				//
+				// for (Id<Link> linkId : networkRoute.getLinkIds()) {
+				// link = this.network.getLinks().get(linkId);
+				// eventsManager.processEvent(new LinkEnterEvent(routeTime_s, vehicleId,
+				// link.getId()));
+				// routeTime_s += this.travelTime.getLinkTravelTime(link, routeTime_s, person,
+				// null);
+				// eventsManager.processEvent(new LinkLeaveEvent(routeTime_s, vehicleId,
+				// link.getId()));
+				// }
+				//
+				// eventsManager
+				// .processEvent(new LinkEnterEvent(routeTime_s, vehicleId,
+				// networkRoute.getEndLinkId()));
+				// eventsManager.processEvent(new VehicleLeavesTrafficEvent(routeTime_s,
+				// person.getId(),
+				// networkRoute.getEndLinkId(), vehicleId, leg.getMode(), 0.0));
+				//
+				// // Asserting that route and leg travel times are consistent up to one minute.
+				// final double legArrivalTime_s = leg.getDepartureTime() + leg.getTravelTime();
+				// final double timeError_s = Math.abs(legArrivalTime_s - routeTime_s);
+				// if (timeError_s > 60.0) {
+				// throw new RuntimeException("Person " + person.getId() + " with time error of
+				// " + timeError_s
+				// + "s : Leg arrival time is " + legArrivalTime_s + "s, but route arrival time
+				// is "
+				// + routeTime_s + "s");
+				// }
+				// }
+				// } else {
+				//
+				// // Here we currently only add a teleportation event. For vehicular modes like
+				// // car or pt we would probably like to add more events here. (Like
+				// // PersonEntersVehicle). The important question is which events do we
+				// actually
+				// // need to create to make the scoring consistent.
+				//
+				// double travelTime = leg.getTravelTime();
+				// if (Time.isUndefinedTime(travelTime)) {
+				// // For some reason some legs don't have a proper travel time in equil
+				// scenario.
+				// // Not sure why, but I don't think it has to do with this whole setup here.
+				// travelTime = 3600.0;
+				// }
+				// eventsManager.processEvent(
+				// new TeleportationArrivalEvent(time, person.getId(),
+				// leg.getRoute().getDistance()));
+				// }
+				//
+				// time += leg.getTravelTime();
+				// eventsManager.processEvent(
+				// new PersonArrivalEvent(time, person.getId(), followingActivity.getLinkId(),
+				// leg.getMode()));
 			}
 		}
 	}

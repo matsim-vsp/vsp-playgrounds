@@ -10,7 +10,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.config.groups.GlobalConfigGroup;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.corelisteners.PlansReplanning;
 import org.matsim.core.controler.events.ReplanningEvent;
 import org.matsim.core.controler.listener.ReplanningListener;
@@ -24,6 +25,7 @@ import com.google.inject.Singleton;
 
 import ch.ethz.matsim.ier.emulator.AgentEmulator;
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
+import ch.ethz.matsim.ier.run.IERConfigGroup;
 
 /**
  * This class replaces the standard MATSim replanning. It fullfills a number of
@@ -43,12 +45,10 @@ import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 public final class IERReplanning implements PlansReplanning, ReplanningListener {
 	private final static Logger logger = Logger.getLogger(IERReplanning.class);
 
-	// All of the parameters are hardcoded now, but we can make it configurable.
-
 	/**
 	 * Number of replanning + scoring iterations.
 	 */
-	private final int numberOfIterations = 3; // TODO
+	private final int iterationsPerCycle;
 
 	/**
 	 * Number of threads on which the emulation of plans is happening. Currently, we
@@ -64,7 +64,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	 * of run time and some may have only "light" ones. This would also effectively
 	 * increase runtime.
 	 */
-	private final int batchSize = 200;
+	private final int batchSize;
 
 	private final Provider<ReplanningContext> replanningContextProvider;
 	private final StrategyManager strategyManager;
@@ -74,12 +74,17 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 	@Inject
 	IERReplanning(StrategyManager strategyManager, Population population,
-			Provider<ReplanningContext> replanningContextProvider, GlobalConfigGroup globalConfig,
+			Provider<ReplanningContext> replanningContextProvider, Config config,
 			Provider<AgentEmulator> agentEmulatorProvider, ReplannerSelector replannerSelector) {
 		this.population = population;
 		this.strategyManager = strategyManager;
 		this.replanningContextProvider = replanningContextProvider;
-		this.numberOfThreads = globalConfig.getNumberOfThreads();
+		this.numberOfThreads = config.global().getNumberOfThreads();
+		{
+			final IERConfigGroup ierConfig = ConfigUtils.addOrGetModule(config, IERConfigGroup.class);
+			this.batchSize = ierConfig.getBatchSize();
+			this.iterationsPerCycle = ierConfig.getIterationsPerCycle();
+		}
 		this.agentEmulatorProvider = agentEmulatorProvider;
 		this.replannerSelector = replannerSelector;
 	}
@@ -88,8 +93,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		try {
 
 			/*
-			 * TODO This handler observes the network experience of all agents with their
-			 * new proposed plans (i.e. the result of the numberOfIterations replanning
+			 * This handler observes the network experience of all agents with their new
+			 * proposed plans (i.e. the result of the iterationsPerCycle re-planning
 			 * iterations *prior* to the call to this.replannerSelector.afterReplanning().
 			 * 
 			 * Necessary events for car traffic: LinkEnterEvent, VehicleEntersTrafficEvent,
@@ -98,10 +103,10 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			 * Necessary events for public transport: PersonEntersVehicleEvent.
 			 * 
 			 */
-			EventHandler handlerForLastReplanningIteration = this.replannerSelector
+			final EventHandler handlerForLastReplanningIteration = this.replannerSelector
 					.getHandlerForHypotheticalNetworkExperience();
-			
-			EventHandler handlerForOtherReplanningIterations = new EventHandler() {
+
+			final EventHandler handlerForOtherReplanningIterations = new EventHandler() {
 			};
 
 			/*
@@ -110,28 +115,29 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			 */
 			this.replannerSelector.beforeReplanning();
 
-			ReplanningContext replanningContext = replanningContextProvider.get();
+			final ReplanningContext replanningContext = this.replanningContextProvider.get();
 
-			for (int i = 0; i < numberOfIterations; i++) {
-				logger.info(String.format("Running replanning iteration %d/%d", i + 1, numberOfIterations));
+			for (int i = 0; i < this.iterationsPerCycle; i++) {
+				logger.info(String.format("Started replanning iteration %d/%d", i + 1, iterationsPerCycle));
 
 				// We run replanning on all agents (exactly as it is defined in the config)
-				strategyManager.run(population, replanningContext);
-				
-				EventHandler currentEventHandler = handlerForOtherReplanningIterations;
-				
-				if (i == numberOfIterations - 1) {
+				this.strategyManager.run(this.population, replanningContext);
+
+				final EventHandler currentEventHandler;
+				if (i == this.iterationsPerCycle - 1) {
 					currentEventHandler = handlerForLastReplanningIteration;
+				} else {
+					currentEventHandler = handlerForOtherReplanningIterations;
 				}
 
 				// We emulate the whole population in parallel
-				emulateInParallel(population, event.getIteration(), currentEventHandler);
+				emulateInParallel(this.population, event.getIteration(), currentEventHandler);
 
-				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, numberOfIterations));
+				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, iterationsPerCycle));
 			}
 
 			/*
-			 * TODO Before the following call, feed the handlerForLastReplanningIteration.
+			 * Before the following call, feed the handlerForLastReplanningIteration.
 			 * 
 			 * afterReplanning() compares the plans and (hypothetical) network experiences
 			 * of the population before and after the replanning and resets the plans of
@@ -145,7 +151,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		}
 	}
 
-	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler) throws InterruptedException {
+	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler)
+			throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
 		List<Thread> threads = new LinkedList<>();
 

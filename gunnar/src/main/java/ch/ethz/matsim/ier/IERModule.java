@@ -15,11 +15,11 @@ import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
  * @author shoerl
  */
 public final class IERModule extends AbstractModule {
-	
-	private final Class<? extends ReplannerSelector> replannerSelector;
+
+	private final Class<? extends ReplannerSelector> replannerSelectorClass;
 
 	public IERModule(Class<? extends ReplannerSelector> replannerSelector) {
-		this.replannerSelector = replannerSelector;
+		this.replannerSelectorClass = replannerSelector;
 	}
 
 	public IERModule() {
@@ -34,6 +34,6 @@ public final class IERModule extends AbstractModule {
 		// We choose the simple emulator for now.
 		bind(SimulationEmulator.class).to(FirstSimpleSimulationEmulator.class);
 
-		bind(ReplannerSelector.class).to(this.replannerSelector);
+		bind(ReplannerSelector.class).to(this.replannerSelectorClass);
 	}
 }

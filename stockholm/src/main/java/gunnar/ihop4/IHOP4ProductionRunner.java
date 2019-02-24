@@ -67,9 +67,9 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
-import cadyts.utilities.misc.Units;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
+import floetteroed.utilities.Units;
 import gunnar.ihop4.sampersutilities.SampersScoringFunctionModule;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
@@ -782,20 +782,30 @@ public class IHOP4ProductionRunner {
 		// config.getModules().remove(PSimConfigGroup.GROUP_NAME);
 		// config.getModules().remove(GreedoConfigGroup.GROUP_NAME);
 
-		final Greedo greedo = new Greedo();
-		greedo.meet(config);
+		final Greedo greedo;
+		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
+			log.info("Using greedo.");
+			greedo = new Greedo();
+			greedo.meet(config);
+		} else {
+			log.info("NOT using greedo.");
+			greedo = null;
+		}
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		keepOnlyStrictCarUsers(scenario);
-		greedo.meet(scenario);
+		if (greedo != null) {
+			greedo.meet(scenario);
+		}
 
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersScoringFunctionModule());
 
-		// controler.addOverridingModule(greedo);
-		for (AbstractModule module : greedo.getModules()) {
-			controler.addOverridingModule(module);
+		if (greedo != null) {
+			for (AbstractModule module : greedo.getModules()) {
+				controler.addOverridingModule(module);
+			}
 		}
 
 		controler.run();
@@ -808,11 +818,12 @@ public class IHOP4ProductionRunner {
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-//		 if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
-//		 throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
-//		 }
-//		 run(config);
+		// if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
+		// throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is
+		// missing.");
+		// }
+		// run(config);
 
-		 runWithSampersDynamics(config);
+		runWithSampersDynamics(config);
 	}
 }

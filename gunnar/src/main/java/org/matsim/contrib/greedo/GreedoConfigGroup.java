@@ -262,7 +262,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binCnt = binCnt;
 	}
 
-	// -------------------- binCnt_s --------------------
+	// -------------------- iterationsPerCycle --------------------
 
 	private int iterationsPerCycle;
 
@@ -388,6 +388,9 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	@StringSetter("adjustStrategyWeights")
 	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
+		if (adjustStrategyWeights == false) {
+			throw new RuntimeException("Setting this to false conflicts with RemoveWorstPlan.");
+		}
 		this.adjustStrategyWeights = adjustStrategyWeights;
 	}
 

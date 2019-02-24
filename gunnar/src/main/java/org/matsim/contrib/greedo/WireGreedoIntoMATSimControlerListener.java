@@ -68,6 +68,7 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDiffere
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.population.PersonUtils;
 
 import com.google.inject.Inject;
 
@@ -219,6 +220,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 			if (!replanners.contains(person.getId())) {
 				this.lastPhysicalPopulationState.set(person);
 			}
+			PersonUtils.removeUnselectedPlans(person); 
 		}
 		
 		this.numberOfReplanners = replanners.size();
