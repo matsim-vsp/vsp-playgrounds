@@ -22,6 +22,7 @@ package gunnar.wum;
 import org.apache.commons.io.FileUtils;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -36,6 +37,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
@@ -166,8 +168,30 @@ public class WUMProductionRunner {
 		controler.run();
 	}
 
+	static void createNetworkWithPt() {
+
+		System.out.println("Comment me out: System.exit(0);");
+		System.exit(0);
+		
+		final Config config = ConfigUtils.createConfig();
+		config.network()
+				.setInputFile("/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/network-output/network.xml");
+		config.transit().setTransitScheduleFile(
+				"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitSchedule_reduced.xml.gz");
+		config.transit().setVehiclesFile(
+				"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
+
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		 new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(),
+		 "tr_").createNetwork();
+
+		 final NetworkWriter writer = new NetworkWriter(scenario.getNetwork());
+		 writer.write("/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/network-with-PT.xml");
+	}
+
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
+		// createNetworkWithPt();
 		runProductionScenario();
 		System.out.println("... DONE");
 	}
