@@ -90,7 +90,7 @@ public class WUMProductionRunner {
 		}
 	}
 
-	static void runProductionScenario(final boolean runLocally) {
+	static void runProductionScenario(final boolean runLocally, final boolean cleanInitialPlans) {
 
 		final String configFileName;
 		if (runLocally) {
@@ -101,7 +101,6 @@ public class WUMProductionRunner {
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
-
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -129,7 +128,9 @@ public class WUMProductionRunner {
 		}
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		removeModeInformation(scenario);
+		if (cleanInitialPlans) {
+			removeModeInformation(scenario);
+		}
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 
 		if (greedo != null) {
@@ -168,7 +169,8 @@ public class WUMProductionRunner {
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
 		final boolean runLocally = false;
-		runProductionScenario(runLocally);
+		final boolean cleanInitialPlans = false;
+		runProductionScenario(runLocally, cleanInitialPlans);
 		System.out.println("... DONE");
 	}
 
