@@ -8,22 +8,28 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.corelisteners.PlansReplanning;
 import org.matsim.core.controler.events.ReplanningEvent;
 import org.matsim.core.controler.listener.ReplanningListener;
+import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.replanning.ReplanningContext;
 import org.matsim.core.replanning.StrategyManager;
+import org.matsim.core.scoring.EventsToScore;
+import org.matsim.core.scoring.ScoringFunctionFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import ch.ethz.matsim.ier.emulator.AgentEmulator;
+import ch.ethz.matsim.ier.emulator.SimulationEmulator;
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 import ch.ethz.matsim.ier.run.IERConfigGroup;
 
@@ -68,16 +74,22 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 	private final Provider<ReplanningContext> replanningContextProvider;
 	private final StrategyManager strategyManager;
-	private final Population population;
+	private final Scenario scenario;
+	// private final Population population;
 	private final Provider<AgentEmulator> agentEmulatorProvider;
+	private final Provider<SimulationEmulator> simulationEmulatorProvider;
 	private final ReplannerSelector replannerSelector;
+	private final ScoringFunctionFactory scoringFunctionFactory;
 
 	@Inject
-	IERReplanning(StrategyManager strategyManager, Population population,
+	IERReplanning(StrategyManager strategyManager, Scenario scenario,
 			Provider<ReplanningContext> replanningContextProvider, Config config,
-			Provider<AgentEmulator> agentEmulatorProvider, ReplannerSelector replannerSelector) {
-		this.population = population;
+			Provider<AgentEmulator> agentEmulatorProvider, 
+			Provider<SimulationEmulator> simulationEmulatorProvider,
+			ReplannerSelector replannerSelector,
+			ScoringFunctionFactory scoringFunctionFactory) {
 		this.strategyManager = strategyManager;
+		this.scenario = scenario;
 		this.replanningContextProvider = replanningContextProvider;
 		this.numberOfThreads = config.global().getNumberOfThreads();
 		{
@@ -86,7 +98,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			this.iterationsPerCycle = ierConfig.getIterationsPerCycle();
 		}
 		this.agentEmulatorProvider = agentEmulatorProvider;
+		this.simulationEmulatorProvider = simulationEmulatorProvider;
 		this.replannerSelector = replannerSelector;
+		this.scoringFunctionFactory = scoringFunctionFactory;
 	}
 
 	public void notifyReplanning(ReplanningEvent event) {
@@ -121,7 +135,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				logger.info(String.format("Started replanning iteration %d/%d", i + 1, iterationsPerCycle));
 
 				// We run replanning on all agents (exactly as it is defined in the config)
-				this.strategyManager.run(this.population, replanningContext);
+				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
 				final EventHandler currentEventHandler;
 				if (i == this.iterationsPerCycle - 1) {
@@ -130,8 +144,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					currentEventHandler = handlerForOtherReplanningIterations;
 				}
 
-				// We emulate the whole population in parallel
-				emulateInParallel(this.population, event.getIteration(), currentEventHandler);
+				emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+				// emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
 
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, iterationsPerCycle));
 			}
@@ -151,6 +165,26 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		}
 	}
 
+	private void emulateSequentially(Population population, int iteration, EventHandler eventHandler)
+			throws InterruptedException {
+
+		final EventsManager eventsManager = EventsUtils.createEventsManager();
+		final EventsToScore eventsToScore = EventsToScore.createWithScoreUpdating(this.scenario,
+				this.scoringFunctionFactory, eventsManager);
+		eventsToScore.beginIteration(iteration);
+
+		eventsManager.addHandler(eventHandler);
+		eventsManager.resetHandlers(iteration);
+
+		for (Person person : population.getPersons().values()) {
+			this.simulationEmulatorProvider.get().emulate(person, person.getSelectedPlan(), eventsManager);
+		}
+
+		eventsManager.finishProcessing();
+		eventsToScore.finish();
+	}
+
+	
 	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler)
 			throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
