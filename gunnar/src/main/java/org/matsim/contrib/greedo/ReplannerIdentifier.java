@@ -261,8 +261,15 @@ public class ReplannerIdentifier {
 		// Instantiate the re-planning recipe.
 
 		final ReplannerIdentifierRecipe recipe;
-		if (GreedoConfigGroup.ModeType.off == this.greedoConfig.getModeTypeField()) {
+		if (GreedoConfigGroup.ModeType.sample == this.greedoConfig.getModeTypeField()) {
 			recipe = new UniformReplanningRecipe(this.lambdaBar);
+		} else if (GreedoConfigGroup.ModeType.off == this.greedoConfig.getModeTypeField()) {
+			recipe = new ReplannerIdentifierRecipe() {
+				@Override
+				public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
+					return true;
+				}
+			};
 		} else if (GreedoConfigGroup.ModeType.accelerate == this.greedoConfig.getModeTypeField()) {
 			recipe = new AccelerationRecipe();
 		} else if (GreedoConfigGroup.ModeType.mah2007 == this.greedoConfig.getModeTypeField()) {

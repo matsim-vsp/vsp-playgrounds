@@ -205,7 +205,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// -------------------- mode --------------------
 
 	public static enum ModeType {
-		off, accelerate, mah2007, mah2009
+		off, sample, accelerate, mah2007, mah2009
 	};
 
 	private ModeType modeTypeField = ModeType.accelerate;
@@ -388,9 +388,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	@StringSetter("adjustStrategyWeights")
 	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
-		if (adjustStrategyWeights == false) {
-			throw new RuntimeException("Setting this to false conflicts with RemoveWorstPlan.");
-		}
 		this.adjustStrategyWeights = adjustStrategyWeights;
 	}
 

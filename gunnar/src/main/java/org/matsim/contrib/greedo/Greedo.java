@@ -73,8 +73,8 @@ public class Greedo {
 		final GreedoConfigGroup accelerationConfig = ConfigUtils.addOrGetModule(config, GreedoConfigGroup.class);
 
 		/*
-		 * Ensure that the simulation starts at iteration 0. One could relax at the cost
-		 * of somewhat messier code.
+		 * Ensure that the simulation starts at iteration 0. One could relax this at the cost
+		 * of probably somewhat messier code.
 		 * 
 		 * TODO Probably no longer necessary.
 		 */
@@ -157,22 +157,22 @@ public class Greedo {
 		// log.warn(" writePlansInterval = " +
 		// config.controler().getWritePlansInterval());
 
-		/*
-		 * Use minimal choice set and always remove the worse plan. This probably as
-		 * close as it can get to best-response in the presence of random innovation
-		 * strategies.
-		 */
-		config.strategy().setMaxAgentPlanMemorySize(1);
-		config.strategy().setPlanSelectorForRemoval("WorstPlanSelector");
-		log.warn("Approximating a best-response simulation through the following settings:");
-		log.warn("  maxAgentPlanMemorySize = 1");
-		log.warn("  planSelectorForRemoval = worstPlanSelector");
-
-		/*
-		 * Keep only plan innovation strategies. Re-weight for maximum emulation efficiency.
-		 * 
-		 */
 		if (accelerationConfig.getAdjustStrategyWeights()) {
+
+			/*
+			 * Use minimal choice set and always remove the worse plan. This probably as
+			 * close as it can get to best-response in the presence of random innovation
+			 * strategies.
+			 */
+			config.strategy().setMaxAgentPlanMemorySize(1);
+			config.strategy().setPlanSelectorForRemoval("WorstPlanSelector");
+			log.warn("Approximating a best-response simulation through the following settings:");
+			log.warn("  maxAgentPlanMemorySize = 1");
+			log.warn("  planSelectorForRemoval = worstPlanSelector");
+
+			/*
+			 * Keep only plan innovation strategies. Re-weight for maximum emulation efficiency.
+			 */
 			final double singleExpensiveStrategyProba = 1.0 / accelerationConfig.getIterationsPerCycle();
 			final double cheapStrategyProbaSum = 1.0 - singleExpensiveStrategyProba * expensiveStrategyCnt;
 			final double cheapStrategyWeightFactor = cheapStrategyProbaSum / cheapStrategyWeightSum;

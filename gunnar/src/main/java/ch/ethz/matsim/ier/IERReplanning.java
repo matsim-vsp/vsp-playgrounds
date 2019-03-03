@@ -84,10 +84,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	@Inject
 	IERReplanning(StrategyManager strategyManager, Scenario scenario,
 			Provider<ReplanningContext> replanningContextProvider, Config config,
-			Provider<AgentEmulator> agentEmulatorProvider, 
-			Provider<SimulationEmulator> simulationEmulatorProvider,
-			ReplannerSelector replannerSelector,
-			ScoringFunctionFactory scoringFunctionFactory) {
+			Provider<AgentEmulator> agentEmulatorProvider, Provider<SimulationEmulator> simulationEmulatorProvider,
+			ReplannerSelector replannerSelector, ScoringFunctionFactory scoringFunctionFactory) {
 		this.strategyManager = strategyManager;
 		this.scenario = scenario;
 		this.replanningContextProvider = replanningContextProvider;
@@ -145,7 +143,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				}
 
 				emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
-				// emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+				// emulateInParallel(this.scenario.getPopulation(), event.getIteration(),
+				// currentEventHandler);
 
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, iterationsPerCycle));
 			}
@@ -168,7 +167,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	private void emulateSequentially(Population population, int iteration, EventHandler eventHandler)
 			throws InterruptedException {
 
-		final EventsManager eventsManager = EventsUtils.createEventsManager();
+		final EventsManager eventsManager = EventsUtils.createEventsManager(); // this.scenario.getConfig());
 		final EventsToScore eventsToScore = EventsToScore.createWithScoreUpdating(this.scenario,
 				this.scoringFunctionFactory, eventsManager);
 		eventsToScore.beginIteration(iteration);
@@ -182,9 +181,17 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 		eventsManager.finishProcessing();
 		eventsToScore.finish();
+
+		for (Person person : population.getPersons().values()) {
+			final double expectedScore = eventsToScore.getAgentScore(person.getId());
+			final double observedScore = person.getSelectedPlan().getScore();
+			if (observedScore != expectedScore) {
+				throw new RuntimeException("person " + person.getId() + " should have score " + expectedScore
+						+ " but has score " + observedScore);
+			}
+		}
 	}
 
-	
 	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler)
 			throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();

@@ -812,9 +812,49 @@ public class IHOP4ProductionRunner {
 
 	}
 
+	static void runWithSampersDynamicsOnlyIER(final Config config) {
+
+		config.plans().setInputFile("1PctAllModes_enriched.xml");
+
+		config.getModules().remove(IhopConfigGroup.GROUP_NAME);
+		config.getModules().remove(PSimConfigGroup.GROUP_NAME);
+		config.getModules().remove(GreedoConfigGroup.GROUP_NAME);
+
+		// final Greedo greedo;
+		// if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
+		// log.info("Using greedo.");
+		// greedo = new Greedo();
+		// greedo.meet(config);
+		// } else {
+		// log.info("NOT using greedo.");
+		// greedo = null;
+		// }
+
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		keepOnlyStrictCarUsers(scenario);
+		// if (greedo != null) {
+		// greedo.meet(scenario);
+		// }
+
+		final Controler controler = new Controler(scenario);
+		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+		controler.addOverridingModule(new SampersScoringFunctionModule());
+
+		// controler.addOverridingModule(new IERModule());
+
+		// if (greedo != null) {
+		// for (AbstractModule module : greedo.getModules()) {
+		// controler.addOverridingModule(module);
+		// }
+		// }
+
+		controler.run();
+
+	}
+
 	public static void main(String[] args) {
 
-		final Config config = ConfigUtils.loadConfig(args[0], new RoadPricingConfigGroup());
+		final Config config = ConfigUtils.loadConfig(args[0], new RoadPricingConfigGroup(), new GreedoConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -825,5 +865,6 @@ public class IHOP4ProductionRunner {
 		// run(config);
 
 		runWithSampersDynamics(config);
+		// runWithSampersDynamicsOnlyIER(config);
 	}
 }
