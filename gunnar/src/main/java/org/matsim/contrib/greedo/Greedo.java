@@ -70,7 +70,7 @@ public class Greedo {
 		if (!config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
 			log.warn("Config module " + GreedoConfigGroup.GROUP_NAME + " is missing, falling back to default values.");
 		}
-		final GreedoConfigGroup accelerationConfig = ConfigUtils.addOrGetModule(config, GreedoConfigGroup.class);
+		final GreedoConfigGroup greedoConfig = ConfigUtils.addOrGetModule(config, GreedoConfigGroup.class);
 
 		/*
 		 * Ensure that the simulation starts at iteration 0. One could relax this at the cost
@@ -95,14 +95,12 @@ public class Greedo {
 		for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
 			final String strategyName = strategySettings.getStrategyName();
 			if (strategySettings.getWeight() > 0) {
-				if (accelerationConfig.getExpensiveStrategyList().contains(strategyName)) {
+				if (greedoConfig.getExpensiveStrategyList().contains(strategyName)) {
 					expensiveStrategyCnt++;
-				} else if (accelerationConfig.getCheapStrategyList().contains(strategyName)) {
+				} else if (greedoConfig.getCheapStrategyList().contains(strategyName)) {
 					cheapStrategyCnt++;
 					cheapStrategyWeightSum += strategySettings.getWeight();
-				} else {
-					log.warn("Dismissing unknown strategy: " + strategyName);
-				}
+				} 
 			}
 		}
 
@@ -111,24 +109,24 @@ public class Greedo {
 		 * innovation strategies.
 		 */
 		{
-			final int originalIterationsPerCycle = accelerationConfig.getIterationsPerCycle();
+			final int originalIterationsPerCycle = greedoConfig.getIterationsPerCycle();
 			if (cheapStrategyCnt > 0) {
 				// Make sure that every strategy can be used used on average at least once.
-				accelerationConfig.setIterationsPerCycle(
+				greedoConfig.setIterationsPerCycle(
 						Math.max(expensiveStrategyCnt + cheapStrategyCnt, originalIterationsPerCycle));
 			} else {
 				if (expensiveStrategyCnt > 0) {
 					// Only best-response strategies: every best-response strategy is used on
 					// average exactly once.
-					accelerationConfig.setIterationsPerCycle(expensiveStrategyCnt);
+					greedoConfig.setIterationsPerCycle(expensiveStrategyCnt);
 				} else {
 					// No innovation strategies at all!
 					log.warn("No relevant strategies recognized.");
 				}
 			}
-			if (accelerationConfig.getIterationsPerCycle() != originalIterationsPerCycle) {
+			if (greedoConfig.getIterationsPerCycle() != originalIterationsPerCycle) {
 				log.warn("Adjusted number of emulated iterations per cycle from " + originalIterationsPerCycle + " to "
-						+ accelerationConfig.getIterationsPerCycle() + ".");
+						+ greedoConfig.getIterationsPerCycle() + ".");
 			}
 		}
 
@@ -157,7 +155,7 @@ public class Greedo {
 		// log.warn(" writePlansInterval = " +
 		// config.controler().getWritePlansInterval());
 
-		if (accelerationConfig.getAdjustStrategyWeights()) {
+		if (greedoConfig.getAdjustStrategyWeights()) {
 
 			/*
 			 * Use minimal choice set and always remove the worse plan. This probably as
@@ -173,15 +171,15 @@ public class Greedo {
 			/*
 			 * Keep only plan innovation strategies. Re-weight for maximum emulation efficiency.
 			 */
-			final double singleExpensiveStrategyProba = 1.0 / accelerationConfig.getIterationsPerCycle();
+			final double singleExpensiveStrategyProba = 1.0 / greedoConfig.getIterationsPerCycle();
 			final double cheapStrategyProbaSum = 1.0 - singleExpensiveStrategyProba * expensiveStrategyCnt;
 			final double cheapStrategyWeightFactor = cheapStrategyProbaSum / cheapStrategyWeightSum;
 			double probaSum = 0;
 			for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
 				final String strategyName = strategySettings.getStrategyName();
-				if (accelerationConfig.getExpensiveStrategyList().contains(strategyName)) {
+				if (greedoConfig.getExpensiveStrategyList().contains(strategyName)) {
 					strategySettings.setWeight(singleExpensiveStrategyProba);
-				} else if (accelerationConfig.getCheapStrategyList().contains(strategyName)) {
+				} else if (greedoConfig.getCheapStrategyList().contains(strategyName)) {
 					strategySettings.setWeight(cheapStrategyWeightFactor * strategySettings.getWeight());
 				} else {
 					strategySettings.setWeight(0.0); // i.e., dismiss

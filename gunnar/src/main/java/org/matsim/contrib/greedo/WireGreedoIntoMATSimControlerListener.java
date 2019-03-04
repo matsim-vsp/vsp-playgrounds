@@ -68,7 +68,6 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDiffere
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
-import org.matsim.core.population.PersonUtils;
 
 import com.google.inject.Inject;
 
@@ -186,7 +185,6 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 	@Override
 	public void beforeReplanning() {
-		
 		this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
 	}
 

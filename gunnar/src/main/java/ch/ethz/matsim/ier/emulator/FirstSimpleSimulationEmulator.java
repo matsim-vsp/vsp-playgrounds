@@ -2,7 +2,6 @@ package ch.ethz.matsim.ier.emulator;
 
 import java.util.List;
 
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -10,7 +9,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Inject;
 
@@ -23,13 +21,15 @@ import com.google.inject.Inject;
  */
 public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 
-	private Network network;
-	private TravelTime travelTime;
+	private final MatsimServices services;
+	// private Network network;
+	// private TravelTime travelTime;
 
 	@Inject
 	public FirstSimpleSimulationEmulator(MatsimServices services) {
-		this.network = services.getScenario().getNetwork();
-		this.travelTime = services.getLinkTravelTimes();
+		this.services = services;
+		// this.network = services.getScenario().getNetwork();
+		// this.travelTime = services.getLinkTravelTimes();
 	}
 
 	@Override // TODO synchronized!
@@ -45,6 +45,7 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 			final boolean isLastElement = (i == (elements.size() - 1));
 
 			if (element instanceof Activity) {
+				
 				/*
 				 * Simulating activities is quite straight-forward. Either they have an end time
 				 * set or they have a maximum duration. It only gets a bit more complicated for
@@ -54,26 +55,8 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 
 				Activity activity = (Activity) element;
 
-				time += (new ActivityEmulatorImpl(eventsManager)).emulateActivityAndReturnEndTime_s(activity, person,
+				time = (new ActivityEmulatorImpl(eventsManager)).emulateActivityAndReturnEndTime_s(activity, person,
 						time, isFirstElement, isLastElement);
-
-				// if (!isFirstElement) {
-				// eventsManager.processEvent(new ActivityStartEvent(time, person.getId(),
-				// activity.getLinkId(),
-				// activity.getFacilityId(), activity.getType()));
-				// }
-				//
-				// if (!Time.isUndefinedTime(activity.getEndTime())) {
-				// time = Math.max(time, activity.getEndTime());
-				// } else {
-				// time += activity.getMaximumDuration();
-				// }
-				//
-				// if (!isLastElement) {
-				// eventsManager.processEvent(new ActivityEndEvent(time, person.getId(),
-				// activity.getLinkId(),
-				// activity.getFacilityId(), activity.getType()));
-				// }
 
 			} else if (element instanceof Leg) {
 				/*
@@ -86,7 +69,7 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 				Activity previousActivity = (Activity) elements.get(i - 1);
 				Activity followingActivity = (Activity) elements.get(i + 1);
 
-				time += (new CarLegEmulatorImpl(eventsManager, this.network, this.travelTime))
+				time = (new CarLegEmulatorImpl(eventsManager, this.services.getScenario().getNetwork(), this.services.getLinkTravelTimes()))
 						.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity, time);
 
 				// eventsManager.processEvent(

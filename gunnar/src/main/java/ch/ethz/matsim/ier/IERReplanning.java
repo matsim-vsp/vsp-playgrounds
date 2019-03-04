@@ -107,13 +107,12 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			/*
 			 * This handler observes the network experience of all agents with their new
 			 * proposed plans (i.e. the result of the iterationsPerCycle re-planning
-			 * iterations *prior* to the call to this.replannerSelector.afterReplanning().
+			 * iterations *prior* to the call to this.replannerSelector.afterReplanning()).
 			 * 
 			 * Necessary events for car traffic: LinkEnterEvent, VehicleEntersTrafficEvent,
 			 * VehicleLeavesTrafficEvent.
 			 * 
 			 * Necessary events for public transport: PersonEntersVehicleEvent.
-			 * 
 			 */
 			final EventHandler handlerForLastReplanningIteration = this.replannerSelector
 					.getHandlerForHypotheticalNetworkExperience();
@@ -130,23 +129,24 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			final ReplanningContext replanningContext = this.replanningContextProvider.get();
 
 			for (int i = 0; i < this.iterationsPerCycle; i++) {
-				logger.info(String.format("Started replanning iteration %d/%d", i + 1, iterationsPerCycle));
+				logger.info(String.format("Started replanning iteration %d/%d", i + 1, this.iterationsPerCycle));
 
 				// We run replanning on all agents (exactly as it is defined in the config)
 				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
-				final EventHandler currentEventHandler;
-				if (i == this.iterationsPerCycle - 1) {
-					currentEventHandler = handlerForLastReplanningIteration;
-				} else {
-					currentEventHandler = handlerForOtherReplanningIterations;
+				{
+					final EventHandler currentEventHandler;
+					if (i == this.iterationsPerCycle - 1) {
+						currentEventHandler = handlerForLastReplanningIteration;
+					} else {
+						currentEventHandler = handlerForOtherReplanningIterations;
+					}
+					emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+					// emulateInParallel(this.scenario.getPopulation(), event.getIteration(),
+					// currentEventHandler);
 				}
 
-				emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
-				// emulateInParallel(this.scenario.getPopulation(), event.getIteration(),
-				// currentEventHandler);
-
-				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, iterationsPerCycle));
+				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, this.iterationsPerCycle));
 			}
 
 			/*
