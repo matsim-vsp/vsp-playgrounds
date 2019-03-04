@@ -39,6 +39,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
@@ -115,6 +116,8 @@ public class KNAccidentScenario {
 		config.controler().setOutputDirectory("./output/telematics/funkturm-example");
 		config.controler().setWriteEventsInterval(100);
 		config.controler().setWritePlansInterval(100);
+
+		config.controler().setRoutingAlgorithmType( ControlerConfigGroup.RoutingAlgorithmType.Dijkstra );
 
 		config.qsim().setFlowCapFactor(0.04);
 		config.qsim().setStorageCapFactor(0.06);
@@ -200,12 +203,12 @@ public class KNAccidentScenario {
 				// ---
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
 //				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
-				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+//				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
 				
-//				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
-//				this.addMobsimListenerBinding().toInstance( abc ) ;
-////				abc.setLastReplanningIteration(9);
-//				abc.setReplanningProba(1.0);
+				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+				this.addMobsimListenerBinding().toInstance( abc ) ;
+				abc.setLastReplanningIteration(9);
+				abc.setReplanningProba(1.0);
 				
 				
 			}
