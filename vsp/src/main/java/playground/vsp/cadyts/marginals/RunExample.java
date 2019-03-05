@@ -19,16 +19,10 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.net.URL;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -42,14 +36,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+import org.matsim.core.scoring.functions.*;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
+
+import javax.inject.Inject;
+import java.net.URL;
 
 /**
  * Created by amit on 21.02.18.
@@ -184,19 +177,19 @@ public class RunExample {
         inputDistanceDistribution.setModeToScalingFactor("car",1);
         inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0,6000.),2);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0,6000.),8);
+		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0, 6000.), 10000, 2);
+		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0, 6000.), 10000, 8);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(6000.0,12000.),4);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(6000.0,12000.),4);
+		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(6000.0, 12000.), 10000, 4);
+		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(6000.0, 12000.), 10000, 4);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(12000.0,18000.),5);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(12000.0,18000.),2);
+		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(12000.0, 18000.), 10000, 5);
+		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(12000.0, 18000.), 10000, 2);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0,86000.),20);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0,86000.),0);
+		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0, 86000.), 10000, 20);
+		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0, 86000.), 10000, 0);
 
-        return inputDistanceDistribution;
+		return inputDistanceDistribution;
     }
 
     private static void addPersonsWithShortTrips(Scenario scenario) {

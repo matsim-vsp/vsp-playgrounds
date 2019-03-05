@@ -19,9 +19,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.io.BufferedWriter;
-import java.util.SortedMap;
-import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.CountsConfigGroup;
@@ -36,6 +33,10 @@ import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
+
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.util.SortedMap;
 
 /**
  * Created by amit on 22.02.18.
@@ -79,7 +80,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         // initialize stats
         inputDistanceDistribution.getModalBins()
                                  .values()
-                                 .forEach(e -> stats.addToDistribution(e.getMode(), e.getDistanceRange(), 0.));
+                .forEach(e -> stats.addToDistribution(e.getMode(), e.getDistanceRange(), 1, 0.));
     }
 
     @Override
@@ -103,6 +104,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                                       (key, value) -> averages.addToDistribution(
                                               this.stats.getModalBins().get(key).getMode(),
                                               value.getDistanceRange(),
+                                              10000,
                                               value.getCount() / this.iterationsUsed));
 
                 } else {

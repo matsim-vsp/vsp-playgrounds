@@ -27,9 +27,15 @@ public class DistanceBin implements Comparable<DistanceBin>{
 
     private final DistanceRange distanceRange;
     private double count = 0.;
+    private final double stdDev;
 
     public DistanceBin(DistanceRange distanceRange) {
+        this(distanceRange, 10000);
+    }
+
+    public DistanceBin(DistanceRange distanceRange, double standardDeviation) {
         this.distanceRange = distanceRange;
+        this.stdDev = standardDeviation;
     }
 
     public DistanceRange getDistanceRange() {
@@ -38,6 +44,10 @@ public class DistanceBin implements Comparable<DistanceBin>{
 
     public double getCount() {
         return count;
+    }
+
+    public double getStandardDeviation() {
+        return stdDev;
     }
 
     public void addToCount(double val){

@@ -19,21 +19,16 @@
 
 package playground.vsp.cadyts.marginals.prep;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.io.IOUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceUnit;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 21.02.18.
@@ -69,7 +64,7 @@ public class DistanceDistribution {
             List<String> labels = null;
 
             while (line != null) {
-                String parts[] = line.split(itemSeparator);
+                String[] parts = line.split(itemSeparator);
 
                 if (labels == null) {
                     labels = Arrays.asList(parts);
@@ -112,14 +107,14 @@ public class DistanceDistribution {
     }
 
     // would be used during simulation
-    public void addToDistribution(String mode, DistanceBin.DistanceRange distanceRange, double val) {
+    public void addToDistribution(String mode, DistanceBin.DistanceRange distanceRange, double standardDeviation, double val) {
         distributionAdded =true;
         if (locked) {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
 
         Id<ModalDistanceBinIdentifier> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
-        DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange));
+        DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange, standardDeviation));
         bin.addToCount(val);
         this.mode2DistanceBins.put(id, bin);
         //

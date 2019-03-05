@@ -25,6 +25,7 @@ jobs:
     - stage: deploy_only_vsp
       script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean failsafe:integration-test failsafe:verify -Dmaven.test.redirectTestOutputToFile deploy"
       skip_cleanup: true
+      if: branch = master
 
 env:
   global:
