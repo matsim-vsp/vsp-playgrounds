@@ -41,8 +41,8 @@ public class RunBerlinModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "berlin-v5.2-1pct";
-		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+		final String runId = "berlin-v5.3-10pct";
+		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/output-berlin-v5.3-10pct/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
@@ -67,7 +67,7 @@ public class RunBerlinModeAnalysis {
 //		filter.setPersonAttribute("berlin");
 //		filter.setPersonAttributeName("home-activity-zone");
 		
-		filter.setZoneFile("/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/input/berlin-shp/berlin.shp");
+		filter.setZoneFile("/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-shp/berlin.shp");
 		filter.setRelevantActivityType("home");
 		
 		filter.preProcess(scenario);
