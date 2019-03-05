@@ -51,7 +51,6 @@ public final class ModalDistanceCadytsBuilderImpl {
 		}
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
-
 		// set the variance scale to a bigger value, so that corrections don't get cut of at '15.0'. The counts weight
 		// must be set accordingly
 		cadytsConfig.setVarianceScale(100);
@@ -74,7 +73,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 			// '15.0' for all bins. When all bins pull with a correction of '15.0' all corrections cancel out each other.
 			// The correction factor is calculated as followed: (expectedValue - simulatedValue) / stddev^2
 			// the stddev can also be set globally for cadyts but then it would also affect the counts calibration
-			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getCount(), 1000 * 10, SingleLinkMeasurement.TYPE.COUNT_VEH);
+			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getCount(), bin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 			numberOfAddedMeasurements++;
 		}
 

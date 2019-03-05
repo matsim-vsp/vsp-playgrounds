@@ -73,7 +73,7 @@ public class EventsToBeelineDistanceRangeTest {
 
         DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes(TransportMode.car, 1.0);
-        inputDistanceDistribution.addToDistribution(TransportMode.car, new DistanceBin.DistanceRange(0, 10000), 1234);
+        inputDistanceDistribution.addToDistribution(TransportMode.car, new DistanceBin.DistanceRange(0, 10000), 10000, 1234);
         return inputDistanceDistribution;
     }
 
