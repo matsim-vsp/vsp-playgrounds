@@ -710,7 +710,7 @@ public class ScenarioBuilderTry {
 	}
 	
 	private void setTravelTimeCalculatorParameters(TravelTimeCalculatorConfigGroup ttc){
-		ttc.setAnalyzedModes(TransportMode.car);
+		ttc.setAnalyzedModesAsString(TransportMode.car);
 		ttc.setCalculateLinkToLinkTravelTimes(false);
 		ttc.setCalculateLinkTravelTimes(true);
 		ttc.setFilterModes(false);
