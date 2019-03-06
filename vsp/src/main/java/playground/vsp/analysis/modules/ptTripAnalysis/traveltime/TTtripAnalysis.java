@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
@@ -38,8 +39,6 @@ import playground.vsp.analysis.modules.AbstractAnalysisModule;
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTripSet;
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractPlan2TripsFilter;
 import playground.vsp.analysis.modules.ptTripAnalysis.AnalysisTripSetStorage;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author aneumann, droeder

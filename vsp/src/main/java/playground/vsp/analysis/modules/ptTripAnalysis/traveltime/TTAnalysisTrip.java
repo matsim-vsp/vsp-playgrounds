@@ -22,6 +22,7 @@ package playground.vsp.analysis.modules.ptTripAnalysis.traveltime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.population.Activity;
@@ -29,8 +30,6 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.PlanElement;
 
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTrip;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * @author droeder

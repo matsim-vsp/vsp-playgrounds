@@ -19,7 +19,7 @@
 
 package playground.ikaddoura.flow;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
 * @author ikaddoura

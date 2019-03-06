@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.PointFeatureFactory;
@@ -37,9 +39,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.analysis.modules.ptAccessibility.activity.ActivityLocation;
 import playground.vsp.analysis.modules.ptAccessibility.activity.LocationMap;
 import playground.vsp.analysis.utils.GridNode;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.MultiPolygon;
 
 /**
  * @author droeder, aneumann

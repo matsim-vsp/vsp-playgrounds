@@ -19,17 +19,18 @@
 
 package playground.jbischoff.taxi.inclusion.analysis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.events.*;
-import org.matsim.core.network.*;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-import playground.jbischoff.av.evaluation.flowpaper.TravelTimeAnalysis;
 import playground.jbischoff.taxi.evaluation.TravelDistanceTimeEvaluator;
 import playground.jbischoff.utils.JbUtils;
 

@@ -1,6 +1,6 @@
 package playground.agarwalamit.pt.openTripPlanner;
 //
-//import com.vividsolutions.jts.geom.Coordinate;
+//import org.locationtech.jts.geom.Coordinate;
 //
 //import org.matsim.api.core.v01.Coord;
 //import org.matsim.core.utils.geometry.CoordUtils;

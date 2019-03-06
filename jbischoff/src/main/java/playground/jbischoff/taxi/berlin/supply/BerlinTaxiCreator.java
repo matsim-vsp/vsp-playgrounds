@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -35,8 +36,6 @@ import org.matsim.contrib.dvrp.fleet.VehicleGenerator;
 import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.network.NetworkUtils;
-
-import com.vividsolutions.jts.geom.Point;
 
 import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
 import playground.michalm.TaxiBerlin.TaxiBerlinZoneUtils;

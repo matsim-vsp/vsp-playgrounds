@@ -1,13 +1,20 @@
 package playground.gleich.av_bus.prepareScenario;
 
-import com.vividsolutions.jts.geom.Geometry;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -19,14 +26,11 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.router.TransitActsRemover;
+import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
+
 import playground.gleich.av_bus.FilePaths;
 import playground.gthunig.utils.CSVWriter;
 import playground.jbischoff.utils.JbUtils;
-
-import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author gleich

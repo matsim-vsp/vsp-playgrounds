@@ -30,10 +30,10 @@
 //import processing.core.PApplet;
 //import processing.core.PVector;
 //
-//import com.vividsolutions.jts.geom.Coordinate;
-//import com.vividsolutions.jts.geom.GeometryCollection;
-//import com.vividsolutions.jts.geom.MultiLineString;
-//import com.vividsolutions.jts.geom.MultiPolygon;
+//import org.locationtech.jts.geom.Coordinate;
+//import org.locationtech.jts.geom.GeometryCollection;
+//import org.locationtech.jts.geom.MultiLineString;
+//import org.locationtech.jts.geom.MultiPolygon;
 //
 ///**
 // * @author benjamin

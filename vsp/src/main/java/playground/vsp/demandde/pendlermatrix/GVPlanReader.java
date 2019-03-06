@@ -21,6 +21,9 @@ package playground.vsp.demandde.pendlermatrix;
 
 import java.util.Collection;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Node;
@@ -34,10 +37,6 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import playground.vsp.pipeline.PopulationReaderTask;
 import playground.vsp.pipeline.PopulationWriterTask;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class GVPlanReader {
 	

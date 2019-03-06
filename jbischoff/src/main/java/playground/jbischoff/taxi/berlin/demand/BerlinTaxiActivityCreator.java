@@ -19,15 +19,16 @@
 
 package playground.jbischoff.taxi.berlin.demand;
 
-import org.matsim.api.core.v01.*;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
-
-import com.vividsolutions.jts.geom.*;
 
 import playground.michalm.TaxiBerlin.TaxiBerlinZoneUtils;
 import playground.michalm.demand.DefaultActivityCreator;

@@ -21,14 +21,14 @@ package playground.michalm.util.gis;
 
 import java.util.Collection;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.google.common.collect.Iterables;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 public class PolygonBasedFilter {
 	public static boolean isLinkInsidePolygon(Link link, Geometry polygonGeometry, boolean includeBorderLinks) {

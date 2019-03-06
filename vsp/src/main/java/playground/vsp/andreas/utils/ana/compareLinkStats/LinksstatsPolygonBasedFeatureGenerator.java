@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.PolygonFeatureFactory;
@@ -30,8 +31,6 @@ import org.matsim.utils.gis.matsim2esri.network.FeatureGenerator;
 import org.matsim.utils.gis.matsim2esri.network.WidthCalculator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 public class LinksstatsPolygonBasedFeatureGenerator implements FeatureGenerator{
 

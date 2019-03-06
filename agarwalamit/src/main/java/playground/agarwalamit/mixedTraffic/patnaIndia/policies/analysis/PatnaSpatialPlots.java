@@ -23,7 +23,8 @@ import java.io.BufferedWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import com.vividsolutions.jts.geom.Point;
+
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -31,6 +32,7 @@ import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import playground.agarwalamit.analysis.emission.EmissionLinkAnalyzer;
 import playground.agarwalamit.analysis.spatial.GeneralGrid;
 import playground.agarwalamit.analysis.spatial.SpatialDataInputs;

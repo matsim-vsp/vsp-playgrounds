@@ -17,6 +17,14 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -41,15 +49,6 @@ import playground.vsp.analysis.modules.AbstractAnalysisModule;
 import playground.vsp.analysis.modules.networkAnalysis.utils.AccessibilityCalc;
 import playground.vsp.analysis.modules.networkAnalysis.utils.BoundingPolygon;
 import playground.vsp.analysis.modules.networkAnalysis.utils.QGisProjectFileWriter;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
 /**
  * This class analyzes the properties of a given network file, such as:
@@ -141,7 +140,7 @@ public class NetworkAnalyzer extends AbstractAnalysisModule{
 		this.smallClusterLinks = new TreeMap<Id, Link>();
 		
 		this.envelope = new BoundingPolygon(network, 200).returnPolygon();
-		this.filesForExportInQGisProject.put("envelope", com.vividsolutions.jts.geom.Polygon.class);
+		this.filesForExportInQGisProject.put("envelope", Polygon.class);
 		
 		if(isRoutable()){
 			continueWithRoutableNetwork();

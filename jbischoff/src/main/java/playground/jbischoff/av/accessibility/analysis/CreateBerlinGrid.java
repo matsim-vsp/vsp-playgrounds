@@ -21,9 +21,13 @@ package playground.jbischoff.av.accessibility.analysis;/*
  * created by jbischoff, 17.05.2018
  */
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.network.NetworkUtils;
@@ -35,11 +39,8 @@ import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import playground.jbischoff.utils.JbUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import playground.jbischoff.utils.JbUtils;
 
 public class CreateBerlinGrid {
 

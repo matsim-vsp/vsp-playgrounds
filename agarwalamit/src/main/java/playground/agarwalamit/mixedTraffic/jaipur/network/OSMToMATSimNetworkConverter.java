@@ -2,6 +2,7 @@ package playground.agarwalamit.mixedTraffic.jaipur.network;
 
 import java.util.Collection;
 
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -16,8 +17,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.OsmNetworkReader;
 import org.matsim.core.utils.io.OsmNetworkReader.OsmFilter;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import playground.agarwalamit.mixedTraffic.jaipur.JaipurUtils;
 
