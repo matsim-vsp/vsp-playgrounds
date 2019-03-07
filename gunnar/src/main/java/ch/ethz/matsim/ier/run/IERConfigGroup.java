@@ -34,6 +34,20 @@ public class IERConfigGroup extends ReflectiveConfigGroup {
 		super(GROUP_NAME);
 	}
 
+	// -------------------- (experimental switch) parallel --------------------
+
+	private boolean parallel = true;
+
+	@StringGetter("parallel")
+	public boolean isParallel() {
+		return this.parallel;
+	}
+
+	@StringSetter("parallel")
+	public void setParallel(boolean parallel) {
+		this.parallel = parallel;
+	}
+
 	// -------------------- iterationsPerCycle --------------------
 
 	private int iterationsPerCycle = 10;

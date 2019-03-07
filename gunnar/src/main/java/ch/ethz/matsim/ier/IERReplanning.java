@@ -54,7 +54,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	/**
 	 * Number of replanning + scoring iterations.
 	 */
-	private final int iterationsPerCycle;
+	// private final int iterationsPerCycle;
 
 	/**
 	 * Number of threads on which the emulation of plans is happening. Currently, we
@@ -70,7 +70,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	 * of run time and some may have only "light" ones. This would also effectively
 	 * increase runtime.
 	 */
-	private final int batchSize;
+	// private final int batchSize;
+
+	private final IERConfigGroup ierConfig;
 
 	private final Provider<ReplanningContext> replanningContextProvider;
 	private final StrategyManager strategyManager;
@@ -91,9 +93,11 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		this.replanningContextProvider = replanningContextProvider;
 		this.numberOfThreads = config.global().getNumberOfThreads();
 		{
-			final IERConfigGroup ierConfig = ConfigUtils.addOrGetModule(config, IERConfigGroup.class);
-			this.batchSize = ierConfig.getBatchSize();
-			this.iterationsPerCycle = ierConfig.getIterationsPerCycle();
+			this.ierConfig = ConfigUtils.addOrGetModule(config, IERConfigGroup.class);
+			// final IERConfigGroup ierConfig = ConfigUtils.addOrGetModule(config,
+			// IERConfigGroup.class);
+			// this.batchSize = ierConfig.getBatchSize();
+			// this.iterationsPerCycle = ierConfig.getIterationsPerCycle();
 		}
 		this.agentEmulatorProvider = agentEmulatorProvider;
 		this.simulationEmulatorProvider = simulationEmulatorProvider;
@@ -128,25 +132,29 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 			final ReplanningContext replanningContext = this.replanningContextProvider.get();
 
-			for (int i = 0; i < this.iterationsPerCycle; i++) {
-				logger.info(String.format("Started replanning iteration %d/%d", i + 1, this.iterationsPerCycle));
+			for (int i = 0; i < this.ierConfig.getIterationsPerCycle(); i++) {
+				logger.info(String.format("Started replanning iteration %d/%d", i + 1,
+						this.ierConfig.getIterationsPerCycle()));
 
 				// We run replanning on all agents (exactly as it is defined in the config)
 				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
 				{
 					final EventHandler currentEventHandler;
-					if (i == this.iterationsPerCycle - 1) {
+					if (i == this.ierConfig.getIterationsPerCycle() - 1) {
 						currentEventHandler = handlerForLastReplanningIteration;
 					} else {
 						currentEventHandler = handlerForOtherReplanningIterations;
 					}
-					emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
-					// emulateInParallel(this.scenario.getPopulation(), event.getIteration(),
-					// currentEventHandler);
+					if (this.ierConfig.isParallel()) {
+						emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+					} else {
+						emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+					}
 				}
 
-				logger.info(String.format("Finished replanning iteration %d/%d", i + 1, this.iterationsPerCycle));
+				logger.info(String.format("Finished replanning iteration %d/%d", i + 1,
+						this.ierConfig.getIterationsPerCycle()));
 			}
 
 			/*
@@ -181,15 +189,6 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 		eventsManager.finishProcessing();
 		eventsToScore.finish();
-
-		for (Person person : population.getPersons().values()) {
-			final double expectedScore = eventsToScore.getAgentScore(person.getId());
-			final double observedScore = person.getSelectedPlan().getScore();
-			if (observedScore != expectedScore) {
-				throw new RuntimeException("person " + person.getId() + " should have score " + expectedScore
-						+ " but has score " + observedScore);
-			}
-		}
 	}
 
 	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler)
@@ -205,9 +204,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		Logger.getLogger("org.matsim").setLevel(Level.WARN);
 
 		// Here we set up all the runner threads and start them
-		for (int i = 0; i < numberOfThreads; i++) {
+		for (int i = 0; i < this.numberOfThreads; i++) {
 			Thread thread = new Thread(() -> {
-				AgentEmulator agentEmulator = agentEmulatorProvider.get();
+				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
 
 				List<Person> batch = new LinkedList<>();
 
@@ -216,7 +215,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 					// Here we create our batch
 					synchronized (personIterator) {
-						while (personIterator.hasNext() && batch.size() < batchSize) {
+						while (personIterator.hasNext() && batch.size() < this.ierConfig.getBatchSize()) {
 							batch.add(personIterator.next());
 						}
 					}

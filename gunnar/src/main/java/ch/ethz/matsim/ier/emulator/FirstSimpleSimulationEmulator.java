@@ -32,8 +32,8 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 		// this.travelTime = services.getLinkTravelTimes();
 	}
 
-	@Override // TODO synchronized!
-	public synchronized void emulate(Person person, Plan plan, EventsManager eventsManager) {
+	@Override
+	public void emulate(Person person, Plan plan, EventsManager eventsManager) {
 		List<? extends PlanElement> elements = plan.getPlanElements();
 
 		double time = 0.0;
