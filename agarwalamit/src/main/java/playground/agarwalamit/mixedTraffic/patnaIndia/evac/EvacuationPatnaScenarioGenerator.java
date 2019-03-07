@@ -177,7 +177,10 @@ public class EvacuationPatnaScenarioGenerator {
 		evavcuationArea = (Geometry) features.iterator().next().getDefaultGeometry();
 
 		// will create a network connecting with safe node.
-		EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evavcuationArea, safeLinkId);
+		// Amit, I added this cast to prevent compilation errors.
+		// Preferably, evacuationgui needs to be adapted to the more recent version of geotools. michal mar'19
+		EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc,
+				(com.vividsolutions.jts.geom.Geometry)(Object)evavcuationArea, safeLinkId);
 		net.run();
 		
 		//since the original network is multi-mode, the new links should also allow all modes

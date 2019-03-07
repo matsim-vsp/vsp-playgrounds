@@ -1,6 +1,6 @@
 package playground.dziemke.lor;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class Lor {
 

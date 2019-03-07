@@ -20,8 +20,8 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import playground.dziemke.utils.ShapeReader;
 import playground.vsp.analysis.utils.GnuplotUtils;

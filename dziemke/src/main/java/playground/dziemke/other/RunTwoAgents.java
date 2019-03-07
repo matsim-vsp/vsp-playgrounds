@@ -40,7 +40,7 @@ public class RunTwoAgents {
 		
 		config.plansCalcRoute().removeModeRoutingParams("pt");
 		config.travelTimeCalculator().setSeparateModes(true);
-		config.travelTimeCalculator().setAnalyzedModes("car,pt");
+		config.travelTimeCalculator().setAnalyzedModesAsString("car,pt");
 		config.plansCalcRoute().setNetworkModes(Arrays.asList("car","pt"));
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);

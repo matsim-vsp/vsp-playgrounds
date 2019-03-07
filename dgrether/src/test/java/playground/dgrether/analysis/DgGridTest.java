@@ -31,9 +31,9 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import playground.dgrether.utils.DgGrid;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Polygon;
 
 
 /**

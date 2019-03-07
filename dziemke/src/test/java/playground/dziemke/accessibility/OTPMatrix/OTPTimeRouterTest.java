@@ -1,6 +1,6 @@
 //package playground.dziemke.accessibility.OTPMatrix;
 //
-//import com.vividsolutions.jts.geom.Coordinate;
+//import org.locationtech.jts.geom.Coordinate;
 //
 //import org.apache.log4j.Logger;
 //import org.junit.Assert;

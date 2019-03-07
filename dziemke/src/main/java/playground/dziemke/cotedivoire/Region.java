@@ -1,7 +1,7 @@
 package playground.dziemke.cotedivoire;
 
 import java.util.List;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class Region {
 

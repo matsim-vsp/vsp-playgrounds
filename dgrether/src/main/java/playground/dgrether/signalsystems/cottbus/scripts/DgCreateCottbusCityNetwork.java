@@ -19,7 +19,7 @@
  * *********************************************************************** */
 package playground.dgrether.signalsystems.cottbus.scripts;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
