@@ -51,13 +51,12 @@ public class ExtractAgentsInAreaStreamReading {
 	private String outputLinksInAreaShpPath;
 	private String outputLinksInAreaShpCoordinateSystem;
 	private Scenario inputScenario;
-	private Scenario outputScenario;
 	private Network networkEnclosedInStudyArea;
 	private Set<Id<Link>> linksInArea = new HashSet<>();
 	private Geometry geometryStudyArea;
 	private boolean selectAgentsByRoutesThroughArea;
 	private boolean selectAgentsByActivitiesInArea;
-	private boolean produceOutputLinksInAreaCsvAndShp;
+	private boolean simplifyOutputPlan;
 	
 	public static void main(String[] args) {
 		ExtractAgentsInAreaStreamReading extractor;
@@ -75,7 +74,7 @@ public class ExtractAgentsInAreaStreamReading {
 					studyAreaShpKey, studyAreaShpElement, outputPopulationPath, selectAgentsByActivitiesInArea, 
 					selectAgentsByRoutesThroughArea);
 			
-		} else if (args.length == 11) {
+		} else if (args.length == 12) {
 			String inputNetworkPath = args[0];
 			String inputPopulationPath = args[1];
 			String studyAreaShpPath = args[2];
@@ -87,10 +86,11 @@ public class ExtractAgentsInAreaStreamReading {
 			String outputLinksInAreaCsvPath = args[8];
 			String outputLinksInAreaShpPath = args[9];
 			String outputLinksInAreaShpCoordinateSystem = args[10];
+			boolean simplifyOutputPlan = Boolean.parseBoolean(args[11]);
 			extractor = new ExtractAgentsInAreaStreamReading(inputNetworkPath, inputPopulationPath, studyAreaShpPath, 
 					studyAreaShpKey, studyAreaShpElement, outputPopulationPath, selectAgentsByActivitiesInArea, 
-					selectAgentsByRoutesThroughArea, true, outputLinksInAreaCsvPath, 
-					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem);
+					selectAgentsByRoutesThroughArea, outputLinksInAreaCsvPath, 
+					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem, simplifyOutputPlan);
 			
 		} else {
 			String inputNetworkPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT_ACCESS_LOOPS;
@@ -106,8 +106,8 @@ public class ExtractAgentsInAreaStreamReading {
 			String outputLinksInAreaShpCoordinateSystem = "DHDN_GK4";
 			extractor = new ExtractAgentsInAreaStreamReading(inputNetworkPath, inputPopulationPath, studyAreaShpPath, 
 					studyAreaShpKey, studyAreaShpElement, outputPopulationPath, selectAgentsByActivitiesInArea, 
-					selectAgentsByRoutesThroughArea, true, outputLinksInAreaCsvPath, 
-					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem);
+					selectAgentsByRoutesThroughArea, outputLinksInAreaCsvPath, 
+					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem, true);
 
 		}
 		extractor.run();
@@ -118,14 +118,15 @@ public class ExtractAgentsInAreaStreamReading {
 			boolean selectAgentsByRoutesThroughArea, boolean selectAgentsByActivitiesInArea){
 		new ExtractAgentsInAreaStreamReading(inputNetworkPath, inputPopulationPath, studyAreaShpPath, 
 				studyAreaShpKey, studyAreaShpElement, outputPopulationPath, selectAgentsByActivitiesInArea, 
-				selectAgentsByRoutesThroughArea, false, "", "", "");
+				selectAgentsByRoutesThroughArea, "", "", "", true);
 	}
 	
 	ExtractAgentsInAreaStreamReading(String inputNetworkPath, String inputPopulationPath, String studyAreaShpPath, 
 			String studyAreaShpKey, String studyAreaShpElement, String outputPopulationPath, 
 			boolean selectAgentsByRoutesThroughArea, boolean selectAgentsByActivitiesInArea, 
-			boolean produceOutputLinksInAreaCsvAndShp, String outputLinksInAreaCsvPath, 
-			String outputLinksInAreaShpPath, String outputLinksInAreaShpCoordinateSystem){
+			String outputLinksInAreaCsvPath, 
+			String outputLinksInAreaShpPath, String outputLinksInAreaShpCoordinateSystem, 
+			boolean simplifyOutputPlan){
 		this.inputNetworkPath = inputNetworkPath;
 		this.inputPopulationPath = inputPopulationPath;
 		this.studyAreaShpPath = studyAreaShpPath;
@@ -134,10 +135,10 @@ public class ExtractAgentsInAreaStreamReading {
 		this.outputPopulationPath = outputPopulationPath;
 		this.selectAgentsByRoutesThroughArea = selectAgentsByRoutesThroughArea;
 		this.selectAgentsByActivitiesInArea = selectAgentsByActivitiesInArea;
-		this.produceOutputLinksInAreaCsvAndShp = produceOutputLinksInAreaCsvAndShp;
 		this.outputLinksInAreaCsvPath = outputLinksInAreaCsvPath;
 		this.outputLinksInAreaShpPath = outputLinksInAreaShpPath;
 		this.outputLinksInAreaShpCoordinateSystem = outputLinksInAreaShpCoordinateSystem;
+		this.simplifyOutputPlan = simplifyOutputPlan;
 	}
 	
 	private void run(){
@@ -153,17 +154,17 @@ public class ExtractAgentsInAreaStreamReading {
 			public void run(Person person) {
 				if(selectAgentsByRoutesThroughArea){
 					if(hasRouteThroughArea(person)){
-						removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
+						if (simplifyOutputPlan) removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
 						popWriter.writePerson(person);
 					} else if(selectAgentsByActivitiesInArea){
 						if(hasActivityInArea(person)){
-							removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
+							if (simplifyOutputPlan) removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
 							popWriter.writePerson(person);
 						}
 					}
 				} else if(selectAgentsByActivitiesInArea){
 					if(hasActivityInArea(person)){
-						removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
+						if (simplifyOutputPlan) removeTransitActsCarRoutesDepartureTimesAndActivityLinkIds(person);
 						popWriter.writePerson(person);
 					}
 				}
@@ -177,7 +178,6 @@ public class ExtractAgentsInAreaStreamReading {
 	
 	private void initialize(){		
 		inputScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		outputScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(inputScenario.getNetwork()).readFile(inputNetworkPath);
 		geometryStudyArea = JbUtils.readShapeFileAndExtractGeometry(studyAreaShpPath,studyAreaShpKey).get(studyAreaShpElement);
 		findLinksInArea();
@@ -190,7 +190,7 @@ public class ExtractAgentsInAreaStreamReading {
 			if(geometryStudyArea.contains(MGC.coord2Point(link.getFromNode().getCoord())) &&
 					geometryStudyArea.contains(MGC.coord2Point(link.getToNode().getCoord()))){
 				linksInArea.add(link.getId());
-				if(produceOutputLinksInAreaCsvAndShp){
+				if( (!outputLinksInAreaCsvPath.equals("")) || (!outputLinksInAreaShpPath.equals("")) ){
 					Node fromNode = link.getFromNode();
 					Node newNetworkFromNode; 
 					if(!networkEnclosedInStudyArea.getNodes().containsKey(fromNode.getId())){
@@ -214,9 +214,11 @@ public class ExtractAgentsInAreaStreamReading {
 				}
 			}
 		}
-		if(produceOutputLinksInAreaCsvAndShp){
+		if(!outputLinksInAreaShpPath.equals("")){
 			Links2ESRIShape shp = new Links2ESRIShape(networkEnclosedInStudyArea, outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem);
 			shp.write();
+		}
+		if (!outputLinksInAreaCsvPath.equals("")) {
 			CSVWriter linksWriter = new CSVWriter(outputLinksInAreaCsvPath, ",");
 			linksWriter.writeField("id");
 			linksWriter.writeField("fromCoordX");
