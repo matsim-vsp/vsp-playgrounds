@@ -174,16 +174,22 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap10MSNetV4,
 		WoMines100itcap07MSNetV4_1,
 		WoMines1000itcap03MSNetV4_1,
+		WoMines1000itcap04MSNetV4_1,
 		WoMines1000itcap05MSNetV4_1,
-		WoMines1000itcap07MSNetV4_1,
+		WoMines1000itcap06MSNetV4_1,
+		WoMines1000itcap07MSNetV4_1, WoMines1000itcap07MSNetV4_1_morning,
+		WoMines1000itcap08MSNetV4_1,
+		WoMines1000itcap09MSNetV4_1,
+		WoMines1000itcap10MSNetV4_1,
 		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS_BTU_OPT_SYLVIA;
+	private static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS_14RE_3RE_7RE;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_RANDOM_GREENSPLITS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
+		MS_INTG0, MS_INTG0_SYLVIA, // MS with modified end times, such that zero intergreen times are used
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
 		ALL_MS_INSIDE_ENVELOPE_REST_GREEN, // all MS systems fixed-time, rest all green
 		ALL_MS_AS_SYLVIA_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as sylvia with MS basis, rest all green. note: green basis for sylvia does not work
@@ -201,7 +207,8 @@ public class TtRunCottbusSimulation {
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 		LAEMMER_FLEXIBLE, // version implemented by pierre schade in his thesis
-		GERSHENSON
+		GERSHENSON,
+		QUEUE_LEARNING
 	}
 	
 	// parameters for specific signal control
@@ -228,7 +235,7 @@ public class TtRunCottbusSimulation {
 	private static final double SIGMA = 0.0;
 	
 	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
-	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
+	private static String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -237,10 +244,11 @@ public class TtRunCottbusSimulation {
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v2_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
+	private static String RUNS_SVN = "../../runs-svn/cottbus/";
 	
 	private static final boolean WRITE_INITIAL_FILES = false;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = .7;
+	private static double SCALING_FACTOR = .7;
 	
 	private static TtGeneralAnalysis ANALYSIS_TOOL;
 	
@@ -259,6 +267,15 @@ public class TtRunCottbusSimulation {
 //			selfTunWt = Double.valueOf(args[4]);
 //			warmUpIt = Integer.valueOf(args[5]);
 //		}
+
+		// for runs on the cluster. note: start from jobfiles directory in shared-svn, ie. 5x to runs-svn, 4x to projects
+		if (args != null && args.length > 0) {
+			OUTPUT_BASE_DIR = args[0];
+			INPUT_BASE_DIR = args[1];
+			RUNS_SVN = args[2];
+			SCALING_FACTOR = Double.valueOf(args[3]);
+			SIGNAL_TYPE = SignalType.valueOf(args[4]);
+		}
 		
 		// prepare output for random greensplits
 		FileWriter fw = null;
@@ -533,88 +550,106 @@ public class TtRunCottbusSimulation {
 //			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs300:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-11-58-38_100it_MS_cap07_stuck600_tbs300/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-7-11-58-38_100it_MS_cap07_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MStbs300:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs900:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs900stuck600:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-58-32_100it_MS_cap07_stuck600_tbs900/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-8-11-58-32_100it_MS_cap07_stuck600_tbs900/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSRand:
-			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
 			break;	
 		case WoMines100itcap07MSideal:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-13-14-14_100it_MSideal_cap07_stuck600/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-01-17-13-14-14_100it_MSideal_cap07_stuck600/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSideal:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSidealNetV1_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-13-13-58-41_100it_MS-ideal_cap07_stuck120_tbs900_networkV1-1/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-13-13-58-41_100it_MS-ideal_cap07_stuck120_tbs900_networkV1-1/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSidealNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-12-18-28_100it_MSideal_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-22-12-18-28_100it_MSideal_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSidealNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-18-0-58_100it_MS_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-03-3-18-0-58_100it_MS_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-56-38_v1-3_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-12-56-38_v1-3_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-57-3_v1-3_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-12-57-3_v1-3_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap13MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-20-59-8_v1-4_MS_100it_BaseCase_cap13/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-20-59-8_v1-4_MS_100it_BaseCase_cap13/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-54-29_v1-4_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-14-54-29_v1-4_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-57-21_v1-4_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-14-57-21_v1-4_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-25-0-16-48_100it_netV4_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-25-0-16-48_100it_netV4_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap09MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-25-8-13-26_100it_netV4_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-25-8-13-26_100it_netV4_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap10MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-29-13-53-2_100it_netV4_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-29-13-53-2_100it_netV4_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
 			break;	
 		case WoMines100itcap07MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-08-24-12-40-20_100it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-08-24-12-40-20_100it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines1000itcap03MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-26-10-37-50_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap03/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-26-10-37-50_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap03/1000.output_plans.xml.gz");
+			break;	
+		case WoMines1000itcap04MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-12-6-11-38-42_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap04/1000.output_plans.xml.gz");
 			break;	
 		case WoMines1000itcap05MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-19-12-1-43_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-1-43_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
 			break;
+		case WoMines1000itcap06MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-01-30-17-29-40_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap06/1000.output_plans.xml.gz");
+			break;	
 		case WoMines1000itcap07MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
+		case WoMines1000itcap07MSNetV4_1_morning:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans_morningPeak.xml.gz");
+			break;
+		case WoMines1000itcap08MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-02-4-13-50-58_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap08/1000.output_plans.xml.gz");
+			break;	
+		case WoMines1000itcap09MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-01-28-22-12-37_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
+			break;
+		case WoMines1000itcap10MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-02-18-10-3-21_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
+			break;	
 		case NicoOutputPlans:
-			config.plans().setInputFile("../../runs-svn/cottbus/NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
 			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
@@ -723,6 +758,22 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
+			case MS_INTG0:
+				if (NETWORK_TYPE.toString().startsWith("V4") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))){
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v4_intG0.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
+			case MS_INTG0_SYLVIA:
+				if (NETWORK_TYPE.toString().startsWith("V4") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))){
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_sylvia_no_13_v4_intG0.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
 			case MS_RANDOM_OFFSETS:
 				if (NETWORK_TYPE.toString().startsWith("V1") || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V1"))) {
@@ -758,6 +809,8 @@ public class TtRunCottbusSimulation {
 					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_optimized.xml");
 //					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_optimized_2019_01_04.xml");
 //					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt_expanded.xml");
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu_new/signal_control_sol.xml");
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu_new/signal_control_sol_green_exp.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -864,9 +917,24 @@ public class TtRunCottbusSimulation {
 				break;
 			case GERSHENSON:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_gershenson.xml");
-				if (NETWORK_TYPE.toString().startsWith("V4") || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))) {
-					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
+				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
+				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
+			case QUEUE_LEARNING:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_queueLearning.xml");
+				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
+				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -1250,6 +1318,8 @@ public class TtRunCottbusSimulation {
 				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
         signalsConfigurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
+//        signalsConfigurator.addSignalControllerFactory(QueueLearningSignalControler.IDENTIFIER,
+//        			QueueLearningSignalControler.QueueLearningFactory.class);
 
 		// bind gershenson config
 		controler.addOverridingModule(new AbstractModule() {
