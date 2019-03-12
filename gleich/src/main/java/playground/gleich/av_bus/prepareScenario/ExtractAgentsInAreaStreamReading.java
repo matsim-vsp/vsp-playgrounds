@@ -278,14 +278,14 @@ public class ExtractAgentsInAreaStreamReading {
 		for (PlanElement pe : plan.getPlanElements()){
 			if (pe instanceof Leg){
 				Leg leg = (Leg) pe;
-				leg.setDepartureTime(Time.UNDEFINED_TIME);
-				leg.setTravelTime(Time.UNDEFINED_TIME);
+				leg.setDepartureTime(Time.getUndefinedTime());
+				leg.setTravelTime(Time.getUndefinedTime());
 				leg.setRoute(null);
 			} else if (pe instanceof Activity){
 				Activity act =  (Activity) pe;
 				act.setLinkId(null);
 				act.setFacilityId(null);
-				act.setStartTime(Time.UNDEFINED_TIME);
+				act.setStartTime(Time.getUndefinedTime());
 			}
 		}
 	}
