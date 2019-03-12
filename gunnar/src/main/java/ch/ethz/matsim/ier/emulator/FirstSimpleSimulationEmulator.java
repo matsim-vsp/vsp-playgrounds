@@ -69,7 +69,7 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 				Activity previousActivity = (Activity) elements.get(i - 1);
 				Activity followingActivity = (Activity) elements.get(i + 1);
 
-				time = (new CarLegEmulatorImpl(eventsManager, this.services.getScenario().getNetwork(), this.services.getLinkTravelTimes()))
+				time = (new CarLegEmulatorImpl(eventsManager, this.services.getScenario().getNetwork(), this.services.getLinkTravelTimes(), this.services.getScenario().getActivityFacilities()))
 						.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity, time);
 
 				// eventsManager.processEvent(

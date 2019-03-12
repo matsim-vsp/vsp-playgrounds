@@ -123,7 +123,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 			final EventHandler handlerForOtherReplanningIterations = new EventHandler() {
 			};
-
+			
 			/*
 			 * This memorizes the plans and network experiences of the population prior to
 			 * the replanning.
@@ -147,7 +147,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 						currentEventHandler = handlerForOtherReplanningIterations;
 					}
 					if (this.ierConfig.isParallel()) {
-						emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
+						emulateInParallel(this.scenario.getPopulation(), event.getIteration(), () -> currentEventHandler);
 					} else {
 						emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
 					}
@@ -191,7 +191,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		eventsToScore.finish();
 	}
 
-	private void emulateInParallel(Population population, int iteration, EventHandler eventHandler)
+	private void emulateInParallel(Population population, int iteration, Provider<EventHandler> eventHandler)
 			throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
 		List<Thread> threads = new LinkedList<>();
@@ -223,13 +223,11 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					// And here we send all the agents to the emulator. The score will be written to
 					// the plan directly.
 					for (Person person : batch) {
-						agentEmulator.emulate(person, person.getSelectedPlan(), eventHandler);
+						agentEmulator.emulate(person, person.getSelectedPlan(), eventHandler.get());
 					}
 
 					processedNumberOfPersons.addAndGet(batch.size());
 				} while (batch.size() > 0);
-
-				agentEmulator.writeScores();
 			});
 
 			threads.add(thread);

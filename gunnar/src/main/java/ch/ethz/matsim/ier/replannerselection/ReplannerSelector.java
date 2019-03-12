@@ -29,10 +29,9 @@ import org.matsim.core.events.handler.EventHandler;
 public interface ReplannerSelector {
 
 	public void beforeReplanning();
-	
+
 	public void afterReplanning();
 
 	public EventHandler getHandlerForHypotheticalNetworkExperience();
-	
-}
 
+}
