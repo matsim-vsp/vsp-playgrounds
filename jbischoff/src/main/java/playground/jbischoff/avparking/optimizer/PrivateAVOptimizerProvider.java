@@ -30,6 +30,7 @@ import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -42,6 +43,7 @@ import playground.jbischoff.avparking.AvParkingContext;
 public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";
 
+	private final EventsManager eventsManager;
 	private final TaxiConfigGroup taxiCfg;
 	private final Fleet fleet;
 	private final Network network;
@@ -53,10 +55,11 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final ParkingSearchManager manager;
 	private final AvParkingContext context;
 
-	public PrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet,
+	public PrivateAVOptimizerProvider(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, TravelDisutility travelDisutility,
 			TaxiScheduler scheduler, ParkingSearchManager manager, AvParkingContext context) {
+		this.eventsManager = eventsManager;
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.network = network;
@@ -72,7 +75,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	@Override
 	public TaxiOptimizer get() {
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
-		return PrivateAVTaxiDispatcher.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler,
-				new RuleBasedTaxiOptimizerParams(optimizerConfig), manager, context);
+		return PrivateAVTaxiDispatcher.create(eventsManager, taxiCfg, fleet, network, timer, travelTime,
+				travelDisutility, scheduler, new RuleBasedTaxiOptimizerParams(optimizerConfig), manager, context);
 	}
 }

@@ -31,6 +31,7 @@ import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
@@ -46,18 +47,19 @@ import com.google.inject.name.Named;
  */
 public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
-	private TaxiConfigGroup taxiCfg;
-	private Fleet fleet;
-	private TaxiScheduler scheduler;
-	private TSPrivateAVRequestInserter requestInserter;
-	private MobsimTimer timer;
-	private TravelTime travelTime;
-	private TravelDisutility travelDisutility;
-	private Network network;
+	private final EventsManager eventsManager;
+	private final TaxiConfigGroup taxiCfg;
+	private final Fleet fleet;
+	private final TaxiScheduler scheduler;
+	private final MobsimTimer timer;
+	private final TravelTime travelTime;
+	private final TravelDisutility travelDisutility;
+	private final Network network;
 
-	public TSPrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet, TaxiScheduler scheduler,
-			MobsimTimer timer, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
+	public TSPrivateAVOptimizerProvider(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,
+			TaxiScheduler scheduler, MobsimTimer timer, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, TravelDisutility travelDisutility) {
+		this.eventsManager = eventsManager;
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.scheduler = scheduler;
@@ -74,7 +76,7 @@ public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 				travelTime);
 		TSPrivateAVRequestInserter requestInserter = new TSPrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
 				router);
-		return new TSPrivateAVTaxiDispatcher(taxiCfg, fleet, scheduler,
+		return new TSPrivateAVTaxiDispatcher(eventsManager, taxiCfg, fleet, scheduler,
 				new RuleBasedTaxiOptimizerParams(optimizerConfig), requestInserter);
 	}
 

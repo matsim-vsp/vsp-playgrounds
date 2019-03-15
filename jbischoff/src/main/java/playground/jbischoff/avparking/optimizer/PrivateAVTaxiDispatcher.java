@@ -44,6 +44,7 @@ import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.contrib.util.distance.DistanceUtils;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
@@ -56,21 +57,23 @@ import org.matsim.core.router.util.TravelTime;
 import playground.jbischoff.avparking.AvParkingContext;
 
 public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
-	public static PrivateAVTaxiDispatcher create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
-			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
-			DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
+	public static PrivateAVTaxiDispatcher create(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,
+			Network network, MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility,
+			TaxiScheduler scheduler, DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger,
+			AvParkingContext context) {
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
 				parkingManger, router);
 		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, scheduler, params, parkingManger,
-				context, router, requestInserter);
+				context, router, requestInserter, eventsManager);
 	}
 
 	public enum AVParkBehavior {
 		findfreeSlot, garage, cruise, randombehavior
 	}
 
+	private final EventsManager eventsManager;
 	private final Fleet fleet;
 	private final TaxiScheduler scheduler;
 	private final Network network;
@@ -87,8 +90,8 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
 			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
-			PrivateAVRequestInserter requestInserter) {
-		super(taxiCfg, fleet, scheduler, params, requestInserter);
+			PrivateAVRequestInserter requestInserter, EventsManager eventsManager) {
+		super(eventsManager, taxiCfg, fleet, scheduler, params, requestInserter);
 		this.fleet = fleet;
 		this.scheduler = scheduler;
 		this.network = network;
@@ -99,6 +102,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 		parkBehavior = context.getBehavior();
 		manager = parkingManger;
 		parkingLogic = new RandomParkingSearchLogic(network);
+		this.eventsManager = eventsManager;
 		this.avParkings = NetworkUtils.getLinks(network, context.getAvParkings());
 
 	}
