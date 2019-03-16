@@ -82,8 +82,8 @@ public class RouterFilter implements TripFlowSink {
 	}
 
 	private boolean isInteresting(Path path) {
-		if (interestingNodeIds.contains(path.nodes.get(0))) {
-			if (interestingNodeIds.contains(path.nodes.get(path.nodes.size()-1))) {
+		if (interestingNodeIds.contains(path.getFromNode())) {
+			if (interestingNodeIds.contains(path.getToNode())) {
 				return false;
 			}
 		}
