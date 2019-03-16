@@ -34,6 +34,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.util.TravelTime;
+import org.matsim.facilities.ActivityFacilities;
 import org.matsim.vehicles.Vehicle;
 
 /**
@@ -46,13 +47,23 @@ public class CarLegEmulatorImpl implements CarLegEmulator {
 	private final EventsManager eventsManager;
 
 	private final Network network;
+	private final ActivityFacilities activityFacilities;
 
 	private final TravelTime travelTime;
 
-	public CarLegEmulatorImpl(final EventsManager eventsManager, final Network network, final TravelTime travelTime) {
+	public CarLegEmulatorImpl(final EventsManager eventsManager, final Network network, final TravelTime travelTime, ActivityFacilities activityFacilities) {
 		this.eventsManager = eventsManager;
 		this.network = network;
 		this.travelTime = travelTime;
+		this.activityFacilities = activityFacilities;
+	}
+	
+	private Id<Link> getLinkId(Activity activity) {
+		if (activity.getFacilityId() != null) {
+			return activityFacilities.getFacilities().get(activity.getFacilityId()).getLinkId();
+		} else {
+			return activity.getLinkId();
+		}
 	}
 
 	public double emulateLegAndReturnEndTime_s(final Leg leg, final Person person, final Activity previousActivity,
@@ -60,7 +71,7 @@ public class CarLegEmulatorImpl implements CarLegEmulator {
 
 		// Every leg starts with a departure.
 		this.eventsManager.processEvent(
-				new PersonDepartureEvent(time_s, person.getId(), previousActivity.getLinkId(), leg.getMode()));
+				new PersonDepartureEvent(time_s, person.getId(), getLinkId(previousActivity), leg.getMode()));
 
 		if (!(leg.getRoute() instanceof NetworkRoute)) {
 			throw new RuntimeException(
@@ -94,7 +105,7 @@ public class CarLegEmulatorImpl implements CarLegEmulator {
 
 		// Every leg ends with an arrival.
 		eventsManager
-				.processEvent(new PersonArrivalEvent(time_s, person.getId(), nextActivity.getLinkId(), leg.getMode()));
+				.processEvent(new PersonArrivalEvent(time_s, person.getId(), getLinkId(nextActivity), leg.getMode()));
 
 		return time_s;
 	}
