@@ -50,6 +50,9 @@ public class IERConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- iterationsPerCycle --------------------
 
+	/**
+	 * Number of replanning + scoring iterations.
+	 */
 	private int iterationsPerCycle = 10;
 
 	@StringGetter("iterationsPerCycle")
@@ -64,6 +67,14 @@ public class IERConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- batchSize --------------------
 
+	/**
+	 * This is the number of agents that are simulated in a chunk on each thread. A
+	 * value that is too small will slow down the emulation because of the overhead
+	 * of creating the scoring functions. A value that is too high will lead to the
+	 * situation where some threads may have a lot of "heavy" agents that take a lot
+	 * of run time and some may have only "light" ones. This would also effectively
+	 * increase runtime.
+	 */
 	private int batchSize = 200;
 
 	@StringGetter("batchSize")

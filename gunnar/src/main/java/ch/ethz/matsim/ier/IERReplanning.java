@@ -51,33 +51,13 @@ import ch.ethz.matsim.ier.run.IERConfigGroup;
 public final class IERReplanning implements PlansReplanning, ReplanningListener {
 	private final static Logger logger = Logger.getLogger(IERReplanning.class);
 
-	/**
-	 * Number of replanning + scoring iterations.
-	 */
-	// private final int iterationsPerCycle;
-
-	/**
-	 * Number of threads on which the emulation of plans is happening. Currently, we
-	 * get this from global.numberOfThreads
-	 */
-	private final int numberOfThreads;
-
-	/**
-	 * This is the number of agents that are simulated in a chunk on each thread. A
-	 * value that is too small will slow down the emulation because of the overhead
-	 * of creating the scoring functions. A value that is too high will lead to the
-	 * situation where some threads may have a lot of "heavy" agents that take a lot
-	 * of run time and some may have only "light" ones. This would also effectively
-	 * increase runtime.
-	 */
-	// private final int batchSize;
+	private final int numberOfEmulationThreads;
 
 	private final IERConfigGroup ierConfig;
 
 	private final Provider<ReplanningContext> replanningContextProvider;
 	private final StrategyManager strategyManager;
 	private final Scenario scenario;
-	// private final Population population;
 	private final Provider<AgentEmulator> agentEmulatorProvider;
 	private final Provider<SimulationEmulator> simulationEmulatorProvider;
 	private final ReplannerSelector replannerSelector;
@@ -91,14 +71,8 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		this.strategyManager = strategyManager;
 		this.scenario = scenario;
 		this.replanningContextProvider = replanningContextProvider;
-		this.numberOfThreads = config.global().getNumberOfThreads();
-		{
-			this.ierConfig = ConfigUtils.addOrGetModule(config, IERConfigGroup.class);
-			// final IERConfigGroup ierConfig = ConfigUtils.addOrGetModule(config,
-			// IERConfigGroup.class);
-			// this.batchSize = ierConfig.getBatchSize();
-			// this.iterationsPerCycle = ierConfig.getIterationsPerCycle();
-		}
+		this.numberOfEmulationThreads = config.global().getNumberOfThreads();
+		this.ierConfig = ConfigUtils.addOrGetModule(config, IERConfigGroup.class);
 		this.agentEmulatorProvider = agentEmulatorProvider;
 		this.simulationEmulatorProvider = simulationEmulatorProvider;
 		this.replannerSelector = replannerSelector;
@@ -108,27 +82,12 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	public void notifyReplanning(ReplanningEvent event) {
 		try {
 
-			/*
-			 * This handler observes the network experience of all agents with their new
-			 * proposed plans (i.e. the result of the iterationsPerCycle re-planning
-			 * iterations *prior* to the call to this.replannerSelector.afterReplanning()).
-			 * 
-			 * Necessary events for car traffic: LinkEnterEvent, VehicleEntersTrafficEvent,
-			 * VehicleLeavesTrafficEvent.
-			 * 
-			 * Necessary events for public transport: PersonEntersVehicleEvent.
-			 */
+			this.replannerSelector.beforeReplanning();
+
 			final EventHandler handlerForLastReplanningIteration = this.replannerSelector
 					.getHandlerForHypotheticalNetworkExperience();
-
 			final EventHandler handlerForOtherReplanningIterations = new EventHandler() {
 			};
-			
-			/*
-			 * This memorizes the plans and network experiences of the population prior to
-			 * the replanning.
-			 */
-			this.replannerSelector.beforeReplanning();
 
 			final ReplanningContext replanningContext = this.replanningContextProvider.get();
 
@@ -139,32 +98,23 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				// We run replanning on all agents (exactly as it is defined in the config)
 				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
-				{
-					final EventHandler currentEventHandler;
-					if (i == this.ierConfig.getIterationsPerCycle() - 1) {
-						currentEventHandler = handlerForLastReplanningIteration;
-					} else {
-						currentEventHandler = handlerForOtherReplanningIterations;
-					}
-					if (this.ierConfig.isParallel()) {
-						emulateInParallel(this.scenario.getPopulation(), event.getIteration(), () -> currentEventHandler);
-					} else {
-						emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
-					}
+				final EventHandler currentEventHandler;
+				if (i == this.ierConfig.getIterationsPerCycle() - 1) {
+					currentEventHandler = handlerForLastReplanningIteration;
+				} else {
+					currentEventHandler = handlerForOtherReplanningIterations;
+				}
+
+				if (this.ierConfig.isParallel()) {
+					emulateInParallel(this.scenario.getPopulation(), event.getIteration(), () -> currentEventHandler);
+				} else {
+					emulateSequentially(this.scenario.getPopulation(), event.getIteration(), currentEventHandler);
 				}
 
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1,
 						this.ierConfig.getIterationsPerCycle()));
 			}
 
-			/*
-			 * Before the following call, feed the handlerForLastReplanningIteration.
-			 * 
-			 * afterReplanning() compares the plans and (hypothetical) network experiences
-			 * of the population before and after the replanning and resets the plans of
-			 * agents that are not allowed to replan to what was memorized in the call to
-			 * beforeReplanning().
-			 */
 			this.replannerSelector.afterReplanning();
 
 		} catch (InterruptedException e) {
@@ -175,7 +125,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	private void emulateSequentially(Population population, int iteration, EventHandler eventHandler)
 			throws InterruptedException {
 
-		final EventsManager eventsManager = EventsUtils.createEventsManager(); // this.scenario.getConfig());
+		final EventsManager eventsManager = EventsUtils.createEventsManager();
 		final EventsToScore eventsToScore = EventsToScore.createWithScoreUpdating(this.scenario,
 				this.scoringFunctionFactory, eventsManager);
 		eventsToScore.beginIteration(iteration);
@@ -204,7 +154,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		Logger.getLogger("org.matsim").setLevel(Level.WARN);
 
 		// Here we set up all the runner threads and start them
-		for (int i = 0; i < this.numberOfThreads; i++) {
+		for (int i = 0; i < this.numberOfEmulationThreads; i++) {
 			Thread thread = new Thread(() -> {
 				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
 

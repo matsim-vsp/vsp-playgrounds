@@ -104,7 +104,7 @@ public class CarLegEmulatorImpl implements CarLegEmulator {
 		}
 
 		// Every leg ends with an arrival.
-		eventsManager
+		this.eventsManager
 				.processEvent(new PersonArrivalEvent(time_s, person.getId(), getLinkId(nextActivity), leg.getMode()));
 
 		return time_s;

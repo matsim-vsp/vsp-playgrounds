@@ -89,7 +89,7 @@ public class RunScaper {
 		Logger.getLogger(RunScaper.class.getName()).severe(
 				"FATAL ERROR: " + msg);
 		System.exit(-1);
-	}
+	} 
 
 	public static void fatal(final Exception e) {
 		Logger.getLogger(RunScaper.class.getName()).severe("FATAL ERROR: " + e);

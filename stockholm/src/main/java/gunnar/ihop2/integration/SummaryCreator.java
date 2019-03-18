@@ -28,7 +28,7 @@ import org.matsim.core.config.ConfigUtils;
 class SummaryCreator {
 
 	public SummaryCreator() {
-	}
+	} 
 
 	static void run(final int maxIterations) {
 		final String lastMATSimIteration = ConfigUtils

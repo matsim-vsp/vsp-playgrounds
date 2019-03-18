@@ -218,7 +218,6 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 			if (!replanners.contains(person.getId())) {
 				this.lastPhysicalPopulationState.set(person);
 			}
-			// PersonUtils.removeUnselectedPlans(person); 
 		}
 		
 		this.numberOfReplanners = replanners.size();

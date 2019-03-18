@@ -27,7 +27,7 @@ package gunnar.ihop2.regent;
 public class FreeFlowTravelTimes {
 
 	public FreeFlowTravelTimes() {
-	}
+	} 
 
 	public static void main(String[] args) {
 

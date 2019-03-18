@@ -31,7 +31,7 @@ import floetteroed.utilities.tabularfileparser.TabularFileParser;
 /**
  * 
  * @author Gunnar Flötteröd
- *
+ * 
  */
 public class EmmeTravelTimes implements TabularFileHandler {
 

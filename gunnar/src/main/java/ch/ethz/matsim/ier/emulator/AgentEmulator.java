@@ -52,21 +52,21 @@ public final class AgentEmulator {
 		EventsManager eventsManager = EventsUtils.createEventsManager();
 
 		EventsToActivities eventsToActivities = new EventsToActivities();
-		EventsToLegs eventsToLegs = new EventsToLegs(scenario);
+		EventsToLegs eventsToLegs = new EventsToLegs(this.scenario);
 
 		eventsManager.addHandler(eventsToActivities);
 		eventsManager.addHandler(eventsToLegs);
 		eventsManager.addHandler(eventHandler);
 
-		ScoringFunction scoringFunction = scoringFunctionFactory.createNewScoringFunction(person);
-		ScoringFunctionWrapper wrapper = new ScoringFunctionWrapper(scoringFunction);
+		ScoringFunction scoringFunction = this.scoringFunctionFactory.createNewScoringFunction(person);
+		ScoringFunctionWrapper scoringFunctionWrapper = new ScoringFunctionWrapper(scoringFunction);
 
-		eventsToActivities.addActivityHandler(wrapper);
-		eventsToLegs.addLegHandler(wrapper);
+		eventsToActivities.addActivityHandler(scoringFunctionWrapper);
+		eventsToLegs.addLegHandler(scoringFunctionWrapper);
 
-		eventsManager.resetHandlers(iteration);
+		eventsManager.resetHandlers(this.iteration);
 
-		simulationEmulator.emulate(person, plan, eventsManager);
+		this.simulationEmulator.emulate(person, plan, eventsManager);
 
 		eventsManager.finishProcessing();
 		eventsToActivities.finish();
@@ -84,12 +84,12 @@ public final class AgentEmulator {
 
 		@Override
 		public void handleLeg(PersonExperiencedLeg leg) {
-			scoringFunction.handleLeg(leg.getLeg());
+			this.scoringFunction.handleLeg(leg.getLeg());
 		}
 
 		@Override
 		public void handleActivity(PersonExperiencedActivity activity) {
-			scoringFunction.handleActivity(activity.getActivity());
+			this.scoringFunction.handleActivity(activity.getActivity());
 		}
 
 		@Override

@@ -43,7 +43,7 @@ import gunnar.ihop2.regent.costwriting.DepartureTimeHistogram;
 /**
  * 
  * @author Gunnar Flötteröd
- *
+ * 
  */
 public class TollLinkAnalyzer implements LinkEnterEventHandler {
 

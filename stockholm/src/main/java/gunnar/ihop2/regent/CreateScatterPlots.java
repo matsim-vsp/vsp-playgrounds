@@ -45,7 +45,7 @@ import gunnar.ihop2.regent.demandreading.Zone;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
- * 
+ *  
  * @author Gunnar Flötteröd
  *
  */
