@@ -41,8 +41,8 @@ public class RunNemoModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "nemo_baseCase_032";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_032/output/";
+		final String runId = "nemo_baseCase_075";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_075/output/";
 		final String outputBaseDirectory = "/Users/ihab/Desktop/";
 		
 		// if iteration < 0 --> analysis of the final iteration
