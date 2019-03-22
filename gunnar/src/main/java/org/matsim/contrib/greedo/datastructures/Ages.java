@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.GreedoConfigGroup;
 
 /**
  *
@@ -40,6 +41,8 @@ public class Ages {
 
 	// -------------------- MEMBERS --------------------
 
+	private final GreedoConfigGroup greedoConfig;
+	
 	/* package for testing */ Map<Id<Person>, Integer> personId2age = null;
 
 	private List<Integer> sortedAges = null;
@@ -56,14 +59,15 @@ public class Ages {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public Ages(final Set<Id<Person>> populationIds) {
+	public Ages(final Set<Id<Person>> populationIds, final GreedoConfigGroup greedoConfig) {
 		this.personId2age = populationIds.stream().collect(Collectors.toMap(id -> id, id -> 0));
-		this.internalUpdate(new double[] { 1.0 });
+		this.greedoConfig = greedoConfig;
+		this.internalUpdate();
 	}
 
 	// -------------------- INTERNALS --------------------
 
-	/* package for testing */ void internalUpdate(final double[] ageWeights) {
+	/* package for testing */ void internalUpdate() {
 
 		this.sortedAges = new ArrayList<>(this.personId2age.values());
 		Collections.sort(this.sortedAges);
@@ -71,24 +75,24 @@ public class Ages {
 		this.averageAge = this.sortedAges.stream().mapToDouble(age -> age).average().getAsDouble();
 
 		this.personId2weight = Collections.unmodifiableMap(this.personId2age.entrySet().stream()
-				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> ageWeights[entry.getValue()])));
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> this.greedoConfig.getAgeWeight(entry.getValue())))); // ageWeights[entry.getValue()]
 		this.averageWeight = this.personId2weight.values().stream().mapToDouble(weight -> weight).average()
 				.getAsDouble();
 
 		final int averageAgeFloor = (int) Math.floor(this.averageAge);
 		final int averageAgeCeil = (int) Math.ceil(this.averageAge);
 		final double ceilWeight = this.averageAge - averageAgeFloor;
-		this.weightAtAverageAge = (1.0 - ceilWeight) * ageWeights[averageAgeFloor]
-				+ ceilWeight * ageWeights[averageAgeCeil];
+		this.weightAtAverageAge = (1.0 - ceilWeight) * this.greedoConfig.getAgeWeight(averageAgeFloor) // ageWeights[averageAgeFloor]
+				+ ceilWeight * this.greedoConfig.getAgeWeight(averageAgeCeil); // ageWeights[averageAgeCeil];
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	public void update(final Set<Id<Person>> replanners, final double[] ageWeights) {
+	public void update(final Set<Id<Person>> replanners) { // final double[] ageWeights) {
 		this.personId2age = Collections
 				.unmodifiableMap(this.personId2age.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
 						entry -> replanners.contains(entry.getKey()) ? 0 : entry.getValue() + 1)));
-		this.internalUpdate(ageWeights);
+		this.internalUpdate();
 	}
 
 	public List<Integer> getSortedAgesView() {

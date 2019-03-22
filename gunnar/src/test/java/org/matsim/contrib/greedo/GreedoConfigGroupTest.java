@@ -89,74 +89,74 @@ public class GreedoConfigGroupTest {
 				(1.0 - rates[2]) * (1.0 - rates[1]) * (1.0 - rates[0]) }, weights, 1e-8);
 	}
 
-	@Test
-	public void testReplanningStateProbability_ConstantReplanningRate() {
+//	@Test
+//	public void testReplanningStateProbability_ConstantReplanningRate() {
+//
+//		for (int lastIteration : new int[] { 49, 50, 51 }) {
+//
+//			final Config conf = ConfigUtils.createConfig();
+//			final Scenario scenario = ScenarioUtils.createScenario(conf);
+//
+//			conf.controler().setFirstIteration(0);
+//			conf.controler().setLastIteration(lastIteration);
+//
+//			final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(conf, PSimConfigGroup.class);
+//			pSimConf.setIterationsPerCycle(10);
+//
+//			final GreedoConfigGroup greedoConf = ConfigUtils.addOrGetModule(conf, GreedoConfigGroup.class);
+//			greedoConf.setInitialMeanReplanningRate(0.1);
+//			greedoConf.setReplanningRateIterationExponent(0.0); // constant
+//			greedoConf.configure(scenario, new LinkedHashSet<>(), new LinkedHashSet<>());
+//
+//			for (int matsimIt = conf.controler().getFirstIteration(); matsimIt <= conf.controler()
+//					.getLastIteration(); matsimIt++) {
+//				final int greedoIt = greedoConf.getGreedoIteration(matsimIt);
+//
+//				Assert.assertEquals(0.1, greedoConf.getReplanningRate(greedoIt), 1e-8);
+//
+//				final double[] ageWeights = greedoConf.getAgeWeights(greedoIt);
+//				Assert.assertEquals(greedoIt + 1, ageWeights.length);
+//				for (int age = 0; age <= greedoIt; age++) {
+//					Assert.assertEquals(Math.pow(1.0 - 0.1, age), ageWeights[age], 1e-8);
+//				}
+//			}
+//		}
+//	}
 
-		for (int lastIteration : new int[] { 49, 50, 51 }) {
-
-			final Config conf = ConfigUtils.createConfig();
-			final Scenario scenario = ScenarioUtils.createScenario(conf);
-
-			conf.controler().setFirstIteration(0);
-			conf.controler().setLastIteration(lastIteration);
-
-			final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(conf, PSimConfigGroup.class);
-			pSimConf.setIterationsPerCycle(10);
-
-			final GreedoConfigGroup greedoConf = ConfigUtils.addOrGetModule(conf, GreedoConfigGroup.class);
-			greedoConf.setInitialMeanReplanningRate(0.1);
-			greedoConf.setReplanningRateIterationExponent(0.0); // constant
-			greedoConf.configure(scenario, new LinkedHashSet<>(), new LinkedHashSet<>());
-
-			for (int matsimIt = conf.controler().getFirstIteration(); matsimIt <= conf.controler()
-					.getLastIteration(); matsimIt++) {
-				final int greedoIt = greedoConf.getGreedoIteration(matsimIt);
-
-				Assert.assertEquals(0.1, greedoConf.getReplanningRate(greedoIt), 1e-8);
-
-				final double[] ageWeights = greedoConf.getAgeWeights(greedoIt);
-				Assert.assertEquals(greedoIt + 1, ageWeights.length);
-				for (int age = 0; age <= greedoIt; age++) {
-					Assert.assertEquals(Math.pow(1.0 - 0.1, age), ageWeights[age], 1e-8);
-				}
-			}
-		}
-	}
-
-	@Test
-	public void testReplanningStateProbability_MSA() {
-
-		for (int lastIteration : new int[] { 49, 50, 51 }) {
-
-			final Config conf = ConfigUtils.createConfig();
-			final Scenario scenario = ScenarioUtils.createScenario(conf);
-
-			conf.controler().setFirstIteration(0);
-			conf.controler().setLastIteration(lastIteration);
-
-			final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(conf, PSimConfigGroup.class);
-			pSimConf.setIterationsPerCycle(10);
-
-			final GreedoConfigGroup accConf = ConfigUtils.addOrGetModule(conf, GreedoConfigGroup.class);
-			accConf.setInitialMeanReplanningRate(1.0);
-			accConf.setReplanningRateIterationExponent(-1.0); // MSA
-			accConf.configure(scenario, new LinkedHashSet<>(), new LinkedHashSet<>());
-
-			for (int matsimIt = conf.controler().getFirstIteration(); matsimIt <= conf.controler()
-					.getLastIteration(); matsimIt++) {
-				final int greedoIt = accConf.getGreedoIteration(matsimIt);
-
-				Assert.assertEquals(1.0 / (1.0 + greedoIt), accConf.getReplanningRate(greedoIt), 1e-8);
-
-				final double[] replanningStateProbas = accConf.getAgeWeights(greedoIt);
-				double expected = 1.0;
-				Assert.assertEquals(expected, replanningStateProbas[0], 1e-8);
-				for (int age = 1; age <= greedoIt; age++) {
-					expected *= (1.0 - accConf.getReplanningRate(greedoIt - age));
-					Assert.assertEquals(expected, replanningStateProbas[age], 1e-8);
-				}
-			}
-		}
-	}
+//	@Test
+//	public void testReplanningStateProbability_MSA() {
+//
+//		for (int lastIteration : new int[] { 49, 50, 51 }) {
+//
+//			final Config conf = ConfigUtils.createConfig();
+//			final Scenario scenario = ScenarioUtils.createScenario(conf);
+//
+//			conf.controler().setFirstIteration(0);
+//			conf.controler().setLastIteration(lastIteration);
+//
+//			final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(conf, PSimConfigGroup.class);
+//			pSimConf.setIterationsPerCycle(10);
+//
+//			final GreedoConfigGroup accConf = ConfigUtils.addOrGetModule(conf, GreedoConfigGroup.class);
+//			accConf.setInitialMeanReplanningRate(1.0);
+//			accConf.setReplanningRateIterationExponent(-1.0); // MSA
+//			accConf.configure(scenario, new LinkedHashSet<>(), new LinkedHashSet<>());
+//
+//			for (int matsimIt = conf.controler().getFirstIteration(); matsimIt <= conf.controler()
+//					.getLastIteration(); matsimIt++) {
+//				final int greedoIt = accConf.getGreedoIteration(matsimIt);
+//
+//				Assert.assertEquals(1.0 / (1.0 + greedoIt), accConf.getReplanningRate(greedoIt), 1e-8);
+//
+//				final double[] replanningStateProbas = accConf.getAgeWeights(greedoIt);
+//				double expected = 1.0;
+//				Assert.assertEquals(expected, replanningStateProbas[0], 1e-8);
+//				for (int age = 1; age <= greedoIt; age++) {
+//					expected *= (1.0 - accConf.getReplanningRate(greedoIt - age));
+//					Assert.assertEquals(expected, replanningStateProbas[age], 1e-8);
+//				}
+//			}
+//		}
+//	}
 
 }

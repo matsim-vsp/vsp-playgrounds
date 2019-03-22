@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
@@ -38,7 +39,6 @@ import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.datastructures.Ages;
 import org.matsim.contrib.greedo.datastructures.PopulationState;
@@ -74,12 +74,10 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDiffere
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
-import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
-import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
 
@@ -134,10 +132,10 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 		this.services = services;
 		this.greedoConfig = ConfigUtils.addOrGetModule(this.services.getConfig(), GreedoConfigGroup.class);
 		this.utilities = new Utilities();
-		this.ages = new Ages(services.getScenario().getPopulation().getPersons().keySet());
+		this.ages = new Ages(services.getScenario().getPopulation().getPersons().keySet(), this.greedoConfig);
 		this.physicalSlotUsageListener = new SlotUsageListener(this.greedoConfig.getTimeDiscretization(),
-				this.ages.getPersonWeights(), this.greedoConfig.getLinkWeights(),
-				this.greedoConfig.getTransitVehicleWeights());
+				this.ages.getPersonWeights(), this.greedoConfig.getConcurrentLinkWeights(),
+				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
@@ -200,17 +198,11 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 		return new EventHandlerProvider() {
 			@Override
 			public synchronized EventHandler get(final Collection<? extends Person> persons) {
-				final TimeDiscretization myTimeDiscretization = new TimeDiscretization(greedoConfig.getStartTime_s(),
-						greedoConfig.getBinSize_s(), greedoConfig.getBinCnt());
-				final Map<Id<Person>, Double> myPersonWeights = new LinkedHashMap<>();
-				for (Person person : persons) {
-					myPersonWeights.put(person.getId(), ages.getPersonWeights().get(person.getId()));
-				}
-				final Map<Id<Link>, Double> myLinkWeights = new LinkedHashMap<>(greedoConfig.getLinkWeights());
-				final Map<Id<Vehicle>, Double> myTransitVehicleWeights = new LinkedHashMap<>(
-						greedoConfig.getTransitVehicleWeights());
-				final SlotUsageListener hypotheticalSlotUsageListener = new SlotUsageListener(myTimeDiscretization,
-						myPersonWeights, myLinkWeights, myTransitVehicleWeights);
+				final SlotUsageListener hypotheticalSlotUsageListener = new SlotUsageListener(
+						greedoConfig.newTimeDiscretization(),
+						ages.getPersonWeights().entrySet().stream().filter(entry -> persons.contains(entry.getValue()))
+								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
+						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
 				hypotheticalSlotUsageListener.resetOnceAndForAll(iteration);
 				allHypotheticalNetworkExperienceListeners.add(hypotheticalSlotUsageListener);
 				return hypotheticalSlotUsageListener;
@@ -253,7 +245,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 		}
 
 		this.numberOfReplanners = replanners.size();
-		this.ages.update(replanners, this.greedoConfig.getAgeWeights(this.iteration + 1));
+		this.ages.update(replanners); // .getAgeWeights(this.iteration + 1));
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 
 		this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier));

@@ -21,10 +21,10 @@ package org.matsim.contrib.greedo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -32,8 +32,6 @@ import org.apache.commons.math3.random.Well19937c;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.StringUtils;
@@ -65,13 +63,11 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	private Integer populationSize = null;
 
-	private Integer pSimIterations = null;
-
 	private TimeDiscretization myTimeDiscretization = null;
 
-	private Map<Id<Link>, Double> linkWeights = null;
+	private Map<Id<Link>, Double> concurrentLinkWeights = null;
 
-	private Map<Id<Vehicle>, Double> transitVehicleWeights = null;
+	private Map<Id<Vehicle>, Double> concurrentLransitVehicleWeights = null;
 
 	private double[] replanningRates = null;
 
@@ -87,14 +83,12 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		// Take over some constants.
 
 		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.pSimIterations = ConfigUtils.addOrGetModule(scenario.getConfig(), PSimConfigGroup.class)
-				.getIterationsPerCycle();
 		this.myTimeDiscretization = new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(),
 				this.getBinCnt());
 
 		// Compute link weights from flow capacities.
 
-		this.linkWeights = new LinkedHashMap<>();
+		this.concurrentLinkWeights = new ConcurrentHashMap<>();
 		if (capacitatedLinkIds != null) {
 			for (Id<Link> linkId : capacitatedLinkIds) {
 				final Link link = scenario.getNetwork().getLinks().get(linkId);
@@ -103,13 +97,13 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 					throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh_timeBin
 							+ " < 0.001 veh per " + this.getBinSize_s() + " sec.");
 				}
-				this.linkWeights.put(link.getId(), 1.0 / cap_veh_timeBin);
+				this.concurrentLinkWeights.put(link.getId(), 1.0 / cap_veh_timeBin);
 			}
 		}
 
 		// Compute transit vehicle weights from person capacities.
 
-		this.transitVehicleWeights = new LinkedHashMap<>();
+		this.concurrentLransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
 				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
@@ -119,7 +113,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
 							+ " < 0.001 persons.");
 				}
-				this.transitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
+				this.concurrentLransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
 			}
 		}
 
@@ -172,12 +166,17 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return this.myTimeDiscretization;
 	}
 
-	public Map<Id<Link>, Double> getLinkWeights() {
-		return this.linkWeights;
+	public TimeDiscretization newTimeDiscretization() {
+		return new TimeDiscretization(this.myTimeDiscretization.getStartTime_s(),
+				this.myTimeDiscretization.getBinSize_s(), this.myTimeDiscretization.getBinCnt());
 	}
 
-	public Map<Id<Vehicle>, Double> getTransitVehicleWeights() {
-		return this.transitVehicleWeights;
+	public Map<Id<Link>, Double> getConcurrentLinkWeights() {
+		return this.concurrentLinkWeights;
+	}
+
+	public Map<Id<Vehicle>, Double> getConcurrentTransitVehicleWeights() {
+		return this.concurrentLransitVehicleWeights;
 	}
 
 	public int getGreedoIteration(final int matsimIteration) {
@@ -189,18 +188,26 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return this.replanningRates[greedoIteration];
 	}
 
-	public double[] getAgeWeights(final int greedoIteration) {
-		final double[] ageWeights = new double[greedoIteration + 1];
+	public double getAgeWeight(final double age) {
 		if (this.getUseAgeWeights()) {
-			ageWeights[0] = 1.0;
-			for (int age = 1; age < ageWeights.length; age++) {
-				ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
-			}
+			return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
 		} else {
-			Arrays.fill(ageWeights, 1.0);
+			return 1.0;
 		}
-		return ageWeights;
 	}
+
+//	public double[] getAgeWeights(final int greedoIteration) {
+//		final double[] ageWeights = new double[greedoIteration + 1];
+//		if (this.getUseAgeWeights()) {
+//			ageWeights[0] = 1.0;
+//			for (int age = 1; age < ageWeights.length; age++) {
+//				ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+//			}
+//		} else {
+//			Arrays.fill(ageWeights, 1.0);
+//		}
+//		return ageWeights;
+//	}
 
 	// -------------------- mode --------------------
 
@@ -274,6 +281,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("iterationsPerCycle")
 	public void setIterationsPerCycle(int iterationsPerCycle) {
 		this.iterationsPerCycle = iterationsPerCycle;
+	}
+
+	// -------------------- ageWeightExponent --------------------
+
+	private double ageWeightExponent = 1.0;
+
+	@StringGetter("ageWeightExponent")
+	public double getAgeWeightExponent() {
+		return this.ageWeightExponent;
+	}
+
+	@StringSetter("ageWeightExponent")
+	public void setAgeWeightExponent(double ageWeightExponent) {
+		this.ageWeightExponent = ageWeightExponent;
 	}
 
 	// -------------------- meanReplanningRate --------------------
