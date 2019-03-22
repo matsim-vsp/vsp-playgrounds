@@ -20,7 +20,11 @@
 package org.matsim.contrib.greedo;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -34,9 +38,11 @@ import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.datastructures.Ages;
 import org.matsim.contrib.greedo.datastructures.PopulationState;
+import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
@@ -68,10 +74,12 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDiffere
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
+import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
 
@@ -99,7 +107,8 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 	private SlotUsageListener physicalSlotUsageListener;
 
-	private SlotUsageListener hypotheticalSlotUsageListener;
+	// TODO replaced by list-of
+	// private SlotUsageListener hypotheticalSlotUsageListener;
 
 	private PopulationState lastPhysicalPopulationState;
 
@@ -174,18 +183,39 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 	// -------------------- IMPLEMENTATION OF ReplannerSelector --------------------
 
-	@Override
-	public EventHandler getHandlerForHypotheticalNetworkExperience() {
-		this.hypotheticalSlotUsageListener = new SlotUsageListener(this.greedoConfig.getTimeDiscretization(),
-				this.ages.getPersonWeights(), this.greedoConfig.getLinkWeights(),
-				this.greedoConfig.getTransitVehicleWeights());
-		this.hypotheticalSlotUsageListener.reset(this.iteration);
-		return this.hypotheticalSlotUsageListener;
+	private List<SlotUsageListener> allHypotheticalNetworkExperienceListeners = new LinkedList<>();
+
+	private Map<Id<Person>, SpaceTimeIndicators<Id<?>>> mergeAndGetAllHypotheticalNetworkExperienceIndicators() {
+		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> result = new LinkedHashMap<>();
+		for (SlotUsageListener listener : this.allHypotheticalNetworkExperienceListeners) {
+			result.putAll(listener.getNewIndicatorView());
+		}
+		return result;
 	}
 
 	@Override
-	public void beforeReplanning() {
+	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
 		this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
+		this.allHypotheticalNetworkExperienceListeners.clear();
+		return new EventHandlerProvider() {
+			@Override
+			public synchronized EventHandler get(final Collection<? extends Person> persons) {
+				final TimeDiscretization myTimeDiscretization = new TimeDiscretization(greedoConfig.getStartTime_s(),
+						greedoConfig.getBinSize_s(), greedoConfig.getBinCnt());
+				final Map<Id<Person>, Double> myPersonWeights = new LinkedHashMap<>();
+				for (Person person : persons) {
+					myPersonWeights.put(person.getId(), ages.getPersonWeights().get(person.getId()));
+				}
+				final Map<Id<Link>, Double> myLinkWeights = new LinkedHashMap<>(greedoConfig.getLinkWeights());
+				final Map<Id<Vehicle>, Double> myTransitVehicleWeights = new LinkedHashMap<>(
+						greedoConfig.getTransitVehicleWeights());
+				final SlotUsageListener hypotheticalSlotUsageListener = new SlotUsageListener(myTimeDiscretization,
+						myPersonWeights, myLinkWeights, myTransitVehicleWeights);
+				hypotheticalSlotUsageListener.resetOnceAndForAll(iteration);
+				allHypotheticalNetworkExperienceListeners.add(hypotheticalSlotUsageListener);
+				return hypotheticalSlotUsageListener;
+			}
+		};
 	}
 
 	@Override
@@ -210,8 +240,10 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, this.iteration,
 				this.physicalSlotUsageListener.getNewIndicatorView(),
-				this.hypotheticalSlotUsageListener.getNewIndicatorView(), this.services.getScenario().getPopulation(),
-				utilityStatsBeforeReplanning.personId2currentDeltaUtility, this.ages);
+				// this.hypotheticalSlotUsageListener.getNewIndicatorView(),
+				this.mergeAndGetAllHypotheticalNetworkExperienceIndicators(),
+				this.services.getScenario().getPopulation(), utilityStatsBeforeReplanning.personId2currentDeltaUtility,
+				this.ages);
 		final Set<Id<Person>> replanners = replannerIdentifier.drawReplanners();
 
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
@@ -219,7 +251,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 				this.lastPhysicalPopulationState.set(person);
 			}
 		}
-		
+
 		this.numberOfReplanners = replanners.size();
 		this.ages.update(replanners, this.greedoConfig.getAgeWeights(this.iteration + 1));
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getPersonWeights());

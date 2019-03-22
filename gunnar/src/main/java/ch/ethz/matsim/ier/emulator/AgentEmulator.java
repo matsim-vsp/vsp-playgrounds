@@ -70,6 +70,7 @@ public final class AgentEmulator {
 
 		eventsManager.finishProcessing();
 		eventsToActivities.finish();
+		scoringFunction.finish();
 
 		plan.setScore(scoringFunction.getScore());
 	}

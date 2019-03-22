@@ -83,10 +83,22 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
+	private boolean hasBeenResetOnceAndForAll = false;
+
+	public void resetOnceAndForAll(final int iteration) {
+		if (this.hasBeenResetOnceAndForAll) {
+			throw new RuntimeException("This listener has already been resetted once and for all.");
+		}
+		this.reset(iteration);
+		this.hasBeenResetOnceAndForAll = true;
+	}
+
 	@Override
 	public void reset(final int iteration) {
-		this.privateTrafficLinkUsageListener.reset(iteration);
-		this.transitVehicleUsageListener.reset(iteration);
+		if (!this.hasBeenResetOnceAndForAll) {
+			this.privateTrafficLinkUsageListener.reset(iteration);
+			this.transitVehicleUsageListener.reset(iteration);
+		}
 	}
 
 	@Override
