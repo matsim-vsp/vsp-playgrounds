@@ -167,8 +167,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	public TimeDiscretization newTimeDiscretization() {
-		return new TimeDiscretization(this.myTimeDiscretization.getStartTime_s(),
-				this.myTimeDiscretization.getBinSize_s(), this.myTimeDiscretization.getBinCnt());
+		return new TimeDiscretization(this.getStartTime_s(),
+				this.getBinSize_s(), this.getBinCnt());
 	}
 
 	public Map<Id<Link>, Double> getConcurrentLinkWeights() {
