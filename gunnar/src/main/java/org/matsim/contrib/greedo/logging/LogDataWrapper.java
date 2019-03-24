@@ -52,10 +52,6 @@ public class LogDataWrapper {
 		return this.identifier.getBeta();
 	}
 	
-	public Double getDelta() {
-		return this.identifier.getDelta();
-	}
-
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.identifier.getSumOfWeightedCountDifferences2();
 	}

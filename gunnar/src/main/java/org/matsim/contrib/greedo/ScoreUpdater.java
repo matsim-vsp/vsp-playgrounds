@@ -50,7 +50,7 @@ public class ScoreUpdater<L> {
 
 	private double inertiaResidual;
 
-	private double regularizationResidual;
+	// private double regularizationResidual;
 
 	private final double individualUtilityChange;
 
@@ -76,9 +76,11 @@ public class ScoreUpdater<L> {
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
 			final double meanLambda, final double ageWeight, final double beta, final double delta,
 			final DynamicData<L> interactionResiduals, final double inertiaResidual,
-			final double regularizationResidual, final GreedoConfigGroup replParams,
-			final double individualUtilityChange, final double totalUtilityChange, Double sumOfInteractionResiduals2,
-			final double ageStratumSize) {
+			// final double regularizationResidual, 
+			final GreedoConfigGroup replParams,
+			final double individualUtilityChange, final double totalUtilityChange, Double sumOfInteractionResiduals2
+			// , final double ageStratumSize
+			) {
 
 		this.meanLambda = meanLambda;
 		// this.targetLambda = replParams.getTargetReplanningRate();
@@ -86,7 +88,7 @@ public class ScoreUpdater<L> {
 
 		this.interactionResiduals = interactionResiduals;
 		this.inertiaResidual = inertiaResidual;
-		this.regularizationResidual = regularizationResidual;
+		// this.regularizationResidual = regularizationResidual;
 
 		this.individualUtilityChange = individualUtilityChange;
 
@@ -154,15 +156,15 @@ public class ScoreUpdater<L> {
 		final double inertiaIfOne = this.expectedInertia(1.0, individualUtilityChange, inertiaResidual);
 		final double inertiaIfMean = this.expectedInertia(meanLambda, individualUtilityChange, inertiaResidual);
 		final double inertiaIfZero = this.expectedInertia(0.0, individualUtilityChange, inertiaResidual);
-		final double regularizationIfOne = this.expectedRegularization(1.0, regularizationResidual, ageStratumSize);
-		final double regularizationIfMean = this.expectedRegularization(meanLambda, regularizationResidual,
-				ageStratumSize);
-		final double regularizationIfZero = this.expectedRegularization(0.0, regularizationResidual, ageStratumSize);
+//		final double regularizationIfOne = this.expectedRegularization(1.0, regularizationResidual, ageStratumSize);
+//		final double regularizationIfMean = this.expectedRegularization(meanLambda, regularizationResidual,
+//				ageStratumSize);
+//		final double regularizationIfZero = this.expectedRegularization(0.0, regularizationResidual, ageStratumSize);
 
-		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean)
-				+ delta * (regularizationIfOne - regularizationIfMean);
-		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean)
-				+ delta * (regularizationIfZero - regularizationIfMean);
+		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean);
+				// + delta * (regularizationIfOne - regularizationIfMean);
+		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean);
+//				+ delta * (regularizationIfZero - regularizationIfMean);
 	}
 
 	private double expectedInteraction(final double lambda, final double sumOfWeightedIndividualChanges2,
@@ -177,12 +179,12 @@ public class ScoreUpdater<L> {
 		return (1.0 - lambda) * individualUtilityChange + inertiaResidual;
 	}
 
-	private double expectedRegularization(final double lambda, final double regularizationResidual,
-			final double ageStratumSize) {
-		return (regularizationResidual * regularizationResidual
-				+ 2.0 * regularizationResidual * (lambda - this.meanLambda) * (1.0 - this.ageWeight)
-				+ Math.pow((lambda - this.meanLambda) * (1.0 - this.ageWeight), 2.0)) / ageStratumSize;
-	}
+//	private double expectedRegularization(final double lambda, final double regularizationResidual,
+//			final double ageStratumSize) {
+//		return (regularizationResidual * regularizationResidual
+//				+ 2.0 * regularizationResidual * (lambda - this.meanLambda) * (1.0 - this.ageWeight)
+//				+ Math.pow((lambda - this.meanLambda) * (1.0 - this.ageWeight), 2.0)) / ageStratumSize;
+//	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
@@ -203,7 +205,7 @@ public class ScoreUpdater<L> {
 		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
 		// this.regularizationResidual += (newLambda - this.meanLambda) * (1.0 -
 		// this.ageWeight);
-		this.regularizationResidual += (newLambda - this.meanLambda) * (1.0 - this.ageWeight);
+		// this.regularizationResidual += (newLambda - this.meanLambda) * (1.0 - this.ageWeight);
 	}
 
 	// -------------------- GETTERS --------------------
@@ -223,12 +225,12 @@ public class ScoreUpdater<L> {
 		return this.inertiaResidual;
 	}
 
-	public double getUpdatedRegularizationResidual() {
-		if (!this.residualsUpdated) {
-			throw new RuntimeException("Residuals have not yet updated.");
-		}
-		return this.regularizationResidual;
-	}
+//	public double getUpdatedRegularizationResidual() {
+//		if (!this.residualsUpdated) {
+//			throw new RuntimeException("Residuals have not yet updated.");
+//		}
+//		return this.regularizationResidual;
+//	}
 
 	public double getUpdatedSumOfInteractionResiduals2() {
 		if (!this.residualsUpdated) {

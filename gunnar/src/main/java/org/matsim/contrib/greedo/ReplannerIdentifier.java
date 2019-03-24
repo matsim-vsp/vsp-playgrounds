@@ -68,7 +68,7 @@ public class ReplannerIdentifier {
 	private final double totalUnweightedUtilityChange; // TODO only for logging/debugging
 
 	private final Ages ages;
-	private final List<Set<Id<Person>>> ageStrata;
+	// private final List<Set<Id<Person>>> ageStrata;
 
 	private final double lambdaBar;
 	// private final double lambdaTarget;
@@ -100,7 +100,7 @@ public class ReplannerIdentifier {
 		this.personId2pseudoSimSlotUsage = personId2pseudoSimSlotUsage;
 		this.population = population;
 		this.ages = ages;
-		this.ageStrata = ages.stratifyByAgeWithMinumStratumSize(greedoConfig.getMinStratumSize());
+		// this.ageStrata = null; // TODO
 
 		this.personId2unweightedUtilityChange = personId2UtilityChange;
 		this.totalUnweightedUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange)
@@ -128,7 +128,7 @@ public class ReplannerIdentifier {
 		final DynamicData<Id<?>> currentUnweightedCounts;
 		{
 			final Tuple<DynamicData<Id<?>>, DynamicData<Id<?>>> currentWeightedAndUnweightedCounts = CountIndicatorUtils
-					.newWeightedAndUnweightedCounts(this.greedoConfig.getTimeDiscretization(),
+					.newWeightedAndUnweightedCounts(this.greedoConfig.newTimeDiscretization(),
 							this.personId2physicalSlotUsage.values());
 			this.currentWeightedCounts = currentWeightedAndUnweightedCounts.getFirst();
 			currentUnweightedCounts = currentWeightedAndUnweightedCounts.getSecond();
@@ -137,7 +137,7 @@ public class ReplannerIdentifier {
 		final DynamicData<Id<?>> upcomingUnweightedCounts;
 		{
 			final Tuple<DynamicData<Id<?>>, DynamicData<Id<?>>> upcomingWeightedAndUnweightedCounts = CountIndicatorUtils
-					.newWeightedAndUnweightedCounts(this.greedoConfig.getTimeDiscretization(),
+					.newWeightedAndUnweightedCounts(this.greedoConfig.newTimeDiscretization(),
 							this.personId2pseudoSimSlotUsage.values());
 			this.upcomingWeightedCounts = upcomingWeightedAndUnweightedCounts.getFirst();
 			upcomingUnweightedCounts = upcomingWeightedAndUnweightedCounts.getSecond();
@@ -150,24 +150,10 @@ public class ReplannerIdentifier {
 		this.lambdaBar = this.greedoConfig.getReplanningRate(greedoIteration);
 		// this.lambdaTarget = this.greedoConfig.getTargetReplanningRate();
 
-		this.beta = 2.0 * this.lambdaBar
-				* (this.greedoConfig.getUseAgeWeightedBeta() ? this.sumOfWeightedCountDifferences2
-						: this.sumOfUnweightedCountDifferences2)
+		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2
 				/ Math.max(this.totalWeightedUtilityChange, 1e-8); // TODO revisit
 
-		this.delta = Math
-				.pow(this.greedoConfig.getRegularizationThreshold()
-						/ (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-				* CountIndicatorUtils.populationAverageUnweightedIndividualChangeSum2(personId2physicalSlotUsage,
-						personId2pseudoSimSlotUsage); // TODO Check efficiency.
-
-		// this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2 /
-		// this.totalWeightedUtilityChange;
-		// this.delta = Math
-		// .pow(this.greedoConfig.getRegularizationThreshold()
-		// / (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-		// * this.sumOfWeightedCountDifferences2 /
-		// Math.pow(ages.getWeightAtAverageAge(), 2.0);
+		this.delta = 0.0; 
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -251,7 +237,7 @@ public class ReplannerIdentifier {
 		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalWeightedUtilityChange;
 		// double regularizationResidual = 0;
 
-		double[] regularizationResiduals = new double[this.ageStrata.size()];
+		// double[] regularizationResiduals = new double[this.ageStrata.size()];
 		// double regularizationResidual = (this.lambdaBar - this.lambdaTarget) * (1.0 -
 		// this.ages.getAverageWeight())
 		// * this.population.getPersons().size();
@@ -288,13 +274,13 @@ public class ReplannerIdentifier {
 		Collections.shuffle(allPersonIdsShuffled);
 
 		final DynamicData<Id<?>> weightedReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.getTimeDiscretization());
+				greedoConfig.newTimeDiscretization());
 		final DynamicData<Id<?>> unweightedReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.getTimeDiscretization());
+				greedoConfig.newTimeDiscretization());
 		final DynamicData<Id<?>> weightedNonReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.getTimeDiscretization());
+				greedoConfig.newTimeDiscretization());
 		final DynamicData<Id<?>> unweightedNonReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.getTimeDiscretization());
+				greedoConfig.newTimeDiscretization());
 
 		this.unweightedReplannerUtilityChangeSum = 0.0;
 		this.unweightedNonReplannerUtilityChangeSum = 0.0;
@@ -306,20 +292,23 @@ public class ReplannerIdentifier {
 
 		for (Id<Person> personId : allPersonIdsShuffled) {
 
-			// TODO Inefficient.
-			Integer ageStratumIndex = null;
-			for (int i = 0; ageStratumIndex == null; i++) {
-				if (this.ageStrata.get(i).contains(personId)) {
-					ageStratumIndex = i;
-				}
-			}
+//			Integer ageStratumIndex = null;
+//			for (int i = 0; ageStratumIndex == null; i++) {
+//				if (this.ageStrata.get(i).contains(personId)) {
+//					ageStratumIndex = i;
+//				}
+//			}
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
 					this.personId2pseudoSimSlotUsage.get(personId), this.lambdaBar,
 					this.ages.getPersonWeights().get(personId), this.beta, this.delta, interactionResiduals,
-					inertiaResidual, regularizationResiduals[ageStratumIndex], this.greedoConfig,
+					inertiaResidual, 
+					// regularizationResiduals[ageStratumIndex], 
+					this.greedoConfig,
 					this.personId2weightedUtilityChange.get(personId), this.totalWeightedUtilityChange,
-					sumOfInteractionResiduals2, this.ageStrata.get(ageStratumIndex).size());
+					sumOfInteractionResiduals2
+//					, this.ageStrata.get(ageStratumIndex).size()
+					);
 
 			final boolean replanner = recipe.isReplanner(personId, scoreUpdater.getScoreChangeIfOne(),
 					scoreUpdater.getScoreChangeIfZero());
@@ -351,7 +340,7 @@ public class ReplannerIdentifier {
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
 
 			// regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
-			regularizationResiduals[ageStratumIndex] = scoreUpdater.getUpdatedRegularizationResidual();
+			// regularizationResiduals[ageStratumIndex] = scoreUpdater.getUpdatedRegularizationResidual();
 
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 		}

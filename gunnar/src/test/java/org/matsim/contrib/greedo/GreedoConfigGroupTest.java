@@ -19,15 +19,12 @@
  */
 package org.matsim.contrib.greedo;
 
-import java.util.LinkedHashSet;
-
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.gbl.MatsimRandom;
 
 /**
  *
@@ -49,15 +46,41 @@ public class GreedoConfigGroupTest {
 				conf.getExpensiveStrategies());
 	}
 
+
+	static double[] newReplanningRates(final int lastGreedoIt, final double initialMeanReplanningRate,
+			final double replanningRateIterationExponent, final boolean binomialNumberOfReplanners,
+			final int populationSize) {
+		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
+		final double[] replanningRates = new double[lastGreedoIt + 1];
+		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
+			double rate = initialMeanReplanningRate * Math.pow(1.0 + greedoIt, replanningRateIterationExponent);
+			if (binomialNumberOfReplanners) {
+				final BinomialDistribution distr = new BinomialDistribution(rng, populationSize, rate);
+				rate = ((double) distr.sample()) / populationSize;
+			}
+			replanningRates[greedoIt] = rate;
+		}
+		return replanningRates;
+	}
+
+	static double[] newAgeWeights(final int greedoIteration, final double[] replanningRates) {
+		final double[] ageWeights = new double[greedoIteration + 1];
+		ageWeights[0] = 1.0;
+		for (int age = 1; age < ageWeights.length; age++) {
+			ageWeights[age] = ageWeights[age - 1] * (1.0 - replanningRates[greedoIteration - age]);
+		}
+		return ageWeights;
+	}
+
 	@Test
 	public void testReplanningRates() {
 
 		// constant re-planning
-		double[] rates = GreedoConfigGroup.newReplanningRates(3, 0.1, 0, false, 100);
+		double[] rates = newReplanningRates(3, 0.1, 0, false, 100);
 		Assert.assertArrayEquals(new double[] { 0.1, 0.1, 0.1, 0.1 }, rates, 1e-8);
 
 		// MSA re-planning rates
-		rates = GreedoConfigGroup.newReplanningRates(3, 1.0, -1.0, false, 100);
+		rates = newReplanningRates(3, 1.0, -1.0, false, 100);
 		Assert.assertArrayEquals(new double[] { 1.0, 1.0 / 2, 1.0 / 3, 1.0 / 4 }, rates, 1e-8);
 	}
 
@@ -66,25 +89,25 @@ public class GreedoConfigGroupTest {
 
 		// constant re-planning
 		double[] rates = new double[] { 0.1, 0.1, 0.1, 0.1 }; // max greedoIt = 3
-		double[] weights = GreedoConfigGroup.newAgeWeights(0, rates);
+		double[] weights = newAgeWeights(0, rates);
 		Assert.assertArrayEquals(new double[] { 1.0 }, weights, 1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(1, rates);
+		weights = newAgeWeights(1, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, 0.9 }, weights, 1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(2, rates);
+		weights = newAgeWeights(2, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, 0.9, 0.9 * 0.9 }, weights, 1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(3, rates);
+		weights = newAgeWeights(3, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, 0.9, 0.9 * 0.9, 0.9 * 0.9 * 0.9 }, weights, 1e-8);
 
 		// MSA re-planning
 		rates = new double[] { 1.0, 1.0 / 2, 1.0 / 3, 1.0 / 4 };
-		weights = GreedoConfigGroup.newAgeWeights(0, rates);
+		weights = newAgeWeights(0, rates);
 		Assert.assertArrayEquals(new double[] { 1.0 }, weights, 1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(1, rates);
+		weights = newAgeWeights(1, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[0]) }, weights, 1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(2, rates);
+		weights = newAgeWeights(2, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[1]), (1.0 - rates[1]) * (1.0 - rates[0]) }, weights,
 				1e-8);
-		weights = GreedoConfigGroup.newAgeWeights(3, rates);
+		weights = newAgeWeights(3, rates);
 		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[2]), (1.0 - rates[2]) * (1.0 - rates[1]),
 				(1.0 - rates[2]) * (1.0 - rates[1]) * (1.0 - rates[0]) }, weights, 1e-8);
 	}

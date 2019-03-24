@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -63,30 +64,26 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	private Integer populationSize = null;
 
-	private TimeDiscretization myTimeDiscretization = null;
+	private Integer firstIteration = null;
 
-	private Map<Id<Link>, Double> concurrentLinkWeights = null;
+	private ConcurrentMap<Id<Link>, Double> concurrentLinkWeights = null;
 
-	private Map<Id<Vehicle>, Double> concurrentLransitVehicleWeights = null;
+	private ConcurrentMap<Id<Vehicle>, Double> concurrentTransitVehicleWeights = null;
 
 	private double[] replanningRates = null;
 
 	// the (necessary) configuration
 
+	public void configure(final Scenario scenario) {
+		this.configure(scenario, scenario.getNetwork().getLinks().keySet(),
+				scenario.getTransitVehicles().getVehicles().keySet());
+	}
+
 	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
 			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
 
-		if (scenario.getConfig().controler().getFirstIteration() != 0) {
-			throw new RuntimeException("The first iteration must be numbered as 0.");
-		}
-
-		// Take over some constants.
-
 		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.myTimeDiscretization = new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(),
-				this.getBinCnt());
-
-		// Compute link weights from flow capacities.
+		this.firstIteration = scenario.getConfig().controler().getFirstIteration();
 
 		this.concurrentLinkWeights = new ConcurrentHashMap<>();
 		if (capacitatedLinkIds != null) {
@@ -101,9 +98,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 			}
 		}
 
-		// Compute transit vehicle weights from person capacities.
-
-		this.concurrentLransitVehicleWeights = new ConcurrentHashMap<>();
+		this.concurrentTransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
 				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
@@ -113,62 +108,30 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
 							+ " < 0.001 persons.");
 				}
-				this.concurrentLransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
+				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
 			}
 		}
 
-		// Pre-compute re-planning rates for all Greedo-iterations.
-
+		// Pre-compute re-planning rates. To have consistent results when randomizing
+		// per iteration.
 		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
-		final int lastGreedoIt = this.getGreedoIteration(scenario.getConfig().controler().getLastIteration());
-		this.replanningRates = new double[lastGreedoIt + 1];
-		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
+		this.replanningRates = new double[scenario.getConfig().controler().getLastIteration()
+				- scenario.getConfig().controler().getFirstIteration() + 1];
+		for (int it = 0; it < this.replanningRates.length; it++) {
 			double rate = this.getInitialMeanReplanningRate()
-					* Math.pow(1.0 + greedoIt, this.getReplanningRateIterationExponent());
+					* Math.pow(1.0 + it, this.getReplanningRateIterationExponent());
 			if (this.getBinomialNumberOfReplanners()) {
 				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
 				rate = ((double) distr.sample()) / this.populationSize;
 			}
-			this.replanningRates[greedoIt] = rate;
+			this.replanningRates[it] = rate;
 		}
-	}
-
-	// static package private computation functions (like this for testing)
-
-	static double[] newReplanningRates(final int lastGreedoIt, final double initialMeanReplanningRate,
-			final double replanningRateIterationExponent, final boolean binomialNumberOfReplanners,
-			final int populationSize) {
-		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
-		final double[] replanningRates = new double[lastGreedoIt + 1];
-		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
-			double rate = initialMeanReplanningRate * Math.pow(1.0 + greedoIt, replanningRateIterationExponent);
-			if (binomialNumberOfReplanners) {
-				final BinomialDistribution distr = new BinomialDistribution(rng, populationSize, rate);
-				rate = ((double) distr.sample()) / populationSize;
-			}
-			replanningRates[greedoIt] = rate;
-		}
-		return replanningRates;
-	}
-
-	static double[] newAgeWeights(final int greedoIteration, final double[] replanningRates) {
-		final double[] ageWeights = new double[greedoIteration + 1];
-		ageWeights[0] = 1.0;
-		for (int age = 1; age < ageWeights.length; age++) {
-			ageWeights[age] = ageWeights[age - 1] * (1.0 - replanningRates[greedoIteration - age]);
-		}
-		return ageWeights;
 	}
 
 	// getters
 
-	public TimeDiscretization getTimeDiscretization() {
-		return this.myTimeDiscretization;
-	}
-
 	public TimeDiscretization newTimeDiscretization() {
-		return new TimeDiscretization(this.getStartTime_s(),
-				this.getBinSize_s(), this.getBinCnt());
+		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
 	}
 
 	public Map<Id<Link>, Double> getConcurrentLinkWeights() {
@@ -176,16 +139,11 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	public Map<Id<Vehicle>, Double> getConcurrentTransitVehicleWeights() {
-		return this.concurrentLransitVehicleWeights;
+		return this.concurrentTransitVehicleWeights;
 	}
 
-	public int getGreedoIteration(final int matsimIteration) {
-		return matsimIteration;
-		// return (matsimIteration / this.pSimIterations);
-	}
-
-	public double getReplanningRate(int greedoIteration) {
-		return this.replanningRates[greedoIteration];
+	public double getReplanningRate(int iteration) {
+		return this.replanningRates[iteration - this.firstIteration];
 	}
 
 	public double getAgeWeight(final double age) {
@@ -195,19 +153,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 			return 1.0;
 		}
 	}
-
-//	public double[] getAgeWeights(final int greedoIteration) {
-//		final double[] ageWeights = new double[greedoIteration + 1];
-//		if (this.getUseAgeWeights()) {
-//			ageWeights[0] = 1.0;
-//			for (int age = 1; age < ageWeights.length; age++) {
-//				ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
-//			}
-//		} else {
-//			Arrays.fill(ageWeights, 1.0);
-//		}
-//		return ageWeights;
-//	}
 
 	// -------------------- mode --------------------
 
@@ -269,20 +214,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binCnt = binCnt;
 	}
 
-	// -------------------- iterationsPerCycle --------------------
-
-	private int iterationsPerCycle;
-
-	@StringGetter("iterationsPerCycle")
-	public int getIterationsPerCycle() {
-		return this.iterationsPerCycle;
-	}
-
-	@StringSetter("iterationsPerCycle")
-	public void setIterationsPerCycle(int iterationsPerCycle) {
-		this.iterationsPerCycle = iterationsPerCycle;
-	}
-
 	// -------------------- ageWeightExponent --------------------
 
 	private double ageWeightExponent = 1.0;
@@ -311,23 +242,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.initialMeanReplanningRate = initialMeanReplanningRate;
 	}
 
-	// -------------------- targetReplanningRate --------------------
-
-	@Deprecated
-	private double targetReplanningRate = 1.0;
-
-	@StringGetter("targetReplanningRate")
-	@Deprecated
-	public double getTargetReplanningRate() {
-		return this.targetReplanningRate;
-	}
-
-	@StringSetter("targetReplanningRate")
-	@Deprecated
-	public void setTargetReplanningRate(double targetReplanningRate) {
-		this.targetReplanningRate = targetReplanningRate;
-	}
-
 	// -------------------- replanningRateIterationExponent --------------------
 
 	private double replanningRateIterationExponent = 0.0;
@@ -340,20 +254,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("replanningRateIterationExponent")
 	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
-	}
-
-	// -------------------- regularizationThreshold --------------------
-
-	private double regularizationThreshold = 0.05;
-
-	@StringGetter("regularizationThreshold")
-	public double getRegularizationThreshold() {
-		return this.regularizationThreshold;
-	}
-
-	@StringSetter("regularizationThreshold")
-	public void setRegularizationThreshold(double regularizationThreshold) {
-		this.regularizationThreshold = regularizationThreshold;
 	}
 
 	// -------------------- binomialNumberOfReplanners --------------------
@@ -384,20 +284,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.useAgeWeights = useAgeWeights;
 	}
 
-	// -------------------- useAgeWeightedBeta --------------------
-
-	private boolean useAgeWeightedBeta = true;
-
-	@StringGetter("useAgeWeightedBeta")
-	public boolean getUseAgeWeightedBeta() {
-		return this.useAgeWeightedBeta;
-	}
-
-	@StringSetter("useAgeWeightedBeta")
-	public void setUseAgeWeightedBeta(final boolean useAgeWeightedBeta) {
-		this.useAgeWeightedBeta = useAgeWeightedBeta;
-	}
-
 	// -------------------- adjustStrategyWeights --------------------
 
 	private boolean adjustStrategyWeights = true;
@@ -410,24 +296,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("adjustStrategyWeights")
 	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
 		this.adjustStrategyWeights = adjustStrategyWeights;
-	}
-
-	// -------------------- relativeAgeStratumSize --------------------
-
-	private double relativeAgeStratumSize = 0.1;
-
-	@StringGetter("relativeAgeStratumSize")
-	public double getRelativeAgeStratumSize() {
-		return this.relativeAgeStratumSize;
-	}
-
-	@StringSetter("relativeAgeStratumSize")
-	public void setRelativeAgeStratumSize(double relativeAgeStratumSize) {
-		this.relativeAgeStratumSize = relativeAgeStratumSize;
-	}
-
-	public int getMinStratumSize() {
-		return (int) (this.relativeAgeStratumSize * this.populationSize);
 	}
 
 	// --------------- cheapStrategies, expensiveStrategies ---------------

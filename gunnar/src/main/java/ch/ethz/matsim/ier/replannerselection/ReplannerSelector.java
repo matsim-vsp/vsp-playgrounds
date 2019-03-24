@@ -19,8 +19,9 @@
  */
 package ch.ethz.matsim.ier.replannerselection;
 
-import java.util.Collection;
+import java.util.Set;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.handler.EventHandler;
 
@@ -37,7 +38,7 @@ public interface ReplannerSelector {
 
 	public interface EventHandlerProvider {
 		
-		public EventHandler get(Collection<? extends Person> persons);
+		public EventHandler get(Set<Id<Person>> persons);
 	
 	}
 	

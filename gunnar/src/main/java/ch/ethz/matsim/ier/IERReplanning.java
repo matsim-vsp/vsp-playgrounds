@@ -1,14 +1,17 @@
 package ch.ethz.matsim.ier;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -90,7 +93,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					.prepareReplanningAndGetEventHandlerProvider();
 			final EventHandlerProvider handlerForOtherReplanningIterationsProvider = new EventHandlerProvider() {
 				@Override
-				public EventHandler get(Collection<? extends Person> personIds) {
+				public EventHandler get(Set<Id<Person>> personIds) {
 					return new EventHandler() {
 					};
 				}
@@ -116,7 +119,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandlerProvider);
 				} else {
 					emulateSequentially(this.scenario.getPopulation(), event.getIteration(),
-							currentEventHandlerProvider.get(this.scenario.getPopulation().getPersons().values()));
+							currentEventHandlerProvider.get(this.scenario.getPopulation().getPersons().keySet()));
 				}
 
 				logger.info(String.format("Finished replanning iteration %d/%d", i + 1,
@@ -166,7 +169,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 			Thread thread = new Thread(() -> {
 				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
 
-				List<Person> batch = new LinkedList<>();
+				Map<Id<Person>, Person> batch = new LinkedHashMap<>();
+				// List<Person> batch = new LinkedList<>();
+				// Set<Id<Person>> batchIds = new LinkedHashSet<>();
 
 				do {
 					batch.clear();
@@ -174,15 +179,16 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 					// Here we create our batch
 					synchronized (personIterator) {
 						while (personIterator.hasNext() && batch.size() < this.ierConfig.getBatchSize()) {
-							batch.add(personIterator.next());
+							final Person person = personIterator.next();
+							batch.put(person.getId(), person);
 						}
 					}
 
-					final EventHandler eventHandler = eventHandlerProvider.get(batch);
+					final EventHandler eventHandler = eventHandlerProvider.get(batch.keySet());
 
 					// And here we send all the agents to the emulator. The score will be written to
 					// the plan directly.
-					for (Person person : batch) {
+					for (Person person : batch.values()) {
 						agentEmulator.emulate(person, person.getSelectedPlan(), eventHandler);
 					}
 
