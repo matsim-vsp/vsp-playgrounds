@@ -10,20 +10,43 @@ import playground.dziemke.utils.Events2ExperiencedPlansConverter;
 public class ExperiencedPlansResidenceApplicator {
 
     public static void main(String[] args) {
+    	//
+    	String runDirectoryRoot = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+        String runId = "berlin-v5.2-10pct";
+        String outputExperiencedPlansFile = "berlin-v5.2-10pct.experiencedPlans.xml.gz";
+        String outputExperiencedPlansFileWithResidence = "berlin-v5.2-10pct.experiencedPlans_withResidence.xml.gz";
+//        String runDirectoryRoot = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+//        String runId = "berlin-v5.2-1pct";
+//        String outputExperiencedPlansFile = "berlin-v5.2-1pct.experiencedPlans.xml.gz";
+//        String outputExperiencedPlansFileWithResidence = "berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
+        String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
+        int areaId = 11000000;
+        //
 
         if (args.length != 0) {
-            String runsDirectoryRoot = args[0];
-            String runId = args[1];
-            String outputExperiencedPlansFile = args[2];
-            String outputExperiencedPlansFileWithResidence = args[3];
-            String areaShapeFile = args[4];
-            int areaId = Integer.parseInt(args[5]);
-
-            ExperiencedPlansResidenceApplicator epra = new ExperiencedPlansResidenceApplicator(runsDirectoryRoot, runId);
-            epra.convertEventsToExperiencedPlans(outputExperiencedPlansFile);
-
-            epra.applyResidenceFilter(outputExperiencedPlansFile, outputExperiencedPlansFileWithResidence, areaShapeFile, areaId);
+        	runDirectoryRoot = args[0];
+            runId = args[1];
+            outputExperiencedPlansFile = args[2];
+            outputExperiencedPlansFileWithResidence = args[3];
+            areaShapeFile = args[4];
+            areaId = Integer.parseInt(args[5]);
+//            String runsDirectoryRoot = args[0];
+//            String runId = args[1];
+//            String outputExperiencedPlansFile = args[2];
+//            String outputExperiencedPlansFileWithResidence = args[3];
+//            String areaShapeFile = args[4];
+//            int areaId = Integer.parseInt(args[5]);
+//
+//            ExperiencedPlansResidenceApplicator epra = new ExperiencedPlansResidenceApplicator(runsDirectoryRoot, runId);
+//            epra.convertEventsToExperiencedPlans(outputExperiencedPlansFile);
+//
+//            epra.applyResidenceFilter(outputExperiencedPlansFile, outputExperiencedPlansFileWithResidence, areaShapeFile, areaId);
         }
+        
+        ExperiencedPlansResidenceApplicator epra = new ExperiencedPlansResidenceApplicator(runDirectoryRoot, runId);
+        epra.convertEventsToExperiencedPlans(outputExperiencedPlansFile);
+
+        epra.applyResidenceFilter(outputExperiencedPlansFile, outputExperiencedPlansFileWithResidence, areaShapeFile, areaId);
     }
 
     private String networkFile;
@@ -31,12 +54,12 @@ public class ExperiencedPlansResidenceApplicator {
     private String plansFile;
     private String eventsFile;
 
-    private ExperiencedPlansResidenceApplicator(String runsDirectoryRoot, String runId) {
+    private ExperiencedPlansResidenceApplicator(String runDirectoryRoot, String runId) {
 
-        this.networkFile = runsDirectoryRoot + "/" + runId + "/" + runId + ".output_network.xml.gz";
-        this.transitSchedule = runsDirectoryRoot + "/" + runId + "/" + runId + ".output_transitSchedule.xml.gz";
-        this.plansFile = runsDirectoryRoot + "/" + runId + "/" + runId + ".output_plans.xml.gz";
-        this.eventsFile = runsDirectoryRoot + "/" + runId + "/" + runId + ".output_events.xml.gz";
+        this.networkFile = runDirectoryRoot + "/" + runId + ".output_network.xml.gz";
+        this.transitSchedule = runDirectoryRoot + "/" + runId + ".output_transitSchedule.xml.gz";
+        this.plansFile = runDirectoryRoot + "/" + runId + ".output_plans.xml.gz";
+        this.eventsFile = runDirectoryRoot + "/" + runId + ".output_events.xml.gz";
     }
 
     private void convertEventsToExperiencedPlans(String outputExperiencedPlansFile) {

@@ -21,6 +21,7 @@ public class TripSurveyUtils {
 //        String midFilePath = "C:/Users/gthunig/VSP/matsim/shared-svn/projects/nemo_mercator/data/original_files/MID/MiD2017_Wege_RVR-Gebiet.csv";
 //        String outputDirectory = "C:/Users/gthunig/VSP/matsim/shared-svn/projects/nemo_mercator/data/original_files/MID/test";
 //        String relativePathToGnuplotScript = "../../../../../cemdapMatsimCadyts/analysis/gnuplot/plot_rel_path_survey_run.gnu";
+        String relativePathToGnuplotScript = "../plot_rel_path_run.gnu";
 //
 //        Population population = TripSurveyUtils.parseMiD(midFilePath);
 //        File directory = new File(outputDirectory);
@@ -36,10 +37,18 @@ public class TripSurveyUtils {
 ////        TripSurveyUtils.performDefaultAnalysis(population, outputDirectory);
 //        TripSurveyUtils.plotDefaultGnuplots(outputDirectory, relativePathToGnuplotScript);
 
-        String runDirectory = "../../public-svn\\matsim\\scenarios\\countries\\de\\berlin\\berlin-v5.2-1pct\\berlin-v5.2-1pct";
-        String populationFile = runDirectory + "\\berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
-        String networkFile = runDirectory + "\\berlin-v5.2-1pct.output_network.xml.gz";
-        String outputDir = runDirectory + "\\..\\analysisNew_ber_dist";
+    	// --
+//        String runDirectory = "../../public-svn\\matsim\\scenarios\\countries\\de\\berlin\\berlin-v5.2-1pct\\berlin-v5.2-1pct";
+//        String populationFile = runDirectory + "\\berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
+//        String networkFile = runDirectory + "\\berlin-v5.2-1pct.output_network.xml.gz";
+//        String outputDir = runDirectory + "\\..\\analysisNew_ber_dist";
+        
+//        String runDirectory = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct";
+        String runDirectory = "/Users/dominik/Workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct";
+        String populationFile = runDirectory + "/berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
+        String networkFile = runDirectory + "/output-berlin-v5.2-1pct/berlin-v5.2-1pct.output_network.xml.gz";
+        String outputDir = runDirectory + "/analysisNew_ber_dist_dz";
+        // --
 
 //        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 //        new PopulationReader(scenario).readFile(populationFile);
@@ -61,6 +70,10 @@ public class TripSurveyUtils {
         tripFilter.activateDist(0,100);
         populationAnalyzer.setTripFilter(tripFilter);
         populationAnalyzer.analyzeAndWrite(outputDir);
+        
+        //
+        TripSurveyUtils.plotDefaultGnuplots(outputDir, relativePathToGnuplotScript);
+        //
     }
 
     public static Population parseMiD(String midFilePath) throws IOException {
@@ -76,7 +89,8 @@ public class TripSurveyUtils {
 
     public static void plotDefaultGnuplots(String outputDirectory, String relativePathToGnuplotScript) {
 
-        String argument1= "wd_wt_carp_dist";
+//        String argument1= "wd_wt_carp_dist";
+        String argument1= "";
         GnuplotUtils.runGnuplotScript(outputDirectory, relativePathToGnuplotScript, argument1);
     }
 }
