@@ -51,6 +51,7 @@ import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
@@ -72,7 +73,7 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
  *
  */
 public class KNAccidentScenario {
-	private static final Logger log = Logger.getLogger(KNAccidentScenario.class) ;
+	private static final Logger log = Logger.getLogger(KNAccidentScenario.class ) ;
 	
 	@SuppressWarnings("unused")
 	private static final String KEEP_LAST_EXECUTED = "keepLastExecuted" ;
@@ -95,7 +96,10 @@ public class KNAccidentScenario {
 	}
 
 	static final Id<Link> accidentLinkId = Id.createLinkId( "4706699_484108_484109-4706699_484109_26662372");
-	static List<Id<Link>> replanningLinkIds = new ArrayList<>() ; 
+	static List<Id<Link>> replanningLinkIds = new ArrayList<>() ;
+
+	enum ControlType { none, manualDetour, bangbang, withinDayRerouting } ;
+	private static final ControlType controlType = ControlType.withinDayRerouting ;
 
 	public static void main(String[] args) {
 		replanningLinkIds.add( Id.createLinkId("4068014_26836040_26836036-4068014_26836036_251045850-4068014_251045850_251045852") ) ;
@@ -179,7 +183,7 @@ public class KNAccidentScenario {
 
 		controler.addOverridingModule( new AbstractModule(){
 			@Override public void install() {
-			
+
 				bind( MobsimDataProvider.class ).in(Singleton.class) ;
 				addMobsimListenerBinding().to( MobsimDataProvider.class) ;
 				bind( ExecutedPlansServiceImpl.class ).in(Singleton.class) ;
@@ -192,21 +196,34 @@ public class KNAccidentScenario {
 				
 
 				// ===
-				
+
+
 				this.addEventHandlerBinding().toInstance( travelTime ) ;
 				this.addMobsimListenerBinding().toInstance( travelTime );
 				this.bind( TravelTime.class ).toInstance( travelTime );
 				
 				// ---
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
-//				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
-				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-				
-//				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
-//				this.addMobsimListenerBinding().toInstance( abc ) ;
-////				abc.setLastReplanningIteration(9);
-//				abc.setReplanningProba(1.0);
-				
+				switch ( controlType ) {
+					case none:
+						break;
+					case manualDetour:
+						this.addMobsimListenerBinding().to( ManualDetour.class ) ;
+						break;
+					case bangbang:
+						this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+						break;
+					case withinDayRerouting:
+						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+						this.addMobsimListenerBinding().toInstance( abc ) ;
+						abc.setLastReplanningIteration(9);
+						abc.setReplanningProba(1.0);
+						break;
+					default:
+						throw new RuntimeException( Gbl.NOT_IMPLEMENTED ) ;
+				}
+
+
 				
 			}
 		}) ;
