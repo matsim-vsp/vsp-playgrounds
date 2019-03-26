@@ -144,11 +144,11 @@ public class RunBerlinScenarioWithMarginalCalib {
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(5000.,10000.),843400+785500, 0); // car + pt
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(5000.,10000.),198907, 0);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(5000.,10000.),22477, 0);
-        
+
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(10000.,20000.),680752+753850, 0); // car + pt
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(10000.,20000.),54255, 0);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(10000.,20000.),2528, 0);
-        
+
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.,10000000.),338635+335439, 0); // car + pt
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),4781, 0);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),167, 0);
