@@ -19,24 +19,18 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-public final class GuiceTest {
-	private static final Logger log = Logger.getLogger( GuiceTest.class ) ;
+public final class MultiBinderExample{
+	private static final Logger log = Logger.getLogger( MultiBinderExample.class ) ;
 
 	public static void main ( String [] args ) {
-		new GuiceTest().run() ;
+		new MultiBinderExample().run() ;
 	}
-
-//	@Inject Map<Annotation, Set<Provider<MyInterface>>> map ;
 
 	void run() {
 		List<Module> modules = new ArrayList<>() ;
 		modules.add(  new AbstractModule(){
 			@Override
 			protected void configure(){
-//				MapBinder<Annotation, MyInterface> mapBinder = MapBinder.newMapBinder( this.binder(), Annotation.class, MyInterface.class );
-//				mapBinder.permitDuplicates() ;
-//				mapBinder.addBinding( Names.named("abc") ).to( MyImpl1.class ) ;
-//				mapBinder.addBinding(Names.named("abc") ).to( MyImpl2.class ) ;
 
 				Multibinder<MyInterface> multiBinder = Multibinder.newSetBinder( this.binder(), MyInterface.class, Names.named( "someAnnotation" ) );;
 //				Multibinder<MyInterface> multiBinder = Multibinder.newSetBinder( this.binder(), MyInterface.class );;
@@ -58,9 +52,6 @@ public final class GuiceTest {
 		log.info("") ;
 
 		Collection<Provider<MyInterface>> set = injector.getInstance( Key.get( new TypeLiteral<Collection<Provider<MyInterface>>>(){} , Names.named( "someAnnotation" )) );
-
-		//		Map<Annotation, Set<Provider<MyInterface>>> map = injector.getInstance( Key.get( new TypeLiteral<Map<Annotation, Set<Provider<MyInterface>>>>(){} ) );;
-		//		Set<Provider<MyInterface>> set = map.get( Names.named("abc" ) ) ;
 
 		for( Provider<MyInterface> provider : set ){
 			provider.get() ;
