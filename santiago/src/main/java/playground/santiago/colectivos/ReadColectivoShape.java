@@ -57,7 +57,7 @@ import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleCapacityImpl;
 import org.matsim.vehicles.VehicleReaderV1;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 import org.matsim.vehicles.VehiclesFactory;
 import org.opengis.feature.simple.SimpleFeature;
@@ -274,7 +274,7 @@ public class ReadColectivoShape {
  		new TransitScheduleReader(scenario).readFile(				"C:/Users/Felix/Documents/Bachelor/Santiago de Chile/santiago/scenario/inputForMATSim/transit/old/transitschedule_simplified.xml");
  				
  		new TransitScheduleWriter(transitSchedule).writeFile(		 "C:/Users/Felix/Documents/Bachelor/Santiago de Chile/v3/scheduleFinal/schedule_all.xml");
- 		new VehicleWriterV1(scenario.getTransitVehicles()).writeFile("C:/Users/Felix/Documents/Bachelor/Santiago de Chile/v3/scheduleFinal/vehicles_all.xml");
+ 		new MatsimVehicleWriter(scenario.getTransitVehicles()).writeFile("C:/Users/Felix/Documents/Bachelor/Santiago de Chile/v3/scheduleFinal/vehicles_all.xml");
 // 		try{
 // 		File file = new File(										 "C:/Users/Felix/Documents/Bachelor/Santiago de Chile/v3/scheduleTest/colectivo_statistics.xml");
 // 		BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));

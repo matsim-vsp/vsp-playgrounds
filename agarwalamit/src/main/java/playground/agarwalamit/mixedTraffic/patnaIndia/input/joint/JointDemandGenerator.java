@@ -25,7 +25,7 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
@@ -63,7 +63,7 @@ public class JointDemandGenerator {
 	public void createAndWriteVehiclesFile(){
 		PatnaVehiclesGenerator pvg = new PatnaVehiclesGenerator(JOINT_PLANS_10PCT,PatnaUtils.PCU_2W);
 		Vehicles vehs = pvg.createAndReturnVehicles(PatnaUtils.ALL_MAIN_MODES);
-		new VehicleWriterV1(vehs).writeFile(JOINT_VEHICLES_10PCT);
+		new MatsimVehicleWriter(vehs).writeFile(JOINT_VEHICLES_10PCT);
 	}
 	
 	public void createSubpopulationAttributes(){

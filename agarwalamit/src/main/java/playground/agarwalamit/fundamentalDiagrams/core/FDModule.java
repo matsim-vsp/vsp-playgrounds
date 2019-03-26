@@ -39,9 +39,9 @@ import org.matsim.core.controler.TerminationCriterion;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.VehicleWriterV1;
 import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorControlerListner;
 import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDDistributionAgentsGeneratorImpl;
@@ -76,7 +76,7 @@ public class FDModule extends AbstractModule {
 
 		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/output_config.xml");
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
-		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
+		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
 	}
 
 	private void checkForConsistencyAndInitialize(){

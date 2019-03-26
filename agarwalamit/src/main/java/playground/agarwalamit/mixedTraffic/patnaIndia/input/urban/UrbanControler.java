@@ -24,7 +24,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
@@ -58,7 +58,7 @@ public class UrbanControler {
 		PatnaVehiclesGenerator pvg = new PatnaVehiclesGenerator(plansFile);
 		Vehicles vehs = pvg.createAndReturnVehicles(PatnaUtils.URBAN_MAIN_MODES);
 		String patnaVehicles = INPUT_FILE_DIR+"/patnaVehicles.xml.gz";
-		new VehicleWriterV1(vehs).writeFile(patnaVehicles);
+		new MatsimVehicleWriter(vehs).writeFile(patnaVehicles);
 
 		config.plans().setInputFile(plansFile);
 		config.counts().setInputFile(INPUT_FILE_DIR+"/countsCarMotorbikeBike.xml");

@@ -44,7 +44,7 @@ import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType.DoorOperationMode;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 
 import playground.ikaddoura.optimization.io.OptSettings;
@@ -427,7 +427,7 @@ class ExternalControler {
 						ptVehiclePCU,
 						maxVelocity);
 				vehicles = vg.getVehicles();
-				VehicleWriterV1 vehicleWriter = new VehicleWriterV1(vehicles);
+				MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(vehicles);
 				vehicleWriter.writeFile(vehiclesFile);
 				
 				if (this.headway2capacity2vehiclesFile.containsKey(headway)){

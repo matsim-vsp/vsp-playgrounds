@@ -8,7 +8,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.openstreetmap.osmosis.core.filter.common.IdTrackerType;
 import org.openstreetmap.osmosis.xml.common.CompressionMethod;
 
@@ -100,7 +100,7 @@ public class OsmTransitMain {
 		log.info("Writing transit schedule to " + this.transitScheduleOutFile);
 		new TransitScheduleWriter(scenario.getTransitSchedule()).writeFile(this.transitScheduleOutFile);
 		log.info("Writing vehicles to " + this.vehiclesOutFile);
-		new VehicleWriterV1(scenario.getTransitVehicles()).writeFile(this.vehiclesOutFile);
+		new MatsimVehicleWriter(scenario.getTransitVehicles()).writeFile(this.vehiclesOutFile);
 		log.info("Done...");
 	}
 

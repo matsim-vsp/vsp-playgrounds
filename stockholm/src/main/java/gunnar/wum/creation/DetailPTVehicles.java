@@ -81,7 +81,7 @@ public class DetailPTVehicles {
 			}
 		}
 
-		final VehicleWriterV1 vehicleWriter = new VehicleWriterV1(newVehicles);
+		final VehicleWriterV1 vehicleWriter = new MatsimVehicleWriter(newVehicles);
 		vehicleWriter.writeFile(newTransitVehiclesFileName);
 		
 		// vehiclesFactory.createVehicle(id, type)

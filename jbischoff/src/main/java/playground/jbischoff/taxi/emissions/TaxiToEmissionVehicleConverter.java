@@ -35,7 +35,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 
 /**
@@ -89,7 +89,7 @@ public class TaxiToEmissionVehicleConverter {
 			outputVehicles.addVehicle(vehicle);//getVehicles().put(vehicle.getId(), vehicle);
 		}
 
-		VehicleWriterV1 vehicleWriter = new VehicleWriterV1(outputVehicles);
+		MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(outputVehicles);
 		vehicleWriter.writeFile(emissionVehicleFile);
 		System.out.println("Writing emission Vehicles files is finished.");
 		

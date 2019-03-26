@@ -48,7 +48,7 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 
 public class RemoveNetworkTransitStopsVehiclesNotUsedByTransitRoutes {
@@ -101,7 +101,7 @@ public class RemoveNetworkTransitStopsVehiclesNotUsedByTransitRoutes {
 		NetworkWriter networkWriter = new NetworkWriter(outputNetwork);
 		networkWriter.write(inputScenario.getConfig().getContext().getFile().substring(0,
 				inputScenario.getConfig().getContext().getFile().lastIndexOf("/")) + "/output_reduced_network.xml.gz");
-		VehicleWriterV1 vehicleWriter = new VehicleWriterV1(outputVehicles);
+		MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(outputVehicles);
 		vehicleWriter.writeFile(inputScenario.getConfig().getContext().getFile().substring(0,
 				inputScenario.getConfig().getContext().getFile().lastIndexOf("/")) + "/output_reduced_transitVehicles.xml.gz");
 	}

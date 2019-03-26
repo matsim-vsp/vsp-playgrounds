@@ -48,12 +48,8 @@ import org.matsim.pt.transitSchedule.api.TransitRouteStop;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vehicles.Vehicles;
+import org.matsim.vehicles.*;
+import org.matsim.vehicles.MatsimVehicleWriter;
 
 /**
  * @author fuerbas
@@ -200,7 +196,7 @@ public class SfCottbusPtSchedule {
 		
 		System.out.println("Network written to: "+cottbus.cbdir+"Cottbus-pt/network_pt.xml");
 		
-		VehicleWriterV1 writer = new VehicleWriterV1(cottbus.vehicles);
+		MatsimVehicleWriter writer = new MatsimVehicleWriter(cottbus.vehicles);
 		writer.writeFile(cottbus.cbdir+"Cottbus-pt/transitVehicles.xml");
 		
 	}

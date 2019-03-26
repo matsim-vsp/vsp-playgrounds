@@ -114,7 +114,7 @@ public class MunichEmissionVehicleGenerator {
 			outputVehicles.addVehicle( vehicle);
 		}
 		
-		VehicleWriterV1 vehicleWriter = new VehicleWriterV1(outputVehicles);
+		MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(outputVehicles);
 		vehicleWriter.writeFile(outputVehicleFile);
 	}
 

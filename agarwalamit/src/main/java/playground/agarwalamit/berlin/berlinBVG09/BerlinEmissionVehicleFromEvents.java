@@ -62,7 +62,7 @@ public class BerlinEmissionVehicleFromEvents implements VehicleEntersTrafficEven
 		eventsManager.addHandler(emissionVehicleFromEvents);
 		new MatsimEventsReader(eventsManager).readFile(convertedEventsFile);
 
-		new VehicleWriterV1(emissionVehicleFromEvents.getVehicles()).writeFile(outputVehiclesFile);
+		new MatsimVehicleWriter(emissionVehicleFromEvents.getVehicles()).writeFile(outputVehiclesFile);
 	}
 
 	//END_EXAMPLE

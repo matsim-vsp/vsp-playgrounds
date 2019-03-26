@@ -56,7 +56,7 @@ import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.counts.Counts;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.Vehicles;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
@@ -108,7 +108,7 @@ public class OuterCordonCadytsControler {
 		PatnaVehiclesGenerator pvg = new PatnaVehiclesGenerator(plansFile);
 		Vehicles vehs = pvg.createAndReturnVehicles(PatnaUtils.EXT_MAIN_MODES);
 
-		new VehicleWriterV1(vehs).writeFile(patnaVehicles);
+		new MatsimVehicleWriter(vehs).writeFile(patnaVehicles);
 		config.vehicles().setVehiclesFile(patnaVehicles);
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);

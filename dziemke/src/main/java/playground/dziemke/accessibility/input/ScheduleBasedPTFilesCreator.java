@@ -27,7 +27,7 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.pt.utils.CreateVehiclesForSchedule;
-import org.matsim.vehicles.VehicleWriterV1;
+import org.matsim.vehicles.MatsimVehicleWriter;
 
 public class ScheduleBasedPTFilesCreator {
 
@@ -42,6 +42,6 @@ public class ScheduleBasedPTFilesCreator {
 		new CreateVehiclesForSchedule(scenario.getTransitSchedule(),scenario.getTransitVehicles()).run();
 		
 		new TransitScheduleWriter(scenario.getTransitSchedule()).writeFile("../../../shared-svn/projects/maxess/data/nairobi/digital_matatus/matsim_2015-06-16_2/schedule2.xml");
-		new VehicleWriterV1(scenario.getTransitVehicles()).writeFile("../../../shared-svn/projects/maxess/data/nairobi/digital_matatus/matsim_2015-06-16_2/vehicles.xml");	
+		new MatsimVehicleWriter(scenario.getTransitVehicles()).writeFile("../../../shared-svn/projects/maxess/data/nairobi/digital_matatus/matsim_2015-06-16_2/vehicles.xml");
 	}
 }

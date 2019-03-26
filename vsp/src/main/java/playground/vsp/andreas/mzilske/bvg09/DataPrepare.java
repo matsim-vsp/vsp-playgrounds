@@ -60,12 +60,8 @@ import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.utils.CreatePseudoNetwork;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleCapacityImpl;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vehicles.VehiclesFactory;
+import org.matsim.vehicles.*;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 import org.matsim.visum.VisumNetwork;
@@ -135,7 +131,7 @@ public class DataPrepare {
 		log.info("writing TransitSchedule to file.");
 		new TransitScheduleWriterV1(this.scenario.getTransitSchedule()).write(IntermediateTransitScheduleWithoutNetworkFile);
 		log.info("writing vehicles to file.");
-		new VehicleWriterV1(this.scenario.getTransitVehicles()).writeFile(OutVehicleFile);
+		new MatsimVehicleWriter(this.scenario.getTransitVehicles()).writeFile(OutVehicleFile);
 		new NetworkWriter(this.pseudoNetwork).write(IntermediateTransitNetworkFile);
 		new TransitScheduleWriter(this.scenario.getTransitSchedule()).writeFile(OutTransitScheduleWithNetworkFile);
 	}

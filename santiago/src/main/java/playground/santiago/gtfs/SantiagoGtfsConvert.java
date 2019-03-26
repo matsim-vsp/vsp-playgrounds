@@ -35,7 +35,7 @@
 //import org.matsim.pt.transitSchedule.api.TransitSchedule;
 //import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 //import org.matsim.pt.utils.CreatePseudoNetwork;
-//import org.matsim.vehicles.VehicleWriterV1;
+//import org.matsim.vehicles.MatsimVehicleWriter;
 //import org.matsim.vehicles.Vehicles;
 //import playground.santiago.SantiagoScenarioConstants;
 //
@@ -85,7 +85,7 @@
 //		TransitScheduleSimplifierAndreas.simplifyTransitSchedule(scenario, outputPath + "/transitschedule_simplified.xml.gz");
 //
 //		Vehicles tv = scenario.getTransitVehicles();
-//		new VehicleWriterV1(tv).writeFile(outputPath + "/transitvehicles.xml.gz");
+//		new MatsimVehicleWriter(tv).writeFile(outputPath + "/transitvehicles.xml.gz");
 //	}
 //
 //	private static void createDir(File file) {

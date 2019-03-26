@@ -123,7 +123,7 @@ public class BerlinEmissionVehicleFromPlans {
 			}
 		}
 		
-		VehicleWriterV1 vehicleWriter = new VehicleWriterV1(outputVehicles);
+		MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(outputVehicles);
 		vehicleWriter.writeFile(outputVehicleFile);
 	}
 

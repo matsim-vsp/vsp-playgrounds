@@ -30,9 +30,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleType.DoorOperationMode;
-import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
 
 /**
@@ -130,7 +130,7 @@ public class ScheduleVehcileWriter {
 		vg.createVehicles(this.schedule, lineIDs, this.busSeats, this.standingRoom, this.length, this.vehTypeId, this.egressSeconds, this.accessSeconds, this.doorOperationMode, this.pcu, this.maxVelocity);
 		this.vehicles = vg.getVehicles();
 		
-		VehicleWriterV1 vehicleWriter = new VehicleWriterV1(this.vehicles);
+		MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(this.vehicles);
 		vehicleWriter.writeFile(this.outputDirectory + this.vehicleFile);
 		
 	}
