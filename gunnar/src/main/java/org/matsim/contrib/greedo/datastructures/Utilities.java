@@ -35,99 +35,97 @@ public class Utilities {
 
 	// -------------------- INNER Entry CLASS --------------------
 
-	public static class Entry {
+	private static class Entry {
 
-		// objects to allow for initial null-value
-		private Double previousRealizedUtility = null;
-		private Double previousExpectedUtility = null;
+		private Double lastRealizedUtility = null;
+		private Double lastExpectedUtility = null;
+		private Double lastExpectedUtilityChange = null;
 
-		// guaranteed to be set upon construction
-		private double currentRealizedUtility;
-		private double currentExpectedUtility;
-
-		private Entry(final double newRealizedUtility, final double newExpectedUtility) {
-			this.currentRealizedUtility = newRealizedUtility;
-			this.currentExpectedUtility = newExpectedUtility;
+		Entry() {
 		}
 
-		public void updateBeforeReplanning(final double newRealizedUtility, final double newExpectedUtility) {
-			this.previousRealizedUtility = this.currentRealizedUtility;
-			this.previousExpectedUtility = this.currentExpectedUtility;
-			this.currentRealizedUtility = newRealizedUtility;
-			this.currentExpectedUtility = newExpectedUtility;
+		void updateExpectedUtility(final double expectedUtility) {
+			this.lastExpectedUtility = expectedUtility;
+			if (this.lastRealizedUtility != null) {
+				this.lastExpectedUtilityChange = expectedUtility - this.lastRealizedUtility;
+			}
 		}
 
-		public boolean previousDataValid() {
-			return ((this.previousRealizedUtility != null) && (this.previousExpectedUtility != null));
+		void updateRealizedUtility(final double realizedUtility) {
+			this.lastRealizedUtility = realizedUtility;
 		}
 
-		public Double getPreviousRealizedUtility() {
-			return previousRealizedUtility;
+		Double getLastRealizedUtility() {
+			return this.lastRealizedUtility;
 		}
 
-		public Double getPreviousExpectedUtility() {
-			return previousExpectedUtility;
+		Double getLastExpectedUtility() {
+			return this.lastExpectedUtility;
 		}
 
-		public double getCurrentRealizedUtility() {
-			return currentRealizedUtility;
-		}
-
-		public double getCurrentExpectedUtility() {
-			return currentExpectedUtility;
-		}
-
-		public Double getPreviousExpectedUtilityChange() {
-			return this.previousExpectedUtility - this.previousRealizedUtility;
+		Double getLastExpectedUtilityChange() {
+			return this.lastExpectedUtilityChange;
 		}
 	}
 
 	// -------------------- INNER SummaryStatistics CLASS --------------------
 
-	public static class SummaryStatistics {
+	public class SummaryStatistics {
 
-		public final Double currentRealizedUtilitySum;
+		public final double expectedUtilitySum;
 
-		public final Double currentExpectedUtilitySum;
+		public final double realizedUtilitySum;
+
+		public final double deltaUtilitySum;
 
 		// set to an unmodifiable instance
 		public final Map<Id<Person>, Double> personId2currentDeltaUtility;
 
-		public final Double currentDeltaUtilitySum;
+		public final int validExpectedUtilityCnt;
+		public final int validRealizedUtilityCnt;
+		public final int validDeltaUtilityCnt;
+		
+		private SummaryStatistics() {
 
-		public final boolean previousDataValid;
+			int validExpectedUtilityCnt = 0;
+			int validRealizedUtilityCnt = 0;
+			int validDeltaUtilityCnt = 0;
 
-		public final Double previousRealizedUtilitySum;
+			double expectedUtilitySum = 0.0;
+			double realizedUtilitySum = 0.0;
+			double deltaUtilitySum = 0.0;
+			Map<Id<Person>, Double> personId2currentDeltaUtility = new LinkedHashMap<>();
 
-		public final Double previousExpectedUtilitySum;
+			for (Map.Entry<Id<Person>, Entry> mapEntry : personId2entry.entrySet()) {
+				final Id<Person> personId = mapEntry.getKey();
+				final Entry entry = mapEntry.getValue();
 
-		public final Double realizedUtilityImprovementSum;
+				if (entry.getLastExpectedUtility() != null) {
+					validExpectedUtilityCnt++;
+					expectedUtilitySum += entry.getLastExpectedUtility();
+				}
 
-		public final Double previousExpectedUtilityImprovementSum;
+				if (entry.getLastRealizedUtility() != null) {
+					validRealizedUtilityCnt++;
+					realizedUtilitySum += entry.getLastRealizedUtility();
+				}
 
-		private SummaryStatistics(final double currentRealizedUtilitySum, final double currentExpectedUtilitySum,
-				final Map<Id<Person>, Double> personId2currentDeltaUtility, final double currentDeltaUtilitySum,
-				final boolean previousDataValid, final Double previousRealizedUtilitySum,
-				final Double previousExpectedUtilitySum) {
-
-			this.currentRealizedUtilitySum = currentRealizedUtilitySum;
-			this.currentExpectedUtilitySum = currentExpectedUtilitySum;
-			this.personId2currentDeltaUtility = Collections.unmodifiableMap(personId2currentDeltaUtility);
-			this.currentDeltaUtilitySum = currentDeltaUtilitySum;
-
-			this.previousDataValid = previousDataValid;
-			if (this.previousDataValid) {
-				this.previousRealizedUtilitySum = previousRealizedUtilitySum;
-				this.previousExpectedUtilitySum = previousExpectedUtilitySum;
-				this.realizedUtilityImprovementSum = this.currentRealizedUtilitySum - this.previousRealizedUtilitySum;
-				this.previousExpectedUtilityImprovementSum = this.previousExpectedUtilitySum
-						- this.previousRealizedUtilitySum;
-			} else {
-				this.previousRealizedUtilitySum = null;
-				this.previousExpectedUtilitySum = null;
-				this.realizedUtilityImprovementSum = null;
-				this.previousExpectedUtilityImprovementSum = null;
+				if (entry.getLastExpectedUtilityChange() != null) {
+					validDeltaUtilityCnt++;
+					deltaUtilitySum += entry.getLastExpectedUtilityChange();
+					personId2currentDeltaUtility.put(personId, entry.getLastExpectedUtilityChange());
+				}
 			}
+
+			this.expectedUtilitySum = expectedUtilitySum;
+			this.realizedUtilitySum = realizedUtilitySum;
+			this.deltaUtilitySum = deltaUtilitySum;
+			
+			this.personId2currentDeltaUtility = Collections.unmodifiableMap(personId2currentDeltaUtility);
+			
+			this.validExpectedUtilityCnt = validExpectedUtilityCnt;
+			this.validRealizedUtilityCnt = validRealizedUtilityCnt;
+			this.validDeltaUtilityCnt = validDeltaUtilityCnt;
 		}
 	}
 
@@ -142,65 +140,24 @@ public class Utilities {
 
 	// -------------------- CONTENT ACCESS --------------------
 
-	public void update(final Id<Person> personId, final Double newRealizedUtility, final double newExpectedUtility) {
+	private Entry getOrCreateEntry(final Id<Person> personId) {
 		Entry entry = this.personId2entry.get(personId);
 		if (entry == null) {
-			this.personId2entry.put(personId, new Entry(newRealizedUtility, newExpectedUtility));
-		} else {
-			entry.updateBeforeReplanning(newRealizedUtility, newExpectedUtility);
+			entry = new Entry();
+			this.personId2entry.put(personId, entry);
 		}
+		return entry;
 	}
 
-	public Entry getUtilities(final Id<Person> personId) {
-		return this.personId2entry.get(personId);
+	public void updateExpectedUtility(final Id<Person> personId, final double expectedUtility) {
+		this.getOrCreateEntry(personId).updateExpectedUtility(expectedUtility);
+	}
+
+	public void updateRealizedUtility(final Id<Person> personId, final Double realizedUtility) {
+		this.getOrCreateEntry(personId).updateRealizedUtility(realizedUtility);
 	}
 
 	public SummaryStatistics newSummaryStatistics() {
-
-		if (this.personId2entry.size() == 0) {
-
-			return null;
-
-		} else {
-
-			double currentRealizedUtilitySum = 0.0;
-			double currentExpectedUtilitySum = 0.0;
-			Map<Id<Person>, Double> personId2currentDeltaUtility = new LinkedHashMap<>();
-			double currentDeltaUtilitySum = 0.0;
-
-			boolean previousDataValid = true;
-			double previousRealizedUtilitySum = 0.0;
-			double previousExpectedUtilitySum = 0.0;
-
-			for (Map.Entry<Id<Person>, Entry> mapEntry : this.personId2entry.entrySet()) {
-				final Id<Person> personId = mapEntry.getKey();
-				final Entry entry = mapEntry.getValue();
-
-				currentRealizedUtilitySum += entry.getCurrentRealizedUtility();
-				currentExpectedUtilitySum += entry.getCurrentExpectedUtility();
-				final double currentDeltaUtility = entry.getCurrentExpectedUtility()
-						- entry.getCurrentRealizedUtility();
-				personId2currentDeltaUtility.put(personId, currentDeltaUtility);
-				currentDeltaUtilitySum += currentDeltaUtility;
-
-				previousDataValid &= entry.previousDataValid();
-				if (previousDataValid) {
-					previousRealizedUtilitySum += entry.getPreviousRealizedUtility();
-					previousExpectedUtilitySum += entry.getPreviousExpectedUtility();
-				}
-			}
-
-			final int cnt = this.personId2entry.size();
-			System.out.println(cnt);
-			System.out.println(previousDataValid);
-			System.out.println(currentRealizedUtilitySum);
-			System.out.println(currentExpectedUtilitySum);
-			System.out.println(previousRealizedUtilitySum);
-			System.out.println(previousExpectedUtilitySum);
-			return new SummaryStatistics(currentRealizedUtilitySum, currentExpectedUtilitySum,
-					personId2currentDeltaUtility, currentDeltaUtilitySum, previousDataValid,
-					previousDataValid ? previousRealizedUtilitySum : null,
-					previousDataValid ? previousExpectedUtilitySum : null);
-		}
+		return new SummaryStatistics();
 	}
 }

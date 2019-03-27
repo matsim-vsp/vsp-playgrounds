@@ -17,24 +17,22 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.logging;
+package org.matsim.contrib.greedo.recipes;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AvgUnweightedNonReplannerUtilityChange extends PopulationAverageStatistic {
-
-	// @Override
-	// public String label() {
-	// return this.getClass().getSimpleName();
-	// }
+public class AcceptAllRecipe implements ReplannerIdentifierRecipe {
 
 	@Override
-	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getUnweightedNonReplannerUtilityChangeSum(),
-				arg0.getNumberOfNonReplanners());
+	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
+		return true;
 	}
 
 }
+

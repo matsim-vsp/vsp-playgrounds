@@ -147,11 +147,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	public double getAgeWeight(final double age) {
-		if (this.getUseAgeWeights()) {
-			return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
-		} else {
-			return 1.0;
-		}
+		return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
 	}
 
 	// -------------------- mode --------------------
@@ -270,18 +266,18 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
 	}
 
-	// -------------------- useAgeWeights --------------------
+	// -------------------- detailedLogging --------------------
 
-	private boolean useAgeWeights = true;
+	private boolean detailedLogging = true;
 
-	@StringGetter("useAgeWeights")
-	public boolean getUseAgeWeights() {
-		return this.useAgeWeights;
+	@StringGetter("detailedLogging")
+	public boolean getDetailedLogging() {
+		return this.detailedLogging;
 	}
 
-	@StringSetter("useAgeWeights")
-	public void setUseAgeWeights(final boolean useAgeWeights) {
-		this.useAgeWeights = useAgeWeights;
+	@StringSetter("detailedLogging")
+	public void setDetailedLogging(final boolean detailedLogging) {
+		this.detailedLogging = detailedLogging;
 	}
 
 	// -------------------- adjustStrategyWeights --------------------

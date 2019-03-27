@@ -30,14 +30,6 @@ import java.util.stream.Collectors;
 import javax.inject.Singleton;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.datastructures.Ages;
 import org.matsim.contrib.greedo.datastructures.PopulationState;
@@ -50,15 +42,11 @@ import org.matsim.contrib.greedo.logging.AvgAgeWeight;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
+import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
-import org.matsim.contrib.greedo.logging.AvgUnweightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.Beta;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
@@ -74,6 +62,7 @@ import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
@@ -85,32 +74,27 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
  * 
  */
 @Singleton
-public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
-		PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler, ReplannerSelector {
+public class WireGreedoIntoMATSimControlerListener implements Provider<EventHandler>, ReplannerSelector {
 
 	// -------------------- MEMBERS --------------------
 
-	private MatsimServices services;
+	private final MatsimServices services;
 
-	private GreedoConfigGroup greedoConfig;
+	private final GreedoConfigGroup greedoConfig;
 
-	private StatisticsWriter<LogDataWrapper> statsWriter;
+	private final StatisticsWriter<LogDataWrapper> statsWriter;
 
-	private Utilities utilities;
+	private final Utilities utilities;
 
-	private Ages ages;
+	private final Ages ages;
 
-	private SlotUsageListener physicalSlotUsageListener;
+	private final SlotUsageListener physicalSlotUsageListener;
 
-	private List<SlotUsageListener> hypotheticalSlotUsageListeners = new LinkedList<>();
+	private final List<SlotUsageListener> hypotheticalSlotUsageListeners = new LinkedList<>();
 
-	private PopulationState lastPhysicalPopulationState;
-
-	private Integer iteration;
+	private PopulationState lastPhysicalPopulationState = null;
 
 	// below only for logging
-
-	private Double expectedUtilityChangeSumAccelerated = null;
 
 	private Double expectedUtilityChangeSumUniform = null;
 
@@ -133,42 +117,28 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 				this.ages.getPersonWeights(), this.greedoConfig.getConcurrentLinkWeights(),
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
-		// Everything below only for statistics logging.
 		this.statsWriter = new StatisticsWriter<>(
 				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
-
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
 		this.statsWriter.addSearchStatistic(new LambdaBar());
 		this.statsWriter.addSearchStatistic(new Beta());
-
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
-
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerSize());
-
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedNonReplannerCountDifferences2());
-
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedNonReplannerCountDifferences2());
-
-		this.statsWriter.addSearchStatistic(new AvgUnweightedUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgUnweightedReplannerUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgUnweightedNonReplannerUtilityChange());
-
-		this.statsWriter.addSearchStatistic(new AvgWeightedUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgWeightedReplannerUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgWeightedNonReplannerUtilityChange());
-
+		this.statsWriter.addSearchStatistic(new AvgReplannerUtilityChange());
+		this.statsWriter.addSearchStatistic(new AvgNonReplannerUtilityChange());
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
-
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
@@ -178,7 +148,13 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 
 	@Override
 	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
+
 		this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
+		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			this.utilities.updateRealizedUtility(person.getId(),
+					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
+		}
+
 		this.hypotheticalSlotUsageListeners.clear();
 		return new EventHandlerProvider() {
 			@Override
@@ -187,7 +163,7 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 						ages.getPersonWeights().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
 								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
 						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
-				listener.resetOnceAndForAll(iteration);
+				listener.resetOnceAndForAll(iteration());
 				hypotheticalSlotUsageListeners.add(listener);
 				return listener;
 			}
@@ -198,33 +174,18 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 	public void afterReplanning() {
 
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
-			this.utilities.update(person.getId(),
-					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore(),
-					person.getSelectedPlan().getScore());
+			this.utilities.updateExpectedUtility(person.getId(), person.getSelectedPlan().getScore());
 		}
-		final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
-
-		// >>>>> TODO revisit >>>>>
-		if (utilityStatsBeforeReplanning.previousDataValid) {
-			this.realizedUtilitySum = utilityStatsBeforeReplanning.previousRealizedUtilitySum;
-			this.realizedUtilityChangeSum = utilityStatsBeforeReplanning.currentRealizedUtilitySum
-					- utilityStatsBeforeReplanning.previousRealizedUtilitySum;
-			this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(this.iteration)
-					* (utilityStatsBeforeReplanning.previousExpectedUtilitySum
-							- utilityStatsBeforeReplanning.previousRealizedUtilitySum);
-			this.expectedUtilityChangeSumAccelerated = null; // TODO
-		}
-		// <<<<< TODO revisit <<<<<
+		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
 
 		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> hypotheticalSlotUsageIndicators = new LinkedHashMap<>();
 		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
 			hypotheticalSlotUsageIndicators.putAll(listener.getNewIndicatorView());
 		}
 
-		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, this.iteration,
+		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, this.iteration(),
 				this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
-				this.services.getScenario().getPopulation(), utilityStatsBeforeReplanning.personId2currentDeltaUtility,
-				this.ages);
+				this.services.getScenario().getPopulation(), utilityStats.personId2currentDeltaUtility);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {
@@ -236,46 +197,35 @@ public class WireGreedoIntoMATSimControlerListener implements LinkEnterEventHand
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 
+		if (this.realizedUtilitySum != null) {
+			this.realizedUtilityChangeSum = utilityStats.realizedUtilitySum - this.realizedUtilitySum;
+		}
+		this.realizedUtilitySum = utilityStats.realizedUtilitySum;
+
 		this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier));
+
+		// These are predictions for the next iteration.
+		this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(this.iteration())
+				* utilityStats.deltaUtilitySum;
 	}
 
-	// -------------------- IMPLEMENTATION OF EventHandlers --------------------
+	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------
 
 	@Override
-	public void reset(final int iteration) {
-		this.iteration = iteration;
-		this.physicalSlotUsageListener.reset(iteration);
-	}
-
-	@Override
-	public void handleEvent(final VehicleEntersTrafficEvent event) {
-		this.physicalSlotUsageListener.handleEvent(event);
-	}
-
-	@Override
-	public void handleEvent(final LinkEnterEvent event) {
-		this.physicalSlotUsageListener.handleEvent(event);
-	}
-
-	@Override
-	public void handleEvent(final PersonEntersVehicleEvent event) {
-		this.physicalSlotUsageListener.handleEvent(event);
-	}
-
-	@Override
-	public void handleEvent(final VehicleLeavesTrafficEvent event) {
-		this.physicalSlotUsageListener.handleEvent(event);
+	public EventHandler get() {
+		// Expecting this to be called only once; returning always the same instance.
+		return this.physicalSlotUsageListener;
 	}
 
 	// -------------------- GETTERS, MAINLY FOR LOGGING --------------------
 
+	private int iteration() {
+		return this.physicalSlotUsageListener.getLastResetIteration();
+	}
+
 	public Double getLambdaRealized() {
 		return (this.numberOfReplanners.doubleValue()
 				/ this.services.getScenario().getPopulation().getPersons().size());
-	}
-
-	public Double getLastExpectedUtilityChangeSumAccelerated() {
-		return this.expectedUtilityChangeSumAccelerated;
 	}
 
 	public Double getLastExpectedUtilityChangeSumUniform() {

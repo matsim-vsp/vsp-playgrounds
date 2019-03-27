@@ -55,6 +55,10 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	private final PrivateTrafficLinkUsageListener privateTrafficLinkUsageListener;
 
 	private final TransitVehicleUsageListener transitVehicleUsageListener;
+	
+	private boolean hasBeenResetOnceAndForAll = false;
+
+	private Integer lastResetIteration = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -80,10 +84,10 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		// Need a deep copy because of subsequent (pSim) resets.
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
-
-	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
-
-	private boolean hasBeenResetOnceAndForAll = false;
+	
+	public Integer getLastResetIteration() {
+		return this.lastResetIteration;
+	}
 
 	public void resetOnceAndForAll(final int iteration) {
 		if (this.hasBeenResetOnceAndForAll) {
@@ -93,12 +97,15 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		this.hasBeenResetOnceAndForAll = true;
 	}
 
+	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
+
 	@Override
 	public void reset(final int iteration) {
 		if (!this.hasBeenResetOnceAndForAll) {
+			this.lastResetIteration = iteration;
 			this.privateTrafficLinkUsageListener.reset(iteration);
 			this.transitVehicleUsageListener.reset(iteration);
-		}
+		}		
 	}
 
 	@Override

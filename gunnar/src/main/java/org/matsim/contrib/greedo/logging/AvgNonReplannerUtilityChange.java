@@ -24,16 +24,12 @@ package org.matsim.contrib.greedo.logging;
  * @author Gunnar Flötteröd
  *
  */
-public class AvgWeightedNonReplannerUtilityChange extends PopulationAverageStatistic {
-
-	// @Override
-	// public String label() {
-	// return this.getClass().getSimpleName();
-	// }
+public class AvgNonReplannerUtilityChange extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getWeightedNonReplannerUtilityChangeSum(), arg0.getNumberOfNonReplanners());
+		return this.averageOrEmpty(arg0.getNonReplannerUtilityChangeSum(),
+				arg0.getNumberOfNonReplanners());
 	}
 
 }

@@ -186,7 +186,8 @@ public class Greedo {
 				this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
 				// }
 				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
-				this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
+				this.addEventHandlerBinding().toProvider(WireGreedoIntoMATSimControlerListener.class);
+				
 			}
 		};
 		final AbstractModule ierModule = new IERModule(WireGreedoIntoMATSimControlerListener.class);

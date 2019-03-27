@@ -65,7 +65,7 @@ public class LogDataWrapper {
 	}
 	
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
-		return this.accelerator.getLastExpectedUtilityChangeSumAccelerated();
+		return this.identifier.getReplannerExpectedUtilityChangeSum();
 	}
 
 	public Double getLastExpectedUtilityChangeSumUniform() {
@@ -88,14 +88,6 @@ public class LogDataWrapper {
 		return this.accelerator.getAverageWeight();
 	}
 
-	public Double getSumOfUnweightedUtilityChanges() {
-		return this.identifier.getSumOfUnweightedUtilityChanges();
-	}
-	
-	public Double getSumOfWeightedUtilityChanges() {
-		return this.identifier.getSumOfWeightedUtilityChanges();
-	}
-	
 	public Double getSumOfUnweightedReplannerCountDifferences2() {
 		return this.identifier.getSumOfUnweightedReplannerCountDifferences2();
 	}
@@ -104,12 +96,8 @@ public class LogDataWrapper {
 		return this.identifier.getSumOfWeightedReplannerCountDifferences2();
 	}
 
-	public Double getUnweightedReplannerUtilityChangeSum() {
-		return this.identifier.getUnweightedReplannerUtilityChangeSum();
-	}
-
-	public Double getWeightedReplannerUtilityChangeSum() {
-		return this.identifier.getWeightedReplannerUtilityChangeSum();
+	public Double getReplannerUtilityChangeSum() {
+		return this.identifier.getReplannerExpectedUtilityChangeSum();
 	}
 
 	public Double getSumOfUnweightedNonReplannerCountDifferences2() {
@@ -120,14 +108,10 @@ public class LogDataWrapper {
 		return this.identifier.getSumOfWeightedNonReplannerCountDifferences2();
 	}
 
-	public Double getUnweightedNonReplannerUtilityChangeSum() {
-		return this.identifier.getUnweightedNonReplannerUtilityChangeSum();
+	public Double getNonReplannerUtilityChangeSum() {
+		return this.identifier.getNonReplannerExpectedUtilityChangeSum();
 	}
 
-	public Double getWeightedNonReplannerUtilityChangeSum() {
-		return this.identifier.getWeightedNonReplannerUtilityChangeSum();
-	}
-	
 	public Integer getNumberOfReplanners() {
 		return this.accelerator.getNumberOfReplanners();
 	}

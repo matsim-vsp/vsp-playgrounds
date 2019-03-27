@@ -29,10 +29,10 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.greedo.datastructures.Ages;
 import org.matsim.contrib.greedo.datastructures.CountIndicatorUtils;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
+import org.matsim.contrib.greedo.recipes.AcceptAllRecipe;
 import org.matsim.contrib.greedo.recipes.Mah2007Recipe;
 import org.matsim.contrib.greedo.recipes.Mah2009Recipe;
 import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
@@ -55,75 +55,44 @@ public class ReplannerIdentifier {
 	private final Population population;
 
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage;
-	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage;
+	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypothetialSlotUsage;
 	private final DynamicData<Id<?>> currentWeightedCounts;
 	private final DynamicData<Id<?>> upcomingWeightedCounts;
 
-	private final double sumOfUnweightedCountDifferences2; // TODO only for logging/debugging
+	private final Double sumOfUnweightedCountDifferences2;
 	private final double sumOfWeightedCountDifferences2;
 
-	private final Map<Id<Person>, Double> personId2weightedUtilityChange;
-	private final Map<Id<Person>, Double> personId2unweightedUtilityChange;
-	private final double totalWeightedUtilityChange;
-	private final double totalUnweightedUtilityChange; // TODO only for logging/debugging
-
-	private final Ages ages;
-	// private final List<Set<Id<Person>>> ageStrata;
+	private final Map<Id<Person>, Double> personId2UtilityChange;
+	private final double totalUtilityChange;
 
 	private final double lambdaBar;
-	// private final double lambdaTarget;
 	private final double beta;
-	private final double delta;
 
 	private Double sumOfUnweightedReplannerCountDifferences2 = null;
 	private Double sumOfWeightedReplannerCountDifferences2 = null;
-	private Double unweightedReplannerUtilityChangeSum = null;
-	private Double weightedReplannerUtilityChangeSum = null;
+	private Double replannerUtilityChangeSum = null;
 
 	private Double sumOfUnweightedNonReplannerCountDifferences2 = null;
 	private Double sumOfWeightedNonReplannerCountDifferences2 = null;
-	private Double unweightedNonReplannerUtilityChangeSum = null;
-	private Double weightedNonReplannerUtilityChangeSum = null;
+	private Double nonReplannerUtilityChangeSum = null;
 
 	private Double replannerSizeSum = null;
 	private Double nonReplannerSizeSum = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final GreedoConfigGroup greedoConfig, final int greedoIteration,
+	ReplannerIdentifier(final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
-			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage, final Population population,
-			final Map<Id<Person>, Double> personId2UtilityChange, final Ages ages) {
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
+			final Population population, final Map<Id<Person>, Double> personId2UtilityChange) {
 
 		this.greedoConfig = greedoConfig;
 		this.personId2physicalSlotUsage = personId2physicalSlotUsage;
-		this.personId2pseudoSimSlotUsage = personId2pseudoSimSlotUsage;
+		this.personId2hypothetialSlotUsage = personId2hypotheticalSlotUsage;
 		this.population = population;
-		this.ages = ages;
-		// this.ageStrata = null; // TODO
 
-		this.personId2unweightedUtilityChange = personId2UtilityChange;
-		this.totalUnweightedUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange)
-				.sum();
-
-		// >>>>> REMOVING THE UTILITY WEIGHTING >>>>>
-
-		this.personId2weightedUtilityChange = this.personId2unweightedUtilityChange;
-		this.totalWeightedUtilityChange = this.totalUnweightedUtilityChange;
-
-		// this.personId2weightedUtilityChange = new
-		// LinkedHashMap<>(personId2UtilityChange.size());
-		// personId2UtilityChange.entrySet().stream().forEach(entry -> {
-		// final Id<Person> personId = entry.getKey();
-		// final double weightedUtilityChange = ages.getPersonWeights().get(personId) *
-		// entry.getValue();
-		// this.personId2weightedUtilityChange.put(personId, weightedUtilityChange);
-		// });
-		// this.totalWeightedUtilityChange =
-		// this.personId2weightedUtilityChange.values().stream()
-		// .mapToDouble(utlChange -> utlChange).sum();
-
-		// <<<<< REMOVING THE UTILITY WEIGHTING <<<<<
+		this.personId2UtilityChange = personId2UtilityChange;
+		this.totalUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange).sum();
 
 		final DynamicData<Id<?>> currentUnweightedCounts;
 		{
@@ -138,22 +107,22 @@ public class ReplannerIdentifier {
 		{
 			final Tuple<DynamicData<Id<?>>, DynamicData<Id<?>>> upcomingWeightedAndUnweightedCounts = CountIndicatorUtils
 					.newWeightedAndUnweightedCounts(this.greedoConfig.newTimeDiscretization(),
-							this.personId2pseudoSimSlotUsage.values());
+							this.personId2hypothetialSlotUsage.values());
 			this.upcomingWeightedCounts = upcomingWeightedAndUnweightedCounts.getFirst();
 			upcomingUnweightedCounts = upcomingWeightedAndUnweightedCounts.getSecond();
 		}
-		this.sumOfUnweightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(currentUnweightedCounts,
-				upcomingUnweightedCounts);
+		if (this.greedoConfig.getDetailedLogging()) {
+			this.sumOfUnweightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(currentUnweightedCounts,
+					upcomingUnweightedCounts);
+		} else {
+			this.sumOfUnweightedCountDifferences2 = null;
+		}
 		this.sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
-		this.lambdaBar = this.greedoConfig.getReplanningRate(greedoIteration);
-		// this.lambdaTarget = this.greedoConfig.getTargetReplanningRate();
-
+		this.lambdaBar = this.greedoConfig.getReplanningRate(iteration);
 		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2
-				/ Math.max(this.totalWeightedUtilityChange, 1e-8); // TODO revisit
-
-		this.delta = 0.0; 
+				/ Math.max(this.totalUtilityChange, 1e-8);
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -166,24 +135,12 @@ public class ReplannerIdentifier {
 		return this.sumOfWeightedCountDifferences2;
 	}
 
-	public Double getSumOfUnweightedUtilityChanges() {
-		return this.totalUnweightedUtilityChange;
-	}
-
-	public Double getSumOfWeightedUtilityChanges() {
-		return this.totalWeightedUtilityChange;
-	}
-
 	public Double getLambdaBar() {
 		return this.lambdaBar;
 	}
 
 	public Double getBeta() {
 		return this.beta;
-	}
-
-	public Double getDelta() {
-		return this.delta;
 	}
 
 	public Double getSumOfUnweightedReplannerCountDifferences2() {
@@ -194,14 +151,6 @@ public class ReplannerIdentifier {
 		return this.sumOfWeightedReplannerCountDifferences2;
 	}
 
-	public Double getUnweightedReplannerUtilityChangeSum() {
-		return this.unweightedReplannerUtilityChangeSum;
-	}
-
-	public Double getWeightedReplannerUtilityChangeSum() {
-		return this.weightedReplannerUtilityChangeSum;
-	}
-
 	public Double getSumOfUnweightedNonReplannerCountDifferences2() {
 		return this.sumOfUnweightedNonReplannerCountDifferences2;
 	}
@@ -210,12 +159,12 @@ public class ReplannerIdentifier {
 		return this.sumOfWeightedNonReplannerCountDifferences2;
 	}
 
-	public Double getUnweightedNonReplannerUtilityChangeSum() {
-		return this.unweightedNonReplannerUtilityChangeSum;
+	public Double getReplannerExpectedUtilityChangeSum() {
+		return this.replannerUtilityChangeSum;
 	}
 
-	public Double getWeightedNonReplannerUtilityChangeSum() {
-		return this.weightedNonReplannerUtilityChangeSum;
+	public Double getNonReplannerExpectedUtilityChangeSum() {
+		return this.nonReplannerUtilityChangeSum;
 	}
 
 	public Double getReplannerSizeSum() {
@@ -234,14 +183,7 @@ public class ReplannerIdentifier {
 
 		final DynamicData<Id<?>> interactionResiduals = CountIndicatorUtils
 				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambdaBar);
-		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalWeightedUtilityChange;
-		// double regularizationResidual = 0;
-
-		// double[] regularizationResiduals = new double[this.ageStrata.size()];
-		// double regularizationResidual = (this.lambdaBar - this.lambdaTarget) * (1.0 -
-		// this.ages.getAverageWeight())
-		// * this.population.getPersons().size();
-
+		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalUtilityChange;
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
 		// Instantiate the re-planning recipe.
@@ -250,111 +192,101 @@ public class ReplannerIdentifier {
 		if (GreedoConfigGroup.ModeType.sample == this.greedoConfig.getModeTypeField()) {
 			recipe = new UniformReplanningRecipe(this.lambdaBar);
 		} else if (GreedoConfigGroup.ModeType.off == this.greedoConfig.getModeTypeField()) {
-			recipe = new ReplannerIdentifierRecipe() {
-				@Override
-				public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
-					return true;
-				}
-			};
+			recipe = new AcceptAllRecipe();
 		} else if (GreedoConfigGroup.ModeType.accelerate == this.greedoConfig.getModeTypeField()) {
 			recipe = new AccelerationRecipe();
 		} else if (GreedoConfigGroup.ModeType.mah2007 == this.greedoConfig.getModeTypeField()) {
-			recipe = new Mah2007Recipe(this.personId2weightedUtilityChange, this.lambdaBar);
+			recipe = new Mah2007Recipe(this.personId2UtilityChange, this.lambdaBar);
 		} else if (GreedoConfigGroup.ModeType.mah2009 == this.greedoConfig.getModeTypeField()) {
-			recipe = new Mah2009Recipe(this.personId2weightedUtilityChange, this.lambdaBar);
+			recipe = new Mah2009Recipe(this.personId2UtilityChange, this.lambdaBar);
 		} else {
 			throw new RuntimeException("Unknown mode: " + this.greedoConfig.getModeTypeField());
 		}
 
 		// Go through all vehicles and decide which driver gets to re-plan.
 
-		final Set<Id<Person>> replanners = new LinkedHashSet<>();
-
 		final List<Id<Person>> allPersonIdsShuffled = new ArrayList<>(this.population.getPersons().keySet());
 		Collections.shuffle(allPersonIdsShuffled);
 
-		final DynamicData<Id<?>> weightedReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.newTimeDiscretization());
-		final DynamicData<Id<?>> unweightedReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.newTimeDiscretization());
-		final DynamicData<Id<?>> weightedNonReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.newTimeDiscretization());
-		final DynamicData<Id<?>> unweightedNonReplannerCountDifferences = new DynamicData<>(
-				greedoConfig.newTimeDiscretization());
+		final DynamicData<Id<?>> weightedReplannerCountDifferences;
+		final DynamicData<Id<?>> unweightedReplannerCountDifferences;
+		final DynamicData<Id<?>> weightedNonReplannerCountDifferences;
+		final DynamicData<Id<?>> unweightedNonReplannerCountDifferences;
+		if (this.greedoConfig.getDetailedLogging()) {
+			weightedReplannerCountDifferences = new DynamicData<>(greedoConfig.newTimeDiscretization());
+			unweightedReplannerCountDifferences = new DynamicData<>(greedoConfig.newTimeDiscretization());
+			weightedNonReplannerCountDifferences = new DynamicData<>(greedoConfig.newTimeDiscretization());
+			unweightedNonReplannerCountDifferences = new DynamicData<>(greedoConfig.newTimeDiscretization());
+		} else {
+			weightedReplannerCountDifferences = null;
+			unweightedReplannerCountDifferences = null;
+			weightedNonReplannerCountDifferences = null;
+			unweightedNonReplannerCountDifferences = null;
+		}
 
-		this.unweightedReplannerUtilityChangeSum = 0.0;
-		this.unweightedNonReplannerUtilityChangeSum = 0.0;
-		this.weightedReplannerUtilityChangeSum = 0.0;
-		this.weightedNonReplannerUtilityChangeSum = 0.0;
+		this.replannerUtilityChangeSum = 0.0;
+		this.nonReplannerUtilityChangeSum = 0.0;
 
 		this.replannerSizeSum = 0.0;
 		this.nonReplannerSizeSum = 0.0;
 
+		final Set<Id<Person>> replanners = new LinkedHashSet<>();
+
 		for (Id<Person> personId : allPersonIdsShuffled) {
 
-//			Integer ageStratumIndex = null;
-//			for (int i = 0; ageStratumIndex == null; i++) {
-//				if (this.ageStrata.get(i).contains(personId)) {
-//					ageStratumIndex = i;
-//				}
-//			}
-
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
-					this.personId2pseudoSimSlotUsage.get(personId), this.lambdaBar,
-					this.ages.getPersonWeights().get(personId), this.beta, this.delta, interactionResiduals,
-					inertiaResidual, 
-					// regularizationResiduals[ageStratumIndex], 
-					this.greedoConfig,
-					this.personId2weightedUtilityChange.get(personId), this.totalWeightedUtilityChange,
-					sumOfInteractionResiduals2
-//					, this.ageStrata.get(ageStratumIndex).size()
-					);
+					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar,
+					this.beta, interactionResiduals, inertiaResidual, this.personId2UtilityChange.get(personId), sumOfInteractionResiduals2);
 
 			final boolean replanner = recipe.isReplanner(personId, scoreUpdater.getScoreChangeIfOne(),
 					scoreUpdater.getScoreChangeIfZero());
+
 			if (replanner) {
 				replanners.add(personId);
-				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
-						unweightedReplannerCountDifferences, this.personId2pseudoSimSlotUsage.get(personId), +1.0);
-				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
-						unweightedReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
-				this.unweightedReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
-				this.weightedReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);
+				if (this.greedoConfig.getDetailedLogging()) {
+					CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
+							unweightedReplannerCountDifferences, this.personId2hypothetialSlotUsage.get(personId),
+							+1.0);
+					CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
+							unweightedReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
+				}
+				this.replannerUtilityChangeSum += this.personId2UtilityChange.get(personId);
 				if (this.personId2physicalSlotUsage.containsKey(personId)) {
 					this.replannerSizeSum += this.personId2physicalSlotUsage.get(personId).size();
 				}
 			} else {
-				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
-						unweightedNonReplannerCountDifferences, this.personId2pseudoSimSlotUsage.get(personId), +1.0);
-				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
-						unweightedNonReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
-				this.unweightedNonReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
-				this.weightedNonReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);
+				if (this.greedoConfig.getDetailedLogging()) {
+					CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
+							unweightedNonReplannerCountDifferences, this.personId2hypothetialSlotUsage.get(personId),
+							+1.0);
+					CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
+							unweightedNonReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId),
+							-1.0);
+				}
+				this.nonReplannerUtilityChangeSum += this.personId2UtilityChange.get(personId);
 				if (this.personId2physicalSlotUsage.containsKey(personId)) {
 					this.nonReplannerSizeSum += this.personId2physicalSlotUsage.get(personId).size();
 				}
 			}
 
-			// interaction residuals are updated by reference
+			// Interaction residuals are updated by reference.
 			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0);
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
-
-			// regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
-			// regularizationResiduals[ageStratumIndex] = scoreUpdater.getUpdatedRegularizationResidual();
-
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 		}
 
 		// >>> collect statistics, only for logging >>>
 
-		this.sumOfUnweightedReplannerCountDifferences2 = CountIndicatorUtils
-				.sumOfEntries2(unweightedReplannerCountDifferences);
-		this.sumOfWeightedReplannerCountDifferences2 = CountIndicatorUtils
-				.sumOfEntries2(weightedReplannerCountDifferences);
-		this.sumOfUnweightedNonReplannerCountDifferences2 = CountIndicatorUtils
-				.sumOfEntries2(unweightedNonReplannerCountDifferences);
-		this.sumOfWeightedNonReplannerCountDifferences2 = CountIndicatorUtils
-				.sumOfEntries2(weightedNonReplannerCountDifferences);
+		if (this.greedoConfig.getDetailedLogging()) {
+			this.sumOfUnweightedReplannerCountDifferences2 = CountIndicatorUtils
+					.sumOfEntries2(unweightedReplannerCountDifferences);
+			this.sumOfWeightedReplannerCountDifferences2 = CountIndicatorUtils
+					.sumOfEntries2(weightedReplannerCountDifferences);
+			this.sumOfUnweightedNonReplannerCountDifferences2 = CountIndicatorUtils
+					.sumOfEntries2(unweightedNonReplannerCountDifferences);
+			this.sumOfWeightedNonReplannerCountDifferences2 = CountIndicatorUtils
+					.sumOfEntries2(weightedNonReplannerCountDifferences);
+		}
 
 		// <<< collect statistics, only for logging <<<
 
