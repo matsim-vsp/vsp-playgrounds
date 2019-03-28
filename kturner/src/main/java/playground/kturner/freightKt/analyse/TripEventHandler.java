@@ -87,9 +87,9 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			}
 
 			VehicleTypeSpezificCapabilities vehTypeCapabilities = 
-					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().fix, 
-							vehType.getVehicleCostInformation().perDistanceUnit, 
-							vehType.getVehicleCostInformation().perTimeUnit, 
+					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().getFix(),
+							vehType.getVehicleCostInformation().getPerDistanceUnit(),
+							vehType.getVehicleCostInformation().getPerTimeUnit(),
 							vehType.getEngineInformation().getGasConsumption(),
 							emissionsPerMeter,
 							vehType.getCarrierVehicleCapacity());
@@ -202,7 +202,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	/**
 	 * Calculates the distance of a tour for all persons (driver) of the specified carrier.
 	 * @param carrierIdString
-	 * @return
 	 */
 	public Map<Id<Person>,Double> getPersonId2TourDistances(String carrierIdString) {
 		Map<Id<Person>,Double> personId2listOfTourDistances = new HashMap<Id<Person>, Double>();
@@ -226,7 +225,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	/**
 	 * Calculates the travel time (excl. time for activities) of a tour for all persons (driver) of the specified carrier.
 	 * @param carrierIdString
-	 * @return
 	 */
 	public Map<Id<Person>, Double> getPersonId2TravelTimes(String carrierIdString) {
 		Map<Id<Person>,Double> personId2listOfTravelTimes = new HashMap<Id<Person>, Double>();
@@ -249,8 +247,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 	/**
 	 * Calculates the distance of a tour for all persons (driver) of all carrier.
-	 * @param carrierIdString
-	 * @return
 	 */
 	public Map<Id<Person>,Double> getPersonId2TourDistances() {
 		Map<Id<Person>,Double> personId2listOfTourDistances = new HashMap<Id<Person>, Double>();
@@ -269,8 +265,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 /**
  * Calculates the travel time (excl. time for activities) of a tour for all persons (Driver) of the specified carrier.
- * @param carrierIdString
- * @return
  */
 	public Map<Id<Person>, Double> getPersonId2TravelTimes() {
 		Map<Id<Person>,Double> personId2listOfTravelTimes = new HashMap<Id<Person>, Double>();
