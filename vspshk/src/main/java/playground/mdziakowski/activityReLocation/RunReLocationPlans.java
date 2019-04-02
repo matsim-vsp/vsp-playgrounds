@@ -30,8 +30,8 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.facilities.*;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -99,7 +99,7 @@ public class RunReLocationPlans {
         System.out.println("Done");
     }
 
-    public static Map<String, Geometry> readShapeFile(String shapeFile){
+    private static Map<String, Geometry> readShapeFile(String shapeFile){
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
         Map<String, Geometry> districts = new HashMap<>();
 
@@ -112,7 +112,7 @@ public class RunReLocationPlans {
         return districts;
     }
 
-    public static String inDistrict( Map<String, Geometry> allDistricts, Coord coord) {
+    private static String inDistrict( Map<String, Geometry> allDistricts, Coord coord) {
         Point point = MGC.coord2Point(coord);
         for (String nameDistrict : allDistricts.keySet()) {
             Geometry geo = allDistricts.get(nameDistrict);
