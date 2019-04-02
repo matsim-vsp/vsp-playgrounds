@@ -33,7 +33,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class LinkDemandAnalysisRun {
 
-	private static String runId = "run0_bc-ohne-RSV";
+	private static String runId = "run3_gesundeStadt-mit-RSV";
 	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/"+ runId +"/output/";
 
 	private String outputDirectory;

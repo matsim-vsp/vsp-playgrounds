@@ -60,8 +60,8 @@ public class IKAnalysisRunRuhr {
 			
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run1_bc-mit-RSV/output/";
-			runId = "run1_bc-mit-RSV";		
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run3_gesundeStadt-mit-RSV/output/";
+			runId = "run3_gesundeStadt-mit-RSV";		
 			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run0_bc-ohne-RSV/output/";
 			runIdToCompareWith = "run0_bc-ohne-RSV";
 			
