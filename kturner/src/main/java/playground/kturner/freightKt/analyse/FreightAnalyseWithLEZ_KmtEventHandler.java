@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -90,7 +89,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().getFix(),
 							vehType.getVehicleCostInformation().getPerDistanceUnit(),
 							vehType.getVehicleCostInformation().getPerTimeUnit(),
-							vehType.getEngineInformation().getGasConsumption(),
+							vehType.getEngineInformation().getFuelConsumption(),
 							emissionsPerMeter,
 							vehType.getCarrierVehicleCapacity());
 			

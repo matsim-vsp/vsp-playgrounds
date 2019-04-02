@@ -90,7 +90,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().getFix(),
 							vehType.getVehicleCostInformation().getPerDistanceUnit(),
 							vehType.getVehicleCostInformation().getPerTimeUnit(),
-							vehType.getEngineInformation().getGasConsumption(),
+							vehType.getEngineInformation().getFuelConsumption(),
 							emissionsPerMeter,
 							vehType.getCarrierVehicleCapacity());
 
