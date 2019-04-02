@@ -115,7 +115,7 @@ public class TransitScheduleAdapter {
 		tw.writeFile(path);
 	}
 	public void writeVehicles(Vehicles vehicles, String path){
-		VehicleWriterV1 vwriter = new MatsimVehicleWriter(vehicles);
+		VehicleWriterV1 vwriter = new VehicleWriterV1(vehicles);
 		vwriter.writeFile(path);
 	}
 }

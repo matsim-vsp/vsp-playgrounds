@@ -31,6 +31,7 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.utils.CreateVehiclesForSchedule;
 
+import org.matsim.vehicles.VehicleWriterV1;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -87,7 +88,7 @@ public class CreateFullTransitSystem {
 
 		// new NetworkWriter(scenario.getNetwork()).write(networkFile);
 		new TransitScheduleWriter(scenario.getTransitSchedule()).writeFile(scheduleFile);
-		new MatsimVehicleWriter(scenario.getTransitVehicles()).writeFile(transitVehiclesFile);
+		new VehicleWriterV1(scenario.getTransitVehicles()).writeFile(transitVehiclesFile);
 
 	}
 }
