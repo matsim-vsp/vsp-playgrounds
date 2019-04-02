@@ -70,8 +70,8 @@ public class WUMProductionRunner {
 			capacity.setSeats((int) Math.ceil(capacity.getSeats() * factor));
 			capacity.setStandingRoom((int) Math.ceil(capacity.getStandingRoom() * factor));
 			// access and egress times per person get scaled UP
-			VehicleUtils.setAccessTime(vehicleType, VehicleUtils.getAccessTime(vehicleType) / factor);
-			VehicleUtils.setEgressTime(vehicleType, VehicleUtils.getEgressTime(vehicleType) / factor);
+			vehicleType.setAccessTime(vehicleType.getAccessTime() / factor);
+			vehicleType.setEgressTime(vehicleType.getEgressTime() / factor);
 			// PCU equivalents -- attempting to cause a failure if used
 			vehicleType.setPcuEquivalents(Double.NaN);
 		}

@@ -24,7 +24,6 @@ import java.util.Iterator;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 /**
  * A class to scale capacity of vehicles as per sample size.
@@ -52,8 +51,8 @@ public class PTCapacityAdjusmentPerSample {
 
 //			vt.setAccessTime(vt.getAccessTime() / samplesize);
 //			vt.setEgressTime(vt.getEgressTime() / samplesize);
-            VehicleUtils.setAccessTime(vt, 0.0);
-			VehicleUtils.setEgressTime(vt, 0.0);
+			vt.setAccessTime(0.0);
+			vt.setEgressTime(0.0);
 		}
 	}
 }
