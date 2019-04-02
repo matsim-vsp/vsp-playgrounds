@@ -22,7 +22,6 @@ package org.matsim.contrib.opdyts.macrostate;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.matsim.contrib.opdyts.macrostate.RecursiveCountAverage;
 
 /**
  *

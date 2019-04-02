@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.datastructures;
+package org.matsim.contrib.greedo;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,7 +37,7 @@ import org.matsim.core.population.PopulationUtils;
  * @author Gunnar Flötteröd
  * 
  */
-public class PopulationState {
+class Plans {
 
 	// -------------------- MEMBERS --------------------
 
@@ -56,9 +56,9 @@ public class PopulationState {
 	 */
 	private final Map<Id<Person>, Integer> person2selectedPlanIndex = new LinkedHashMap<>();
 
-	// -------------------- IMPLEMENTATION --------------------
+	// -------------------- CONSTRUCTION --------------------
 
-	public PopulationState(final Population population) {
+	Plans(final Population population) {
 		for (Person person : population.getPersons().values()) {
 			if (person.getSelectedPlan() == null) {
 				this.person2selectedPlanIndex.put(person.getId(), null);
@@ -74,14 +74,16 @@ public class PopulationState {
 		}
 	}
 
-	public void set(final Population population) {
+	// -------------------- IMPLEMENTATION --------------------
+
+	void set(final Population population) {
 		for (Id<Person> personId : this.personId2planList.keySet()) {
 			final Person person = population.getPersons().get(personId);
 			this.set(person);
 		}
 	}
 
-	public void set(final HasPlansAndId<Plan, Person> person) {
+	void set(final HasPlansAndId<Plan, Person> person) {
 		person.getPlans().clear();
 		final List<? extends Plan> copiedPlans = newDeepCopy(this.personId2planList.get(person.getId()));
 		for (Plan plan : copiedPlans) {
@@ -90,7 +92,7 @@ public class PopulationState {
 		person.setSelectedPlan(getSelectedPlan(copiedPlans, this.person2selectedPlanIndex.get(person.getId())));
 	}
 
-	public Plan getSelectedPlan(Id<Person> personId) {
+	Plan getSelectedPlan(Id<Person> personId) {
 		return getSelectedPlan(this.personId2planList.get(personId), this.person2selectedPlanIndex.get(personId));
 	}
 

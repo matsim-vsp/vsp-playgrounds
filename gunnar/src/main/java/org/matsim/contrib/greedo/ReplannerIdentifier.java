@@ -40,6 +40,7 @@ import org.matsim.contrib.greedo.recipes.UniformReplanningRecipe;
 import org.matsim.core.utils.collections.Tuple;
 
 import floetteroed.utilities.DynamicData;
+import floetteroed.utilities.DynamicDataUtils;
 
 /**
  * 
@@ -112,12 +113,12 @@ public class ReplannerIdentifier {
 			upcomingUnweightedCounts = upcomingWeightedAndUnweightedCounts.getSecond();
 		}
 		if (this.greedoConfig.getDetailedLogging()) {
-			this.sumOfUnweightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(currentUnweightedCounts,
+			this.sumOfUnweightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(currentUnweightedCounts,
 					upcomingUnweightedCounts);
 		} else {
 			this.sumOfUnweightedCountDifferences2 = null;
 		}
-		this.sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(this.currentWeightedCounts,
+		this.sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
 		this.lambdaBar = this.greedoConfig.getReplanningRate(iteration);
@@ -181,8 +182,8 @@ public class ReplannerIdentifier {
 
 		// Initialize score residuals.
 
-		final DynamicData<Id<?>> interactionResiduals = CountIndicatorUtils
-				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambdaBar);
+		final DynamicData<Id<?>> interactionResiduals = DynamicDataUtils
+				.newDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambdaBar);
 		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalUtilityChange;
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
@@ -278,13 +279,13 @@ public class ReplannerIdentifier {
 		// >>> collect statistics, only for logging >>>
 
 		if (this.greedoConfig.getDetailedLogging()) {
-			this.sumOfUnweightedReplannerCountDifferences2 = CountIndicatorUtils
+			this.sumOfUnweightedReplannerCountDifferences2 = DynamicDataUtils
 					.sumOfEntries2(unweightedReplannerCountDifferences);
-			this.sumOfWeightedReplannerCountDifferences2 = CountIndicatorUtils
+			this.sumOfWeightedReplannerCountDifferences2 = DynamicDataUtils
 					.sumOfEntries2(weightedReplannerCountDifferences);
-			this.sumOfUnweightedNonReplannerCountDifferences2 = CountIndicatorUtils
+			this.sumOfUnweightedNonReplannerCountDifferences2 = DynamicDataUtils
 					.sumOfEntries2(unweightedNonReplannerCountDifferences);
-			this.sumOfWeightedNonReplannerCountDifferences2 = CountIndicatorUtils
+			this.sumOfWeightedNonReplannerCountDifferences2 = DynamicDataUtils
 					.sumOfEntries2(weightedNonReplannerCountDifferences);
 		}
 

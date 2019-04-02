@@ -26,11 +26,6 @@ package org.matsim.contrib.greedo.logging;
  */
 public class AvgExpectedDeltaUtilityUniform extends PopulationAverageStatistic {
 
-	// @Override
-	// public String label() {
-	// return AverageExpectedDeltaUtilityUniform.class.getSimpleName();
-	// }
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getLastExpectedUtilityChangeSumUniform(), arg0.getPopulationSize());

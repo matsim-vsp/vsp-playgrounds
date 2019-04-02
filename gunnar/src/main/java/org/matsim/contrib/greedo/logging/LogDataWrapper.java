@@ -40,10 +40,6 @@ public class LogDataWrapper {
 		this.identifier = identifier;
 	}
 
-	public Double getLambdaRealized() {
-		return this.accelerator.getLambdaRealized();
-	}
-
 	public Double getLambdaBar() {
 		return this.identifier.getLambdaBar();
 	}
@@ -61,7 +57,7 @@ public class LogDataWrapper {
 	}
 
 	public Double getLastRealizedUtilitySum() {
-		return this.accelerator.getLastRealizedUtilitySum();
+		return this.accelerator.getRealizedUtilitySum();
 	}
 	
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
@@ -69,14 +65,14 @@ public class LogDataWrapper {
 	}
 
 	public Double getLastExpectedUtilityChangeSumUniform() {
-		return this.accelerator.getLastExpectedUtilityChangeSumUniform();
+		return this.accelerator.getExpectedUtilityChangeSumUniform();
 	}
 
 	public Double getLastRealizedUtilityChangeSum() {
-		return this.accelerator.getLastRealizedUtilityChangeSum();
+		return this.accelerator.getRealizedUtilityChangeSum();
 	}
 	
-	public List<Integer> getSortedAgesView() {
+	public List<Integer> getSortedAges() {
 		return this.accelerator.getSortedAgesView();
 	}
 	

@@ -21,7 +21,9 @@ package org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.inject.Inject;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;

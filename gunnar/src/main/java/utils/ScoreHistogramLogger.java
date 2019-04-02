@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.utils;
+package utils;
 
 import java.io.File;
 import java.io.FileWriter;

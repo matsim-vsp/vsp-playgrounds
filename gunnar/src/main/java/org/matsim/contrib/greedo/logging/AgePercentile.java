@@ -46,7 +46,7 @@ public class AgePercentile implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(final LogDataWrapper logData) {
-		final List<Integer> ages = logData.getSortedAgesView();
+		final List<Integer> ages = logData.getSortedAges();
 		if (ages == null) {
 			return Statistic.toString(null);
 		} else {

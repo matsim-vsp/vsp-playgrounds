@@ -26,11 +26,6 @@ package org.matsim.contrib.greedo.logging;
  */
 public class NormalizedUnweightedNonReplannerCountDifferences2 extends PopulationAverageStatistic {
 
-//	@Override
-//	public String label() {
-//		return this.getClass().getSimpleName();
-//	}
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getSumOfUnweightedNonReplannerCountDifferences2(),

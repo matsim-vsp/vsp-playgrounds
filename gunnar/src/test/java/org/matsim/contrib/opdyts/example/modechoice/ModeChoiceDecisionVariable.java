@@ -20,10 +20,12 @@
 package org.matsim.contrib.opdyts.example.modechoice;
 
 import java.util.Map;
-import floetteroed.opdyts.DecisionVariable;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+
+import floetteroed.opdyts.DecisionVariable;
 
 /**
  * Created by amit on 13/10/16.

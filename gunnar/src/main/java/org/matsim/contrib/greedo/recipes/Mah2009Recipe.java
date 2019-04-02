@@ -48,8 +48,7 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 
 	public Mah2009Recipe(final Map<Id<Person>, Double> person2utilityGain, final double meanLambda) {
 
-		// TODO Inefficient; sort population according once beforehand.
-
+		// TODO Inefficient; sort population once beforehand.
 		double tmpReplanProbaConstant = Double.NEGATIVE_INFINITY;
 		for (Double gain : person2utilityGain.values()) {
 			tmpReplanProbaConstant = Math.max(tmpReplanProbaConstant, 1.0 / meanLambda / Math.max(minGain, gain));
@@ -83,9 +82,6 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 			}
 
 		} while (replanProbaSum > meanLambda * person2utilityGain.size());
-
-		// System.out.println("terminating");
-		// System.exit(0);
 
 		this.replanProbaConstant = tmpReplanProbaConstant;
 		this.person2utilityGain = person2utilityGain;

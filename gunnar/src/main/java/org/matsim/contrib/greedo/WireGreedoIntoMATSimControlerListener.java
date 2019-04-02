@@ -31,10 +31,7 @@ import javax.inject.Singleton;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.greedo.datastructures.Ages;
-import org.matsim.contrib.greedo.datastructures.PopulationState;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
-import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
 import org.matsim.contrib.greedo.logging.AvgAge;
@@ -92,7 +89,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private final List<SlotUsageListener> hypotheticalSlotUsageListeners = new LinkedList<>();
 
-	private PopulationState lastPhysicalPopulationState = null;
+	private Plans lastPhysicalPopulationState = null;
 
 	// below only for logging
 
@@ -114,7 +111,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.utilities = new Utilities();
 		this.ages = new Ages(services.getScenario().getPopulation().getPersons().keySet(), this.greedoConfig);
 		this.physicalSlotUsageListener = new SlotUsageListener(this.greedoConfig.newTimeDiscretization(),
-				this.ages.getPersonWeights(), this.greedoConfig.getConcurrentLinkWeights(),
+				this.ages.getWeights(), this.greedoConfig.getConcurrentLinkWeights(),
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
 		this.statsWriter = new StatisticsWriter<>(
@@ -149,18 +146,19 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 	@Override
 	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
 
-		this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
+		this.lastPhysicalPopulationState = new Plans(this.services.getScenario().getPopulation());
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			// TODO Hedge against selectedPlan == null ?
 			this.utilities.updateRealizedUtility(person.getId(),
 					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
 		}
 
-		this.hypotheticalSlotUsageListeners.clear();
+		this.hypotheticalSlotUsageListeners.clear(); // Redundant, see afterReplanning().
 		return new EventHandlerProvider() {
 			@Override
 			public synchronized EventHandler get(final Set<Id<Person>> personIds) {
 				final SlotUsageListener listener = new SlotUsageListener(greedoConfig.newTimeDiscretization(),
-						ages.getPersonWeights().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
+						ages.getWeights().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
 								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
 						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
 				listener.resetOnceAndForAll(iteration());
@@ -182,10 +180,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
 			hypotheticalSlotUsageIndicators.putAll(listener.getNewIndicatorView());
 		}
+		this.hypotheticalSlotUsageListeners.clear(); // Release as soon as possible.
 
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, this.iteration(),
 				this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
-				this.services.getScenario().getPopulation(), utilityStats.personId2currentDeltaUtility);
+				this.services.getScenario().getPopulation(), utilityStats.personId2expectedUtilityChange);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {
@@ -195,18 +194,19 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 		this.numberOfReplanners = replannerIds.size();
 		this.ages.update(replannerIds);
-		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
+		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
 
 		if (this.realizedUtilitySum != null) {
 			this.realizedUtilityChangeSum = utilityStats.realizedUtilitySum - this.realizedUtilitySum;
 		}
 		this.realizedUtilitySum = utilityStats.realizedUtilitySum;
 
+		// The following is the present iteration's expectation for the next iteration.
+		this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(this.iteration())
+				* utilityStats.expectedUtilityChangeSum;
+
 		this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier));
 
-		// These are predictions for the next iteration.
-		this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(this.iteration())
-				* utilityStats.deltaUtilitySum;
 	}
 
 	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------
@@ -223,25 +223,20 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		return this.physicalSlotUsageListener.getLastResetIteration();
 	}
 
-	public Double getLambdaRealized() {
-		return (this.numberOfReplanners.doubleValue()
-				/ this.services.getScenario().getPopulation().getPersons().size());
-	}
-
-	public Double getLastExpectedUtilityChangeSumUniform() {
+	public Double getExpectedUtilityChangeSumUniform() {
 		return this.expectedUtilityChangeSumUniform;
 	}
 
-	public Double getLastRealizedUtilityChangeSum() {
+	public Double getRealizedUtilityChangeSum() {
 		return this.realizedUtilityChangeSum;
 	}
 
-	public Double getLastRealizedUtilitySum() {
+	public Double getRealizedUtilitySum() {
 		return this.realizedUtilitySum;
 	}
 
 	public List<Integer> getSortedAgesView() {
-		return this.ages.getSortedAgesView();
+		return this.ages.getSortedAges();
 	}
 
 	public Double getAveragAge() {

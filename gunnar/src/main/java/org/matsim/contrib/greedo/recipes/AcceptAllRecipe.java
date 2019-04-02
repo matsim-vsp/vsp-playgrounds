@@ -33,6 +33,5 @@ public class AcceptAllRecipe implements ReplannerIdentifierRecipe {
 	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
 		return true;
 	}
-
 }
 

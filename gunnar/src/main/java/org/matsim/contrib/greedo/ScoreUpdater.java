@@ -65,8 +65,8 @@ public class ScoreUpdater<L> {
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
-			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals, final double inertiaResidual,
-			final double individualUtilityChange, Double sumOfInteractionResiduals2) {
+			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals,
+			final double inertiaResidual, final double individualUtilityChange, Double sumOfInteractionResiduals2) {
 
 		this.interactionResiduals = interactionResiduals;
 		this.inertiaResidual = inertiaResidual;

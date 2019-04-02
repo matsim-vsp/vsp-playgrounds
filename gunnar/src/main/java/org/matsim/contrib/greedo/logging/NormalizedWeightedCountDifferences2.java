@@ -26,11 +26,6 @@ package org.matsim.contrib.greedo.logging;
  */
 public class NormalizedWeightedCountDifferences2 extends PopulationAverageStatistic {
 
-	// @Override
-	// public String label() {
-	// return SumOfWeightedCountDifferences2.class.getSimpleName();
-	// }
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getSumOfWeightedCountDifferences2(), arg0.getPopulationSize());

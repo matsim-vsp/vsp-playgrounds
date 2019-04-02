@@ -40,9 +40,8 @@ public abstract class PopulationAverageStatistic implements Statistic<LogDataWra
 			return "";
 		}
 	}
-	
+
 	@Override
 	public abstract String value(LogDataWrapper arg0);
 
 }
-

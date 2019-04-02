@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.utils;
+package gunnar.utils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

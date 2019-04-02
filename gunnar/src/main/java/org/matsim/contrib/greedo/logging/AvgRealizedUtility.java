@@ -26,11 +26,6 @@ package org.matsim.contrib.greedo.logging;
  */
 public class AvgRealizedUtility extends PopulationAverageStatistic {
 
-	// @Override
-	// public String label() {
-	// return AverageRealizedUtility.class.getSimpleName();
-	// }
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getLastRealizedUtilitySum(), arg0.getPopulationSize());
