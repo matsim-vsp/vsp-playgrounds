@@ -51,7 +51,7 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 	
 	private Map<Id<Link>,Integer> linkId2demand = new HashMap<Id<Link>, Integer>();
 	private Map<Id<Link>,Integer> linkId2otherVehicles = new HashMap<Id<Link>, Integer>();
-	private Map<Id<Link>,Integer> linkId2taxiVehicles = new HashMap<Id<Link>, Integer>();
+	private Map<Id<Link>,Integer> linkId2specificVehicles = new HashMap<Id<Link>, Integer>();
 
 	public LinkDemandEventHandler(Network network, String taxiPrefix) {
 		this.network = network;
@@ -95,13 +95,13 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 			}
 			
 			if (event.getVehicleId().toString().startsWith(vehTypePrefix)) {
-				
-				if (this.linkId2taxiVehicles.containsKey(event.getLinkId())) {
-					int agents = this.linkId2taxiVehicles.get(event.getLinkId());
-					this.linkId2taxiVehicles.put(event.getLinkId(), agents + 1);
+
+				if (this.linkId2specificVehicles.containsKey(event.getLinkId())) {
+					int agents = this.linkId2specificVehicles.get(event.getLinkId());
+					this.linkId2specificVehicles.put(event.getLinkId(), agents + 1);
 					
 				} else {
-					this.linkId2taxiVehicles.put(event.getLinkId(), 1);
+					this.linkId2specificVehicles.put(event.getLinkId(), 1);
 				}
 				
 			} else {
@@ -136,8 +136,8 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 					agents = this.linkId2demand.get(linkId);
 				}
 				
-				if (this.linkId2taxiVehicles.get(linkId) != null) {
-					taxiVehicles = this.linkId2taxiVehicles.get(linkId);
+				if (this.linkId2specificVehicles.get(linkId) != null) {
+					taxiVehicles = this.linkId2specificVehicles.get(linkId);
 				}
 				
 				if (this.linkId2otherVehicles.get(linkId) != null) {

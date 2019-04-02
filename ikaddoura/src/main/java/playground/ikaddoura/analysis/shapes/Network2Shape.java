@@ -60,16 +60,14 @@ public class Network2Shape {
 		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
 						
 		for (Link link : scenario.getNetwork().getLinks().values()){
-			if (link.getAllowedModes().contains("car")) {
-				SimpleFeature feature = factory.createPolyline(
-						new Coordinate[]{
-								new Coordinate(MGC.coord2Coordinate(ct.transform(link.getFromNode().getCoord()))),
-								new Coordinate(MGC.coord2Coordinate(ct.transform(link.getToNode().getCoord())))
-						}, new Object[] {link.getId(), link.getLength(), link.getCapacity(), link.getNumberOfLanes(), link.getFreespeed(), link.getAllowedModes()
-						}, null
-				);
-				features.add(feature);
-			}
+			SimpleFeature feature = factory.createPolyline(
+					new Coordinate[]{
+							new Coordinate(MGC.coord2Coordinate(ct.transform(link.getFromNode().getCoord()))),
+							new Coordinate(MGC.coord2Coordinate(ct.transform(link.getToNode().getCoord())))
+					}, new Object[] {link.getId(), link.getLength(), link.getCapacity(), link.getNumberOfLanes(), link.getFreespeed(), link.getAllowedModes()
+					}, null
+			);
+			features.add(feature);
 		}
 		
 		log.info("Writing network to shapefile... ");
