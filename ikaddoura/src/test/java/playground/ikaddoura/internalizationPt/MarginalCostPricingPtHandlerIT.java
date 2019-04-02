@@ -62,11 +62,8 @@ import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.*;
 import org.matsim.vehicles.VehicleType.DoorOperationMode;
-import org.matsim.vehicles.Vehicles;
 
 public class MarginalCostPricingPtHandlerIT {
 
@@ -2111,10 +2108,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -2311,10 +2308,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -2626,10 +2623,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -2901,10 +2898,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -3176,10 +3173,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -3459,10 +3456,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -3745,10 +3742,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -4036,10 +4033,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -4324,10 +4321,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -4726,10 +4723,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -5036,10 +5033,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -5346,10 +5343,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.);
 		type.setPcuEquivalents(7.5);
 		
@@ -5682,10 +5679,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -6005,10 +6002,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		
@@ -6341,10 +6338,10 @@ public class MarginalCostPricingPtHandlerIT {
 		cap.setStandingRoom(0);
 		type.setCapacity(cap);
 		type.setLength(10);
-		type.setAccessTime(1.0);
-		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
-		
+        VehicleUtils.setAccessTime(type, 1.0);
+		VehicleUtils.setEgressTime(type, 0.75);
+		VehicleUtils.setDoorOperationMode(type, DoorOperationMode.serial) ;
+
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
 		

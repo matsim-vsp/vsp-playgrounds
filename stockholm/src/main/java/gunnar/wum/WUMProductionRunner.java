@@ -50,6 +50,7 @@ import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
+import org.matsim.vehicles.VehicleUtils;
 
 /**
  *
@@ -69,8 +70,8 @@ public class WUMProductionRunner {
 			capacity.setSeats((int) Math.ceil(capacity.getSeats() * factor));
 			capacity.setStandingRoom((int) Math.ceil(capacity.getStandingRoom() * factor));
 			// access and egress times per person get scaled UP
-			vehicleType.setAccessTime(vehicleType.getAccessTime() / factor);
-			vehicleType.setEgressTime(vehicleType.getEgressTime() / factor);
+			VehicleUtils.setAccessTime(vehicleType, VehicleUtils.getAccessTime(vehicleType) / factor);
+			VehicleUtils.setEgressTime(vehicleType, VehicleUtils.getEgressTime(vehicleType) / factor);
 			// PCU equivalents -- attempting to cause a failure if used
 			vehicleType.setPcuEquivalents(Double.NaN);
 		}

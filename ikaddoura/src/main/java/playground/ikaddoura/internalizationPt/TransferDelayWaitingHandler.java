@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
@@ -47,6 +46,7 @@ import org.matsim.core.api.experimental.events.handler.VehicleArrivesAtFacilityE
 import org.matsim.core.api.experimental.events.handler.VehicleDepartsAtFacilityEventHandler;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleUtils;
 
 
 /**
@@ -202,12 +202,12 @@ public class TransferDelayWaitingHandler implements PersonEntersVehicleEventHand
 			this.vehId2agentsTransferingAtThisStop.put(event.getVehicleId(), agentsTransferingAtThisStop);
 
 			// start tracking the delay effect induced by that person entering the public vehicle
-			double transferTime = this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getAccessTime();
+            double transferTime = VehicleUtils.getAccessTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			TransferDelayWaiting delayEffect = startTrackingDelayEffect(event.getVehicleId(), event.getPersonId(), transferTime);
 			this.boardingDelayEffects.add(delayEffect);
 			
 			// update the vehicle delay
-			double delay = this.vehicleId2delay.get(event.getVehicleId()) + this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getAccessTime();
+            double delay = this.vehicleId2delay.get(event.getVehicleId()) + VehicleUtils.getAccessTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			if (this.vehicleId2isFirstTransfer.get(event.getVehicleId())) {
 				delay = delay + this.doorOpeningTime;
 				this.vehicleId2isFirstTransfer.put(event.getVehicleId(), false);
@@ -283,12 +283,12 @@ public class TransferDelayWaitingHandler implements PersonEntersVehicleEventHand
 			this.vehId2agentsTransferingAtThisStop.put(event.getVehicleId(), agentsTransferingAtThisStop);
 			
 			// start tracking the delay effect induced by that person leaving the public vehicle
-			double transferTime = this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getEgressTime();
+			double transferTime = VehicleUtils.getEgressTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			TransferDelayWaiting delayEffect = startTrackingDelayEffect(event.getVehicleId(), event.getPersonId(), transferTime);
 			this.alightingDelayEffects.add(delayEffect);
 			
 			// update the vehicle delay
-			double delay = this.vehicleId2delay.get(event.getVehicleId()) + this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getEgressTime();
+			double delay = this.vehicleId2delay.get(event.getVehicleId()) + VehicleUtils.getEgressTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			if (this.vehicleId2isFirstTransfer.get(event.getVehicleId())) {
 				delay = delay + this.doorOpeningTime;
 				this.vehicleId2isFirstTransfer.put(event.getVehicleId(), false);

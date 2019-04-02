@@ -88,10 +88,10 @@ public class VehiclesGenerator {
 			cap.setStandingRoom(standingRoom);
 			type.setCapacity(cap);
 			type.setLength(length);
-			type.setAccessTime(accessSeconds);
-			type.setEgressTime(egressSeconds);
-			type.setDoorOperationMode(doorOperationMode);
-			
+            VehicleUtils.setAccessTime(type, accessSeconds);
+			VehicleUtils.setEgressTime(type, egressSeconds);
+			VehicleUtils.setDoorOperationMode(type, doorOperationMode) ;
+
 			type.setMaximumVelocity(maxVelocity);
 			type.setPcuEquivalents(pcu);
 			

@@ -43,7 +43,7 @@ import org.matsim.core.api.experimental.events.handler.VehicleArrivesAtFacilityE
 import org.matsim.core.api.experimental.events.handler.VehicleDepartsAtFacilityEventHandler;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.vehicles.Vehicle;
-
+import org.matsim.vehicles.VehicleUtils;
 
 
 /**
@@ -128,8 +128,8 @@ public class TransferDelayInVehicleHandler implements PersonEntersVehicleEventHa
 			}
 			agentsTransferingAtThisStop.add(event.getPersonId());
 			this.vehId2agentsBoardingAtThisStop.put(event.getVehicleId(), agentsTransferingAtThisStop);
-													
-			double delay = this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getAccessTime();
+
+            double delay = VehicleUtils.getAccessTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			int delayedPassengers_inVeh = calcDelayedPassengersInVeh(event.getVehicleId());
 			TransferDelayInVehicleEvent delayInVehicleEvent = new TransferDelayInVehicleEvent(event.getPersonId(), event.getVehicleId(), event.getTime(), delayedPassengers_inVeh, delay);
 			this.events.processEvent(delayInVehicleEvent);
@@ -163,8 +163,8 @@ public class TransferDelayInVehicleHandler implements PersonEntersVehicleEventHa
 			// update number of passengers in vehicle before throwing delay event
 			int passengersInVeh = this.vehId2passengers.get(event.getVehicleId());
 			this.vehId2passengers.put(event.getVehicleId(), passengersInVeh - 1);
-			
-			double delay = this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType().getEgressTime();
+
+			double delay = VehicleUtils.getEgressTime(this.scenario.getTransitVehicles().getVehicles().get(event.getVehicleId()).getType());
 			int delayedPassengers_inVeh = calcDelayedPassengersInVeh(event.getVehicleId());
 			
 			// throw delay event

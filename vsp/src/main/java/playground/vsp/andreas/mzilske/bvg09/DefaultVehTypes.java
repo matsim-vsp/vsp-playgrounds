@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.vehicles.VehicleCapacityImpl;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleTypeImpl;
+import org.matsim.vehicles.VehicleUtils;
 
 public class DefaultVehTypes {
 	
@@ -52,10 +53,10 @@ public class DefaultVehTypes {
 		veh.setLength(12.0);
 		veh.setWidth(2.55);
 		veh.setMaximumVelocity(23.6); // 85 km/h
-		
-		veh.setAccessTime(2.0);
-		veh.setEgressTime(0.5);
-		
+
+        VehicleUtils.setAccessTime(veh, 2.0);
+		VehicleUtils.setEgressTime(veh, 0.5);
+
 		return veh;
 	}
 	
@@ -72,10 +73,11 @@ public class DefaultVehTypes {
 		veh.setLength(12.0);
 		veh.setWidth(2.55);
 		veh.setMaximumVelocity(22.2); // 80 km/h
-		
-		veh.setAccessTime(2.0);
-		veh.setEgressTime(1.0); // just one door
-		
+
+        VehicleUtils.setAccessTime(veh, 2.0);
+		// just one door
+		VehicleUtils.setEgressTime(veh, 1.0);
+
 		return veh;
 	}
 	
@@ -92,10 +94,10 @@ public class DefaultVehTypes {
 		veh.setLength(28.27);
 		veh.setWidth(2.30);
 		veh.setMaximumVelocity(19.44); // 70 km/h
-		
-		veh.setAccessTime(0.5);
-		veh.setEgressTime(0.5);
-		
+
+        VehicleUtils.setAccessTime(veh, 0.5);
+		VehicleUtils.setEgressTime(veh, 0.5);
+
 		return veh;
 	}
 	
@@ -112,10 +114,12 @@ public class DefaultVehTypes {
 		veh.setLength(19.05);
 		veh.setWidth(2.30);
 		veh.setMaximumVelocity(16.67); // 60 km/h
-		
-		veh.setAccessTime(1.0); // hochflur
-		veh.setEgressTime(1.0); // hochflur
-		
+
+        // hochflur
+        VehicleUtils.setAccessTime(veh, 1.0);
+		// hochflur
+		VehicleUtils.setEgressTime(veh, 1.0);
+
 		return veh;
 	}
 	
@@ -132,10 +136,11 @@ public class DefaultVehTypes {
 		veh.setLength(96.3);
 		veh.setWidth(2.65);
 		veh.setMaximumVelocity(19.44); // 70 km/h
-		
-		veh.setAccessTime(0.05); // 6 wagons * 3 doors
-		veh.setEgressTime(0.05);
-		
+
+        // 6 wagons * 3 doors
+        VehicleUtils.setAccessTime(veh, 0.05);
+		VehicleUtils.setEgressTime(veh, 0.05);
+
 		return veh;
 	}
 	
@@ -152,10 +157,11 @@ public class DefaultVehTypes {
 		veh.setLength(147.2);
 		veh.setWidth(3.00);
 		veh.setMaximumVelocity(27.78); // 100 km/h
-		
-		veh.setAccessTime(0.04); // 8 wagons * 3 doors
-		veh.setEgressTime(0.04);
-		
+
+        // 8 wagons * 3 doors
+        VehicleUtils.setAccessTime(veh, 0.04);
+		VehicleUtils.setEgressTime(veh, 0.04);
+
 		return veh;
 	}
 	
@@ -172,10 +178,11 @@ public class DefaultVehTypes {
 		veh.setLength(150.0); // 5*26,8 + Engine
 		veh.setWidth(3.00);
 		veh.setMaximumVelocity(44.44); // 160 km/h
-		
-		veh.setAccessTime(0.125); // 4 wagons * 2 doors
-		veh.setEgressTime(0.125);
-		
+
+        // 4 wagons * 2 doors
+        VehicleUtils.setAccessTime(veh, 0.125);
+		VehicleUtils.setEgressTime(veh, 0.125);
+
 		return veh;
 	}
 
