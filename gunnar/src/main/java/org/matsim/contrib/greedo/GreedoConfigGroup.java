@@ -294,8 +294,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.adjustStrategyWeights = adjustStrategyWeights;
 	}
 
-	// --------------- cheapStrategies, expensiveStrategies ---------------
-
 	// helpers
 
 	private static String listToString(final List<String> list) {
