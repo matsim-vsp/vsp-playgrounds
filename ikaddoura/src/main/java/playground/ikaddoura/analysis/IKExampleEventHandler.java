@@ -32,11 +32,11 @@ import org.matsim.api.core.v01.network.Network;
  * @author Ihab
  *
  */
-public class IKEventHandler implements  LinkLeaveEventHandler {
+public class IKExampleEventHandler implements  LinkLeaveEventHandler {
 
 	private final Network network;
 	
-	public IKEventHandler(Network network) {
+	public IKExampleEventHandler(Network network) {
 		this.network = network;
 	}
 

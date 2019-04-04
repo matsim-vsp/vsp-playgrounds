@@ -68,7 +68,7 @@ public class ModeAnalysis {
 		int counter = 0;
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (counter % 100000 == 0) {
+			if (counter % 1000 == 0) {
 				log.info("Person #" + counter);
 			}
 			
