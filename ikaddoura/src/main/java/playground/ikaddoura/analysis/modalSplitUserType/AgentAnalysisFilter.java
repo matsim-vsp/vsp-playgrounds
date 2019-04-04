@@ -145,7 +145,7 @@ public class AgentAnalysisFilter implements AgentFilter {
 	public void preProcess(Scenario scenario) {
 		this.dataPreprocessed = true;
 		
-	    if (zoneFile != null) {
+	    if (scenario != null && zoneFile != null) {
 	    	log.info("Getting persons' home coordinates...");
 			for (Person person : scenario.getPopulation().getPersons().values()) {
 				Activity act = (Activity) person.getSelectedPlan().getPlanElements().get(0);
@@ -157,7 +157,7 @@ public class AgentAnalysisFilter implements AgentFilter {
 			log.info("Getting persons' home coordinates... Done.");
 	    }
 	    	    
-		if (zoneFile != null) {					
+		if (scenario != null &&  zoneFile != null) {					
 			log.info("Reading shape file...");
 			Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(zoneFile);
 			int counter = 0;
