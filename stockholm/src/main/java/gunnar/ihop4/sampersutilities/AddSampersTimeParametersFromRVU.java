@@ -168,10 +168,10 @@ public class AddSampersTimeParametersFromRVU {
 		// PopulationUtils.writePopulation(scenario.getPopulation(),
 		// "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched-population_TMP.xml");
 
-		for (String frac : new String[] { "1", "5", "25" }) {
+		// for (String frac : new String[] { "1", "5", "25" }) {
 
 			Config config = ConfigUtils.createConfig();
-			config.plans().setInputFile("/Users/GunnarF/OneDrive - VTI/My Data/ihop4/" + frac + "PctAllModes.xml");
+			config.plans().setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/25PctAllModes.xml");
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 
 			AddSampersTimeParametersFromRVU enricher = new AddSampersTimeParametersFromRVU(
@@ -179,7 +179,7 @@ public class AddSampersTimeParametersFromRVU {
 			enricher.enrich(scenario.getPopulation());
 
 			PopulationUtils.writePopulation(scenario.getPopulation(),
-					"/Users/GunnarF/OneDrive - VTI/My Data/ihop4/" + frac + "PctAllModes_enriched.xml");
-		}
+					"/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/25PctAllModes_enriched.xml");
+		// }
 	}
 }

@@ -58,8 +58,8 @@ public class IHOP2ProductionRunner {
 		final String laneConnectorsFile = path + "network-input/Lane Connectors.csv";
 		final String linksFile = path + "network-input/Links.csv";
 
-		// final String matsimNetworkFile = path + "network-output/network.xml";
-		final String matsimNetworkFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/Stockholm.xml.gz";
+		final String matsimNetworkFile = path + "network-output/network.xml";
+		// final String matsimNetworkFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/Stockholm.xml.gz";
 
 		final String matsimFullNetworkFile = path + "network-output/network-full.xml";
 		final String linkAttributesFile = path + "network-output/link-attributes.xml";
@@ -71,8 +71,8 @@ public class IHOP2ProductionRunner {
 		final String populationFileName = path + "demand-input/trips.xml";
 
 		final double populationSample = 0.25;
-		final String initialPlansFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/25PctAllModes.xml";
-		//final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml";
+		// final String initialPlansFile = "/Users/GunnarF/OneDrive - VTI/My Data/ihop4/25PctAllModes.xml";
+		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/25PctAllModes.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;
