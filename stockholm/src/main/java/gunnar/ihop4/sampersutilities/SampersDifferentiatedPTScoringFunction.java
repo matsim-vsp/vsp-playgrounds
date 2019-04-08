@@ -62,8 +62,9 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SampersDifferentiatedPTScoringFunction(final Person person, final SampersTourUtilityFunction utlFct) {
-		super(person, utlFct);
+	public SampersDifferentiatedPTScoringFunction(final Person person,
+			final SampersTourUtilityFunction utilityFunction) {
+		super(person, utilityFunction);
 	}
 
 	// -------------------- IMPLEMENTATION OF ScoringFunction --------------------
@@ -113,10 +114,12 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 				final double firstWaitingTime_s = this.tmpActs.getFirst().getEndTime()
 						- this.tmpActs.getFirst().getStartTime();
 
+				double distance_m = 0.0; // "avstånd"
 				double transferTime_s = 0; // "bytestid"
 				double inVehicleTime_s = 0; // "restid i fordonet"
 				for (int i = 1; i < this.tmpLegs.size() - 1; i++) {
 					final Leg leg = this.tmpLegs.get(i);
+					distance_m += leg.getRoute().getDistance();
 					if (TransportMode.transit_walk.equals(leg.getMode())) {
 						transferTime_s += leg.getTravelTime();
 					} else if (PT_SUBMODES.contains(leg.getMode())) {
@@ -125,16 +128,16 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 						throw new RuntimeException("Unknown PT trip-chain mode: " + leg.getMode());
 					}
 				}
-				int numberOfChanges = 0; // "antal byten"
+				int numberOfTransfers = 0; // "antal byten"
 				for (Activity transfer : this.tmpActs) {
-					numberOfChanges++;
+					numberOfTransfers++;
 					transferTime_s += transfer.getEndTime() - transfer.getStartTime();
 				}
 
-				final SampersPTSummaryLeg summaryLeg = new SampersPTSummaryLeg(accessEgressTime_s, firstWaitingTime_s,
-						inVehicleTime_s, transferTime_s, numberOfChanges);
+				final double generalizedTravelTime_s = super.utlFct.getGeneralizedPTTravelTime_s(accessEgressTime_s,
+						firstWaitingTime_s, inVehicleTime_s, transferTime_s, numberOfTransfers);
+				final SampersPTSummaryLeg summaryLeg = new SampersPTSummaryLeg(generalizedTravelTime_s, distance_m);
 				super.handleLeg(summaryLeg);
-
 			}
 
 			super.handleActivity(act);
@@ -147,19 +150,12 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 	class SampersPTSummaryLeg implements Leg {
 
-		private final double accessTime_s;
-		private final double firstWaitingTime_s;
-		private final double inVehicleTime_s;
-		private final double transferTime_s;
-		private final int numberOfChanges;
-
-		private SampersPTSummaryLeg(final double accessTime_s, final double firstWaitingTime_s,
-				final double inVehicleTime_s, final double transferTime_s, final int numberOfChanges) {
-			this.accessTime_s = accessTime_s;
-			this.firstWaitingTime_s = firstWaitingTime_s;
-			this.inVehicleTime_s = inVehicleTime_s;
-			this.transferTime_s = transferTime_s;
-			this.numberOfChanges = numberOfChanges;
+		private final double generalizedTravelTime_s;
+		private final double totalDistance_m;
+		
+		private SampersPTSummaryLeg(final double generalizedTravelTime_s, final double totalDistance_m) {
+			this.generalizedTravelTime_s = generalizedTravelTime_s;
+			this.totalDistance_m = totalDistance_m;
 		}
 
 		@Override
@@ -172,7 +168,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 			return new Route() {
 				@Override
 				public double getDistance() {
-					return 0; // TODO
+					return totalDistance_m;
 				}
 
 				@Override
@@ -234,8 +230,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 		@Override
 		public double getTravelTime() {
-			// TODO
-			return (this.accessTime_s + this.firstWaitingTime_s + this.inVehicleTime_s + this.transferTime_s);
+			return this.generalizedTravelTime_s;
 		}
 
 		@Override

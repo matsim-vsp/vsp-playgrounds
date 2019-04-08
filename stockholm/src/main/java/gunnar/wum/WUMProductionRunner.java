@@ -51,7 +51,7 @@ import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
-import gunnar.ihop4.sampersutilities.SampersScoringFunctionModule;
+import gunnar.ihop4.sampersutilities.SampersDifferentiatedPTScoringFunctionModule;
 
 /**
  *
@@ -182,7 +182,7 @@ public class WUMProductionRunner {
 
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
-		controler.addOverridingModule(new SampersScoringFunctionModule());
+		controler.addOverridingModule(new SampersDifferentiatedPTScoringFunctionModule());
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {

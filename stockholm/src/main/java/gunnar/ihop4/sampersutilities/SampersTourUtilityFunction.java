@@ -19,6 +19,7 @@
  */
 package gunnar.ihop4.sampersutilities;
 
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 
 import floetteroed.utilities.Units;
@@ -33,8 +34,6 @@ class SampersTourUtilityFunction {
 
 	// -------------------- CONSTANTS --------------------
 
-	private static final double eps = 1e-8;
-
 	private final SampersUtilityParameters utlParams;
 
 	// -------------------- CONSTRUCTION --------------------
@@ -45,40 +44,34 @@ class SampersTourUtilityFunction {
 
 	// -------------------- INTERNALS --------------------
 
-	// private double earlyArrivalTimeLoss_min(final SampersTour tour) {
-	// return Math.max(0.0,
-	// SampersParameterUtils.getActivityOpens_min(tour) -
-	// SampersParameterUtils.getActivityStart_min(tour));
-	// }
-	//
-	// private double lateDepartureTimeLoss_min(final SampersTour tour) {
-	// return Math.max(0.0,
-	// SampersParameterUtils.getActivityEnd_min(tour) -
-	// SampersParameterUtils.getActivityCloses_min(tour));
-	// }
-
 	double getScheduleDelayCost(final SampersTour tour, final Double income_SEK_yr) {
 		final Purpose purpose = tour.getPurpose();
+		final String mode = tour.getFirstLeg().getMode();
 		double result = 0.0;
 
-		final Double plannedStart_h = SampersAttributeUtils.getPlannedActivityStart_h(tour);
-		if (plannedStart_h != null) {
-			final double plannedStart_min = Units.MIN_PER_H * plannedStart_h;
-			final double realizedStart_min = Units.MIN_PER_S * tour.getRealizedStartTime_s();
-			result += this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK_yr)
-					* Math.max(0.0, (plannedStart_min - realizedStart_min) - this.utlParams.getScheduleDelaySlack_min())
-					+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK_yr) * Math.max(0.0,
-							(realizedStart_min - plannedStart_min) - this.utlParams.getScheduleDelaySlack_min());
+		/* Start time */ {
+			final Double plannedStart_h = SampersAttributeUtils.getPlannedActivityStart_h(tour);
+			if (plannedStart_h != null) {
+				final double plannedStart_min = Units.MIN_PER_H * plannedStart_h;
+				final double realizedStart_min = Units.MIN_PER_S * tour.getRealizedStartTime_s();
+				result += this.utlParams.getScheduleDelayCostEarly_1_min(purpose, mode, income_SEK_yr)
+						* Math.max(0.0,
+								(plannedStart_min - realizedStart_min) - this.utlParams.getScheduleDelaySlack_min())
+						+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, mode, income_SEK_yr) * Math.max(0.0,
+								(realizedStart_min - plannedStart_min) - this.utlParams.getScheduleDelaySlack_min());
+			}
 		}
 
-		final Double plannedDuration_h = SampersAttributeUtils.getPlannedActivityDuration_h(tour);
-		if (plannedDuration_h != null) {
-			final double plannedDuration_min = Units.MIN_PER_H * plannedDuration_h;
-			final double realizedDuration_min = Units.MIN_PER_S * (tour.getRealizedActivityDuration_s());
-			result += this.utlParams.getScheduleDelayCostTooShort_1_min(purpose, income_SEK_yr)
-					* Math.max(0.0, plannedDuration_min - realizedDuration_min)
-					+ this.utlParams.getScheduleDelayCostTooLong_1_min(purpose, income_SEK_yr)
-							* Math.max(0.0, realizedDuration_min - plannedDuration_min);
+		/* Duration */ {
+			final Double plannedDuration_h = SampersAttributeUtils.getPlannedActivityDuration_h(tour);
+			if (plannedDuration_h != null) {
+				final double plannedDuration_min = Units.MIN_PER_H * plannedDuration_h;
+				final double realizedDuration_min = Units.MIN_PER_S * (tour.getRealizedActivityDuration_s());
+				result += this.utlParams.getScheduleDelayCostTooShort_1_min(purpose, mode, income_SEK_yr)
+						* Math.max(0.0, plannedDuration_min - realizedDuration_min)
+						+ this.utlParams.getScheduleDelayCostTooLong_1_min(purpose, mode, income_SEK_yr)
+								* Math.max(0.0, realizedDuration_min - plannedDuration_min);
+			}
 		}
 
 		return result;
@@ -86,37 +79,56 @@ class SampersTourUtilityFunction {
 
 	// -------------------- IMPLEMENTATION --------------------
 
+	protected double getGeneralizedPTTravelTime_s(final double accessEgressTime_s, final double firstWaitingTime_s,
+			final double inVehicleTime_s, final double transferTime_s, final int numberOfTransfers) {
+		return (this.utlParams.getPTAccessEgressTimeMultiplier() * accessEgressTime_s
+				+ this.utlParams.getPTFirstWaitingTimeMultiplier() * firstWaitingTime_s
+				+ this.utlParams.getPTInVehicleTimeMultiplier() * inVehicleTime_s
+				+ this.utlParams.getPTTransferTimeMultiplier() * transferTime_s
+				+ Units.S_PER_MIN * this.utlParams.getPTTransferPenalty_min() * numberOfTransfers);
+	}
+
 	double getStuckScore(final Person person) {
-		return this.utlParams.getStuckScore(SampersUtilityParameters.Purpose.work,
+		return this.utlParams.getStuckScore(SampersUtilityParameters.Purpose.work, TransportMode.car,
 				SampersAttributeUtils.getIncome_SEK_yr(person));
 	}
 
 	double getUtility(final SampersTour tour, final Person person) {
 
 		final Purpose purpose = tour.getPurpose();
+		final String mode = tour.getFirstLeg().getMode();
 		final double income_SEK_yr = SampersAttributeUtils.getIncome_SEK_yr(person);
 
-		/*
-		 * Schedule delay.
-		 */
+		/* Schedule delay */
 		double result = this.getScheduleDelayCost(tour, income_SEK_yr);
 
-		/*
-		 * Time.
-		 */
-		result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_SEK_yr) * tour.getRealizedTravelTime_min();
-
-		/*
-		 * Monetary cost.
-		 */
-		final double cost_SEK = tour.getEventBasedCost_SEK()
-				+ this.utlParams.getMonetaryDistanceCost_SEK_km() * tour.getRealizedTravelDistance_km();
-		if (cost_SEK < 0) {
-			throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
+		/* Time */ {
+			final double travelTime_min = tour.getRealizedTravelTime_min();
+			if (travelTime_min < 0) {
+				throw new RuntimeException("tour travel time = " + travelTime_min + " min");
+			}
+			result += this.utlParams.getLinTimeCoeff_1_min(purpose, mode, income_SEK_yr)
+					* tour.getRealizedTravelTime_min();
 		}
-		if (cost_SEK > eps) {
-			result += this.utlParams.getLinMoneyCoeff_1_SEK(purpose, income_SEK_yr) * cost_SEK
-					+ this.utlParams.getLnMoneyCoeff_lnArgInSEK(purpose, income_SEK_yr) * Math.log(cost_SEK);
+
+		/* Monetary cost */ {
+			final double cost_SEK = tour.getEventBasedCost_SEK()
+					+ this.utlParams.getMonetaryDistanceCost_SEK_km() * tour.getRealizedTravelDistance_km();
+			if (cost_SEK < 0) {
+				throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
+			}
+			result += this.utlParams.getLinCostCoeff_1_SEK(purpose, mode, income_SEK_yr) * cost_SEK
+					+ this.utlParams.getLogCostCoeff_lnArgInSEK(purpose, mode, income_SEK_yr)
+							* Math.log(0.01 + cost_SEK); // Yes, +0.01 it is.
+		}
+
+		/* Distance */ {
+			final double dist_km = tour.getRealizedTravelDistance_km();
+			if (dist_km < 0) {
+				throw new RuntimeException("tour distance = " + dist_km + " km");
+			}
+			result += this.utlParams.getLinDistanceCoeff_1_km(purpose, mode, income_SEK_yr) * dist_km
+					+ this.utlParams.getLogDistanceCoeff_1_km(purpose, mode, income_SEK_yr) * Math.log(0.01 + dist_km);
 		}
 
 		return result;
