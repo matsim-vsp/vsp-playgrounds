@@ -57,6 +57,7 @@ import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
@@ -169,20 +170,13 @@ public class CNEMunich {
 				public void install() {
 					final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 					String ug = "COMMUTER_REV_COMMUTER";
-					addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice
-							.concat("_")
-							.concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
-						final String[] availableModes = {"car", "pt_".concat(ug)};
+					addPlanStrategyBinding( DefaultStrategy.SubtourModeChoice + "_" + ug ).toProvider(new Provider<PlanStrategy>() {
+						final String[] availableModes = {"car", "pt_"+ug };
 						final String[] chainBasedModes = {"car", "bike"};
-						@Inject
-						Scenario sc;
-
-						@Override
-						public PlanStrategy get() {
+						@Inject Scenario sc;
+						@Override public PlanStrategy get() {
 							final Builder builder = new Builder(new RandomPlanSelector<>());
-							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
-									.global()
-									.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false,
 									0.0, //value 0.0 for backward compatibility.
 									tripRouterProvider));
 							builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
