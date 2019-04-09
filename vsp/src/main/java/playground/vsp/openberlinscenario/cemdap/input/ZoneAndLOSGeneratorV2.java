@@ -30,15 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.vividsolutions.jts.geom.Geometry;
-
-import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
+
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke

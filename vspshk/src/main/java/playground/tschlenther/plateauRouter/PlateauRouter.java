@@ -1,5 +1,12 @@
 package playground.tschlenther.plateauRouter;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -12,8 +19,6 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.utils.leastcostpathtree.LeastCostPathTree;
 import org.matsim.utils.leastcostpathtree.LeastCostPathTree.NodeData;
 import org.matsim.vehicles.Vehicle;
-
-import java.util.*;
 
 /**
  * @author tschlenther + gthunig
@@ -79,8 +84,8 @@ public class PlateauRouter implements LeastCostPathCalculator {
 		
 		while(!longestPlateaus.isEmpty()) {
 			Path currentPlateau = longestPlateaus.pollFirst();
-			
-			lcpTree.calculate(network, currentPlateau.nodes.get(currentPlateau.nodes.size()-1), starttime);
+
+			lcpTree.calculate(network, currentPlateau.getToNode(), starttime);
 			Map<Id<Node>, NodeData> fromPlateauTree = lcpTree.getTree();
 			Path currentFinalPath = getFinalPath(currentPlateau, fromTree, fromPlateauTree, fromNode.getId(), toNode.getId());
 		
@@ -92,9 +97,9 @@ public class PlateauRouter implements LeastCostPathCalculator {
 
 	private Path getFinalPath(Path plateau, Map<Id<Node>, NodeData> fromTree,
 			Map<Id<Node>, NodeData> fromPlateauTree, Id<Node> fromNodeId, Id<Node> toNodeId) {
-		Path toPlateau = calcPath(fromNodeId, plateau.nodes.get(0).getId(), fromTree);
+		Path toPlateau = calcPath(fromNodeId, plateau.getFromNode().getId(), fromTree);
 		Path originToPlateauEnd = concatPath(toPlateau, plateau);
-		Path fromPlateau = calcPath(plateau.nodes.get(plateau.nodes.size()-1).getId(), toNodeId, fromPlateauTree);
+		Path fromPlateau = calcPath(plateau.getToNode().getId(), toNodeId, fromPlateauTree);
 		Path fullPath = concatPath(originToPlateauEnd, fromPlateau);
 		int[] nodesToRemove = {0, fullPath.nodes.size()-1};
 		Path finalPath = removeNodeFromPath(nodesToRemove, fullPath);

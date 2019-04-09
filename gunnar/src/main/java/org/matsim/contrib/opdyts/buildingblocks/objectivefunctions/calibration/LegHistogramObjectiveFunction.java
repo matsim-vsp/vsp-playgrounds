@@ -37,6 +37,7 @@ import com.google.inject.Inject;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class LegHistogramObjectiveFunction extends NonnegativeTimeSeriesObjectiveFunction<MATSimState> {
 
 	public static class StateComponent {

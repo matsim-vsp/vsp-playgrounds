@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -36,13 +37,10 @@ import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.algorithms.PersonAlgorithm;
-import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.io.StreamingPopulationReader;
 import org.matsim.core.population.io.StreamingDeprecated;
+import org.matsim.core.population.io.StreamingPopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTrip;
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTripSet;

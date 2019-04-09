@@ -22,7 +22,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.vividsolutions.jts.geom.Geometry;
+
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -58,6 +59,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.opengis.feature.simple.SimpleFeature;
+
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.UrbanDemandGenerator;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
@@ -175,7 +177,10 @@ public class EvacuationPatnaScenarioGenerator {
 		evavcuationArea = (Geometry) features.iterator().next().getDefaultGeometry();
 
 		// will create a network connecting with safe node.
-		EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evavcuationArea, safeLinkId);
+		// Amit, I added this cast to prevent compilation errors.
+		// Preferably, evacuationgui needs to be adapted to the more recent version of geotools. michal mar'19
+		EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc,
+				(com.vividsolutions.jts.geom.Geometry)(Object)evavcuationArea, safeLinkId);
 		net.run();
 		
 		//since the original network is multi-mode, the new links should also allow all modes

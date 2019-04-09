@@ -30,6 +30,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -42,16 +44,11 @@ import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.vehicles.Vehicle;
-
-import com.google.inject.name.Named;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * @author  jbischoff

@@ -24,13 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 
 import playground.vsp.analysis.modules.ptTripAnalysis.distance.DistAnalysisTripI;
 import playground.vsp.analysis.modules.ptTripAnalysis.distance.DistanceAnalysisTripSet;
 import playground.vsp.analysis.modules.ptTripAnalysis.traveltime.TTAnalysisTripI;
 import playground.vsp.analysis.modules.ptTripAnalysis.traveltime.TTAnalysisTripSet;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author droeder

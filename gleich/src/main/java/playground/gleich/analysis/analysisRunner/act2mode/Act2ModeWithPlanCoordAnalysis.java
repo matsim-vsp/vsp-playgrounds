@@ -26,6 +26,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.events.handler.EventHandler;
@@ -36,9 +38,6 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 import playground.vsp.analysis.modules.act2mode.ActivityToMode;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * @author droeder,

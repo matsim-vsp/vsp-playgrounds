@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 /**
 * @author ikaddoura
@@ -38,8 +39,8 @@ public class FilterSelectedPlans {
 	
 	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
 	
-	private final static String inputPlans = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_slowPt_bike_walk_10pct/be_251.output_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_slowPt_bike_walk_10pct/be_251.output_plans_selected.xml.gz";
+	private final static String inputPlans = "/Users/ihab/Desktop/ils4a/matsim-berlin/scenarios/berlin-v5.3-1pct/output-berlin-v5.3-1pct/berlin-v5.3-1pct.output_plans.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Desktop/ils4a/matsim-berlin/scenarios/berlin-v5.3-1pct/output-berlin-v5.3-1pct/berlin-v5.3-1pct.output_plans.selected.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
@@ -58,7 +59,9 @@ public class FilterSelectedPlans {
 		log.info("Other person attributes will not appear in the output plans file.");
 		
 		Config config = ConfigUtils.createConfig();
+		config.global().setCoordinateSystem(TransformationFactory.GK4);
 		config.plans().setInputFile(inputPlans);
+		config.plans().setInputCRS(TransformationFactory.GK4);
 		Scenario scOutput;
 		Scenario scInput = ScenarioUtils.loadScenario(config);
 		scOutput = ScenarioUtils.createScenario(ConfigUtils.createConfig());

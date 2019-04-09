@@ -19,7 +19,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.util.Map;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.measurements.SingleLinkMeasurement;
 import org.apache.log4j.Logger;
@@ -31,6 +30,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.Time;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
+
+import java.util.Map;
 
 /**
  * @author nagel
@@ -51,6 +52,11 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		cadytsConfig.setVarianceScale( 100. );
+		// set the variance scale to a bigger value, so that corrections don't get cut of at '15.0'. The counts weight
+		// must be set accordingly. janek
+		// Well, I think that they are still cut off at 15.0.  However, the correction values are divided by the variance scale.  The the values
+		// themselves are much smaller.  So indeed we correct by a larger counts weight in the scoring function. kai, apr'19
+		cadytsConfig.setVarianceScale(100);
 		// yyyy I think that this will operate both on the marginals and on the counts.  (Currently not on the marginals since I have now set stddev individually per
 		// measurement.) kai, feb'19
 
@@ -69,8 +75,13 @@ public final class ModalDistanceCadytsBuilderImpl {
 			DistanceBin bin = entry.getValue();
 			//only one measurement per day.
 //			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
-			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), 1000.*10., SingleLinkMeasurement.TYPE.COUNT_VEH);
+			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), bin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 			// (stddev scheint quadratisch einzugehen, also wenn man die Messwerte einen Faktor 10 kleiner haben will, muss man hier mit sqrt(10) multiplizieren. kai, feb'19)
+			// set the standard deviation for marginals to a 'big' value to avoid the cadyts correction being cut of at
+			// '15.0' for all bins. When all bins pull with a correction of '15.0' all corrections cancel out each other.
+			// The correction factor is calculated as followed: (expectedValue - simulatedValue) / stddev^2
+			// the stddev can also be set globally for cadyts but then it would also affect the counts calibration. janek
+			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getCount(), bin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 			numberOfAddedMeasurements++;
 		}
 

@@ -9,7 +9,7 @@ import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * This is a starter class to create visual QGis-based output from a readily-done accessibility computation

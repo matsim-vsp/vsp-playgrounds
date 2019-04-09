@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.MultiLineString;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -39,9 +41,6 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.MultiLineString;
 
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 

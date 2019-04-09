@@ -29,7 +29,7 @@ import playground.dgrether.utils.zones.DgZoneUtils;
 import playground.dgrether.utils.zones.DgZoneWriter;
 import playground.dgrether.utils.zones.DgZones;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 
 /**

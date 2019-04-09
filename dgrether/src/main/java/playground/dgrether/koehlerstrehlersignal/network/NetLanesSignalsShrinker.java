@@ -19,7 +19,7 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.network;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;

@@ -39,6 +39,7 @@ import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.utils.CreatePseudoNetwork;
+import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
@@ -50,6 +51,7 @@ import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
+import gunnar.ihop4.sampersutilities.SampersDifferentiatedPTScoringFunctionModule;
 
 /**
  *
@@ -90,7 +92,7 @@ public class WUMProductionRunner {
 		}
 	}
 
-	static void runProductionScenario(final boolean runLocally) {
+	static void runProductionScenario(final boolean runLocally, final boolean cleanInitialPlans) {
 
 		final String configFileName;
 		if (runLocally) {
@@ -101,7 +103,6 @@ public class WUMProductionRunner {
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
-
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -129,7 +130,9 @@ public class WUMProductionRunner {
 		}
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		removeModeInformation(scenario);
+		if (cleanInitialPlans) {
+			removeModeInformation(scenario);
+		}
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 
 		if (greedo != null) {
@@ -165,10 +168,45 @@ public class WUMProductionRunner {
 		controler.run();
 	}
 
+	static void runProductionScenarioWithSampersDynamics() {
+
+		final String configFileName = "./config.xml";
+		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		removeModeInformation(scenario);
+		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
+		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
+
+		final Controler controler = new Controler(scenario);
+		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+		controler.addOverridingModule(new SampersDifferentiatedPTScoringFunctionModule());
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.install(new SBBTransitModule());
+				this.install(new SwissRailRaptorModule());
+			}
+
+			@Provides
+			QSimComponentsConfig provideQSimComponentsConfig() {
+				QSimComponentsConfig components = new QSimComponentsConfig();
+				new StandardQSimComponentConfigurator(config).configure(components);
+				SBBTransitEngineQSimModule.configure(components);
+				return components;
+			}
+		});
+		controler.run();
+	}
+
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
-		final boolean runLocally = false;
-		runProductionScenario(runLocally);
+		// final boolean runLocally = false;
+		// final boolean cleanInitialPlans = false;
+		// runProductionScenario(runLocally, cleanInitialPlans);
+		runProductionScenarioWithSampersDynamics();
 		System.out.println("... DONE");
 	}
 

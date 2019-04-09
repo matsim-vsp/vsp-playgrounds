@@ -20,8 +20,9 @@
 package playground.vsp.openberlinscenario.cemdap.output;
 
 import java.util.Map;
-import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
@@ -30,6 +31,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
+
 import playground.vsp.corineLandcover.CorineLandCoverData;
 import playground.vsp.corineLandcover.LandCoverUtils;
 

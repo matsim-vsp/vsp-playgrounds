@@ -24,7 +24,7 @@ import org.matsim.core.network.filter.NetworkFilterManager;
 
 import playground.dgrether.EnvelopeLinkStartEndFilter;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 
 /**

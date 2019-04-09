@@ -19,20 +19,28 @@
 
 package playground.jbischoff.taxi.berlin.demand;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import org.geotools.feature.simple.*;
-import org.matsim.api.core.v01.*;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileWriter;
-import org.matsim.core.utils.io.tabularFileParser.*;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
+import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.*;
 
 import playground.jbischoff.taxi.berlin.data.BeelineDistanceExractor;
 

@@ -44,7 +44,7 @@ import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.sav.prepare.BerlinShpUtils;
+import org.matsim.prepare.BerlinShpUtils;
 
 /**
 * @author ikaddoura

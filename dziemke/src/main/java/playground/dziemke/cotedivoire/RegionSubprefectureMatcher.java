@@ -2,7 +2,7 @@ package playground.dziemke.cotedivoire;
 
 import java.util.List;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 
 public class RegionSubprefectureMatcher implements Runnable{
 	private List <Region> regions = ShapeReader.read("D:/Workspace/container/cotedivoire/input/CIV_adm1.shp");

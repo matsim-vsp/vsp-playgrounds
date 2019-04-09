@@ -29,7 +29,7 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
 
-public class IKAnalysisMain2 {
+public class IKExampleAnalysisMain2 {
 	
 	static String configFile = "/Users/Ihab/Desktop/testScenario_output/output_config.xml.gz";
 	
@@ -37,7 +37,7 @@ public class IKAnalysisMain2 {
 	private String outputDir;
 	
 	public static void main(String[] args) {
-		IKAnalysisMain2 anaMain = new IKAnalysisMain2();
+		IKExampleAnalysisMain2 anaMain = new IKExampleAnalysisMain2();
 		anaMain.run();
 	}
 
@@ -58,7 +58,7 @@ public class IKAnalysisMain2 {
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 		
-		IKEventHandler handler = new IKEventHandler(scenario.getNetwork());
+		IKExampleEventHandler handler = new IKExampleEventHandler(scenario.getNetwork());
 		events.addHandler(handler);
 		
 		MatsimEventsReader reader = new MatsimEventsReader(events);

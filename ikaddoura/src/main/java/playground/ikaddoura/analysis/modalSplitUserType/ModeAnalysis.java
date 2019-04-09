@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripStructureUtils;
@@ -69,7 +68,7 @@ public class ModeAnalysis {
 		int counter = 0;
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (counter % 100000 == 0) {
+			if (counter % 1000 == 0) {
 				log.info("Person #" + counter);
 			}
 			
@@ -83,7 +82,7 @@ public class ModeAnalysis {
 						routeDistance += leg.getRoute().getDistance();
 					}
 					
-					MainModeIdentifierImpl modeIdentifier = new MainModeIdentifierImpl();
+					MainModeIdentifierOnlyTransitWalkImpl modeIdentifier = new MainModeIdentifierOnlyTransitWalkImpl();
 					String currentLegMode = modeIdentifier.identifyMainMode(trip.getTripElements());
 					
 					if (mode2TripCounterFiltered.containsKey(currentLegMode)) {

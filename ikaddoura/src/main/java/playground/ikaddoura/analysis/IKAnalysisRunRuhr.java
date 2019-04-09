@@ -46,6 +46,7 @@ public class IKAnalysisRunRuhr {
 		String scenarioCRS = null;	
 		String shapeFileZones = null;
 		String zonesCRS = null;
+		String zoneFile = null;
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
@@ -59,18 +60,20 @@ public class IKAnalysisRunRuhr {
 			
 		} else {
 			
-			runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/output1/";
-			runId = "nemo_baseCase_continued_001";		
-			runDirectoryToCompareWith = "/Users/ihab/Desktop/ils3a/kaddoura/output0/";
-			runIdToCompareWith = "nemo_baseCase_032";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run3_gesundeStadt-mit-RSV/output/";
+			runId = "run3_gesundeStadt-mit-RSV";		
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run0_bc-ohne-RSV/output/";
+			runIdToCompareWith = "run0_bc-ohne-RSV";
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
 			scenarioCRS = "EPSG:25832";
 			
-			shapeFileZones = null;
-			zonesCRS = null;
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete-ruhrgebiet_EPSG-25832.shp";
+			zonesCRS = "EPSG:25832";
 			
+			zoneFile = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/shapeFile_Ruhrgebiet/ruhrgebiet_boundary.shp";
+
 			homeActivityPrefix = "home";
 			scalingFactor = 100;
 			
@@ -88,11 +91,27 @@ public class IKAnalysisRunRuhr {
 		
 		List<AgentAnalysisFilter> filter1 = new ArrayList<>();
 		
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+		filter1a.preProcess(scenario1);
+		filter1.add(filter1a);
+		
 		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
+		filter1b.setZoneFile(zoneFile);
+		filter1b.setRelevantActivityType(homeActivityPrefix);
 		filter1b.preProcess(scenario1);
 		filter1.add(filter1b);
 		
-		List<AgentAnalysisFilter> filter0 = null;
+		List<AgentAnalysisFilter> filter0 = new ArrayList<>();
+				
+		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
+		filter0a.preProcess(scenario0);
+		filter0.add(filter0a);
+		
+		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
+		filter0b.setZoneFile(zoneFile);
+		filter0b.setRelevantActivityType(homeActivityPrefix);
+		filter0b.preProcess(scenario0);
+		filter0.add(filter0b);
 		
 		List<String> modes = new ArrayList<>();
 		for (String mode : modesString.split(",")) {

@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.network.Link;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 
 /**

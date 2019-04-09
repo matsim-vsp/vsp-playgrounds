@@ -17,14 +17,14 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.od;
+package playground.ikaddoura.savPricing;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.matsim.analysis.od.ODAnalysis;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.sav.analysis.od.ODAnalysis;
 
 /**
 * @author ikaddoura
@@ -58,7 +58,7 @@ public class RunODAnalysis {
 //		modes.add("bicycle");
 //		modes.add(TransportMode.ride);
 				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, zoneId, modes, helpLegModes, stageActivitySubString);
+		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, "GK4", zoneId, modes, helpLegModes, stageActivitySubString, 10.);
 		reader.run();
 	}
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -43,13 +44,11 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.vividsolutions.jts.geom.Point;
-
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
-import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 
 /**
  * @author amit

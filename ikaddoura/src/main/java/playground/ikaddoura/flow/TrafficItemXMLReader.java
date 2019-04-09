@@ -23,10 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
 * @author ikaddoura

@@ -63,7 +63,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 import playground.dgrether.analysis.RunResultsLoader;
 import playground.dgrether.analysis.categoryhistogram.CategoryHistogramWriter;

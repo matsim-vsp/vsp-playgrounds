@@ -3,6 +3,7 @@ package playground.jbischoff.networkChange;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -19,8 +20,6 @@ import org.matsim.core.network.io.NetworkChangeEventsWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.core.utils.geometry.geotools.MGC;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import playground.jbischoff.utils.JbUtils;
 

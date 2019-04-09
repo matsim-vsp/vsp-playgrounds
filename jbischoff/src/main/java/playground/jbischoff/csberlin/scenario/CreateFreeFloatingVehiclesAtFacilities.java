@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -44,9 +46,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
 import playground.jbischoff.utils.JbUtils;

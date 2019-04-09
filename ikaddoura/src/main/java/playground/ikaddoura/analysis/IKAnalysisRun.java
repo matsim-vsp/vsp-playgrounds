@@ -146,57 +146,9 @@ public class IKAnalysisRun {
 		String analyzeSubpopulation = null;
 		
 		if (args.length > 0) {
-			if (!args[0].equals("null")) runDirectory = args[0];
-			log.info("Run directory: " + runDirectory);
-			
-			if (!args[1].equals("null")) runId = args[1];
-			log.info("Run Id: " + runDirectory);
-			
-			if (!args[2].equals("null")) runDirectoryToCompareWith = args[2];
-			log.info("Run directory to compare with: " + runDirectoryToCompareWith);
-			
-			if (!args[3].equals("null")) runIdToCompareWith = args[3];
-			log.info("Run Id to compare with: " + runDirectory);
-			
-			if (!args[4].equals("null")) scenarioCRS = args[4];	
-			log.info("Scenario CRS: " + scenarioCRS);
-			
-			if (!args[5].equals("null")) shapeFileZones = args[5];
-			log.info("Shape file zones: " + shapeFileZones);
-
-			if (!args[6].equals("null")) zonesCRS = args[6];
-			log.info("Zones CRS: " + zonesCRS);
-			
-			if (!args[7].equals("null")) homeActivityPrefix = args[7];
-			log.info("Home activity prefix: " + homeActivityPrefix);
-
-			scalingFactor = Integer.valueOf(args[8]);
-			log.info("Scaling factor: " + scalingFactor);
-		
-			if (!args[9].equals("null")) visualizationScriptInputDirectory = args[9];
-			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
-			
-			if (!args[10].equals("null")) modesString = args[10];
-			log.info("modes: " + modesString);
-			
-			if (!args[10].equals("null")) taxiMode = args[11];
-			log.info("taxiMode: " + taxiMode);
-			
-			if (!args[10].equals("null")) carMode = args[12];
-			log.info("carMode: " + carMode);
-			
-			rewardSAVuserFormerCarUser = Double.valueOf(args[13]);
-			log.info("rewardSAVuserFormerCarUser: " + rewardSAVuserFormerCarUser);
-			
-			analyzeSubpopulation = args[14];
-			log.info("analyzeSubpopulation: " + analyzeSubpopulation);
+			throw new RuntimeException("Not implemented. Aborting...");
 			
 		} else {
-			
-//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_B1_1pct/";
-//			runId = "oAV_B1_1pct";
-//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_0_1pct/";
-//			runIdToCompareWith = "oAV_0_1pct";
 			
 			runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
 			runId = "berlin-v5.2-10pct";		
@@ -210,12 +162,6 @@ public class IKAnalysisRun {
 			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
 			zonesCRS = TransformationFactory.DHDN_GK4;
 
-//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/greater-berlin-area_3000/greater-berlin-area_3000.shp";
-//			zonesCRS = TransformationFactory.DHDN_GK4;
-			
-//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
-//			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
-			
 			homeActivityPrefix = "home";
 			scalingFactor = 10;
 			

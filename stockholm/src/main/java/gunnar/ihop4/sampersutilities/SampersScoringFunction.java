@@ -40,7 +40,7 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	private final Person person;
 
-	private final SampersTourUtilityFunction utlFct;
+	protected /* Vanilla PT implementation is in a subclass. */ final SampersTourUtilityFunction utlFct;
 
 	// -------------------- MEMBERS --------------------
 

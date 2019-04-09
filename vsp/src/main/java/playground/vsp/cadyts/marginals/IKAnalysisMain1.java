@@ -20,10 +20,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.io.BufferedWriter;
-import java.util.Map;
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -34,12 +30,15 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
+
+import java.io.BufferedWriter;
+import java.util.Map;
+import java.util.SortedMap;
 
 
 
@@ -75,11 +74,11 @@ public class IKAnalysisMain1 {
 	                TransportMode.walk, getBeelineDistanceFactor(modeRoutingParamsMap, TransportMode.walk, 1.3));
 	        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes(
 	                TransportMode.ride, getBeelineDistanceFactor(modeRoutingParamsMap, TransportMode.ride, 1.3));
-		
-        inputDistanceDistribution.addToDistribution(TransportMode.car, new DistanceBin.DistanceRange(0, 1000000.), 123456789);
-        inputDistanceDistribution.addToDistribution(TransportMode.ride, new DistanceBin.DistanceRange(0, 1000000.), 123456789);
-        inputDistanceDistribution.addToDistribution(TransportMode.bike, new DistanceBin.DistanceRange(0, 1000000.), 123456789);
-        inputDistanceDistribution.addToDistribution(TransportMode.walk, new DistanceBin.DistanceRange(0, 1000000.), 123456789);
+
+		inputDistanceDistribution.addToDistribution(TransportMode.car, new DistanceBin.DistanceRange(0, 1000000.), 10000, 123456789);
+		inputDistanceDistribution.addToDistribution(TransportMode.ride, new DistanceBin.DistanceRange(0, 1000000.), 10000, 123456789);
+		inputDistanceDistribution.addToDistribution(TransportMode.bike, new DistanceBin.DistanceRange(0, 1000000.), 10000, 123456789);
+		inputDistanceDistribution.addToDistribution(TransportMode.walk, new DistanceBin.DistanceRange(0, 1000000.), 10000, 123456789);
 
 		events.addHandler(handler1);
 		

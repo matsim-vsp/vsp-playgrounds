@@ -73,7 +73,6 @@ public class ActitoppMatsimDemandGenerator {
 		int childrenFrom0To10 = getChildrenFrom0To10(); // TODO
 		int childrenUnder18 = getChildrenUnder18(); // TODO
 
-		// Use: int age = (int) ...getAttributes().get("age"); don't use toString; the object knows its type and throws an error.
 		int age = (int) attr.getAttribute(CEMDAPPersonAttributes.age.toString());
 		
 		int employment = getEmploymentClass((boolean) attr.getAttribute(CEMDAPPersonAttributes.employed.toString()),
@@ -122,22 +121,18 @@ public class ActitoppMatsimDemandGenerator {
 
 		List<HActivity> activityList = weekPattern.getAllActivities();
 		for (HActivity actitoppActivity : activityList) {
-			if (actitoppActivity.getDayIndex() == 0) { // Only use activities of
-														// first day; until
-														// 1,440min
-
+			if (actitoppActivity.getDayIndex() == 0) { // Only use activities of first day; until 1,440min
 				// actitoppActivity.getType(); // Letter-based type
 				actitoppActivity.getActivityType();
 				String matsimActivityType = transformActType(actitoppActivity.getActivityType());
-				Coord dummyCoord = CoordUtils.createCoord(0, 0); // TODO choose
-																	// location
+				Coord dummyCoord = CoordUtils.createCoord(0, 0); // TODO choose location
 
 				Activity matsimActivity = populationFactory.createActivityFromCoord(matsimActivityType, dummyCoord);
 				matsimPlan.addActivity(matsimActivity);
 
-				int activityEndTime = actitoppActivity.getEndTime();
-				if (activityEndTime <= 24 * 60) { // i.e. midnight in minutes
-					matsimActivity.setEndTime(activityEndTime * 60); // times in ActiTopp in min, in MATSim in s
+				int activityEndTime_min = actitoppActivity.getEndTime();
+				if (activityEndTime_min <= 24 * 60) { // i.e. midnight in minutes
+					matsimActivity.setEndTime(activityEndTime_min * 60); // times in ActiTopp in min, in MATSim in s
 
 					Leg matsimLeg = populationFactory.createLeg(TransportMode.car); // TODO
 					matsimPlan.addLeg(matsimLeg);

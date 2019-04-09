@@ -22,8 +22,12 @@
  */
 package playground.ikaddoura.noise;
 
-import com.vividsolutions.jts.geom.Envelope;
-import org.matsim.contrib.analysis.vsp.qgis.*;
+import org.locationtech.jts.geom.Envelope;
+import org.matsim.contrib.analysis.vsp.qgis.GraduatedSymbolRenderer;
+import org.matsim.contrib.analysis.vsp.qgis.QGisConstants;
+import org.matsim.contrib.analysis.vsp.qgis.QGisWriter;
+import org.matsim.contrib.analysis.vsp.qgis.RendererFactory;
+import org.matsim.contrib.analysis.vsp.qgis.VectorLayer;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 /**

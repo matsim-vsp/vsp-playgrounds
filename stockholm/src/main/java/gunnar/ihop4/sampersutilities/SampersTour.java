@@ -117,7 +117,6 @@ class SampersTour {
 	}
 
 	double getRealizedTravelTime_min() {
-		// System.out.println(this.buildStatus());
 		// legs contain travel time in seconds
 		return (this.firstLeg.getTravelTime() + this.secondLeg.getTravelTime()) / 60.0;
 	}

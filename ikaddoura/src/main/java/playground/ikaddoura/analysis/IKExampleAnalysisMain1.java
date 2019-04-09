@@ -30,13 +30,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 
 
-public class IKAnalysisMain1 {
+public class IKExampleAnalysisMain1 {
 
 	static String configFile = "path";
 	static String eventsFile = "path";
 				
 	public static void main(String[] args) {
-		IKAnalysisMain1 anaMain = new IKAnalysisMain1();
+		IKExampleAnalysisMain1 anaMain = new IKExampleAnalysisMain1();
 		anaMain.run();
 	}
 
@@ -46,7 +46,7 @@ public class IKAnalysisMain1 {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 		
-		IKEventHandler handler1 = new IKEventHandler(scenario.getNetwork());
+		IKExampleEventHandler handler1 = new IKExampleEventHandler(scenario.getNetwork());
 		events.addHandler(handler1);
 		// add more handlers here
 		

@@ -26,6 +26,7 @@ import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 
 /**
@@ -41,9 +42,10 @@ public class TSPrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	 * @param params
 	 * @param requestInserter
 	 */
-	public TSPrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, TaxiScheduler scheduler,
+	public TSPrivateAVTaxiDispatcher(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,
+			TaxiScheduler scheduler,
 			DefaultTaxiOptimizerParams params, TSPrivateAVRequestInserter requestInserter) {
-		super(taxiCfg, fleet, scheduler, params, requestInserter);
+		super(eventsManager, taxiCfg, fleet, scheduler, params, requestInserter);
 		// TODO Auto-generated constructor stub
 	}
 

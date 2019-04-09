@@ -29,7 +29,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 /**
  * @author thibaut
  */
-public final class MainModeIdentifierImpl implements MainModeIdentifier {
+public final class ZZZ_MainModeIdentifierImpl implements MainModeIdentifier {
 
 	private static int warnCnt = 0;
 	

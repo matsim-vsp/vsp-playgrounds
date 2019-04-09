@@ -30,13 +30,13 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent;
-import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEventHandler;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEventHandler;
 import org.matsim.contrib.dvrp.optimizer.Request;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEventHandler;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestScheduledEvent;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestScheduledEventHandler;
 import org.matsim.core.api.experimental.events.EventsManager;
 
 /**
@@ -46,7 +46,8 @@ import org.matsim.core.api.experimental.events.EventsManager;
 /**
  *
  */
-public class SharedTaxiFareCalculator implements PassengerRequestRejectedEventHandler, DrtRequestScheduledEventHandler,
+public class SharedTaxiFareCalculator
+		implements PassengerRequestRejectedEventHandler, PassengerRequestScheduledEventHandler,
 		DrtRequestSubmittedEventHandler {
 
 	Map<Id<Link>, MutableDouble> faresPerLink = new HashMap<>();
@@ -74,10 +75,10 @@ public class SharedTaxiFareCalculator implements PassengerRequestRejectedEventHa
 	}
 
 	/* (non-Javadoc)
-	 * @see org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEventHandler#handleEvent(org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent)
+	 * @see org.matsim.contrib.drt.passenger.events.PassengerRequestScheduledEventHandler#handleEvent(org.matsim.contrib.drt.passenger.events.PassengerRequestScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(DrtRequestScheduledEvent event) {
+	public void handleEvent(PassengerRequestScheduledEvent event) {
 		DrtRequestSubmittedEvent submission = requests.remove(event.getRequestId());
 		double fare = calcFare(submission.getUnsharedRideDistance());
 		if (faresPerLink.containsKey(submission.getFromLinkId())) {

@@ -22,7 +22,7 @@ package playground.dgrether.utils.zones;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 public class DgZoneFromLink extends DgOriginImpl implements DgOrigin {
 

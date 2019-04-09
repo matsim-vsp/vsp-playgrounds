@@ -24,7 +24,7 @@ package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
 import java.util.Map;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * @author  jbischoff

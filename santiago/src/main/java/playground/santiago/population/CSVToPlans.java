@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -56,8 +58,6 @@ import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import playground.santiago.SantiagoScenarioConstants;
 
@@ -572,7 +572,7 @@ public class CSVToPlans {
 	
 	private Coord shoot(String legMode, Geometry comuna){
 		Random random = MatsimRandom.getRandom();
-  	   com.vividsolutions.jts.geom.Point p;
+		Point p;
   	   double x, y;
   	   do {
   	      x = comuna.getEnvelopeInternal().getMinX() + random.nextDouble() * (comuna.getEnvelopeInternal().getMaxX() - comuna.getEnvelopeInternal().getMinX());

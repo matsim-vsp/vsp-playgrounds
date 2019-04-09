@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -32,9 +34,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
 * @author ikaddoura
@@ -146,7 +145,7 @@ public class AgentAnalysisFilter implements AgentFilter {
 	public void preProcess(Scenario scenario) {
 		this.dataPreprocessed = true;
 		
-	    if (zoneFile != null) {
+	    if (scenario != null && zoneFile != null) {
 	    	log.info("Getting persons' home coordinates...");
 			for (Person person : scenario.getPopulation().getPersons().values()) {
 				Activity act = (Activity) person.getSelectedPlan().getPlanElements().get(0);
@@ -158,7 +157,7 @@ public class AgentAnalysisFilter implements AgentFilter {
 			log.info("Getting persons' home coordinates... Done.");
 	    }
 	    	    
-		if (zoneFile != null) {					
+		if (scenario != null &&  zoneFile != null) {					
 			log.info("Reading shape file...");
 			Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(zoneFile);
 			int counter = 0;

@@ -19,17 +19,19 @@
 
 package playground.jbischoff.taxi.berlin.data;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.TreeMap;
 
-import org.matsim.api.core.v01.*;
+import org.locationtech.jts.geom.Point;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.util.distance.DistanceUtils;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
-
-import com.vividsolutions.jts.geom.Point;
 
 import playground.michalm.TaxiBerlin.TaxiBerlinZoneUtils;
 

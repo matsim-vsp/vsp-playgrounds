@@ -41,8 +41,8 @@ public class RunNemoModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "nemo_baseCase_032";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_032/output/";
+		final String runId = "nemo_baseCase_030";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_030/output/";
 		final String outputBaseDirectory = "/Users/ihab/Desktop/";
 		
 		// if iteration < 0 --> analysis of the final iteration
@@ -90,6 +90,7 @@ public class RunNemoModeAnalysis {
 		distanceGroups.add(new Tuple<>(5000., 10000.));
 		distanceGroups.add(new Tuple<>(10000., 20000.));
 		distanceGroups.add(new Tuple<>(20000., 100000.));
+		distanceGroups.add(new Tuple<>(100000., 1000000.));
 		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
 		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}

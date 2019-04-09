@@ -17,56 +17,61 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis;
+package playground.ikaddoura.savPricing;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
 
 /**
 * @author ikaddoura
 */
 
-public class PlanAnalysis {
+public final class BerlinPlansModificationTagFormerCarUsers {
+	private static final Logger log = Logger.getLogger(BerlinPlansModificationTagFormerCarUsers.class);
 
-	public static void main(String[] args) {
-		String plansFile = "";
-		
-		Config config = ConfigUtils.loadConfig("output-config-file");
-		config.plans().setInputFile(plansFile);
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		
-		double scoreSum = 0.;
-		double tt = 0.;
-		
+	public void run(Scenario scenario) {
+		tagCarUsers(scenario);
+	}
+	
+	private void tagCarUsers(Scenario scenario) {
+		int carUsers = 0;
+		int noCarUsers = 0;
+
+		log.info("Tagging car users...");
+
 		for (Person person : scenario.getPopulation().getPersons().values()) {
-			scoreSum += person.getSelectedPlan().getScore();
-			Plan plan = person.getSelectedPlan();
-			
-			for (PlanElement pE : plan.getPlanElements()) {
+			Plan selectedPlan = person.getSelectedPlan();
+			if (selectedPlan == null) {
+				throw new RuntimeException("No selected plan. Aborting...");
+			}
+
+			boolean personHasCarTrip = false;
+
+			for (PlanElement pE : selectedPlan.getPlanElements()) {
+
 				if (pE instanceof Leg) {
 					Leg leg = (Leg) pE;
-					if (leg.getMode().equals("car")) {
-						
-						String[] linkIdsFromRoute = leg.getRoute().getRouteDescription().split(" ");
-						for (String linkId : linkIdsFromRoute) {
-							if (linkId.equals("baustellen-link")) {
-								tt += leg.getTravelTime();
-							}
-						}
+					if (leg.getMode().equals(TransportMode.car)) {
+						personHasCarTrip = true;
 					}
- 				}
+				}
+			}
+			person.getAttributes().putAttribute("CarOwnerInBaseCase", personHasCarTrip);
+			if (personHasCarTrip) {
+				carUsers++;
+			} else {
+				noCarUsers++;
 			}
 		}
-		
-		System.out.println("scoreSum: " + scoreSum);
-		System.out.println("travel time of agents traveling on certain links: " + tt);
+		log.info("Tagging car users... Done.");
+		log.info("Number of former car users: " + carUsers);
+		log.info("Number of former non-car users: " + noCarUsers);
 	}
+
 }
 

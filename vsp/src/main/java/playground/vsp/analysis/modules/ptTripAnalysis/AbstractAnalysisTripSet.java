@@ -20,8 +20,7 @@
 package playground.vsp.analysis.modules.ptTripAnalysis;
 
 import org.apache.log4j.Logger;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * @author droeder

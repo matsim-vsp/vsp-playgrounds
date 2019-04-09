@@ -19,10 +19,12 @@
  * *********************************************************************** */
 package playground.benjamin.scenarios.munich;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import java.util.Collection;
+
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -36,8 +38,6 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 import org.opengis.feature.simple.SimpleFeature;
-
-import java.util.Collection;
 
 /**
  * @author benjamin

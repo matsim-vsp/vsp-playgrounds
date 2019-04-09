@@ -47,19 +47,19 @@ import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripRouter;
+import org.matsim.prepare.BerlinPlansModificationTagFormerCarUsers;
+import org.matsim.prepare.BerlinShpUtils;
+import org.matsim.prepare.PersonAttributesModification;
 import org.matsim.run.RunBerlinScenario;
-import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
-import org.matsim.sav.SAVPassengerTracker;
-import org.matsim.sav.SAVPassengerTrackerImpl;
-import org.matsim.sav.ServiceAreaRequestValidator;
-import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
-import org.matsim.sav.prepare.BerlinShpUtils;
-import org.matsim.sav.prepare.PersonAttributesModification;
-import org.matsim.sav.runTaxi.RunBerlinTaxiScenarioA;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import playground.ikaddoura.savPricing.DailyRewardHandlerSAVInsteadOfCar;
+import playground.ikaddoura.savPricing.RunBerlinTaxiScenarioA;
+import playground.ikaddoura.savPricing.SAVPassengerTracker;
+import playground.ikaddoura.savPricing.SAVPassengerTrackerImpl;
+import playground.ikaddoura.savPricing.ServiceAreaRequestValidator;
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinNetworkModification;
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinPlansModificationSplitTrips;
 

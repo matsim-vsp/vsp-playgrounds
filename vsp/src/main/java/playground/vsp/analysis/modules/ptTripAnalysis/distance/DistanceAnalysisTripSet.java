@@ -20,12 +20,11 @@
 package playground.vsp.analysis.modules.ptTripAnalysis.distance;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.TransportMode;
 
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTrip;
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTripSet;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author droeder

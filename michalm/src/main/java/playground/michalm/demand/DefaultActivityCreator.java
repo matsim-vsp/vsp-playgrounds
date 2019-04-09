@@ -19,15 +19,19 @@
 
 package playground.michalm.demand;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.*;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.util.random.*;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.util.random.RandomUtils;
+import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.contrib.zone.Zone;
 import org.matsim.contrib.zone.util.RandomPointUtils;
 import org.matsim.core.network.NetworkUtils;
-
-import com.vividsolutions.jts.geom.*;
 
 public class DefaultActivityCreator implements ActivityCreator {
 	protected final UniformRandom uniform = RandomUtils.getGlobalUniform();

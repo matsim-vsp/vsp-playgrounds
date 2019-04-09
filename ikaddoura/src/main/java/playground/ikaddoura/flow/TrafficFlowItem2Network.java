@@ -21,6 +21,7 @@ package playground.ikaddoura.flow;
 
 import java.util.List;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -31,8 +32,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
 * @author ikaddoura

@@ -25,13 +25,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.collections.CollectionUtils;
 
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTrip;
 import playground.vsp.analysis.modules.ptTripAnalysis.AbstractAnalysisTripSet;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author droeder

@@ -118,4 +118,21 @@
 			<version>0.1.54</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>java-9+</id>
+			<activation>
+				<jdk>[9</jdk>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+					<version>11.0.2</version>
+					<type>pom</type>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>

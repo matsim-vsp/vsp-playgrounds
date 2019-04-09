@@ -2,7 +2,7 @@ package playground.dziemke.utils;
 
 import org.matsim.contrib.accessibility.gis.GridUtils;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class ShapeFileAnalyzer {
 	static String shapeFileName = "../../data/cemdapMatsimCadyts/input/shapefiles/Berlin_DHDN_GK4.shp";

@@ -38,7 +38,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dgrether.events.GeospatialEventTools;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 
 /**

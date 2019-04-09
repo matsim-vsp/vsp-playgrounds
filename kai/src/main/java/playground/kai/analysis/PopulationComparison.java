@@ -20,10 +20,7 @@
 
 package playground.kai.analysis;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Random;
-
+import org.junit.Assert;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
@@ -35,7 +32,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
-import com.vividsolutions.jts.util.Assert;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Random;
 
 /**
  * @author nagel
@@ -66,13 +65,13 @@ class PopulationComparison {
 	
 	private static double binToXx(int ii) {
 		double xx = xmin + ((1.*ii+.5)/LL)*(xmax-xmin) ;
-		Assert.equals( xxToBin(xx) , ii ) ;
+		Assert.assertEquals(  xxToBin(xx ) , new Integer(ii) ) ;
 		return xx ;
 	}
 	
 	private static double binToYy(int jj) {
 		double yy = ymin + ((1.*jj+.5)/MM)*(ymax-ymin) ;
-		Assert.equals( yyToBin(yy) , jj ) ;
+		Assert.assertEquals( yyToBin(yy) , new Integer(jj) ); ;
 		return yy ;
 	}
 	

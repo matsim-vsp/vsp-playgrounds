@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -41,8 +42,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Point;
-
 import playground.agarwalamit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.agarwalamit.analysis.emission.EmissionLinkAnalyzer;
 import playground.agarwalamit.analysis.spatial.GeneralGrid.GridType;
@@ -50,8 +49,8 @@ import playground.agarwalamit.analysis.spatial.SpatialDataInputs;
 import playground.agarwalamit.analysis.spatial.SpatialDataInputs.LinkWeightMethod;
 import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
 import playground.agarwalamit.analysis.userBenefits.MyUserBenefitsAnalyzer;
-import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MonetaryPaymentsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;
 
