@@ -95,8 +95,12 @@ class SampersTourUtilityFunction {
 
 	double getUtility(final SampersTour tour, final Person person) {
 
-		final Purpose purpose = tour.getPurpose();
 		final String mode = tour.getFirstLeg().getMode();
+		if (!SampersUtilityParameters.CONSIDERED_MODES.contains(mode)) {
+			throw new RuntimeException("Mode " + mode + " is not one of the supported modes: " + SampersUtilityParameters.CONSIDERED_MODES);
+		}
+		
+		final Purpose purpose = tour.getPurpose();
 		final double income_SEK_yr = SampersAttributeUtils.getIncome_SEK_yr(person);
 
 		/* Schedule delay */

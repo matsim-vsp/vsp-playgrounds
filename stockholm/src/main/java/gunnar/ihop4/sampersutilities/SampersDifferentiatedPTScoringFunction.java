@@ -19,6 +19,7 @@
  */
 package gunnar.ihop4.sampersutilities;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -43,16 +44,8 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 	// -------------------- CONSTANTS (TODO) --------------------
 
-	public static final Set<String> PT_SUBMODES;
-	static {
-		Set<String> ptSubmodes = new LinkedHashSet<>();
-		ptSubmodes.add("busPassenger");
-		ptSubmodes.add("tramPassenger");
-		ptSubmodes.add("subwayPassenger");
-		ptSubmodes.add("railPassenger");
-		ptSubmodes.add("ferryPassenger");
-		PT_SUBMODES = Collections.unmodifiableSet(ptSubmodes);
-	}
+	public static final Set<String> PT_SUBMODES = Collections.unmodifiableSet(new LinkedHashSet<>(
+			Arrays.asList("busPassenger", "tramPassenger", "subwayPassenger", "railPassenger", "ferryPassenger")));
 
 	// -------------------- MEMBERS --------------------
 
@@ -87,11 +80,22 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 			if (this.tmpLegs.size() == 1) {
 
-				// The previous leg contains a single trip. Expected to be non-PT.
+				// The previous leg contains a single trip. Since there is no access/egress,
+				// this is interpreted as a non-PT trip.
 				final Leg leg = this.tmpLegs.getFirst();
+
+				// The transit router may produce pure (transit) walk trips. Interpret as a
+				// non-PT walking trip. (MATSim-type justification: Keep "Scoring" independent
+				// of "innovation".)
+				if (TransportMode.transit_walk.equals(leg.getMode())) {
+					leg.setMode(TransportMode.walk);
+				}
+				
+				// Any other PT mode should not be possible.
 				if (TransportMode.pt.equals(leg.getMode()) || PT_SUBMODES.contains(leg.getMode())) {
 					throw new RuntimeException("Encountered single-trip leg with mode: " + leg.getMode());
 				}
+				
 				super.handleLeg(leg);
 
 			} else if (this.tmpLegs.size() > 1) {
@@ -152,7 +156,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 		private final double generalizedTravelTime_s;
 		private final double totalDistance_m;
-		
+
 		private SampersPTSummaryLeg(final double generalizedTravelTime_s, final double totalDistance_m) {
 			this.generalizedTravelTime_s = generalizedTravelTime_s;
 			this.totalDistance_m = totalDistance_m;
