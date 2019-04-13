@@ -35,7 +35,8 @@ public class LogDataWrapper {
 
 	private final ReplannerIdentifier identifier;
 
-	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator, final ReplannerIdentifier identifier) {
+	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator,
+			final ReplannerIdentifier identifier) {
 		this.accelerator = accelerator;
 		this.identifier = identifier;
 	}
@@ -43,11 +44,11 @@ public class LogDataWrapper {
 	public Double getLambdaBar() {
 		return this.identifier.getLambdaBar();
 	}
-	
+
 	public Double getBeta() {
 		return this.identifier.getBeta();
 	}
-	
+
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.identifier.getSumOfWeightedCountDifferences2();
 	}
@@ -59,9 +60,13 @@ public class LogDataWrapper {
 	public Double getLastRealizedUtilitySum() {
 		return this.accelerator.getRealizedUtilitySum();
 	}
-	
+
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
 		return this.identifier.getReplannerExpectedUtilityChangeSum();
+	}
+
+	public Double getLastExpectedUtilityChangeSumTotal() {
+		return this.accelerator.getExpectedUtilityChangeSumTotal();
 	}
 
 	public Double getLastExpectedUtilityChangeSumUniform() {
@@ -71,15 +76,15 @@ public class LogDataWrapper {
 	public Double getLastRealizedUtilityChangeSum() {
 		return this.accelerator.getRealizedUtilityChangeSum();
 	}
-	
+
 	public List<Integer> getSortedAges() {
 		return this.accelerator.getSortedAgesView();
 	}
-	
+
 	public Double getAverageAge() {
 		return this.accelerator.getAveragAge();
 	}
-	
+
 	public Double getAverageWeight() {
 		return this.accelerator.getAverageWeight();
 	}
@@ -111,11 +116,11 @@ public class LogDataWrapper {
 	public Integer getNumberOfReplanners() {
 		return this.accelerator.getNumberOfReplanners();
 	}
-	
+
 	public Integer getNumberOfNonReplanners() {
 		return this.accelerator.getNumberOfNonReplanners();
 	}
-	
+
 	public Integer getPopulationSize() {
 		return this.accelerator.getPopulationSize();
 	}
@@ -123,9 +128,9 @@ public class LogDataWrapper {
 	public Double getReplannerSizeSum() {
 		return this.identifier.getReplannerSizeSum();
 	}
-	
+
 	public Double getNonReplannerSizeSum() {
 		return this.identifier.getNonReplannerSizeSum();
 	}
-	
+
 }

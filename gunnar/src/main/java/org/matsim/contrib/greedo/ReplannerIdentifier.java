@@ -82,7 +82,7 @@ public class ReplannerIdentifier {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final GreedoConfigGroup greedoConfig, final int iteration,
+	ReplannerIdentifier(final double overrideLambdaBar, final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
 			final Population population, final Map<Id<Person>, Double> personId2UtilityChange) {
@@ -121,7 +121,10 @@ public class ReplannerIdentifier {
 		this.sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
-		this.lambdaBar = this.greedoConfig.getReplanningRate(iteration);
+		// TODO HARDWIRED
+		this.lambdaBar = overrideLambdaBar;
+		// this.lambdaBar = this.greedoConfig.getReplanningRate(iteration);
+		
 		this.beta = 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2
 				/ Math.max(this.totalUtilityChange, 1e-8);
 	}

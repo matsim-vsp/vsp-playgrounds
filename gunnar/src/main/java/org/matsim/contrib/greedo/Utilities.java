@@ -41,6 +41,7 @@ class Utilities {
 		private Double lastRealizedUtility = null;
 		private Double lastExpectedUtility = null;
 		private Double lastExpectedUtilityChange = null;
+		private Double lastRealizedUtilityChange = null;
 
 		Entry() {
 		}
@@ -53,6 +54,9 @@ class Utilities {
 		}
 
 		void updateRealizedUtility(final double realizedUtility) {
+			if (this.lastRealizedUtility != null) {
+				this.lastRealizedUtilityChange = realizedUtility - this.lastRealizedUtility;
+			}
 			this.lastRealizedUtility = realizedUtility;
 		}
 
@@ -67,6 +71,11 @@ class Utilities {
 		Double getLastExpectedUtilityChange() {
 			return this.lastExpectedUtilityChange;
 		}
+		
+		Double getLastRealizedUtilityChange() {
+			return this.lastRealizedUtilityChange;
+		}
+		
 	}
 
 	// -------------------- INNER SummaryStatistics CLASS --------------------
@@ -79,11 +88,13 @@ class Utilities {
 		final double expectedUtilitySum;
 		final double realizedUtilitySum;
 		final double expectedUtilityChangeSum;
+		final double realizedUtilityChangeSum;
 
 		final int validExpectedUtilityCnt;
 		final int validRealizedUtilityCnt;
 		final int validExpectedUtilityChangeCnt;
-
+		final int validRealizedUtilityChangeCnt;
+		
 		private SummaryStatistics() {
 
 			final Map<Id<Person>, Double> personId2expectedUtilityChange = new LinkedHashMap<>();
@@ -91,11 +102,13 @@ class Utilities {
 			double expectedUtilitySum = 0.0;
 			double realizedUtilitySum = 0.0;
 			double expectedUtilityChangeSum = 0.0;
+			double realizedUtilityChangeSum = 0.0;
 
 			int validExpectedUtilityCnt = 0;
 			int validRealizedUtilityCnt = 0;
 			int validExpectedUtilityChangeCnt = 0;
-
+			int validRealizedUtilityChangeCnt = 0;
+			
 			for (Map.Entry<Id<Person>, Entry> mapEntry : personId2entry.entrySet()) {
 				final Id<Person> personId = mapEntry.getKey();
 				final Entry entry = mapEntry.getValue();
@@ -113,6 +126,10 @@ class Utilities {
 					expectedUtilityChangeSum += entry.getLastExpectedUtilityChange();
 					validExpectedUtilityChangeCnt++;
 				}
+				if (entry.getLastRealizedUtilityChange() != null) {
+					realizedUtilityChangeSum += entry.getLastRealizedUtilityChange();
+					validRealizedUtilityChangeCnt++;
+				}
 			}
 
 			this.personId2expectedUtilityChange = Collections.unmodifiableMap(personId2expectedUtilityChange);
@@ -120,10 +137,12 @@ class Utilities {
 			this.expectedUtilitySum = expectedUtilitySum;
 			this.realizedUtilitySum = realizedUtilitySum;
 			this.expectedUtilityChangeSum = expectedUtilityChangeSum;
+			this.realizedUtilityChangeSum = realizedUtilityChangeSum;
 
 			this.validExpectedUtilityCnt = validExpectedUtilityCnt;
 			this.validRealizedUtilityCnt = validRealizedUtilityCnt;
 			this.validExpectedUtilityChangeCnt = validExpectedUtilityChangeCnt;
+			this.validRealizedUtilityChangeCnt = validRealizedUtilityChangeCnt;
 
 			Logger.getLogger(this.getClass()).info("Created instance:");
 			Logger.getLogger(this.getClass()).info(this.toString());
@@ -140,6 +159,8 @@ class Utilities {
 					+ "; number of valid persons: " + this.validExpectedUtilityChangeCnt + "\n");
 			result.append(
 					"number of individual expected utility changes: " + this.personId2expectedUtilityChange.size());
+			result.append("Realized utility change sum: " + this.realizedUtilityChangeSum
+					+ "; number of valid persons: " + this.validRealizedUtilityChangeCnt + "\n");
 			return result.toString();
 		}
 	}

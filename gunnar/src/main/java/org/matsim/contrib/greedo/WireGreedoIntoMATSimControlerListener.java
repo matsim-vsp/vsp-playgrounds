@@ -29,14 +29,17 @@ import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
 import org.matsim.contrib.greedo.logging.AvgAge;
 import org.matsim.contrib.greedo.logging.AvgAgeWeight;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityTotal;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
@@ -57,6 +60,8 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDiffere
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.population.PersonUtils;
+import org.matsim.core.replanning.selectors.BestPlanSelector;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -64,6 +69,7 @@ import com.google.inject.Provider;
 import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
+import utils.ReplanningEfficiencyEstimator;
 
 /**
  * 
@@ -93,6 +99,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	// below only for logging
 
+	private Double expectedUtilityChangeSumTotal = null;
+
 	private Double expectedUtilityChangeSumUniform = null;
 
 	private Double realizedUtilityChangeSum = null;
@@ -100,6 +108,10 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 	private Double realizedUtilitySum = null;
 
 	private Integer numberOfReplanners = null;
+
+	// TODO HARDWIRED
+	private final ReplanningEfficiencyEstimator replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(0.01,
+			0.01);
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -134,6 +146,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerUtilityChange());
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
+		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityTotal());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
 		for (int percent = 5; percent <= 95; percent += 5) {
@@ -151,6 +164,19 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 			// TODO Hedge against selectedPlan == null ?
 			this.utilities.updateRealizedUtility(person.getId(),
 					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
+		}
+
+		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
+		if (utilityStats.validExpectedUtilityCnt == this.getPopulationSize()) {
+			this.realizedUtilitySum = utilityStats.realizedUtilitySum;
+		}
+		if (utilityStats.validExpectedUtilityChangeCnt == this.getPopulationSize()) {
+			this.realizedUtilityChangeSum = utilityStats.realizedUtilityChangeSum;
+		}
+		if ((utilityStats.validExpectedUtilityChangeCnt == this.getPopulationSize())
+				&& (utilityStats.validRealizedUtilityChangeCnt == this.getPopulationSize())) {
+			this.replanningEfficiencyEstimator.update(utilityStats.realizedUtilityChangeSum,
+					utilityStats.expectedUtilityChangeSum);
 		}
 
 		this.hypotheticalSlotUsageListeners.clear(); // Redundant, see afterReplanning().
@@ -171,10 +197,23 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 	@Override
 	public void afterReplanning() {
 
+		if (this.greedoConfig.getAdjustStrategyWeights()) {
+			final BestPlanSelector<Plan, Person> bestPlanSelector = new BestPlanSelector<>();
+			for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+				person.setSelectedPlan(bestPlanSelector.selectPlan(person));
+				PersonUtils.removeUnselectedPlans(person);
+			}
+		}
+
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			this.utilities.updateExpectedUtility(person.getId(), person.getSelectedPlan().getScore());
 		}
 		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
+
+		// SANITY TEST
+		final double val1 = utilityStats.expectedUtilityChangeSum;
+		final double val2 = utilityStats.personId2expectedUtilityChange.values().stream().mapToDouble(x -> x).sum();
+		Logger.getLogger(this.getClass()).info("val1 = " + val1 + ", val2 = " + val2);
 
 		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> hypotheticalSlotUsageIndicators = new LinkedHashMap<>();
 		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
@@ -182,8 +221,17 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 		this.hypotheticalSlotUsageListeners.clear(); // Release as soon as possible.
 
-		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, this.iteration(),
-				this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
+		final double meanLambda;
+		if (GreedoConfigGroup.StepSizeType.adaptive.equals(this.greedoConfig.getStepSizeField())) {
+			meanLambda = this.replanningEfficiencyEstimator.getLambda();
+		} else if (GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField())) {
+			meanLambda = this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		} else {
+			throw new RuntimeException("Unknown step size logic: " + this.greedoConfig.getStepSizeField());
+		}
+
+		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(meanLambda, this.greedoConfig,
+				this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
 				this.services.getScenario().getPopulation(), utilityStats.personId2expectedUtilityChange);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
@@ -196,17 +244,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
 
-		if (this.realizedUtilitySum != null) {
-			this.realizedUtilityChangeSum = utilityStats.realizedUtilitySum - this.realizedUtilitySum;
-		}
-		this.realizedUtilitySum = utilityStats.realizedUtilitySum;
-
-		// The following is the present iteration's expectation for the next iteration.
-		this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(this.iteration())
-				* utilityStats.expectedUtilityChangeSum;
-
 		this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier));
 
+		// The following is the present iteration's expectation for the NEXT iteration.
+		this.expectedUtilityChangeSumTotal = utilityStats.expectedUtilityChangeSum;
+		this.expectedUtilityChangeSumUniform = meanLambda * utilityStats.expectedUtilityChangeSum;
 	}
 
 	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------
@@ -221,6 +263,10 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private int iteration() {
 		return this.physicalSlotUsageListener.getLastResetIteration();
+	}
+
+	public Double getExpectedUtilityChangeSumTotal() {
+		return this.expectedUtilityChangeSumTotal;
 	}
 
 	public Double getExpectedUtilityChangeSumUniform() {

@@ -142,12 +142,86 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return this.concurrentTransitVehicleWeights;
 	}
 
-	public double getReplanningRate(int iteration) {
+	public double getExogenousReplanningRate(int iteration) {
 		return this.replanningRates[iteration - this.firstIteration];
 	}
 
 	public double getAgeWeight(final double age) {
 		return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
+	}
+
+	// -------------------- stepSize --------------------
+
+	public static enum StepSizeType {
+		exogenous, adaptive
+	};
+
+	private StepSizeType stepSizeField = StepSizeType.adaptive;
+
+	@StringGetter("stepSize")
+	public StepSizeType getStepSizeField() {
+		return this.stepSizeField;
+	}
+
+	@StringSetter("stepSize")
+	public void setStepSizeField(final StepSizeType stepSizeField) {
+		this.stepSizeField = stepSizeField;
+	}
+
+	// -------------------- minReplanningRate --------------------
+
+	private double minReplanningRate = 0.01;
+
+	@StringGetter("minReplanningRate")
+	public double getMinReplanningRate() {
+		return this.minReplanningRate;
+	}
+
+	@StringSetter("minReplanningRate")
+	public void setMinReplanningRate(double minReplanningRate) {
+		this.minReplanningRate = minReplanningRate;
+	}
+
+	// -------------------- loadingEquivalentReplanningRate --------------------
+
+	private double loadingEquivalentReplanningRate = 0.01;
+
+	@StringGetter("loadingEquivalentReplanningRate")
+	public double getLoadingEquivalentReplanningRate() {
+		return this.loadingEquivalentReplanningRate;
+	}
+
+	@StringSetter("loadingEquivalentReplanningRate")
+	public void setLoadingEquivalentReplanningRate(double loadingEquivalentReplanningRate) {
+		this.loadingEquivalentReplanningRate = loadingEquivalentReplanningRate;
+	}
+
+	// -------------------- meanReplanningRate --------------------
+
+	private double initialMeanReplanningRate = 0.2;
+
+	@StringGetter("initialMeanReplanningRate")
+	public double getInitialMeanReplanningRate() {
+		return this.initialMeanReplanningRate;
+	}
+
+	@StringSetter("initialMeanReplanningRate")
+	public void setInitialMeanReplanningRate(double initialMeanReplanningRate) {
+		this.initialMeanReplanningRate = initialMeanReplanningRate;
+	}
+
+	// -------------------- replanningRateIterationExponent --------------------
+
+	private double replanningRateIterationExponent = 0.0;
+
+	@StringGetter("replanningRateIterationExponent")
+	public double getReplanningRateIterationExponent() {
+		return this.replanningRateIterationExponent;
+	}
+
+	@StringSetter("replanningRateIterationExponent")
+	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
+		this.replanningRateIterationExponent = replanningRateIterationExponent;
 	}
 
 	// -------------------- mode --------------------
@@ -166,6 +240,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("mode")
 	public void setModeTypeField(final ModeType modeTypeField) {
 		this.modeTypeField = modeTypeField;
+	}
+
+	// -------------------- ageWeightExponent --------------------
+
+	private double ageWeightExponent = 1.0;
+
+	@StringGetter("ageWeightExponent")
+	public double getAgeWeightExponent() {
+		return this.ageWeightExponent;
+	}
+
+	@StringSetter("ageWeightExponent")
+	public void setAgeWeightExponent(double ageWeightExponent) {
+		this.ageWeightExponent = ageWeightExponent;
 	}
 
 	// -------------------- startTime_s --------------------
@@ -208,48 +296,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("binCnt")
 	public void setBinCnt(int binCnt) {
 		this.binCnt = binCnt;
-	}
-
-	// -------------------- ageWeightExponent --------------------
-
-	private double ageWeightExponent = 1.0;
-
-	@StringGetter("ageWeightExponent")
-	public double getAgeWeightExponent() {
-		return this.ageWeightExponent;
-	}
-
-	@StringSetter("ageWeightExponent")
-	public void setAgeWeightExponent(double ageWeightExponent) {
-		this.ageWeightExponent = ageWeightExponent;
-	}
-
-	// -------------------- meanReplanningRate --------------------
-
-	private double initialMeanReplanningRate = 0.2;
-
-	@StringGetter("initialMeanReplanningRate")
-	public double getInitialMeanReplanningRate() {
-		return this.initialMeanReplanningRate;
-	}
-
-	@StringSetter("initialMeanReplanningRate")
-	public void setInitialMeanReplanningRate(double initialMeanReplanningRate) {
-		this.initialMeanReplanningRate = initialMeanReplanningRate;
-	}
-
-	// -------------------- replanningRateIterationExponent --------------------
-
-	private double replanningRateIterationExponent = 0.0;
-
-	@StringGetter("replanningRateIterationExponent")
-	public double getReplanningRateIterationExponent() {
-		return this.replanningRateIterationExponent;
-	}
-
-	@StringSetter("replanningRateIterationExponent")
-	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
-		this.replanningRateIterationExponent = replanningRateIterationExponent;
 	}
 
 	// -------------------- binomialNumberOfReplanners --------------------
