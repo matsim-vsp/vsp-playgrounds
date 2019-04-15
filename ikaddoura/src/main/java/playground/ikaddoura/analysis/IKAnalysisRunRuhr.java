@@ -60,14 +60,11 @@ public class IKAnalysisRunRuhr {
 			
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run10_gesundeStadt-onlyNetworkChanges-ohne-RSV/";
-			runId = "run10_gesundeStadt-onlyNetworkChanges-ohne-RSV";		
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019_simulationsbasierteZukunftsforschung/run3_gesundeStadt-mit-RSV/";
+			runId = "run3_gesundeStadt-mit-RSV";		
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run0_bc-ohne-RSV/";
-			runIdToCompareWith = "run0_bc-ohne-RSV";
-			
-			runDirectoryToCompareWith = null;
-			runIdToCompareWith = null;
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019_simulationsbasierteZukunftsforschung/run2_gesundeStadt-ohne-RSV/";
+			runIdToCompareWith = "run2_gesundeStadt-ohne-RSV";
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			

@@ -89,6 +89,7 @@ public class RunBerlinModeAnalysis {
 		distanceGroups.add(new Tuple<>(5000., 10000.));
 		distanceGroups.add(new Tuple<>(10000., 20000.));
 		distanceGroups.add(new Tuple<>(20000., 100000.));
+		distanceGroups.add(new Tuple<>(100000., 999999999999.));
 		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
 		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}

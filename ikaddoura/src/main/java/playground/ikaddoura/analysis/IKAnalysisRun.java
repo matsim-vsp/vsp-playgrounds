@@ -117,7 +117,7 @@ public class IKAnalysisRun {
 	
 	private final List<String> modes;
 
-	private String outputDirectoryName = "analysis-ik-v1.8";
+	private String outputDirectoryName = "analysis-ik-v1.9";
 
 	private final String visualizationScriptInputDirectory;
 
@@ -809,6 +809,7 @@ public class IKAnalysisRun {
 			distanceGroups.add(new Tuple<>(5000., 10000.));
 			distanceGroups.add(new Tuple<>(10000., 20000.));
 			distanceGroups.add(new Tuple<>(20000., 100000.));
+			distanceGroups.add(new Tuple<>(100000., 999999999999.));
 			modeAnalysis.writeTripRouteDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".", distanceGroups);
 			modeAnalysis.writeTripEuclideanDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".", distanceGroups);
 		}
