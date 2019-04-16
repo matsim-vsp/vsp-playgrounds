@@ -29,8 +29,8 @@ import org.matsim.pt.router.TransitActsRemover;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 
 import playground.gleich.av_bus.FilePaths;
-import playground.gthunig.utils.CSVWriter;
-import playground.jbischoff.utils.JbUtils;
+import playground.gleich.utilsFromOthers.gthunig.CSVWriter;
+import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
 /**
  * @author gleich

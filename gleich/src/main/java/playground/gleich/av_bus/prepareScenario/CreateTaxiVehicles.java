@@ -42,7 +42,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
 import playground.gleich.av_bus.FilePaths;
-import playground.jbischoff.utils.JbUtils;
+import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
 /**
  * @author  vsp-gleich

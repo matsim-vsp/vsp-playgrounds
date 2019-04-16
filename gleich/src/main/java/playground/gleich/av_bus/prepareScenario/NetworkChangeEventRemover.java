@@ -37,7 +37,7 @@ import org.matsim.core.network.io.NetworkChangeEventsWriter;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
 import playground.gleich.av_bus.FilePaths;
-import playground.jbischoff.utils.JbUtils;
+import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
 /**
  * @author  jbischoff
