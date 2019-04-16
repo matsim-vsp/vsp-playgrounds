@@ -24,7 +24,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>playground.vsptelematics.roadpricing.RoadpricingGUI</mainClass>
+							<mainClass>playground.vsptelematics.ha1.UE1GUI</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
