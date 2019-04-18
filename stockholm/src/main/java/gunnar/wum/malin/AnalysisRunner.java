@@ -28,6 +28,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.scoring.EventsToActivities;
 import org.matsim.core.scoring.EventsToLegs;
 
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
@@ -52,8 +53,9 @@ public class AnalysisRunner {
 		config.transit().setUseTransit(true);
 		config.transit().setTransitScheduleFile(
 				"/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_transitSchedule.xml.gz");
-
+		
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		
 		zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
 		final InterZonalStatistics zoneStats = new InterZonalStatistics(zonalSystem, scenario);
 		
@@ -67,11 +69,16 @@ public class AnalysisRunner {
 		zoneStats.addDestination("720111");
 		zoneStats.addDestination("720103");
 
+		final EventsManager manager = EventsUtils.createEventsManager();
+
 		final EventsToLegs events2legs = new EventsToLegs(scenario);
 		events2legs.addLegHandler(zoneStats);
-
-		final EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(events2legs);
+
+		final EventsToActivities events2acts = new EventsToActivities();
+		events2acts.addActivityHandler(zoneStats);
+		manager.addHandler(events2acts);
+		
 		EventsUtils.readEvents(manager, "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_events.xml.gz");
 
 		System.out.println("valid: " + zoneStats.getValidCnt());

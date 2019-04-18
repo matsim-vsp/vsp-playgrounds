@@ -28,22 +28,28 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
+import org.matsim.core.scoring.EventsToActivities.ActivityHandler;
 import org.matsim.core.scoring.EventsToLegs.LegHandler;
+import org.matsim.core.scoring.PersonExperiencedActivity;
 import org.matsim.core.scoring.PersonExperiencedLeg;
 import org.matsim.core.utils.collections.Tuple;
 
 import cadyts.utilities.math.MathHelpers;
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
 import gunnar.ihop2.regent.demandreading.Zone;
+import gunnar.ihop4.sampersutilities.MultiLegPTTripSummarizer;
+import gunnar.ihop4.sampersutilities.SampersDifferentiatedPTScoringFunction;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class InterZonalStatistics implements LegHandler {
+public class InterZonalStatistics implements LegHandler, ActivityHandler {
 
 	// -------------------- INNER CLASS --------------------
 
@@ -91,6 +97,8 @@ public class InterZonalStatistics implements LegHandler {
 
 	// -------------------- MEMBERS --------------------
 
+	private final Map<Id<Person>, MultiLegPTTripSummarizer> ptTripSummarizers = new LinkedHashMap<>();
+
 	private final Set<Zone> origins = new LinkedHashSet<>();
 
 	private final Set<Zone> destinations = new LinkedHashSet<>();
@@ -116,7 +124,7 @@ public class InterZonalStatistics implements LegHandler {
 		}
 	}
 
-	private Entry getOrCreate(final Zone origin, final Zone destination) {
+	private Entry getOrCreateEntry(final Zone origin, final Zone destination) {
 		final Tuple<Zone, Zone> od = new Tuple<>(origin, destination);
 		Entry entry = this.od2Entry.get(od);
 		if (entry == null) {
@@ -124,6 +132,29 @@ public class InterZonalStatistics implements LegHandler {
 			this.od2Entry.put(od, entry);
 		}
 		return entry;
+	}
+
+	private MultiLegPTTripSummarizer getOrCreateTripSummarizer(final Id<Person> personId) {
+		MultiLegPTTripSummarizer ptSummarizer = this.ptTripSummarizers.get(personId);
+		if (ptSummarizer == null) {
+			ptSummarizer = new MultiLegPTTripSummarizer(SampersDifferentiatedPTScoringFunction.PT_SUBMODES, null,
+					(leg) -> {
+						final Route route = leg.getRoute();
+						final Zone fromZone = this.zonalSystem.getZone(
+								this.scenario.getNetwork().getLinks().get(route.getStartLinkId()).getFromNode());
+						final Zone toZone = this.zonalSystem
+								.getZone(this.scenario.getNetwork().getLinks().get(route.getEndLinkId()).getFromNode());
+						if ((fromZone != null) && (toZone != null)) {
+							this.getOrCreateEntry(fromZone, toZone).register(route.getTravelTime(),
+									route.getDistance());
+							this.valid++;
+						} else {
+							this.invalid++;
+						}
+					});
+			this.ptTripSummarizers.put(personId, ptSummarizer);
+		}
+		return ptSummarizer;
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -139,18 +170,13 @@ public class InterZonalStatistics implements LegHandler {
 	}
 
 	@Override
-	public void handleLeg(PersonExperiencedLeg leg) {
-		final Route route = leg.getLeg().getRoute();
-		final Zone fromZone = this.zonalSystem
-				.getZone(this.scenario.getNetwork().getLinks().get(route.getStartLinkId()).getFromNode());
-		final Zone toZone = this.zonalSystem
-				.getZone(this.scenario.getNetwork().getLinks().get(route.getEndLinkId()).getFromNode());
-		if ((fromZone != null) && (toZone != null)) {
-			this.getOrCreate(fromZone, toZone).register(route.getTravelTime(), route.getDistance());
-			this.valid++;
-		} else {
-			this.invalid++;
-		}
+	public void handleActivity(final PersonExperiencedActivity act) {
+		this.getOrCreateTripSummarizer(act.getAgentId()).handleActivity(act.getActivity());
+	}
+
+	@Override
+	public void handleLeg(final PersonExperiencedLeg leg) {
+		this.getOrCreateTripSummarizer(leg.getAgentId()).handleLeg(leg.getLeg());
 	}
 
 	public long getValidCnt() {
