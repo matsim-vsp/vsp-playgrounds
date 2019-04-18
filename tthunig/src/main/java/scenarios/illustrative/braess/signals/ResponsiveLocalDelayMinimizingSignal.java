@@ -42,36 +42,48 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 
 /**
  * @author tthunig
  *
  */
-public class ResponsiveLocalDelayMinimizingSignal implements AfterMobsimListener {
+@Singleton
+public final class ResponsiveLocalDelayMinimizingSignal implements AfterMobsimListener {
 
 	private static final Logger LOG = Logger.getLogger(ResponsiveLocalDelayMinimizingSignal.class);
 
-	private static final int INTERVAL = 1;
-	private static final int FIRST_INTERVENTION = 50;
+	private static final int INTERVAL = 100;
+	private static final int FIRST_INTERVENTION = 100;
+	private static final int LAST_INTERVENTION = 1500;
 
 	private Map<Id<Link>, Double> link2avgDelay = new HashMap<>();
+	private Double[] absoluteDelay;
+	private Double[] avgDelay;
+	private Double[] freeflowRouteTT = {11*60 + 3., 3*60 + 3., 11*60 + 3.};
 
 	@Inject
 	Scenario scenario;
+	@Inject
+	TtAbstractAnalysisTool analyzeTool;
 
 	@Override
 	public void notifyAfterMobsim(AfterMobsimEvent event) {
 		// change signal green split every INTERVAL iteration
-		if (event.getIteration() >= FIRST_INTERVENTION && 
+		if (event.getIteration() >= FIRST_INTERVENTION && event.getIteration() <= LAST_INTERVENTION &&
 				event.getIteration() % INTERVAL == 0 && event.getIteration() != scenario.getConfig().controler().getFirstIteration()) {
-			computeDelays(event);
+//			computeAbsoluteDelays();
+			computeAverageDelays();
 			LOG.info("+++ Iteration " + event.getIteration() + ". Update signal green split...");
 			updateSignals();
 		}
 	}
 
 	// note: this does not consider spill back delays
-	private void computeDelays(AfterMobsimEvent event) {
+	@Deprecated
+	private void computeAvgDelays(AfterMobsimEvent event) {
 		TravelTime travelTime = event.getServices().getLinkTravelTimes();
 		int timeBinSize = scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize();
 
@@ -88,21 +100,36 @@ public class ResponsiveLocalDelayMinimizingSignal implements AfterMobsimListener
 			link2avgDelay.put(link.getId(), summedDelay / timeBinCounter);
 			LOG.info("Link id: " + link.getId() + ", avg delay: " + summedDelay / timeBinCounter);
 		}
-
+	}
+	
+	private void computeAbsoluteDelays() {
+		absoluteDelay = new Double[analyzeTool.getNumberOfRoutes()];
+		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
+			absoluteDelay[route] = analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route];
+		}
 	}
 
+	private void computeAverageDelays() {
+		avgDelay = new Double[analyzeTool.getNumberOfRoutes()];
+		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
+			avgDelay[route] = (analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route]) / analyzeTool.getRouteUsers()[route];
+		}
+	}
+	
 	private void updateSignals() {
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		SignalControlData signalControl = signalsData.getSignalControlData();
 
-		SignalSystemControllerData signalControlSystem1 = signalControl.getSignalSystemControllerDataBySystemId().get(Id.create("signalSystem4", SignalSystem.class));
-		SignalPlanData signalPlan = signalControlSystem1.getSignalPlanData().get(Id.create("1", SignalPlan.class));
+		SignalSystemControllerData signalControlSystem4 = signalControl.getSignalSystemControllerDataBySystemId().get(Id.create("signalSystem4", SignalSystem.class));
+		SignalPlanData signalPlan = signalControlSystem4.getSignalPlanData().get(Id.create("1", SignalPlan.class));
 		SortedMap<Id<SignalGroup>, SignalGroupSettingsData> signalGroupSettings = signalPlan.getSignalGroupSettingsDataByGroupId();
 		SignalGroupSettingsData group3_4Setting = signalGroupSettings.get(Id.create("signal3_4.1", SignalGroup.class));
 		SignalGroupSettingsData group2_4Setting = signalGroupSettings.get(Id.create("signal2_4.1", SignalGroup.class));
 
 		// shift green time by one second depending on which delay is higher
-		int greenTimeShift = (int) Math.signum(link2avgDelay.get(Id.createLinkId("3_4")) - link2avgDelay.get(Id.createLinkId("2_4"))); // the time that 3_4 gets added
+//		int greenTimeShift = (int) Math.signum(link2avgDelay.get(Id.createLinkId("3_4")) - link2avgDelay.get(Id.createLinkId("2_4"))); // the time that 3_4 gets added
+//		int greenTimeShift = 5 * (int) Math.signum(absoluteDelay[1] - absoluteDelay[2]); // the time that 3_4 gets added
+		int greenTimeShift = 5 * (int) Math.signum(avgDelay[1] - avgDelay[2]); // the time that 3_4 gets added
 
 		// group3_4 onset = 0, group2_4 dropping = 60. signal switch should stay inside this interval
 		if (greenTimeShift != 0 && group3_4Setting.getDropping() + greenTimeShift > 0 && group2_4Setting.getOnset() + greenTimeShift < 60) {
