@@ -123,7 +123,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1;
+	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -140,7 +140,7 @@ public class TtRunCottbusSimulation {
 	private final static boolean LONG_LANES = true;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines1000itcap07MSNetV4_1;
+	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_MATSIM_ROUTES;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -186,7 +186,7 @@ public class TtRunCottbusSimulation {
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS_14RE_3RE_7RE;
+	private static SignalType SIGNAL_TYPE = SignalType.MS_RANDOM_GREENSPLITS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_RANDOM_GREENSPLITS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		MS_INTG0, MS_INTG0_SYLVIA, // MS with modified end times, such that zero intergreen times are used
@@ -222,7 +222,7 @@ public class TtRunCottbusSimulation {
 	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.NONE;
+	private static final PricingType PRICING_TYPE = PricingType.INTERVAL_BASED;
 	private enum PricingType {
 		NONE, CP_V3, CP_V4, CP_V7, CP_V8, CP_V9, CP_V10, FLOWBASED, CORDON_INNERCITY, CORDON_RING, INTERVAL_BASED
 	}
@@ -234,21 +234,21 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/randomGreensplits/";
 	private static String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-//	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-13_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-13_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/"; // random green splits
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v1_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v2_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
 	private static String RUNS_SVN = "../../runs-svn/cottbus/";
 	
 	private static final boolean WRITE_INITIAL_FILES = false;
 	private static final boolean USE_COUNTS = false;
-	private static double SCALING_FACTOR = .7;
+	private static double SCALING_FACTOR = 1.;
 	
 	private static TtGeneralAnalysis ANALYSIS_TOOL;
 	
@@ -523,8 +523,8 @@ public class TtRunCottbusSimulation {
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-05-17_sameEndTimes_ksOptTripPlans_btu_solution.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_solution.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-08-14_sameEndTimes_ksOptTripPlans_agent2com_solution_splits_expanded.xml");
-//			config.plans().setInputFile(BTU_BASE_DIR + "randoms/2018-11-30_ksRandomTripPlans_coord" + signalCoordIndex + ".xml");
-			config.plans().setInputFile(BTU_BASE_DIR + "btu/sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
+			config.plans().setInputFile(BTU_BASE_DIR + "randoms/2018-11-30_ksRandomTripPlans_coord" + signalCoordIndex + ".xml");
+//			config.plans().setInputFile(BTU_BASE_DIR + "btu/sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-11-20_sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
 			break;
 		case BTU_POP_BTU_ROUTES_90:
@@ -983,6 +983,8 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+// 		config.travelTimeCalculator().setTraveltimeBinSize( 30 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 60 );
 		// TODO
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
@@ -1104,22 +1106,19 @@ public class TtRunCottbusSimulation {
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
 		decongestionSettings.setWriteOutputIteration(200);
 		decongestionSettings.setUpdatePriceInterval(1);
-		decongestionSettings.setTollBlendFactor(1.0);
+//		decongestionSettings.setTollBlendFactor(1.0);
 		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
 		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
 		decongestionSettings.setToleratedAverageDelaySec(1);
 		decongestionSettings.setWriteLinkInfoCharts(true);
-		decongestionSettings.setMsa(true);
+		decongestionSettings.setMsa(true); // does this also work for BangBang?
 
-		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
-		decongestionSettings.setTollAdjustment(1);
-		decongestionSettings.setInitialToll(1);
-		decongestionSettings.setKp(0.003);
+		decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
+//		decongestionSettings.setTollAdjustment(1);
+//		decongestionSettings.setInitialToll(1);
+		decongestionSettings.setKp(0.003); // TODO 0.0067 (2*VTTS/3600)
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKd(0.);
-//		decongestionSettings.setKd(0.005);
-//		decongestionSettings.setKi(0.005);
-//		decongestionSettings.setKp(0.005);
 
 		config.addModule(decongestionSettings);
 		
@@ -1153,7 +1152,11 @@ public class TtRunCottbusSimulation {
 		if (DELETE_ROUTES) {
 			ModifyPopulation.removeRoutesLeaveFirstPlan(scenario.getPopulation());
 		}
-		
+
+		// TODO delete bottleneck links for coord14
+//		scenario.getNetwork().getLinks().get(Id.createLinkId("1356-5867-7871")).setCapacity(1);
+//		scenario.getNetwork().getLinks().get(Id.createLinkId("5771-5772")).setCapacity(1);
+
 		if (LONG_LANES){
 			// lengthen all lanes
 			ModifyNetwork.lengthenAllLanes(scenario);
@@ -1335,8 +1338,7 @@ public class TtRunCottbusSimulation {
 			TollHandler tollHandler = new TollHandler(scenario);
 			
 			// add correct TravelDisutilityFactory for tolls if ReRoute is used
-			StrategySettings[] strategies = config.strategy().getStrategySettings()
-					.toArray(new StrategySettings[0]);
+			StrategySettings[] strategies = config.strategy().getStrategySettings().toArray(new StrategySettings[0]);
 			for (int i = 0; i < strategies.length; i++) {
 				if (strategies[i].getStrategyName().equals(DefaultStrategy.ReRoute.toString())){
 					if (strategies[i].getWeight() > 0.0){ // ReRoute is used
@@ -1360,36 +1362,29 @@ public class TtRunCottbusSimulation {
 			EventHandler congestionHandler = null;
 			switch (PRICING_TYPE){
 			case CP_V3:
-				congestionHandler = new CongestionHandlerImplV3(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV3(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V4:
-				congestionHandler = new CongestionHandlerImplV4(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV4(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V7:
-				congestionHandler = new CongestionHandlerImplV7(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV7(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V8:
-				congestionHandler = new CongestionHandlerImplV8(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV8(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V9:
-				congestionHandler = new CongestionHandlerImplV9(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV9(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V10:
-				congestionHandler = new CongestionHandlerImplV10(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV10(controler.getEvents(), controler.getScenario());
 				break;
 			default:
 				break;
 			}
-			controler.addControlerListener(
-					new MarginalCongestionPricingContolerListener(controler.getScenario(), 
-							tollHandler, congestionHandler));
-		
+			controler.addControlerListener(new MarginalCongestionPricingContolerListener(controler.getScenario(),
+					tollHandler, congestionHandler));
+
 		} else if (PRICING_TYPE.equals(PricingType.FLOWBASED)) {
 			
 			throw new UnsupportedOperationException("Not yet implemented!");
@@ -1518,8 +1513,7 @@ public class TtRunCottbusSimulation {
 			runName += "_laneCapFromNet";
 		}
 		
-		StrategySettings[] strategies = config.strategy().getStrategySettings()
-				.toArray(new StrategySettings[0]);
+		StrategySettings[] strategies = config.strategy().getStrategySettings().toArray(new StrategySettings[0]);
 		for (int i = 0; i < strategies.length; i++) {
 			double weight = strategies[i].getWeight();
 			if (weight != 0.0){
@@ -1543,8 +1537,7 @@ public class TtRunCottbusSimulation {
 		if (SIGMA != 0.0)
 			runName += "_sigma" + SIGMA;
 		if (config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate() != 0.0)
-			runName += "_distCost"
-					+ config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
+			runName += "_distCost" + config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
 
 		if (config.qsim().isUseLanes()){
 			runName += "_lanes";
