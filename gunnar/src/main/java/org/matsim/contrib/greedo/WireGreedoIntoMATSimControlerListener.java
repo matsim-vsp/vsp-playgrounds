@@ -46,8 +46,7 @@ import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
-import org.matsim.contrib.greedo.logging.AvgReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.Beta;
+import org.matsim.contrib.greedo.logging.BetaScaled;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.LogDataWrapper;
@@ -57,6 +56,8 @@ import org.matsim.contrib.greedo.logging.NormalizedUnweightedReplannerCountDiffe
 import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.RelativeSlotVariability;
+import org.matsim.contrib.greedo.logging.RelativeUtilityEfficiency;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
@@ -99,19 +100,16 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	// below only for logging
 
-	private Double expectedUtilityChangeSumTotal = null;
-
-	private Double expectedUtilityChangeSumUniform = null;
-
 	private Double realizedUtilityChangeSum = null;
 
 	private Double realizedUtilitySum = null;
 
-	private Integer numberOfReplanners = null;
-
 	// TODO HARDWIRED
 	private final ReplanningEfficiencyEstimator replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(0.01,
 			0.01);
+
+	private ReplannerIdentifier.LastExpectations lastExpectations = new ReplannerIdentifier.LastExpectations(null, null,
+			null, null, null, null, null, null, null, null, null, null);
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -131,7 +129,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
 		this.statsWriter.addSearchStatistic(new LambdaBar());
-		this.statsWriter.addSearchStatistic(new Beta());
+		this.statsWriter.addSearchStatistic(new BetaScaled());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
@@ -142,19 +140,22 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedNonReplannerCountDifferences2());
-		this.statsWriter.addSearchStatistic(new AvgReplannerUtilityChange());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerUtilityChange());
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityTotal());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
+		this.statsWriter.addSearchStatistic(new RelativeUtilityEfficiency());
+		this.statsWriter.addSearchStatistic(new RelativeSlotVariability());
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
 	}
 
 	// -------------------- IMPLEMENTATION OF ReplannerSelector --------------------
+
+	private LogDataWrapper lastLogDataWrapper = null;
 
 	@Override
 	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
@@ -166,18 +167,22 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
 		}
 
+		final int popSize = this.services.getScenario().getPopulation().getPersons().size();
 		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
-		if (utilityStats.validExpectedUtilityCnt == this.getPopulationSize()) {
+		if (utilityStats.validExpectedUtilityCnt == popSize) {
 			this.realizedUtilitySum = utilityStats.realizedUtilitySum;
 		}
-		if (utilityStats.validExpectedUtilityChangeCnt == this.getPopulationSize()) {
+		if (utilityStats.validExpectedUtilityChangeCnt == popSize) {
 			this.realizedUtilityChangeSum = utilityStats.realizedUtilityChangeSum;
 		}
-		if ((utilityStats.validExpectedUtilityChangeCnt == this.getPopulationSize())
-				&& (utilityStats.validRealizedUtilityChangeCnt == this.getPopulationSize())) {
+		if ((utilityStats.validExpectedUtilityChangeCnt == popSize)
+				&& (utilityStats.validRealizedUtilityChangeCnt == popSize)) {
 			this.replanningEfficiencyEstimator.update(utilityStats.realizedUtilityChangeSum,
 					utilityStats.expectedUtilityChangeSum);
 		}
+
+		this.lastLogDataWrapper = new LogDataWrapper(this, this.lastExpectations);
+		this.statsWriter.writeToFile(this.lastLogDataWrapper);
 
 		this.hypotheticalSlotUsageListeners.clear(); // Redundant, see afterReplanning().
 		return new EventHandlerProvider() {
@@ -192,6 +197,21 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				return listener;
 			}
 		};
+	}
+
+	// private Double beta = null;
+	private Double betaNumerator = null;
+	private Double betaDenominator = null;
+
+	private Double tryMSAUpdate(final Double oldMean, final Double innovation, final int iteration) {
+		if (innovation == null) {
+			return oldMean;
+		} else if (oldMean == null) {
+			return innovation;
+		} else {
+			final double innoWeight = 1.0 / (1.0 + iteration);
+			return (1.0 - innoWeight) * oldMean + innoWeight * innovation;
+		}
 	}
 
 	@Override
@@ -210,10 +230,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
 
-		// SANITY TEST
+		// >>>>> SANITY TEST >>>>>
 		final double val1 = utilityStats.expectedUtilityChangeSum;
 		final double val2 = utilityStats.personId2expectedUtilityChange.values().stream().mapToDouble(x -> x).sum();
 		Logger.getLogger(this.getClass()).info("val1 = " + val1 + ", val2 = " + val2);
+		// <<<<< SANITY TEST <<<<<
 
 		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> hypotheticalSlotUsageIndicators = new LinkedHashMap<>();
 		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
@@ -221,18 +242,57 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 		this.hypotheticalSlotUsageListeners.clear(); // Release as soon as possible.
 
-		final double meanLambda;
-		if (GreedoConfigGroup.StepSizeType.adaptive.equals(this.greedoConfig.getStepSizeField())) {
-			meanLambda = this.replanningEfficiencyEstimator.getLambda();
-		} else if (GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField())) {
-			meanLambda = this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		// final double meanLambda = Double.NaN;
+		// if
+		// (GreedoConfigGroup.StepSizeType.adaptive.equals(this.greedoConfig.getStepSizeField()))
+		// {
+		// Logger.getLogger(this.getClass())
+		// .info("relativeSlotVariability = " +
+		// this.lastLogDataWrapper.getRelativeSlotVariability());
+		// Logger.getLogger(this.getClass())
+		// .info("relativeUtilityEfficiency = " +
+		// this.lastLogDataWrapper.getRelativeUtilityEfficiency());
+		// // meanLambda = this.replanningEfficiencyEstimator.getLambda();
+		// if ((this.lastLogDataWrapper.getRelativeSlotVariability() != null)
+		// && (this.lastLogDataWrapper.getRelativeUtilityEfficiency() != null)) {
+		// meanLambda = Math.min(1.0, Math.max(0.0, 0.5 *
+		// this.lastLogDataWrapper.getRelativeSlotVariability()
+		// / this.lastLogDataWrapper.getRelativeUtilityEfficiency()));
+		// } else {
+		// meanLambda = 0.5;
+		// }
+		// Logger.getLogger(this.getClass()).info("meanLambda = " + meanLambda);
+		// } else if
+		// (GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField()))
+		// {
+		// meanLambda = this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		// } else {
+		// throw new RuntimeException("Unknown step size logic: " +
+		// this.greedoConfig.getStepSizeField());
+		// }
+
+		this.betaNumerator = this.tryMSAUpdate(this.betaNumerator, this.lastLogDataWrapper.getEstimatedBetaNumerator(),
+				this.iteration());
+		this.betaDenominator = this.tryMSAUpdate(this.betaDenominator,
+				this.lastLogDataWrapper.getEstimatedBetaDenominator(), this.iteration());
+		final Double betaScaled;
+		if ((this.betaNumerator != null) && (this.betaDenominator != null)) {
+			betaScaled = this.greedoConfig.getBetaScale() * (this.betaNumerator / Math.max(this.betaDenominator, 1e-8));
 		} else {
-			throw new RuntimeException("Unknown step size logic: " + this.greedoConfig.getStepSizeField());
+			betaScaled = null;
 		}
 
-		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(meanLambda, this.greedoConfig,
-				this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
-				this.services.getScenario().getPopulation(), utilityStats.personId2expectedUtilityChange);
+		final Double overrideLambda;
+		if (GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField())) {
+			overrideLambda = this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		} else {
+			overrideLambda = null;
+		}
+
+		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(overrideLambda, betaScaled,
+				this.greedoConfig, this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(),
+				hypotheticalSlotUsageIndicators, this.services.getScenario().getPopulation(),
+				utilityStats.personId2expectedUtilityChange);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {
@@ -240,15 +300,9 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 			}
 		}
 
-		this.numberOfReplanners = replannerIds.size();
+		this.lastExpectations = replannerIdentifier.getLastExpectations();
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
-
-		this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier));
-
-		// The following is the present iteration's expectation for the NEXT iteration.
-		this.expectedUtilityChangeSumTotal = utilityStats.expectedUtilityChangeSum;
-		this.expectedUtilityChangeSumUniform = meanLambda * utilityStats.expectedUtilityChangeSum;
 	}
 
 	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------
@@ -263,14 +317,6 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private int iteration() {
 		return this.physicalSlotUsageListener.getLastResetIteration();
-	}
-
-	public Double getExpectedUtilityChangeSumTotal() {
-		return this.expectedUtilityChangeSumTotal;
-	}
-
-	public Double getExpectedUtilityChangeSumUniform() {
-		return this.expectedUtilityChangeSumUniform;
 	}
 
 	public Double getRealizedUtilityChangeSum() {
@@ -291,21 +337,5 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	public Double getAverageWeight() {
 		return this.ages.getAverageWeight();
-	}
-
-	public Integer getPopulationSize() {
-		return this.services.getScenario().getPopulation().getPersons().size();
-	}
-
-	public Integer getNumberOfReplanners() {
-		return this.numberOfReplanners;
-	}
-
-	public Integer getNumberOfNonReplanners() {
-		if (this.getNumberOfReplanners() == null) {
-			return null;
-		} else {
-			return (this.getPopulationSize() - this.getNumberOfReplanners());
-		}
 	}
 }

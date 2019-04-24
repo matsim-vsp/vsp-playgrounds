@@ -26,17 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class Beta implements Statistic<LogDataWrapper> {
+public class RelativeSlotVariability implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return Beta.class.getSimpleName();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getBeta());
+		return Statistic.toString(arg0.getRelativeSlotVariability());
 	}
 
 }
-

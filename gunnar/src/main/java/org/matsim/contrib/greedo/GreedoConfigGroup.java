@@ -168,6 +168,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.stepSizeField = stepSizeField;
 	}
 
+	// -------------------- eta --------------------
+
+	private double betaScale = 1.0;
+
+	@StringGetter("betaScale")
+	public double getBetaScale() {
+		return this.betaScale;
+	}
+
+	@StringSetter("betaScale")
+	public void setBetaScale(double betaScale) {
+		this.betaScale = betaScale;
+	}
+
 	// -------------------- minReplanningRate --------------------
 
 	private double minReplanningRate = 0.01;

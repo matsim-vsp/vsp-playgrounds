@@ -33,28 +33,28 @@ public class LogDataWrapper {
 
 	private final WireGreedoIntoMATSimControlerListener accelerator;
 
-	private final ReplannerIdentifier identifier;
+	private final ReplannerIdentifier.LastExpectations lastExpectations;
 
 	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator,
-			final ReplannerIdentifier identifier) {
+			final ReplannerIdentifier.LastExpectations lastExpectations) {
 		this.accelerator = accelerator;
-		this.identifier = identifier;
+		this.lastExpectations = lastExpectations;
 	}
 
 	public Double getLambdaBar() {
-		return this.identifier.getLambdaBar();
+		return this.lastExpectations.lambdaBar;
 	}
 
-	public Double getBeta() {
-		return this.identifier.getBeta();
+	public Double getBetaScaled() {
+		return this.lastExpectations.betaScaled;
 	}
 
 	public Double getSumOfWeightedCountDifferences2() {
-		return this.identifier.getSumOfWeightedCountDifferences2();
+		return this.lastExpectations.getSumOfWeightedCountDifferences2();
 	}
 
 	public Double getSumOfUnweightedCountDifferences2() {
-		return this.identifier.getSumOfUnweightedCountDifferences2();
+		return this.lastExpectations.getSumOfUnweightedCountDifferences2();
 	}
 
 	public Double getLastRealizedUtilitySum() {
@@ -62,15 +62,15 @@ public class LogDataWrapper {
 	}
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
-		return this.identifier.getReplannerExpectedUtilityChangeSum();
+		return this.lastExpectations.sumOfReplannerUtilityChanges;
 	}
 
 	public Double getLastExpectedUtilityChangeSumTotal() {
-		return this.accelerator.getExpectedUtilityChangeSumTotal();
+		return this.lastExpectations.getSumOfUtilityChanges();
 	}
 
 	public Double getLastExpectedUtilityChangeSumUniform() {
-		return this.accelerator.getExpectedUtilityChangeSumUniform();
+		return this.lastExpectations.getSumOfUtilityChangesGivenUniformReplanning();
 	}
 
 	public Double getLastRealizedUtilityChangeSum() {
@@ -90,47 +90,96 @@ public class LogDataWrapper {
 	}
 
 	public Double getSumOfUnweightedReplannerCountDifferences2() {
-		return this.identifier.getSumOfUnweightedReplannerCountDifferences2();
+		return this.lastExpectations.sumOfUnweightedReplannerCountDifferences2;
 	}
 
 	public Double getSumOfWeightedReplannerCountDifferences2() {
-		return this.identifier.getSumOfWeightedReplannerCountDifferences2();
+		return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
 	}
 
-	public Double getReplannerUtilityChangeSum() {
-		return this.identifier.getReplannerExpectedUtilityChangeSum();
-	}
+	// public Double getReplannerUtilityChangeSum() {
+	// return this.identifier.replannerExpectedUtilityChangeSum;
+	// }
 
 	public Double getSumOfUnweightedNonReplannerCountDifferences2() {
-		return this.identifier.getSumOfUnweightedNonReplannerCountDifferences2();
+		return this.lastExpectations.sumOfUnweightedNonReplannerCountDifferences2;
 	}
 
 	public Double getSumOfWeightedNonReplannerCountDifferences2() {
-		return this.identifier.getSumOfWeightedNonReplannerCountDifferences2();
+		return this.lastExpectations.sumOfWeightedNonReplannerCountDifferences2;
 	}
 
 	public Double getNonReplannerUtilityChangeSum() {
-		return this.identifier.getNonReplannerExpectedUtilityChangeSum();
+		return this.lastExpectations.sumOfReplannerUtilityChanges;
 	}
 
 	public Integer getNumberOfReplanners() {
-		return this.accelerator.getNumberOfReplanners();
+		return this.lastExpectations.numberOfReplanners;
 	}
 
 	public Integer getNumberOfNonReplanners() {
-		return this.accelerator.getNumberOfNonReplanners();
+		return this.lastExpectations.numberOfNonReplanners;
 	}
 
 	public Integer getPopulationSize() {
-		return this.accelerator.getPopulationSize();
+		return this.lastExpectations.getNumberOfPersons();
 	}
 
 	public Double getReplannerSizeSum() {
-		return this.identifier.getReplannerSizeSum();
+		return this.lastExpectations.replannerSizeSum;
 	}
 
 	public Double getNonReplannerSizeSum() {
-		return this.identifier.getNonReplannerSizeSum();
+		return this.lastExpectations.nonReplannerSizeSum;
 	}
+
+	public Double getRelativeUtilityEfficiency() {
+		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)
+				&& (this.lastExpectations.getSumOfUtilityChanges() != null)) {
+			return Math.abs(
+					this.accelerator.getRealizedUtilityChangeSum() - this.lastExpectations.sumOfReplannerUtilityChanges)
+					/ this.lastExpectations.getSumOfUtilityChanges();
+		} else {
+			return null;
+		}
+	}
+
+	public Double getRelativeSlotVariability() {
+		if ((this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
+				&& (this.lastExpectations.getSumOfWeightedCountDifferences2() != null)) {
+			return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
+					/ this.lastExpectations.getSumOfWeightedCountDifferences2();
+		} else {
+			return null;
+		}
+	}
+
+	public Double getEstimatedBetaNumerator() {
+		return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
+	}
+
+	public Double getEstimatedBetaDenominator() {
+		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)) {
+			return Math.abs(this.accelerator.getRealizedUtilityChangeSum()
+					- this.lastExpectations.sumOfReplannerUtilityChanges);
+		} else {
+			return null;
+		}
+
+	}
+
+//	public Double getEstimatedBeta() {
+//		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+//				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)
+//				&& (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)) {
+//			return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
+//					/ Math.abs(this.accelerator.getRealizedUtilityChangeSum()
+//							- this.lastExpectations.sumOfReplannerUtilityChanges);
+//		} else {
+//			return null;
+//		}
+//	}
 
 }
