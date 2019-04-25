@@ -37,17 +37,17 @@ public class RunOSMLeisure {
         String outputFacilityFile = root + "MyOwnFacilities.xml";
 
         String newCoord = "DHDN_GK4";
-//		waiting for matsim core
-//        CoordinateTransformation coordinateTransformation = TransformationFactory.getCoordinateTransformation("WGS84", newCoord);
-//        AmenityReader amenityReader = new AmenityReader(inputOSMFile, coordinateTransformation, OSMKeyForLeisure.buildOsmAllLeisureToMatsimTypeMap(), true);
-//
-//        try {
-//            amenityReader.parseAmenity(inputOSMFile);
-//            amenityReader.writeFacilities(outputFacilityFile);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//
+
+        CoordinateTransformation coordinateTransformation = TransformationFactory.getCoordinateTransformation("WGS84", newCoord);
+        AmenityReader amenityReader = new AmenityReader(inputOSMFile, coordinateTransformation, OSMKeyForLeisure.buildOsmAllLeisureToMatsimTypeMap(), true);
+
+        try {
+            amenityReader.parseAmenity(inputOSMFile);
+            amenityReader.writeFacilities(outputFacilityFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         System.out.println("Done");
 
     }
