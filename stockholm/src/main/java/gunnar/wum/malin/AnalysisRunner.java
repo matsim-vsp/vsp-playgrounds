@@ -30,8 +30,10 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.EventsToActivities;
 import org.matsim.core.scoring.EventsToLegs;
+import org.matsim.core.scoring.EventsToScore;
 
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
+import gunnar.ihop4.sampersutilities.SampersScoringFunctionFactory;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -53,17 +55,17 @@ public class AnalysisRunner {
 		config.transit().setUseTransit(true);
 		config.transit().setTransitScheduleFile(
 				"/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_transitSchedule.xml.gz");
-		
+
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		
+
 		zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
 		final InterZonalStatistics zoneStats = new InterZonalStatistics(zonalSystem, scenario);
-		
+
 		zoneStats.addOrigin("720113");
 		zoneStats.addOrigin("720112");
 		zoneStats.addOrigin("720111");
 		zoneStats.addOrigin("720103");
-		
+
 		zoneStats.addDestination("720113");
 		zoneStats.addDestination("720112");
 		zoneStats.addDestination("720111");
@@ -78,14 +80,25 @@ public class AnalysisRunner {
 		final EventsToActivities events2acts = new EventsToActivities();
 		events2acts.addActivityHandler(zoneStats);
 		manager.addHandler(events2acts);
+
+		// >>>>> 2019-04-24 >>>>>
+
+		// events to scores requires to load the entire population -> servers
+//		final EventsToScore events2scores = EventsToScore.createWithoutScoreUpdating(scenario,
+//				new SampersScoringFunctionFactory(), manager);
+//		manager.addHandler(events2scores);
 		
+		
+		
+		// <<<<< 2019-04-24 <<<<<
+
 		EventsUtils.readEvents(manager, "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_events.xml.gz");
 
 		System.out.println("valid: " + zoneStats.getValidCnt());
 		System.out.println("invalid: " + zoneStats.getInvalidCnt());
-		
+
 		zoneStats.toFolder(new File("./malin"));
-		
+
 		System.out.println("... DONE");
 	}
 
