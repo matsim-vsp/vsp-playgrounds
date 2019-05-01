@@ -51,8 +51,8 @@ public class RunSharedBerlinTaxiCase {
 			drt.setNumberOfThreads(7);
 			drt.setMaxTravelTimeAlpha(5);
 			drt.setMaxTravelTimeBeta(3000);
-			
-			MinCostFlowRebalancingParams rebalancingParams = drt.getMinCostFlowRebalancing();
+
+		MinCostFlowRebalancingParams rebalancingParams = drt.getMinCostFlowRebalancing().get();
 			rebalancingParams.setInterval(1800);
 			rebalancingParams.setCellSize(2000);
 			
