@@ -25,7 +25,6 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
@@ -48,9 +47,6 @@ public class RunNonSharedTaxiBerlin {
 	}
 
 	public static Controler createControler(Config config, boolean otfvis) {
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
-		config.checkConsistency();
-
 		String mode = TaxiConfigGroup.get(config).getMode();
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 

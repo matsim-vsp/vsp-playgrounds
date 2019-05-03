@@ -30,7 +30,6 @@ import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
@@ -39,8 +38,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import java.util.Collections;
 
 /**
  * @author jbischoff
@@ -77,8 +74,6 @@ public class RunRWPTComboExample {
 		config.transitRouter().setSearchRadius(3000);
 		config.transitRouter().setExtensionRadius(0);
 
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
-		config.checkConsistency();
 		String mode = TaxiConfigGroup.get(config).getMode();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);

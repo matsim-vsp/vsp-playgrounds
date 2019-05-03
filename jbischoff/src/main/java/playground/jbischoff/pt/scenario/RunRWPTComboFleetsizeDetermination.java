@@ -30,7 +30,6 @@ import org.matsim.contrib.av.intermodal.router.config.VariableAccessModeConfigGr
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
@@ -86,8 +85,6 @@ public class RunRWPTComboFleetsizeDetermination {
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		taxiCfg.setBreakSimulationIfNotAllRequestsServed(false);
 		taxiCfg.setChangeStartLinkToLastLinkInSchedule(true);
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
-		config.checkConsistency();
 		String mode = TaxiConfigGroup.get(config).getMode();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
