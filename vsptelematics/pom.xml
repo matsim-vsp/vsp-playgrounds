@@ -2,13 +2,19 @@
   <parent>
     <groupId>org.matsim.vsp</groupId>
     <artifactId>vsp-playgrounds</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>12.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
   <artifactId>vsptelematics</artifactId>
   <name>vsptelematics</name>
   <description>matsim code for the telematics lecture at vsp</description>
+
+	<properties>
+		<!-- release> -->
+		<matsim.version>12.0-SNAPSHOT</matsim.version>
+	</properties>
+
 
 	<build>
 		<plugins>
@@ -87,17 +93,17 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>roadpricing</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>otfvis</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 	</dependencies>
 </project>
