@@ -13,7 +13,6 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
 import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigConsistencyChecker;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -38,9 +37,7 @@ public class RunDrt {
 				new DrtConfigGroup(), new DvrpConfigGroup(), new VariableAccessConfigGroup());
 
 		config.controler().setOutputDirectory(IOUtils.newUrl(config.getContext(), args[1]).getFile());
-		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());
-		config.checkConsistency();
-		
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());
