@@ -28,8 +28,12 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.ev.EvUnits;
-import org.matsim.contrib.ev.data.*;
-import org.matsim.contrib.ev.data.file.ElectricVehicleWriter;
+import org.matsim.contrib.ev.fleet.BatteryImpl;
+import org.matsim.contrib.ev.fleet.ElectricFleet;
+import org.matsim.contrib.ev.fleet.ElectricFleetImpl;
+import org.matsim.contrib.ev.fleet.ElectricFleetWriter;
+import org.matsim.contrib.ev.fleet.ElectricVehicle;
+import org.matsim.contrib.ev.fleet.ElectricVehicleImpl;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -72,7 +76,7 @@ public class WriteTestPopulation {
             ((ElectricFleetImpl) evFleet).addElectricVehicle(ev);
         }
         new PopulationWriter(scenario.getPopulation()).write("C:/Users/Joschka/Desktop/ev_population.xml");
-        new ElectricVehicleWriter(evFleet.getElectricVehicles().values()).write("C:/Users/Joschka/Desktop/evehicles.xml");
+        new ElectricFleetWriter(evFleet.getElectricVehicles().values()).write("C:/Users/Joschka/Desktop/evehicles.xml");
 				
 	}
 
