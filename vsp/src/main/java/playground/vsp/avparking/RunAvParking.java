@@ -82,8 +82,7 @@ public class RunAvParking {
 	/**
 	 * @param config
 	 * 			a standard MATSim config
-	 * @param otfvis
-	 *            turns otfvis visualisation on or off
+     *
 	 */
 	public void run(Config config, AVParkBehavior b) {
 		config.controler().setOutputDirectory(config.controler().getOutputDirectory()+"/"+b.toString());
