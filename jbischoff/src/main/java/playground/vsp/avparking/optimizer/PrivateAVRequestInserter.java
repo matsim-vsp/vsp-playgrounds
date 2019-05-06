@@ -16,10 +16,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.avparking.optimizer;
-
-import java.util.Collection;
-import java.util.Iterator;
+package playground.vsp.avparking.optimizer;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -29,14 +26,17 @@ import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPaths;
 import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
-import org.matsim.contrib.taxi.passenger.TaxiRequest;
 import org.matsim.contrib.taxi.optimizer.UnplannedRequestInserter;
+import org.matsim.contrib.taxi.passenger.TaxiRequest;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author michalm

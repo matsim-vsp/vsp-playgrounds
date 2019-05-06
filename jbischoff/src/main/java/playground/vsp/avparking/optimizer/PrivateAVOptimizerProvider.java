@@ -17,8 +17,10 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.avparking.optimizer;
+package playground.vsp.avparking.optimizer;
 
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
@@ -34,11 +36,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
-
-import playground.jbischoff.avparking.AvParkingContext;
+import playground.vsp.avparking.AvParkingContext;
 
 public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";

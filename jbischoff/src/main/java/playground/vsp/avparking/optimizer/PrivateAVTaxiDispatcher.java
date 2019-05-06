@@ -17,11 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.avparking.optimizer;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+package playground.vsp.avparking.optimizer;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -53,8 +49,11 @@ import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
+import playground.vsp.avparking.AvParkingContext;
 
-import playground.jbischoff.avparking.AvParkingContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public static PrivateAVTaxiDispatcher create(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,

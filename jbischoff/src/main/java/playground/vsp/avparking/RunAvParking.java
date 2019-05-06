@@ -20,10 +20,7 @@
 /**
  * 
  */
-package playground.jbischoff.avparking;
-
-import java.util.ArrayList;
-import java.util.List;
+package playground.vsp.avparking;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -40,9 +37,11 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import playground.vsp.avparking.optimizer.PrivateAVOptimizerProvider;
+import playground.vsp.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
 
-import playground.jbischoff.avparking.optimizer.PrivateAVOptimizerProvider;
-import playground.jbischoff.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author jbischoff An example how to use parking search in MATSim.

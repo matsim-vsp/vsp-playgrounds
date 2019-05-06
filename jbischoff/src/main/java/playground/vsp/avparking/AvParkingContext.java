@@ -20,14 +20,13 @@
 /**
  * 
  */
-package playground.jbischoff.avparking;
-
-import java.util.List;
+package playground.vsp.avparking;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import playground.vsp.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
 
-import playground.jbischoff.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
+import java.util.List;
 
 /**
  * @author  jbischoff

@@ -20,8 +20,9 @@
 /**
  *
  */
-package playground.jbischoff.avparking.optimizer;
+package playground.vsp.avparking.optimizer;
 
+import com.google.inject.name.Named;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
@@ -40,8 +41,6 @@ import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.inject.name.Named;
 
 /**
  * @author jbischoff

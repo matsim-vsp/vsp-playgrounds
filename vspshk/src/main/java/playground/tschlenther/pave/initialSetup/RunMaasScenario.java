@@ -44,8 +44,8 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.jbischoff.avparking.optimizer.PrivateAVScheduler;
 import playground.tschlenther.pave.av.TSPrivateAVFleetGenerator;
+import playground.vsp.avparking.optimizer.PrivateAVScheduler;
 
 /**
  * @author tschlenther

@@ -17,8 +17,9 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.avparking;
+package playground.vsp.avparking;
 
+import com.google.inject.Provider;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
@@ -27,10 +28,7 @@ import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
 import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.controler.AbstractModule;
-
-import com.google.inject.Provider;
-
-import playground.jbischoff.avparking.optimizer.PrivateAVScheduler;
+import playground.vsp.avparking.optimizer.PrivateAVScheduler;
 
 /**
  * @author michalm
