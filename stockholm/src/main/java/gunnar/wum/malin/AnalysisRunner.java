@@ -19,7 +19,6 @@
  */
 package gunnar.wum.malin;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.matsim.api.core.v01.Scenario;
@@ -28,13 +27,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.EventsToActivities;
-import org.matsim.core.scoring.EventsToLegs;
-import org.matsim.core.scoring.EventsToScore;
-
-import gunnar.ihop2.regent.demandreading.ZonalSystem;
-import gunnar.ihop4.sampersutilities.SampersScoringFunctionFactory;
-import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
  *
@@ -46,9 +38,13 @@ public class AnalysisRunner {
 	public static void main(String[] args) throws FileNotFoundException {
 		System.out.println("STARTED ...");
 
-		final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
-		final ZonalSystem zonalSystem = new ZonalSystem(zonesShapeFileName,
-				StockholmTransformationFactory.WGS84_EPSG3857);
+		System.out.println("System.exit(0);");
+		System.exit(0);
+
+		// final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My
+		// Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
+		// final ZonalSystem zonalSystem = new ZonalSystem(zonesShapeFileName,
+		// StockholmTransformationFactory.WGS84_EPSG3857);
 
 		final Config config = ConfigUtils.createConfig();
 		config.network().setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_network.xml.gz");
@@ -58,46 +54,62 @@ public class AnalysisRunner {
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
-		zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
-		final InterZonalStatistics zoneStats = new InterZonalStatistics(zonalSystem, scenario);
-
-		zoneStats.addOrigin("720113");
-		zoneStats.addOrigin("720112");
-		zoneStats.addOrigin("720111");
-		zoneStats.addOrigin("720103");
-
-		zoneStats.addDestination("720113");
-		zoneStats.addDestination("720112");
-		zoneStats.addDestination("720111");
-		zoneStats.addDestination("720103");
+		// zonalSystem.addNetwork(scenario.getNetwork(),
+		// StockholmTransformationFactory.WGS84_SWEREF99);
 
 		final EventsManager manager = EventsUtils.createEventsManager();
 
-		final EventsToLegs events2legs = new EventsToLegs(scenario);
-		events2legs.addLegHandler(zoneStats);
-		manager.addHandler(events2legs);
+		// final EventsToLegs events2legs = new EventsToLegs(scenario);
+		// final EventsToActivities events2acts = new EventsToActivities();
+		// manager.addHandler(events2legs);
+		// manager.addHandler(events2acts);
 
-		final EventsToActivities events2acts = new EventsToActivities();
-		events2acts.addActivityHandler(zoneStats);
-		manager.addHandler(events2acts);
+		// zoneStats
 
-		// >>>>> 2019-04-24 >>>>>
+		// final InterZonalStatistics zoneStats = new InterZonalStatistics(zonalSystem,
+		// scenario);
+		//
+		// zoneStats.addOrigin("720113");
+		// zoneStats.addOrigin("720112");
+		// zoneStats.addOrigin("720111");
+		// zoneStats.addOrigin("720103");
+		//
+		// zoneStats.addDestination("720113");
+		// zoneStats.addDestination("720112");
+		// zoneStats.addDestination("720111");
+		// zoneStats.addDestination("720103");
+		//
+		// events2legs.addLegHandler(zoneStats);
+		// events2acts.addActivityHandler(zoneStats);
 
-		// events to scores requires to load the entire population -> servers
-//		final EventsToScore events2scores = EventsToScore.createWithoutScoreUpdating(scenario,
-//				new SampersScoringFunctionFactory(), manager);
-//		manager.addHandler(events2scores);
-		
-		
-		
-		// <<<<< 2019-04-24 <<<<<
+		// personStats
+
+		// final PersonTravelStatistics personStats = new PersonTravelStatistics(
+		// act -> !act.getAgentId().toString().startsWith("pt") &&
+		// !act.getActivity().getType().startsWith("pt"),
+		// leg -> !leg.getAgentId().toString().startsWith("pt"), scenario.getNetwork(),
+		// zonalSystem);
+		// events2legs.addLegHandler(personStats);
+		// events2acts.addActivityHandler(personStats);
+
+		// linkStats
+
+		final LinkTravelStatistic linkStats = new LinkTravelStatistic(scenario.getNetwork(),
+				time_s -> (time_s >= 8 * 3600 && time_s < 9 * 3600), linkId -> true,
+				personId -> !personId.toString().startsWith("pt"));
+		manager.addHandler(linkStats);
 
 		EventsUtils.readEvents(manager, "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_events.xml.gz");
 
-		System.out.println("valid: " + zoneStats.getValidCnt());
-		System.out.println("invalid: " + zoneStats.getInvalidCnt());
+		// System.out.println("valid: " + zoneStats.getValidCnt());
+		// System.out.println("invalid: " + zoneStats.getInvalidCnt());
+		// zoneStats.toFolder(new File("./malin"));
 
-		zoneStats.toFolder(new File("./malin"));
+		// personStats.writePersonData("./malin/personStats.csv");
+
+		linkStats.writeLinkData("./malin/linkStats8-9.csv");
+
+		// TODO write out
 
 		System.out.println("... DONE");
 	}
