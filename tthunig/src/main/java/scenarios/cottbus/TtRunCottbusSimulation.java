@@ -123,7 +123,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -140,7 +140,7 @@ public class TtRunCottbusSimulation {
 	private final static boolean LONG_LANES = true;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_MATSIM_ROUTES;
+	private final static PopulationType POP_TYPE = PopulationType.WoMinesAllModes;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -181,12 +181,13 @@ public class TtRunCottbusSimulation {
 		WoMines1000itcap08MSNetV4_1,
 		WoMines1000itcap09MSNetV4_1,
 		WoMines1000itcap10MSNetV4_1,
-		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
+		NicoOutputPlans, // the plans that nico used in his MA: netV1, MS, 100it
+		WoMinesAllModes // not only car (55% mode share), but all (100%) agents from commuter statistics
 	}
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private static SignalType SIGNAL_TYPE = SignalType.MS_RANDOM_GREENSPLITS;
+	private static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_RANDOM_GREENSPLITS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		MS_INTG0, MS_INTG0_SYLVIA, // MS with modified end times, such that zero intergreen times are used
@@ -222,7 +223,7 @@ public class TtRunCottbusSimulation {
 	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.INTERVAL_BASED;
+	private static final PricingType PRICING_TYPE = PricingType.NONE;
 	private enum PricingType {
 		NONE, CP_V3, CP_V4, CP_V7, CP_V8, CP_V9, CP_V10, FLOWBASED, CORDON_INNERCITY, CORDON_RING, INTERVAL_BASED
 	}
@@ -234,7 +235,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/randomGreensplits/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/createNewBC/";
 	private static String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -660,6 +661,9 @@ public class TtRunCottbusSimulation {
 //				config.plans().setInputFile(OUTPUT_BASE_DIR + "2017-02-3_100it_ReRoute0.1_tbs10_ChExp0.9_beta2_lanes_2link_ALL_NODES_DOWNSTREAM_5plans_GRID_LOCK_BTU_BTU_NET_3600'12'3/output_plans.xml.gz");						
 			}
 			break;
+		case WoMinesAllModes:
+			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_woLinks.xml.gz");
+			break;
 		default:
 			throw new RuntimeException("Population type not specified!");
 		}
@@ -670,7 +674,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(1000);
+		config.controler().setLastIteration(100);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -1028,6 +1032,12 @@ public class TtRunCottbusSimulation {
 			strat.setWeight(0.0);
 			config.strategy().addStrategySettings(strat);
 		}
+		{
+			StrategySettings strat = new StrategySettings();
+			strat.setStrategyName(DefaultStrategy.SubtourModeChoice.toString());
+			strat.setWeight(0.0);
+			config.strategy().addStrategySettings(strat);
+		}
 
 		// choose maximal number of plans per agent. 0 means unlimited
 		if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES))
@@ -1098,6 +1108,13 @@ public class TtRunCottbusSimulation {
 			workAct.setClosingTime(17.5 * 3600);
 			config.planCalcScore().addActivityParams(workAct);
 		}
+		
+		// TODO
+//		config.planCalcScore().getModes().get("pt").setConstant(alternativeSpecificConstantPt); // default is 0
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setBeelineDistanceFactor(1.3); // default is 1.3
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setTeleportedModeFreespeedFactor(1.5); // default is 2.0
+		String[] modes = {"pt", "car"};
+		config.subtourModeChoice().setModes(modes);
 		
 		config.global().setCoordinateSystem("EPSG:25833"); //UTM33
 		
