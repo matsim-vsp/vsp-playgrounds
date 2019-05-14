@@ -29,11 +29,11 @@ import java.util.function.Predicate;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
+import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -47,7 +47,7 @@ import cadyts.utilities.math.MathHelpers;
  *
  */
 class LinkTravelStatistic
-		implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+		implements LinkEnterEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
 	private class LinkEntry {
 		private Set<Id<Person>> personIds = new LinkedHashSet<>();
@@ -60,17 +60,24 @@ class LinkTravelStatistic
 	private final Predicate<Double> timeChecker;
 	private final Predicate<Id<Link>> linkChecker;
 	private final Predicate<Id<Person>> personChecker;
-	private final Network network;
+	private final Predicate<Id<Vehicle>> vehicleChecker;
 
-	private final Map<Id<Vehicle>, Id<Person>> vehicleId2personId = new LinkedHashMap<>();
+	private final Network network;
+	private final boolean writeCapacity;
+
+	private final Map<Id<Vehicle>, Set<Id<Person>>> vehicleId2personIds = new LinkedHashMap<>();
+
 	private final Map<Id<Link>, LinkEntry> linkId2entry = new LinkedHashMap<>();
 
 	LinkTravelStatistic(final Network network, final Predicate<Double> timeChecker,
-			final Predicate<Id<Link>> linkChecker, final Predicate<Id<Person>> personChecker) {
+			final Predicate<Id<Link>> linkChecker, final Predicate<Id<Person>> personChecker,
+			final Predicate<Id<Vehicle>> vehicleChecker, final boolean writeCapacity) {
 		this.network = network;
 		this.timeChecker = timeChecker;
 		this.linkChecker = linkChecker;
 		this.personChecker = personChecker;
+		this.vehicleChecker = vehicleChecker;
+		this.writeCapacity = writeCapacity;
 	}
 
 	private LinkEntry getOrCreate(final Id<Link> linkId) {
@@ -82,28 +89,43 @@ class LinkTravelStatistic
 		return entry;
 	}
 
+	// EVENT HANDLING
+
 	@Override
-	public void handleEvent(final VehicleEntersTrafficEvent event) {
-		final Id<Person> driverId = event.getPersonId();
-		if (driverId != null && this.personChecker.test(driverId)) {
-			this.vehicleId2personId.put(event.getVehicleId(), driverId);
+	public void handleEvent(final PersonEntersVehicleEvent event) {
+		if (this.personChecker.test(event.getPersonId()) && this.vehicleChecker.test(event.getVehicleId())) {
+			Set<Id<Person>> personIds = this.vehicleId2personIds.get(event.getVehicleId());
+			if (personIds == null) {
+				personIds = new LinkedHashSet<>();
+				this.vehicleId2personIds.put(event.getVehicleId(), personIds);
+			}
+			personIds.add(event.getPersonId());
+		}
+	}
+
+	@Override
+	public void handleEvent(final PersonLeavesVehicleEvent event) {
+		if (this.personChecker.test(event.getPersonId()) && this.vehicleChecker.test(event.getVehicleId())) {
+			Set<Id<Person>> personIds = this.vehicleId2personIds.get(event.getVehicleId());
+			personIds.remove(event.getPersonId());
+			if (personIds.isEmpty()) {
+				this.vehicleId2personIds.remove(event.getVehicleId());
+			}
+
 		}
 	}
 
 	@Override
 	public void handleEvent(final LinkEnterEvent event) {
 		if (this.timeChecker.test(event.getTime()) && this.linkChecker.test(event.getLinkId())) {
-			final Id<Person> personId = this.vehicleId2personId.get(event.getVehicleId());
-			if (personId != null) { // tested before
-				this.getOrCreate(event.getLinkId()).registerEntry(personId);
+			final Set<Id<Person>> personIds = this.vehicleId2personIds.get(event.getVehicleId());
+			if (personIds != null) {
+				personIds.stream().forEach(personId -> this.getOrCreate(event.getLinkId()).registerEntry(personId));
 			}
 		}
 	}
 
-	@Override
-	public void handleEvent(final VehicleLeavesTrafficEvent event) {
-		this.vehicleId2personId.remove(event.getVehicleId());
-	}
+	// FILE WRITING
 
 	void writeLinkData(final String fileName) throws FileNotFoundException {
 
@@ -113,10 +135,10 @@ class LinkTravelStatistic
 		for (Map.Entry<Id<Link>, LinkEntry> entry : this.linkId2entry.entrySet()) {
 			writer.print(entry.getKey());
 			final Link link = this.network.getLinks().get(entry.getKey());
-			if (link != null) {
+			if (this.writeCapacity) {
 				writer.print("," + MathHelpers.round(link.getCapacity()));
 			} else {
-				writer.print(",PT");
+				writer.print(",*");
 			}
 
 			writer.print("," + entry.getValue().personIds.size());

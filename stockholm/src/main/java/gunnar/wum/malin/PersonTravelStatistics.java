@@ -48,11 +48,11 @@ import gunnar.ihop2.regent.demandreading.Zone;
  */
 class PersonTravelStatistics implements ActivityHandler, LegHandler {
 
-	private class PersonEntry {
+	class PersonEntry {
 
 		private Map<String, String> actType2zoneId = new LinkedHashMap<>();
-		private double totalTravelTime_s = 0;
-		private double totalTravelDistance_m = 0;
+		double totalTravelTime_s = 0;
+		double totalTravelDistance_m = 0;
 
 		PersonEntry() {
 		}
@@ -82,7 +82,7 @@ class PersonTravelStatistics implements ActivityHandler, LegHandler {
 
 	private final ZonalSystem zonalSystem;
 
-	private final Map<Id<Person>, PersonEntry> personId2entry = new LinkedHashMap<>();
+	final Map<Id<Person>, PersonEntry> personId2entry = new LinkedHashMap<>();
 
 	PersonTravelStatistics(final Predicate<PersonExperiencedActivity> experiencedActivitySelector,
 			final Predicate<PersonExperiencedLeg> experiencedLegSelector, final Network network,
