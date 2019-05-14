@@ -8,15 +8,17 @@ import java.io.FileNotFoundException;
 public class RunOSMBerlinActivities {
 
     public static void main(String[] args) {
+    	
 
-        String root = "D:/Arbeit/Berlin/ReLocation/Test/";
+//        String root = "D:/Arbeit/Berlin/ReLocation/Test/";
+    	 String root = "/net/ils3/dziakowski/ReLocation/";
 
         //        String inputOSMFile = root + "brandenburg-berlin-latest.osm_01.osm";
-        String inputOSMFile = root + "berlin-latest-test.osm_01.osm";
+        String inputOSMFile = args[0];
 //        String outputFacilityFile = root + "facilities.xml.gz";
         String outputFacilityFile = root + "combinedFacilities-test.xml";
         String attributeFile = root + "attributeFile-test.xml";
-
+        
         String newCoord = "DHDN_GK4";
 
         CombinedOsmReader activitiesReader = new CombinedOsmReader(newCoord,
