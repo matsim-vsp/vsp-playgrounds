@@ -19,24 +19,18 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
+import org.matsim.contrib.greedo.LogDataWrapper;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class BetaScaled implements Statistic<LogDataWrapper> {
-
-	@Override
-	public String label() {
-		return BetaScaled.class.getSimpleName();
-	}
+public class AvgPredictedDeltaUtility extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getBetaScaled());
+		return this.averageOrEmpty(arg0.getPredictedUtilityChange(), arg0.getPopulationSize());
 	}
 
 }
-

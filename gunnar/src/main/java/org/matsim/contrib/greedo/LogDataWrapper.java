@@ -17,12 +17,9 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.logging;
+package org.matsim.contrib.greedo;
 
 import java.util.List;
-
-import org.matsim.contrib.greedo.ReplannerIdentifier;
-import org.matsim.contrib.greedo.WireGreedoIntoMATSimControlerListener;
 
 /**
  *
@@ -31,13 +28,20 @@ import org.matsim.contrib.greedo.WireGreedoIntoMATSimControlerListener;
  */
 public class LogDataWrapper {
 
-	private final WireGreedoIntoMATSimControlerListener accelerator;
+	// private final WireGreedoIntoMATSimControlerListener accelerator;
+
+	private final Ages ages;
+
+	Utilities.SummaryStatistics summaryStats;
 
 	private final ReplannerIdentifier.LastExpectations lastExpectations;
 
-	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator,
+	public LogDataWrapper(// final WireGreedoIntoMATSimControlerListener accelerator,
+			final Ages ages, Utilities.SummaryStatistics summaryStats,
 			final ReplannerIdentifier.LastExpectations lastExpectations) {
-		this.accelerator = accelerator;
+		// this.accelerator = accelerator;
+		this.ages = ages;
+		this.summaryStats = summaryStats;
 		this.lastExpectations = lastExpectations;
 	}
 
@@ -45,8 +49,23 @@ public class LogDataWrapper {
 		return this.lastExpectations.lambdaBar;
 	}
 
-	public Double getBetaScaled() {
-		return this.lastExpectations.betaScaled;
+	public Double getBeta() {
+		return this.lastExpectations.beta;
+	}
+
+	public Double getUnconstrainedBeta() {
+		return this.lastExpectations.unconstrainedBeta;
+	}
+
+	public Double getPredictedUtilityChange() {
+		if ((this.lastExpectations.sumOfReplannerUtilityChanges != null)
+				&& (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
+				&& (this.getBeta() != null)) {
+			return (this.lastExpectations.sumOfReplannerUtilityChanges
+					- this.lastExpectations.sumOfWeightedReplannerCountDifferences2 / this.getBeta());
+		} else {
+			return null;
+		}
 	}
 
 	public Double getSumOfWeightedCountDifferences2() {
@@ -58,7 +77,8 @@ public class LogDataWrapper {
 	}
 
 	public Double getLastRealizedUtilitySum() {
-		return this.accelerator.getRealizedUtilitySum();
+		// return this.accelerator.getRealizedUtilitySum();
+		return this.summaryStats.realizedUtilitySum;
 	}
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
@@ -74,19 +94,23 @@ public class LogDataWrapper {
 	}
 
 	public Double getLastRealizedUtilityChangeSum() {
-		return this.accelerator.getRealizedUtilityChangeSum();
+		// return this.accelerator.getRealizedUtilityChangeSum();
+		return this.summaryStats.realizedUtilityChangeSum;
 	}
 
 	public List<Integer> getSortedAges() {
-		return this.accelerator.getSortedAgesView();
+		// return this.accelerator.getSortedAgesView();
+		return this.ages.getSortedAges();
 	}
 
 	public Double getAverageAge() {
-		return this.accelerator.getAveragAge();
+		// return this.accelerator.getAveragAge();
+		return this.ages.getAverageAge();
 	}
 
 	public Double getAverageWeight() {
-		return this.accelerator.getAverageWeight();
+		// return this.accelerator.getAverageWeight();
+		return this.ages.getAverageWeight();
 	}
 
 	public Double getSumOfUnweightedReplannerCountDifferences2() {
@@ -133,53 +157,54 @@ public class LogDataWrapper {
 		return this.lastExpectations.nonReplannerSizeSum;
 	}
 
-	public Double getRelativeUtilityEfficiency() {
-		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)
-				&& (this.lastExpectations.getSumOfUtilityChanges() != null)) {
-			return Math.abs(
-					this.accelerator.getRealizedUtilityChangeSum() - this.lastExpectations.sumOfReplannerUtilityChanges)
-					/ this.lastExpectations.getSumOfUtilityChanges();
-		} else {
-			return null;
-		}
-	}
+	// public Double getRelativeUtilityEfficiency() {
+	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)
+	// && (this.lastExpectations.getSumOfUtilityChanges() != null)) {
+	// return Math.abs(
+	// this.accelerator.getRealizedUtilityChangeSum() -
+	// this.lastExpectations.sumOfReplannerUtilityChanges)
+	// / this.lastExpectations.getSumOfUtilityChanges();
+	// } else {
+	// return null;
+	// }
+	// }
 
-	public Double getRelativeSlotVariability() {
-		if ((this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
-				&& (this.lastExpectations.getSumOfWeightedCountDifferences2() != null)) {
-			return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
-					/ this.lastExpectations.getSumOfWeightedCountDifferences2();
-		} else {
-			return null;
-		}
-	}
+	// public Double getRelativeSlotVariability() {
+	// if ((this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
+	// && (this.lastExpectations.getSumOfWeightedCountDifferences2() != null)) {
+	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
+	// / this.lastExpectations.getSumOfWeightedCountDifferences2();
+	// } else {
+	// return null;
+	// }
+	// }
 
-	public Double getEstimatedBetaNumerator() {
-		return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
-	}
+	// public Double getEstimatedBetaNumerator() {
+	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
+	// }
 
-	public Double getEstimatedBetaDenominator() {
-		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)) {
-			return Math.abs(this.accelerator.getRealizedUtilityChangeSum()
-					- this.lastExpectations.sumOfReplannerUtilityChanges);
-		} else {
-			return null;
-		}
+	// public Double getEstimatedBetaDenominator() {
+	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)) {
+	// return Math.abs(this.accelerator.getRealizedUtilityChangeSum()
+	// - this.lastExpectations.sumOfReplannerUtilityChanges);
+	// } else {
+	// return null;
+	// }
+	//
+	// }
 
-	}
-
-//	public Double getEstimatedBeta() {
-//		if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-//				&& (this.lastExpectations.sumOfReplannerUtilityChanges != null)
-//				&& (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)) {
-//			return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
-//					/ Math.abs(this.accelerator.getRealizedUtilityChangeSum()
-//							- this.lastExpectations.sumOfReplannerUtilityChanges);
-//		} else {
-//			return null;
-//		}
-//	}
+	// public Double getEstimatedBeta() {
+	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
+	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)
+	// && (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)) {
+	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
+	// / Math.abs(this.accelerator.getRealizedUtilityChangeSum()
+	// - this.lastExpectations.sumOfReplannerUtilityChanges);
+	// } else {
+	// return null;
+	// }
+	// }
 
 }

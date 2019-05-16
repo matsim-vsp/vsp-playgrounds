@@ -28,7 +28,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class RelativeSlotVariability implements Statistic<LogDataWrapper> {
+public class UnconstrainedBeta implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
@@ -37,7 +37,7 @@ public class RelativeSlotVariability implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return "DEPRECATED"; // Statistic.toString(arg0.getRelativeSlotVariability());
+		return Statistic.toString(arg0.getUnconstrainedBeta());
 	}
 
 }

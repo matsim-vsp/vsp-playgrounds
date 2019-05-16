@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -35,8 +37,7 @@ public class RelativeUtilityEfficiency implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getRelativeUtilityEfficiency());
+		return "DEPRECATED"; // Statistic.toString(arg0.getRelativeUtilityEfficiency());
 	}
 
 }
-

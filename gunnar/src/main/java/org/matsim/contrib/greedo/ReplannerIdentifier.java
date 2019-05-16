@@ -64,24 +64,15 @@ public class ReplannerIdentifier {
 	private final double totalUtilityChange;
 
 	private final double lambdaBar;
-	private final double betaScaled;
-
-	// private Double sumOfUnweightedReplannerCountDifferences2 = null;
-	// private Double sumOfWeightedReplannerCountDifferences2 = null;
-	// private Double lastExpectedUtilityChangeSumAccelerated = null;
-
-	// private Double sumOfUnweightedNonReplannerCountDifferences2 = null;
-	// private Double sumOfWeightedNonReplannerCountDifferences2 = null;
-	// private Double nonReplannerUtilityChangeSum = null;
-
-	// private Double replannerSizeSum = null;
-	// private Double nonReplannerSizeSum = null;
+	private final double beta;
+	private final Double unconstrainedBeta;
+	// private final Double delta;
 
 	private LastExpectations lastExpectations = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final Double overrideLambda, final Double lastEstimatedBetaScaled,
+	ReplannerIdentifier(final Double overrideLambda, final double unconstrainedBeta,
 			final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
@@ -122,70 +113,20 @@ public class ReplannerIdentifier {
 		final double sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
-		// TODO HARDWIRED
+		this.unconstrainedBeta = unconstrainedBeta;
 		if (overrideLambda != null) {
 			this.lambdaBar = overrideLambda;
-			this.betaScaled = 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2
-					/ Math.max(this.totalUtilityChange, 1e-8);
-		} else if (lastEstimatedBetaScaled != null) {
-			this.lambdaBar = 0.5 * lastEstimatedBetaScaled * this.totalUtilityChange / sumOfWeightedCountDifferences2;
-			this.betaScaled = lastEstimatedBetaScaled;
+			this.beta = 2.0 * overrideLambda * sumOfWeightedCountDifferences2 / Math.max(this.totalUtilityChange, 1e-8);
 		} else {
-			this.lambdaBar = 1.0;
-			this.betaScaled = 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2
-					/ Math.max(this.totalUtilityChange, 1e-8);
+			if (unconstrainedBeta <= 0) {
+				throw new RuntimeException("(unconstrainedBeta < 0) calls for (overrideLambda != null)");
+			}
+			this.beta = unconstrainedBeta;
+			this.lambdaBar = 0.5 * unconstrainedBeta * this.totalUtilityChange
+					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
 		}
+		// this.delta = replanningEfficiencyEstimator.getDelta(); // identically zero
 	}
-
-	// -------------------- GETTERS (FOR LOGGING) --------------------
-
-	// public Double getSumOfUnweightedCountDifferences2() {
-	// return this.sumOfUnweightedCountDifferences2;
-	// }
-
-	// public Double getSumOfWeightedCountDifferences2() {
-	// return this.sumOfWeightedCountDifferences2;
-	// }
-
-	// public Double getLambdaBar() {
-	// return this.lambdaBar;
-	// }
-
-	// public Double getBeta() {
-	// return this.beta;
-	// }
-
-	// public Double getSumOfUnweightedReplannerCountDifferences2() {
-	// return this.sumOfUnweightedReplannerCountDifferences2;
-	// }
-
-	// public Double getSumOfWeightedReplannerCountDifferences2() {
-	// return this.sumOfWeightedReplannerCountDifferences2;
-	// }
-
-	// public Double getSumOfUnweightedNonReplannerCountDifferences2() {
-	// return this.sumOfUnweightedNonReplannerCountDifferences2;
-	// }
-
-	// public Double getSumOfWeightedNonReplannerCountDifferences2() {
-	// return this.sumOfWeightedNonReplannerCountDifferences2;
-	// }
-
-	// public Double getReplannerExpectedUtilityChangeSum() {
-	// return this.lastExpectedUtilityChangeSumAccelerated;
-	// }
-
-	// public Double getNonReplannerExpectedUtilityChangeSum() {
-	// return this.nonReplannerUtilityChangeSum;
-	// }
-
-	// public Double getReplannerSizeSum() {
-	// return this.replannerSizeSum;
-	// }
-
-	// public Double getNonReplannerSizeSum() {
-	// return this.nonReplannerSizeSum;
-	// }
 
 	// -------------------- IMPLEMENTATION --------------------
 
@@ -241,9 +182,8 @@ public class ReplannerIdentifier {
 		for (Id<Person> personId : allPersonIdsShuffled) {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
-					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar, this.betaScaled,
-					interactionResiduals, inertiaResidual, this.personId2UtilityChange.get(personId),
-					sumOfInteractionResiduals2);
+					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar, this.beta, interactionResiduals,
+					inertiaResidual, this.personId2UtilityChange.get(personId), sumOfInteractionResiduals2);
 
 			final boolean replanner = recipe.isReplanner(personId, scoreUpdater.getScoreChangeIfOne(),
 					scoreUpdater.getScoreChangeIfZero());
@@ -298,7 +238,7 @@ public class ReplannerIdentifier {
 					.sumOfEntries2(weightedNonReplannerCountDifferences);
 		}
 
-		this.lastExpectations = new LastExpectations(this.lambdaBar, this.betaScaled,
+		this.lastExpectations = new LastExpectations(this.lambdaBar, this.beta, this.unconstrainedBeta,
 				lastExpectedUtilityChangeSumAccelerated, sumOfUnweightedReplannerCountDifferences2,
 				sumOfWeightedReplannerCountDifferences2, sumOfUnweightedNonReplannerCountDifferences2,
 				sumOfWeightedNonReplannerCountDifferences2, nonReplannerUtilityChangeSum, replannerSizeSum,
@@ -318,7 +258,8 @@ public class ReplannerIdentifier {
 	public static class LastExpectations {
 
 		public final Double lambdaBar;
-		public final Double betaScaled;
+		public final Double beta;
+		public final Double unconstrainedBeta;
 		public final Double sumOfReplannerUtilityChanges;
 		public final Double sumOfNonReplannerUtilityChanges;
 		public final Double sumOfUnweightedReplannerCountDifferences2;
@@ -330,7 +271,7 @@ public class ReplannerIdentifier {
 		public final Integer numberOfReplanners;
 		public final Integer numberOfNonReplanners;
 
-		LastExpectations(final Double lambdaBar, final Double betaScaled,
+		LastExpectations(final Double lambdaBar, final Double beta, final Double unconstrainedBeta,
 				final Double lastExpectedUtilityChangeSumAccelerated,
 				final Double sumOfUnweightedReplannerCountDifferences2,
 				final Double sumOfWeightedReplannerCountDifferences2,
@@ -339,7 +280,8 @@ public class ReplannerIdentifier {
 				final Double replannerSizeSum, final Double nonReplannerSizeSum, final Integer numberOfReplanners,
 				final Integer numberOfNonReplanners) {
 			this.lambdaBar = lambdaBar;
-			this.betaScaled = betaScaled;
+			this.beta = beta;
+			this.unconstrainedBeta = unconstrainedBeta;
 			this.sumOfReplannerUtilityChanges = lastExpectedUtilityChangeSumAccelerated;
 			this.sumOfNonReplannerUtilityChanges = nonReplannerUtilityChangeSum;
 			this.sumOfUnweightedReplannerCountDifferences2 = sumOfUnweightedReplannerCountDifferences2;

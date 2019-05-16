@@ -24,6 +24,8 @@ import static java.lang.Math.min;
 
 import java.util.List;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**

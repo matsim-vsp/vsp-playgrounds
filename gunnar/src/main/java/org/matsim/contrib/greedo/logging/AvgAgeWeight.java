@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**

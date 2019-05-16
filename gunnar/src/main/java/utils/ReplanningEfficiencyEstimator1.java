@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
  * @author Gunnar Flötteröd
  *
  */
-public class ReplanningEfficiencyEstimator {
+public class ReplanningEfficiencyEstimator1 {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -50,7 +50,7 @@ public class ReplanningEfficiencyEstimator {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public ReplanningEfficiencyEstimator(final double minLambda, final double networkLoadingNoiseEquivalentLambda) {
+	public ReplanningEfficiencyEstimator1(final double minLambda, final double networkLoadingNoiseEquivalentLambda) {
 		this.minLambda = minLambda;
 		this.networkLoadingNoiseEquivalentLambda = networkLoadingNoiseEquivalentLambda;
 	}
@@ -81,7 +81,7 @@ public class ReplanningEfficiencyEstimator {
 
 	static void test1() {
 		final Random rnd = new Random();
-		ReplanningEfficiencyEstimator estim = new ReplanningEfficiencyEstimator(0.01, 0.01);
+		ReplanningEfficiencyEstimator1 estim = new ReplanningEfficiencyEstimator1(0.01, 0.01);
 		System.out.println("realized\texpected\teta\tetaStddev");
 		for (int k = 0; k < 1000; k++) {
 			final double realized = Math.pow(0.9, k) * (1.0 + 0.9 * (rnd.nextDouble() - 0.5))

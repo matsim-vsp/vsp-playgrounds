@@ -1,5 +1,7 @@
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 public class LambdaRealized extends PopulationAverageStatistic {
 
 	@Override

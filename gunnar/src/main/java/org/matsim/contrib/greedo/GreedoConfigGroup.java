@@ -168,6 +168,34 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.stepSizeField = stepSizeField;
 	}
 
+	// --------------- replanningEfficiencyEstimationInertia ---------------
+
+	private double replanningEfficiencyEstimationInertia = 1.0;
+
+	@StringGetter("replanningEfficiencyEstimationInertia")
+	public double getReplanningEfficiencyEstimationInertia() {
+		return this.replanningEfficiencyEstimationInertia;
+	}
+
+	@StringSetter("replanningEfficiencyEstimationInertia")
+	public void setReplanningEfficiencyEstimationInertia(double replanningEfficiencyEstimationInertia) {
+		this.replanningEfficiencyEstimationInertia = replanningEfficiencyEstimationInertia;
+	}
+
+	// --------------- warmupIterations ---------------
+
+	private int warmUpIterations = 3;
+
+	@StringGetter("warmUpIterations")
+	public int getWarmUpIterations() {
+		return this.warmUpIterations;
+	}
+
+	@StringSetter("warmUpIterations")
+	public void setWarmUpIterations(int warmUpIterations) {
+		this.warmUpIterations = warmUpIterations;
+	}
+
 	// -------------------- eta --------------------
 
 	private double betaScale = 1.0;
