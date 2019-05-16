@@ -48,12 +48,12 @@ import playground.vsp.andreas.osmBB.extended.TransitScheduleImpl;
 /**
  * @author tthunig
  */
-public class ConvertGTFS {
+public class ConvertCottbusGTFS {
 
-	private static final Logger log = Logger.getLogger(ConvertGTFS.class);
+	private static final Logger log = Logger.getLogger(ConvertCottbusGTFS.class);
 
 	public static void main(String[] args) {
-		new ConvertGTFS().run("../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/Cottbus-pt/gtfs-2012/openvbb-archiver_20121130_0405.zip");
+		new ConvertCottbusGTFS().run("../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/Cottbus-pt/gtfs-2012/openvbb-archiver_20121130_0405.zip");
 	}
 	
     public Scenario run(String gtfsZipFile) {
