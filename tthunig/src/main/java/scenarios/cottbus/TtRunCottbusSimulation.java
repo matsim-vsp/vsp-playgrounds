@@ -249,7 +249,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = false;
 	private static final boolean USE_COUNTS = false;
-	private static double SCALING_FACTOR = 1.;
+	private static double SCALING_FACTOR = .5;
 	
 	private static TtGeneralAnalysis ANALYSIS_TOOL;
 	
@@ -1008,34 +1008,34 @@ public class TtRunCottbusSimulation {
 			config.strategy().addStrategySettings(strat);
 		}
 		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
-			strat.setWeight(0.0);
-			config.strategy().addStrategySettings(strat);
-			config.timeAllocationMutator().setMutationRange(1800); // 1800 is default
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
+//			config.timeAllocationMutator().setMutationRange(1800); // 1800 is default
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.9);
+			strat.setWeight(0.8);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.BestScore.toString());
-			strat.setWeight(0.0);
-			config.strategy().addStrategySettings(strat);
-		}
-		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
-			strat.setWeight(0.0);
-			config.strategy().addStrategySettings(strat);
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultSelector.BestScore.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
+//		}
+//		{
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.SubtourModeChoice.toString());
-			strat.setWeight(0.0);
+			strat.setWeight(0.1);
 			config.strategy().addStrategySettings(strat);
 		}
 
@@ -1111,10 +1111,14 @@ public class TtRunCottbusSimulation {
 		
 		// TODO
 //		config.planCalcScore().getModes().get("pt").setConstant(alternativeSpecificConstantPt); // default is 0
-		config.plansCalcRoute().getModeRoutingParams().get("pt").setBeelineDistanceFactor(1.3); // default is 1.3
-		config.plansCalcRoute().getModeRoutingParams().get("pt").setTeleportedModeFreespeedFactor(1.5); // default is 2.0
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setBeelineDistanceFactor( 1.3 ); // default is 1.3
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setTeleportedModeFreespeedFactor( 2.0 ); // default is 2.0
 		String[] modes = {"pt", "car"};
 		config.subtourModeChoice().setModes(modes);
+//		config.subtourModeChoice().setProbaForRandomSingleTripMode( 0.5 ); // default is 0.0. for non-chain based modes (e.g. pt+walk)
+		
+		// TODO
+		config.global().setNumberOfThreads(2); // 2 is default
 		
 		config.global().setCoordinateSystem("EPSG:25833"); //UTM33
 		
