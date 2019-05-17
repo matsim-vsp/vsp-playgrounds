@@ -15,7 +15,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 /**
@@ -39,22 +38,17 @@ public final class KNTaxiBus {
 		
 		config.checkConsistency();
 
-		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, true,
-				KNTaxiBus::createCustomizedDrtScenario);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, true);
+		KNTaxiBus.customizeDrtScenario(controler.getScenario());
 		controler.run() ;
 	}
 
-	private static Scenario createCustomizedDrtScenario(Config config) {
-		Scenario scenario = DrtControlerCreator.createScenarioWithDrtRouteFactory(config);
-		ScenarioUtils.loadScenario(scenario);
-
+	private static void customizeDrtScenario(Scenario scenario) {
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			for (PlanElement pe : person.getSelectedPlan().getPlanElements()) {
 				((Activity)pe).setEndTime(0 * 3600. + MatsimRandom.getRandom().nextDouble() * 7200.);
 				break;
 			}
 		}
-
-		return scenario;
 	}
 }
