@@ -7,7 +7,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.drt.run.DrtConfigConsistencyChecker;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -30,7 +29,7 @@ public final class KNTaxiBus {
 		Config config = ConfigUtils.loadConfig("drt_example/drtconfig_door2door.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
 		config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
-		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());
+//		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());
 		
 		DrtConfigGroup drtConfig = ConfigUtils.addOrGetModule(config,DrtConfigGroup.class) ;
 		ConfigUtils.addOrGetModule(config,DvrpConfigGroup.class) ;
