@@ -19,6 +19,7 @@
  */
 package gunnar.wum.malin;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -50,8 +51,8 @@ public class AnalysisRunner {
 	public static void main(String[] args) throws FileNotFoundException {
 		System.out.println("STARTED ...");
 
-		 System.out.println("System.exit(0);");
-		 System.exit(0);
+		System.out.println("System.exit(0);");
+		System.exit(0);
 
 		final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
 		final ZonalSystem zonalSystem = new ZonalSystem(zonesShapeFileName,
@@ -124,14 +125,34 @@ public class AnalysisRunner {
 
 		// linkStats.writeLinkData("./malin/linkStats8-9.csv");
 
-		writeZonalUsageStatistics(scenario, zonalSystem, manager);
-
+		writeInterZonalStatistics(scenario, zonalSystem, manager);
+		// writeZonalUsageStatistics(scenario, zonalSystem, manager);
 		// writeLinkDataPrivateCars(scenario, manager);
 		// writeLinkDataPublicTransport(scenario, manager);
 
-		// TODO write out
-
 		System.out.println("... DONE");
+	}
+
+	static void writeInterZonalStatistics(final Scenario scenario, final ZonalSystem zonalSystem,
+			final EventsManager manager) throws FileNotFoundException {
+
+		final EventsToLegs events2legs = new EventsToLegs(scenario);
+		final EventsToActivities events2acts = new EventsToActivities();
+		manager.addHandler(events2legs);
+		manager.addHandler(events2acts);
+
+		final InterZonalStatistics zoneStats = new InterZonalStatistics(zonalSystem, scenario);
+		events2legs.addLegHandler(zoneStats);
+		events2acts.addActivityHandler(zoneStats);
+
+		for (String zoneId : zonalSystem.getId2zoneView().keySet()) {
+			zoneStats.addOrigin(zoneId);
+			zoneStats.addDestination(zoneId);
+		}
+
+		EventsUtils.readEvents(manager, "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_events.xml.gz");
+
+		zoneStats.toFolder(new File("./malin/zones"));
 	}
 
 	static void writeZonalUsageStatistics(final Scenario scenario, final ZonalSystem zonalSystem,
