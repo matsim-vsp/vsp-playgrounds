@@ -20,6 +20,7 @@
  */
 package analysis;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,15 +41,13 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.network.filter.NetworkFilterManager;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.vehicles.Vehicle;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dgrether.analysis.eventsfilter.FeatureNetworkLinkCenterCoordFilter;
-import playground.dgrether.signalsystems.cottbus.CottbusUtils;
 
 /**
  * @author tthunig
@@ -68,11 +67,13 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 	private Map<Id<Person>, Double> pers2lastDepatureTime = new HashMap<>();
 
 	
-	public TtSubnetworkAnalyzer(String filterFeatureFilename, Network fullNetwork) {		
-		Tuple<CoordinateReferenceSystem, SimpleFeature> featureTuple = CottbusUtils.loadFeature(filterFeatureFilename);
+	public TtSubnetworkAnalyzer(String filterFeatureFilename, Network fullNetwork) {	
+		ShapeFileReader shapeReader = new ShapeFileReader();
+		Collection<SimpleFeature> features = shapeReader.readFileAndInitialize(filterFeatureFilename);
+		
 		NetworkFilterManager netFilter = new NetworkFilterManager(fullNetwork);
 		FeatureNetworkLinkCenterCoordFilter filter = new FeatureNetworkLinkCenterCoordFilter(
-				MGC.getCRS(TransformationFactory.WGS84_UTM33N), featureTuple.getSecond(), featureTuple.getFirst());
+				MGC.getCRS(TransformationFactory.WGS84_UTM33N), features.iterator().next(), shapeReader.getCoordinateSystem());
 		netFilter.addLinkFilter(filter);
 		subNetwork = netFilter.applyFilters();
 	}
