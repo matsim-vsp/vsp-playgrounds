@@ -674,7 +674,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(1000);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
