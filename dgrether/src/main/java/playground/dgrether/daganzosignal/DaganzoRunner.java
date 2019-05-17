@@ -19,9 +19,6 @@
  * *********************************************************************** */
 package playground.dgrether.daganzosignal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -39,9 +36,7 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 
-import playground.dgrether.analysis.charts.DgTravelTimeCalculatorChart;
 import playground.dgrether.analysis.charts.utils.DgChartWriter;
 import playground.dgrether.linkanalysis.DgCountPerIterationGraph;
 import playground.dgrether.linkanalysis.TTGraphWriter;
@@ -134,21 +129,21 @@ public class DaganzoRunner {
 					//				inoutWriter.addInOutEventHandler(handler4);
 					//				inoutWriter.writeInOutChart(e.getServices().getControlerIO().getIterationPath(e.getIteration()), e.getIteration());
 
-					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
-					ttcalcChart.setStartTime(10.0);
-					ttcalcChart.setEndTime(3600.0 * 2.5);
-					List<Id<Link>> list = new ArrayList<>();
-					list.add(Id.create("2", Link.class));
-					ttcalcChart.addLinkId(list);
-					list = new ArrayList<>();
-					list.add(Id.create("4", Link.class));
-					ttcalcChart.addLinkId(list);
-					list = new ArrayList<>();
-					list.add(Id.create("3", Link.class));
-					list.add(Id.create("5", Link.class));
-					ttcalcChart.addLinkId(list);
-					DgChartWriter.writeChart(e.getServices().getControlerIO().getIterationFilename(e.getIteration(), "ttcalculator"),
-							ttcalcChart.createChart());
+//					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
+//					ttcalcChart.setStartTime(10.0);
+//					ttcalcChart.setEndTime(3600.0 * 2.5);
+//					List<Id<Link>> list = new ArrayList<>();
+//					list.add(Id.create("2", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					list = new ArrayList<>();
+//					list.add(Id.create("4", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					list = new ArrayList<>();
+//					list.add(Id.create("3", Link.class));
+//					list.add(Id.create("5", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					DgChartWriter.writeChart(e.getServices().getControlerIO().getIterationFilename(e.getIteration(), "ttcalculator"),
+//							ttcalcChart.createChart());
 
 				if ( e.getIteration() % 10 == 0 ) {
 					DgCountPerIterationGraph chart = new DgCountPerIterationGraph(e.getServices().getConfig().controler());
