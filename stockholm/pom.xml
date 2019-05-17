@@ -54,10 +54,10 @@
  	-->
  
   		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>matsim-gtfs</artifactId>
-			<version>0.10.0</version>
-  		</dependency>
+            <groupId>com.github.matsim-org</groupId>
+            <artifactId>GTFS2MATSim</artifactId>
+            <version>-SNAPSHOT</version>
+        </dependency>
 
 		<!--    		 
 		<dependency>
