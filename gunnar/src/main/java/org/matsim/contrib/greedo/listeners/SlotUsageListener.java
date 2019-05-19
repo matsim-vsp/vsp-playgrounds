@@ -55,6 +55,10 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	private final PrivateTrafficLinkUsageListener privateTrafficLinkUsageListener;
 
 	private final TransitVehicleUsageListener transitVehicleUsageListener;
+	
+	private boolean hasBeenResetOnceAndForAll = false;
+
+	private Integer lastResetIteration = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -80,32 +84,47 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		// Need a deep copy because of subsequent (pSim) resets.
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
+	
+	public Integer getLastResetIteration() {
+		return this.lastResetIteration;
+	}
+
+	public void resetOnceAndForAll(final int iteration) {
+		if (this.hasBeenResetOnceAndForAll) {
+			throw new RuntimeException("This listener has already been resetted once and for all.");
+		}
+		this.reset(iteration);
+		this.hasBeenResetOnceAndForAll = true;
+	}
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
 	@Override
 	public void reset(final int iteration) {
-		this.privateTrafficLinkUsageListener.reset(iteration);
-		this.transitVehicleUsageListener.reset(iteration);
+		if (!this.hasBeenResetOnceAndForAll) {
+			this.lastResetIteration = iteration;
+			this.privateTrafficLinkUsageListener.reset(iteration);
+			this.transitVehicleUsageListener.reset(iteration);
+		}		
 	}
 
 	@Override
-	public void handleEvent(final VehicleEntersTrafficEvent event) {
+	public synchronized void handleEvent(final VehicleEntersTrafficEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final LinkEnterEvent event) {
+	public synchronized void handleEvent(final LinkEnterEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final PersonEntersVehicleEvent event) {
+	public synchronized void handleEvent(final PersonEntersVehicleEvent event) {
 		this.transitVehicleUsageListener.handleEvent(event);
 	}
 
 	@Override
-	public void handleEvent(final VehicleLeavesTrafficEvent event) {
+	public synchronized void handleEvent(final VehicleLeavesTrafficEvent event) {
 		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 }

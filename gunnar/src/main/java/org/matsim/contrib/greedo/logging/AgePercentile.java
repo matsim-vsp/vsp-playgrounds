@@ -24,6 +24,8 @@ import static java.lang.Math.min;
 
 import java.util.List;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -46,7 +48,7 @@ public class AgePercentile implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(final LogDataWrapper logData) {
-		final List<Integer> ages = logData.getSortedAgesView();
+		final List<Integer> ages = logData.getSortedAges();
 		if (ages == null) {
 			return Statistic.toString(null);
 		} else {

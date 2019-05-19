@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -26,15 +28,9 @@ package org.matsim.contrib.greedo.logging;
  */
 public class NormalizedUnweightedCountDifferences2 extends PopulationAverageStatistic {
 
-	// @Override
-	// public String label() {
-	// return SumOfUnweightedCountDifferences2.class.getSimpleName();
-	// }
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getSumOfUnweightedCountDifferences2(), arg0.getPopulationSize());
-		// return Statistic.toString(arg0.getSumOfUnweightedCountDifferences2());
 	}
 
 }

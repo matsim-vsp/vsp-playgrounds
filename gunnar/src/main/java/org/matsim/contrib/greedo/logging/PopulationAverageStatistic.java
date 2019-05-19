@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -40,9 +42,8 @@ public abstract class PopulationAverageStatistic implements Statistic<LogDataWra
 			return "";
 		}
 	}
-	
+
 	@Override
 	public abstract String value(LogDataWrapper arg0);
 
 }
-
