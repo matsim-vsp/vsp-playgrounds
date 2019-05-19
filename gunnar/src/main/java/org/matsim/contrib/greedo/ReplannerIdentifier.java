@@ -66,13 +66,13 @@ public class ReplannerIdentifier {
 	private final double lambdaBar;
 	private final double beta;
 	private final Double unconstrainedBeta;
-	// private final Double delta;
+	private final Double delta;
 
 	private LastExpectations lastExpectations = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final Double overrideLambda, final double unconstrainedBeta,
+	ReplannerIdentifier(final Double overrideLambda, final double unconstrainedBeta, final double delta,
 			final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
@@ -125,7 +125,7 @@ public class ReplannerIdentifier {
 			this.lambdaBar = 0.5 * unconstrainedBeta * this.totalUtilityChange
 					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
 		}
-		// this.delta = replanningEfficiencyEstimator.getDelta(); // identically zero
+		this.delta = delta; // only bookkeeping
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -238,7 +238,7 @@ public class ReplannerIdentifier {
 					.sumOfEntries2(weightedNonReplannerCountDifferences);
 		}
 
-		this.lastExpectations = new LastExpectations(this.lambdaBar, this.beta, this.unconstrainedBeta,
+		this.lastExpectations = new LastExpectations(this.lambdaBar, this.beta, this.unconstrainedBeta, this.delta,
 				lastExpectedUtilityChangeSumAccelerated, sumOfUnweightedReplannerCountDifferences2,
 				sumOfWeightedReplannerCountDifferences2, sumOfUnweightedNonReplannerCountDifferences2,
 				sumOfWeightedNonReplannerCountDifferences2, nonReplannerUtilityChangeSum, replannerSizeSum,
@@ -260,6 +260,7 @@ public class ReplannerIdentifier {
 		public final Double lambdaBar;
 		public final Double beta;
 		public final Double unconstrainedBeta;
+		public final Double delta;
 		public final Double sumOfReplannerUtilityChanges;
 		public final Double sumOfNonReplannerUtilityChanges;
 		public final Double sumOfUnweightedReplannerCountDifferences2;
@@ -271,7 +272,7 @@ public class ReplannerIdentifier {
 		public final Integer numberOfReplanners;
 		public final Integer numberOfNonReplanners;
 
-		LastExpectations(final Double lambdaBar, final Double beta, final Double unconstrainedBeta,
+		LastExpectations(final Double lambdaBar, final Double beta, final Double unconstrainedBeta, final Double delta,
 				final Double lastExpectedUtilityChangeSumAccelerated,
 				final Double sumOfUnweightedReplannerCountDifferences2,
 				final Double sumOfWeightedReplannerCountDifferences2,
@@ -282,6 +283,7 @@ public class ReplannerIdentifier {
 			this.lambdaBar = lambdaBar;
 			this.beta = beta;
 			this.unconstrainedBeta = unconstrainedBeta;
+			this.delta = delta;
 			this.sumOfReplannerUtilityChanges = lastExpectedUtilityChangeSumAccelerated;
 			this.sumOfNonReplannerUtilityChanges = nonReplannerUtilityChangeSum;
 			this.sumOfUnweightedReplannerCountDifferences2 = sumOfUnweightedReplannerCountDifferences2;

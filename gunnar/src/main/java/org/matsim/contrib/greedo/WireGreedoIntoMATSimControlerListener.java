@@ -48,6 +48,7 @@ import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
 import org.matsim.contrib.greedo.logging.Beta;
+import org.matsim.contrib.greedo.logging.Delta;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
@@ -105,7 +106,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 	// private Double realizedUtilitySum = null;
 
 	private ReplannerIdentifier.LastExpectations lastExpectations = new ReplannerIdentifier.LastExpectations(null, null,
-			null, null, null, null, null, null, null, null, null, null, null);
+			null, null, null, null, null, null, null, null, null, null, null, null);
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -130,6 +131,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new LambdaBar());
 		this.statsWriter.addSearchStatistic(new Beta());
 		this.statsWriter.addSearchStatistic(new UnconstrainedBeta());
+		this.statsWriter.addSearchStatistic(new Delta());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
@@ -295,7 +297,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.replanningEfficiencyEstimator.update(this.lastLogDataWrapper.getLastExpectedUtilityChangeSumAccelerated(),
 				this.lastLogDataWrapper.getLastRealizedUtilityChangeSum(),
 				this.lastLogDataWrapper.getSumOfWeightedReplannerCountDifferences2());
-		// final Double delta = this.replanningEfficiencyEstimator.getDelta();
+		final Double delta = this.replanningEfficiencyEstimator.getDelta();
 
 		final Double unconstrainedBeta = this.replanningEfficiencyEstimator.getBeta();
 		final Double overrideLambda;
@@ -307,7 +309,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(overrideLambda, unconstrainedBeta,
-				this.greedoConfig, this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(),
+				delta, this.greedoConfig, this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(),
 				hypotheticalSlotUsageIndicators, this.services.getScenario().getPopulation(),
 				utilityStats.personId2expectedUtilityChange);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();

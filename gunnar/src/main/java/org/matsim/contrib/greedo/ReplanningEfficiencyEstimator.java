@@ -21,6 +21,9 @@ package org.matsim.contrib.greedo;
 
 import org.apache.log4j.Logger;
 
+import floetteroed.utilities.math.Regression;
+import floetteroed.utilities.math.Vector;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -34,17 +37,14 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- MEMBERS --------------------
 
-	// private final Regression regression;
-
-	private double sumOfLogOfDeltaX2 = 0.0;
-	private double sumOfLogOfDeltaDeltaU = 0.0;
+	private final Regression regression;
 
 	private int observationCnt = 0;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt) {
-		// this.regression = new Regression(inertia, 1);
+		this.regression = new Regression(inertia, 2);
 		this.minObservationCnt = minObservationCnt;
 	}
 
@@ -57,15 +57,12 @@ class ReplanningEfficiencyEstimator {
 						+ ", realizedUtilityChange = " + realizedUtilityChange + ", anticipatedSlotUsageChange2 = "
 						+ anticipatedSlotUsageChange2 + ", observationCnt = " + this.observationCnt);
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
-				&& (anticipatedSlotUsageChange2 != null) && (anticipatedSlotUsageChange2 >= 1e-8)
-				&& (anticipatedUtilityChange - realizedUtilityChange >= 1e-8)) {
-			this.sumOfLogOfDeltaX2 += Math.log(anticipatedSlotUsageChange2);
-			this.sumOfLogOfDeltaDeltaU += Math.log(anticipatedUtilityChange - realizedUtilityChange);
-			// this.regression.update(new Vector(anticipatedUtilityChange -
-			// realizedUtilityChange),
-			// anticipatedSlotUsageChange2);
+				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
+			this.regression.update(new Vector(anticipatedSlotUsageChange2, 1.0),
+					anticipatedUtilityChange - realizedUtilityChange);
 			this.observationCnt++;
-			Logger.getLogger(this.getClass()).info("update accepted, leading to sumOfLogOfDeltaX2 = " + this.sumOfLogOfDeltaX2 + ", sumOfLogOfDeltaDeltaU = " + this.sumOfLogOfDeltaDeltaU + ", resulting in beta = " + this.getBeta());
+			Logger.getLogger(this.getClass()).info("update accepted, leading to 1/beta = " + (1.0 / this.getBeta())
+					+ " based on in total " + this.observationCnt + " observations.");
 		} else {
 			Logger.getLogger(this.getClass()).info("update rejected");
 		}
@@ -76,16 +73,10 @@ class ReplanningEfficiencyEstimator {
 	}
 
 	Double getBeta() {
-		return Math.exp(this.sumOfLogOfDeltaX2 - this.sumOfLogOfDeltaDeltaU);
+		return (1.0 / this.regression.getCoefficients().get(0));
 	}
 
-	@Deprecated
 	Double getDelta() {
-		return 0.0;
-		// if (this.hadEnoughData()) {
-		// return this.regression.getCoefficients().get(1);
-		// } else {
-		// return null;
-		// }
+		return this.regression.getCoefficients().get(1);
 	}
 }

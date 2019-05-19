@@ -57,6 +57,10 @@ public class LogDataWrapper {
 		return this.lastExpectations.unconstrainedBeta;
 	}
 
+	public Double getDelta() {
+		return this.lastExpectations.delta;
+	}
+
 	public Double getPredictedUtilityChange() {
 		if ((this.lastExpectations.sumOfReplannerUtilityChanges != null)
 				&& (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
