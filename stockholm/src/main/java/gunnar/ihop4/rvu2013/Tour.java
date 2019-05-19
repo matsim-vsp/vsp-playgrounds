@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.matsim.contrib.greedo.utils.SetUtils;
+import org.matsim.contrib.greedo_DEPRECATED.utils.SetUtils;
 import org.matsim.core.utils.collections.Tuple;
 
 /**
