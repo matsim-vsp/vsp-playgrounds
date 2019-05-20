@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
 
 /**
 * @author ikaddoura
@@ -45,8 +48,16 @@ public class RunODAnalysis {
 		final List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.drt);
 				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, crs , zoneId, modes, helpLegModes, stageActivitySubString, scaleFactor);
-		reader.run();
+		EventsManager events = EventsUtils.createEventsManager();
+
+		ODEventAnalysisHandler handler1 = new ODEventAnalysisHandler(helpLegModes, stageActivitySubString);
+		events.addHandler(handler1);
+
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(runDirectory + runId + ".output_events.xml.gz");
+		
+		ODAnalysis odAnalysis = new ODAnalysis(runDirectory, null, runId, shapeFile, crs , zoneId, modes, scaleFactor);
+		odAnalysis.process(handler1);
 	}
 
 }

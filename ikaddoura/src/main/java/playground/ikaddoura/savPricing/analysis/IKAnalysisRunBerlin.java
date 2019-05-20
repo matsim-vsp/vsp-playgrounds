@@ -129,6 +129,10 @@ public class IKAnalysisRunBerlin {
 		modes.add(TransportMode.taxi);
 		modes.add("car_bb");
 
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
+		
 		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
@@ -141,7 +145,8 @@ public class IKAnalysisRunBerlin {
 				filters1,
 				filters0,
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

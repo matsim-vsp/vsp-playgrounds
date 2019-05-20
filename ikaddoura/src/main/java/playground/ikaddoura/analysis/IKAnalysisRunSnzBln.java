@@ -52,6 +52,10 @@ public class IKAnalysisRunSnzBln {
 		String modesString = null;
 		String analyzeSubpopulation = null;
 		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
+		
 		if (args.length > 0) {
 			throw new RuntimeException();
 			
@@ -124,7 +128,9 @@ public class IKAnalysisRunSnzBln {
 				filter1,
 				filter0,
 				modes,
-				analyzeSubpopulation);
+				analyzeSubpopulation,
+				zoneId, helpLegModes, stageActivitySubString
+				);
 		analysis.run();
 	}
 	

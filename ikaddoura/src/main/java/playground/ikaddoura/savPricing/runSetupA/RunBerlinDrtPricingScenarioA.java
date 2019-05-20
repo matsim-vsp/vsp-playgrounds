@@ -152,6 +152,10 @@ public class RunBerlinDrtPricingScenarioA {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.drt);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
 
 		IKAnalysis analysis = new IKAnalysis(
 				controler.getScenario(),
@@ -165,7 +169,8 @@ public class RunBerlinDrtPricingScenarioA {
 				filters,
 				null,
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 		
 		// noise post-analysis

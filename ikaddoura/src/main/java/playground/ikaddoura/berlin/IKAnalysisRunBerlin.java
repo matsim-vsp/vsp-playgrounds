@@ -51,6 +51,10 @@ public class IKAnalysisRunBerlin {
 		final String homeActivityPrefix = "home";
 		final int scalingFactor = 100;
 		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
+		
 		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
 
@@ -91,7 +95,8 @@ public class IKAnalysisRunBerlin {
 				filters1,
 				null,
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

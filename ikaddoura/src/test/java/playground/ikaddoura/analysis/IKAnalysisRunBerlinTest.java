@@ -87,10 +87,6 @@ public class IKAnalysisRunBerlinTest {
 		final String homeActivityPrefix = "h";
 		final int scalingFactor = 100;
 		
-		final String taxiMode = TransportMode.taxi;
-		final String carMode = TransportMode.car;
-		final double rewardSAVformerCarUser = 5.3;
-		
 		final String analyzeSubpopulation = "person_no-potential-sav-user";
 		
 		// optional: person attributes file to replace the output person attributes file
@@ -111,7 +107,6 @@ public class IKAnalysisRunBerlinTest {
 		filter1b.preProcess(scenario1);
 		filters1.add(filter1b);
 		
-		
 		List<AgentAnalysisFilter> filters0 = new ArrayList<>();
 		
 		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
@@ -128,6 +123,10 @@ public class IKAnalysisRunBerlinTest {
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.pt);
 		modes.add("bicycle");
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = null;
 
 		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
@@ -141,7 +140,8 @@ public class IKAnalysisRunBerlinTest {
 				filters1,
 				filters0,
 				modes,
-				analyzeSubpopulation);
+				analyzeSubpopulation,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

@@ -50,10 +50,10 @@ public class IKAnalysisRunOpenBerlin {
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
-		String taxiMode = "taxi";
-		String carMode = "car_bb";
-		double rewardSAVuserFormerCarUser = 5.3;
 		String analyzeSubpopulation = null;
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
 		
 		if (args.length > 0) {
 			if (!args[0].equals("null")) runDirectory = args[0];
@@ -89,16 +89,7 @@ public class IKAnalysisRunOpenBerlin {
 			if (!args[10].equals("null")) modesString = args[10];
 			log.info("modes: " + modesString);
 			
-			if (!args[10].equals("null")) taxiMode = args[11];
-			log.info("taxiMode: " + taxiMode);
-			
-			if (!args[10].equals("null")) carMode = args[12];
-			log.info("carMode: " + carMode);
-			
-			rewardSAVuserFormerCarUser = Double.valueOf(args[13]);
-			log.info("rewardSAVuserFormerCarUser: " + rewardSAVuserFormerCarUser);
-			
-			analyzeSubpopulation = args[14];
+			analyzeSubpopulation = args[11];
 			log.info("analyzeSubpopulation: " + analyzeSubpopulation);
 			
 		} else {
@@ -165,7 +156,8 @@ public class IKAnalysisRunOpenBerlin {
 				filter1,
 				filter0,
 				modes,
-				analyzeSubpopulation);
+				analyzeSubpopulation,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	}
 	

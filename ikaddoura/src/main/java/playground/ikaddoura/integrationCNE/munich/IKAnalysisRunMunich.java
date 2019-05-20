@@ -60,6 +60,10 @@ public class IKAnalysisRunMunich {
 		modes.add("pt_COMMUTER_REV_COMMUTER");
 		modes.add(TransportMode.ride);
 		modes.add(TransportMode.walk);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
 
 		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
@@ -73,7 +77,8 @@ public class IKAnalysisRunMunich {
 				new ArrayList<>(),
 				new ArrayList<>(),
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

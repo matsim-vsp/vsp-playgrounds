@@ -202,6 +202,10 @@ public class RunBerlinPricing {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
 
 		IKAnalysis analysis = new IKAnalysis(
 				scenario,
@@ -215,7 +219,8 @@ public class RunBerlinPricing {
 				filters,
 				null,
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

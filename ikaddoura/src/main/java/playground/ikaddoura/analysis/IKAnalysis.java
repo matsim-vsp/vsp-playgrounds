@@ -35,11 +35,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.noise.personLinkMoneyEvents.CombinedPersonLinkMoneyEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
@@ -54,6 +51,8 @@ import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModeAnalysis;
 import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
+import playground.ikaddoura.analysis.od.ODAnalysis;
+import playground.ikaddoura.analysis.od.ODEventAnalysisHandler;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
@@ -98,8 +97,11 @@ public class IKAnalysis {
 	private final String scenarioCRS;	
 	private final String shapeFileZones;
 	private final String zonesCRS;
+	private final String zoneId;
 	private final String homeActivityPrefix;
 	private final int scalingFactor;
+	private final String[] helpLegModes;
+	private final String stageActivitySubString;
 		
 	// policy case
 	private final String runDirectory;
@@ -114,14 +116,14 @@ public class IKAnalysis {
 	private final List<AgentAnalysisFilter> filters0;
 	
 	private final List<String> modes;
-
+	
 	private String outputDirectoryName = "analysis-ik-v1.10";
 
 	private final String visualizationScriptInputDirectory;
 
 	private final String analyzeSubpopulation;
 	
-	public IKAnalysis(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String analyzeSubpopulation) {
+	public IKAnalysis(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String analyzeSubpopulation, String zoneId, String[] helpLegModes, String stageActivitySubString) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -148,11 +150,15 @@ public class IKAnalysis {
 		
 		this.modes = modes;
 		this.analyzeSubpopulation = analyzeSubpopulation;
+		
+		this.zoneId = zoneId;
+		this.helpLegModes = helpLegModes;
+		this.stageActivitySubString = stageActivitySubString;
 	}
 	
 	public IKAnalysis(Scenario scenario1, Scenario scenario0,
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String analyzeSubpopulation) {
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String analyzeSubpopulation, String zoneId, String[] helpLegModes, String stageActivitySubString) {
 
 		if (scenario0 != null) this.outputDirectoryName = this.outputDirectoryName + "-comparison";
 		
@@ -190,6 +196,9 @@ public class IKAnalysis {
 		this.modes = modes;
 		
 		this.analyzeSubpopulation = analyzeSubpopulation;
+		this.zoneId = zoneId;
+		this.helpLegModes = helpLegModes;
+		this.stageActivitySubString = stageActivitySubString;
 	}
 
 	public IKAnalysis(Scenario scenario, String crs, int scaleFactor) {
@@ -220,6 +229,10 @@ public class IKAnalysis {
 		modes.add(TransportMode.car);
 		
 		this.analyzeSubpopulation = null;
+		
+		this.zoneId = null;
+		this.helpLegModes = null;
+		this.stageActivitySubString = null;
 	}
 
 	public void run() {
@@ -258,6 +271,7 @@ public class IKAnalysis {
 		MoneyExtCostHandler personMoneyHandler1 = null;
 		ActDurationHandler actHandler1 = null;
 		VTTSHandler vttsHandler1 = null;
+		ODEventAnalysisHandler odHandler1 = null;
 
 		if (scenario1 != null) {
 			basicHandler1 = new BasicPersonTripAnalysisHandler();
@@ -278,6 +292,8 @@ public class IKAnalysis {
 			
 			vttsHandler1 = new VTTSHandler(scenario1);
 			
+			odHandler1 = new ODEventAnalysisHandler(helpLegModes, stageActivitySubString);
+			
 			events1 = EventsUtils.createEventsManager();
 			events1.addHandler(basicHandler1);
 			events1.addHandler(delayAnalysis1);
@@ -287,6 +303,7 @@ public class IKAnalysis {
 			events1.addHandler(personMoneyHandler1);
 			events1.addHandler(actHandler1);
 			events1.addHandler(vttsHandler1);
+			events1.addHandler(odHandler1);
 		}
 		
 		EventsManager events0 = null;
@@ -299,6 +316,7 @@ public class IKAnalysis {
 		MoneyExtCostHandler personMoneyHandler0 = null;
 		ActDurationHandler actHandler0 = null;
 		VTTSHandler vttsHandler0 = null;
+		ODEventAnalysisHandler odHandler0 = null;
 		
 		if (scenario0 != null) {
 			basicHandler0 = new BasicPersonTripAnalysisHandler();
@@ -318,6 +336,8 @@ public class IKAnalysis {
 			actHandler0 = new ActDurationHandler();
 			
 			vttsHandler0 = new VTTSHandler(scenario0);
+			
+			odHandler0 = new ODEventAnalysisHandler(helpLegModes, stageActivitySubString);
 
 			events0 = EventsUtils.createEventsManager();
 			events0.addHandler(basicHandler0);
@@ -328,6 +348,7 @@ public class IKAnalysis {
 			events0.addHandler(personMoneyHandler0);
 			events0.addHandler(actHandler0);
 			events0.addHandler(vttsHandler0);
+			events0.addHandler(odHandler0);
 		}
 
 		// #####################################
@@ -394,7 +415,8 @@ public class IKAnalysis {
 				actHandler1,
 				modeAnalysisList1,
 				vttsHandler1,
-				modes);
+				modes,
+				odHandler1);
 		
 		log.info("Printing results...");
 		if (scenario0 != null) printResults(scenario0,
@@ -409,7 +431,8 @@ public class IKAnalysis {
 				actHandler0,
 				modeAnalysisList0,
 				vttsHandler0,
-				modes);
+				modes,
+				odHandler0);
 
 		// #####################################
 		// Scenario comparison
@@ -543,7 +566,9 @@ public class IKAnalysis {
 			ActDurationHandler actHandler,
 			List<ModeAnalysis> modeAnalysisList,
 			VTTSHandler vttsHandler,
-			List<String> modes) {
+			List<String> modes,
+			ODEventAnalysisHandler odHandler
+			) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -726,79 +751,17 @@ public class IKAnalysis {
 				}
 			}
 		}
+		
+		// #####################################
+		// Print OD analysis
+		// #####################################
+		ODAnalysis odAnalysis = new ODAnalysis(analysisOutputDirectory, scenario.getNetwork(), scenario.getConfig().controler().getRunId(), this.shapeFileZones, this.zonesCRS, this.zoneId, this.modes, this.scalingFactor);
+		odAnalysis.process(odHandler);
 	}
 	
 	private void createDirectory(String directory) {
 		File file = new File(directory);
 		file.mkdirs();
-	}
-
-	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFileToReplaceOutputFile) {
-		log.info("Loading scenario...");
-		
-		if (runDirectory == null) {
-			return null;	
-		}
-		
-		if (runDirectory.equals("")) {
-			return null;	
-		}
-		
-		if (runDirectory.equals("null")) {
-			return null;	
-		}
-		
-		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
-
-		String networkFile;
-		String populationFile;
-		String personAttributesFile;
-		String configFile;
-		
-		if (new File(runDirectory + runId + ".output_config.xml").exists()) {
-			
-			configFile = runDirectory + runId + ".output_config.xml";
-			
-			networkFile = runId + ".output_network.xml.gz";
-			populationFile = runId + ".output_plans.xml.gz";
-			
-			if (personAttributesFileToReplaceOutputFile == null) {
-				personAttributesFile = runId + ".output_personAttributes.xml.gz";
-			} else {
-				personAttributesFile = personAttributesFileToReplaceOutputFile;
-			}
-			
-		} else {
-			
-			configFile = runDirectory + "output_config.xml";
-			
-			networkFile = "output_network.xml.gz";
-			populationFile = "output_plans.xml.gz";
-			
-			if (personAttributesFileToReplaceOutputFile == null) {
-				personAttributesFile = "output_personAttributes.xml.gz";
-			} else {
-				personAttributesFile = personAttributesFileToReplaceOutputFile;
-			}
-		}
-
-		Config config = ConfigUtils.loadConfig(configFile);
-
-		if (config.controler().getRunId() != null) {
-			if (!runId.equals(config.controler().getRunId())) throw new RuntimeException("Given run ID " + runId + " doesn't match the run ID given in the config file. Aborting...");
-		} else {
-			config.controler().setRunId(runId);
-		}
-
-		config.controler().setOutputDirectory(runDirectory);
-		config.plans().setInputFile(populationFile);
-		config.plans().setInputPersonAttributeFile(personAttributesFile);
-		config.network().setInputFile(networkFile);
-		config.vehicles().setVehiclesFile(null);
-		config.transit().setTransitScheduleFile(null);
-		config.transit().setVehiclesFile(null);
-		
-		return ScenarioUtils.loadScenario(config);
 	}
 	
 	private Map<Id<Person>, Double> getPersonId2UserBenefit(Scenario scenario) {

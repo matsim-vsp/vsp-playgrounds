@@ -24,8 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
 
 import playground.ikaddoura.analysis.od.ODAnalysis;
+import playground.ikaddoura.analysis.od.ODEventAnalysisHandler;
 
 /**
 * @author ikaddoura
@@ -59,8 +63,17 @@ public class RunODAnalysis {
 //		modes.add("bicycle");
 //		modes.add(TransportMode.ride);
 				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, "GK4", zoneId, modes, helpLegModes, stageActivitySubString, 10.);
-		reader.run();
+		EventsManager events = EventsUtils.createEventsManager();
+
+		ODEventAnalysisHandler handler1 = new ODEventAnalysisHandler(helpLegModes, stageActivitySubString);
+		events.addHandler(handler1);
+
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(runDirectory + runId + ".output_events.xml.gz");
+		
+		ODAnalysis odAnalysis = new ODAnalysis(runDirectory, null, runId, shapeFile, "GK4", zoneId, modes, 10.);
+		odAnalysis.process(handler1);
+		
 	}
 
 }

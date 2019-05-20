@@ -22,6 +22,7 @@ package playground.ikaddoura.analysis.od;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,12 +39,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
-import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
@@ -55,106 +50,84 @@ import org.opengis.feature.simple.SimpleFeature;
 
 
 /**
+ * 
+ * 
 * @author ikaddoura
 */
 public final class ODAnalysis {
 
 	private static final Logger log = Logger.getLogger(ODAnalysis.class);
 	private final String analysisOutputFolder = "od-analysis/";
-
-	private final String[] helpLegModes;
-	private final String stageActivitySubString;
-
+	
 	private final String outputDirectory;
-    private final String networkFile;
+    private final Network network;
 	private final String shapeFile;
 	private final String runId;
-	private final String runDirectory;
 	private final String zoneId;
 	private final List<String> modes;
 	private final Coord dummyCoord = new Coord(0.0, 0.0);
-	private final Coordinate dummyCoordinateOutside = new Coordinate(4628657,5803010);
+	private final Coordinate dummyCoordinateOutside = new Coordinate(0.0,0.0);
 	private final double scaleFactor;
 	private final String shapeFileCRS;
 
-	public ODAnalysis(String outputDirectory, String runDirectory, String runId, String shapeFile, String shapeFileCRS, String zoneId, List<String> modes, String[] helpLegModes, String stageActivitySubString, double scaleFactor) {
-
-		if (!outputDirectory.endsWith("/")) outputDirectory = outputDirectory + "/";
-
-		this.outputDirectory = outputDirectory;
-		this.shapeFile = shapeFile;
-		this.runId = runId;
-		this.runDirectory = runDirectory;
-		this.zoneId = zoneId;
-		this.modes = modes;
-		this.helpLegModes = helpLegModes;
-		this.stageActivitySubString = stageActivitySubString;
-        this.networkFile = null;
-        this.scaleFactor = scaleFactor;
-        this.shapeFileCRS = shapeFileCRS;
-    }
-
-    ODAnalysis(String outputDirectory, String networkFile, String runDirectory, String runId, String shapeFile, String shapeFileCRS, String zoneId, List<String> modes, String[] helpLegModes, String stageActivitySubString, double scaleFactor) {
+    /**
+     * @param outputDirectory
+     * @param network
+     * @param runId
+     * @param shapeFile
+     * @param shapeFileCRS
+     * @param zoneId
+     * @param modes
+     * @param scaleFactor
+     */
+    public ODAnalysis(String outputDirectory, Network network, String runId, String shapeFile, String shapeFileCRS, String zoneId, List<String> modes, double scaleFactor) {
         if (!outputDirectory.endsWith("/")) outputDirectory = outputDirectory + "/";
 
-        this.outputDirectory = outputDirectory;
+        this.outputDirectory = outputDirectory + analysisOutputFolder;
         this.shapeFile = shapeFile;
         this.runId = runId;
-        this.runDirectory = runDirectory;
         this.zoneId = zoneId;
         this.modes = modes;
-        this.helpLegModes = helpLegModes;
-        this.stageActivitySubString = stageActivitySubString;
-        this.networkFile = networkFile;
         this.scaleFactor = scaleFactor;
         this.shapeFileCRS = shapeFileCRS;
+		this.network = network;
 	}
 
-	public void run() throws IOException {
-
-		File file = new File(outputDirectory + analysisOutputFolder);
-		file.mkdirs();
-
-        Collection<SimpleFeature> features;
-        if (shapeFile.startsWith("http")) {
-            URL shapeFileAsURL = new URL(shapeFile);
-            features = ShapeFileReader.getAllFeatures(shapeFileAsURL);
-        } else {
-            features = ShapeFileReader.getAllFeatures(shapeFile);
-        }
-
-		Map<String, Geometry> zones = new HashMap<>();
-
-		for (SimpleFeature feature : features) {
-			String id = feature.getAttribute(zoneId).toString();
-			Geometry geometry = (Geometry) feature.getDefaultGeometry();
-			zones.put(id, geometry);
-		}
-
-		Network network = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getNetwork();
-		MatsimNetworkReader networkReader = new MatsimNetworkReader(network );
-        if(networkFile == null){
-    		networkReader.readFile(runDirectory + runId + ".output_network.xml.gz");
-        } else {
-    		if (networkFile.startsWith("http")) {
-    			networkReader.readURL(new URL(networkFile));
-    		} else {
-            	networkReader.readFile(networkFile);
-    		}
-        }
-        String crsNetwork = (String) network.getAttributes().getAttribute("coordinateReferenceSystem");
-		if (!shapeFileCRS.equalsIgnoreCase(crsNetwork)) {
-	        throw new RuntimeException("Coordinate transformation not yet implemented. Expecting shape file to have the following coordinate reference system: " + crsNetwork);
-	        // TODO: add coordinate transformation
+	public void process(ODEventAnalysisHandler handler1) {
+		
+		if (network != null && this.shapeFileCRS != null) {
+			String crsNetwork = (String) network.getAttributes().getAttribute("coordinateReferenceSystem");
+	        if (!shapeFileCRS.equalsIgnoreCase(crsNetwork)) {
+		        throw new RuntimeException("Coordinate transformation not yet implemented. Expecting shape file to have the following coordinate reference system: " + crsNetwork);
+		        // TODO: add coordinate transformation
+			}
 		}
 		
-		EventsManager events = EventsUtils.createEventsManager();
+		File file = new File(outputDirectory);
+		file.mkdirs();
 
-		ODEventAnalysisHandler handler1 = new ODEventAnalysisHandler(helpLegModes, stageActivitySubString);
-		events.addHandler(handler1);
-
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(runDirectory + runId + ".output_events.xml.gz");
+    	Map<String, Geometry> zones = new HashMap<>();
+        if (shapeFile != null) {
+            Collection<SimpleFeature> features;
+        	if (shapeFile.startsWith("http")) {
+                URL shapeFileAsURL = null;
+    			try {
+    				shapeFileAsURL = new URL(shapeFile);
+    			} catch (MalformedURLException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+                features = ShapeFileReader.getAllFeatures(shapeFileAsURL);
+            } else {
+                features = ShapeFileReader.getAllFeatures(shapeFile);
+            }
+        	
+    		for (SimpleFeature feature : features) {
+    			String id = feature.getAttribute(zoneId).toString();
+    			Geometry geometry = (Geometry) feature.getDefaultGeometry();
+    			zones.put(id, geometry);
+    		}
+        }
 
 		List<ODTrip> odTrips = new ArrayList<>();
 
@@ -213,13 +186,22 @@ public final class ODAnalysis {
 				}
 			}
 			log.info("filtered trips (sample size): " + filteredTripCounter);
-            writeData(filteredOdRelations, zones, outputDirectory + analysisOutputFolder + "od-analysis_DAY_" + modes.toString() + ".csv");
-            writeDataTable(filteredOdRelations, outputDirectory + analysisOutputFolder + "od-analysis_DAY_" + modes.toString() + "_from-to-format.csv");
-            printODLinesForEachAgent(filteredTrips, outputDirectory + analysisOutputFolder + "trip-od-analysis_DAY_" + modes.toString() + ".shp");
+            try {
+				writeData(filteredOdRelations, zones, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + ".csv");
+				writeDataTable(filteredOdRelations, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + "_from-to-format.csv");
+	            printODLinesForEachAgent(filteredTrips, outputDirectory + runId + ".trip-od-analysis_DAY_" + modes.toString() + ".shp");
 
+            } catch (IOException e) {
+				e.printStackTrace();
+			}
+            
 			Map<String, Map<String, ODRelation>> time2odRelation = new HashMap<>();
 			time2odRelation.put(from + "-" + to, filteredOdRelations);
-			printODLines(time2odRelation, zones, outputDirectory + analysisOutputFolder + "od-analysis_DAY_" + modes.toString() + ".shp");
+			try {
+				printODLines(time2odRelation, zones, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + ".shp");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		{
@@ -255,24 +237,36 @@ public final class ODAnalysis {
 					}
 				}
 				log.info("filtered trips (sample size): " + filteredTripCounter);
-				writeData(filteredOdRelations, zones, outputDirectory + analysisOutputFolder + "od-analysis_" + hour + "_" + modes.toString() + ".csv");
-				writeDataTable(filteredOdRelations, outputDirectory + analysisOutputFolder + "od-analysis_" + hour + "_" + modes.toString() + "_from-to-format.csv");
-				printODLinesForEachAgent(filteredTrips, outputDirectory + analysisOutputFolder + "trip-od-analysis_" + hour + "_" + modes.toString() + ".shp");
+				try {
+					writeData(filteredOdRelations, zones, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + ".csv");
+					writeDataTable(filteredOdRelations, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + "_from-to-format.csv");
+					printODLinesForEachAgent(filteredTrips, outputDirectory + runId + ".trip-od-analysis_" + hour + "_" + modes.toString() + ".shp");
 
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 				boolean writeHourlyShapefiles = true;
 
 				if (writeHourlyShapefiles) {
 					Map<String, Map<String, ODRelation>> time2odRelation = new HashMap<>();
 					time2odRelation.put(from + "-" + to, filteredOdRelations);
-					printODLines(time2odRelation, zones, outputDirectory + analysisOutputFolder + "od-analysis_" + hour + "_" + modes.toString() + ".shp");
+					try {
+						printODLines(time2odRelation, zones, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + ".shp");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 
 				time2odRelations.put(from + "-" + to, filteredOdRelations);
 			}
 
-			printODLines(time2odRelations, zones, outputDirectory + analysisOutputFolder + "od-analysis_HOURLY_" + modes.toString() + ".shp");
+			try {
+				printODLines(time2odRelations, zones, outputDirectory + runId + ".od-analysis_HOURLY_" + modes.toString() + ".shp");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-
 	}
 
 	private void writeData(Map<String, ODRelation> odRelations, Map<String, Geometry> zones,  String fileName) throws IOException {

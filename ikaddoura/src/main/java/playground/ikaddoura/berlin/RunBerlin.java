@@ -103,6 +103,10 @@ public class RunBerlin {
 		final String homeActivity = "home";
 		final int scalingFactor = scaleFactor;
 		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
+		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(controler.getScenario());
@@ -136,7 +140,8 @@ public class RunBerlin {
 				filters,
 				null,
 				modes,
-				null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 				
 		log.info("Done.");
