@@ -20,6 +20,10 @@
 package org.matsim.contrib.greedo;
 
 import java.util.List;
+import java.util.Map;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
 
 /**
  *
@@ -31,7 +35,7 @@ public class LogDataWrapper {
 	// private final WireGreedoIntoMATSimControlerListener accelerator;
 
 	private final Ages ages;
-
+	
 	Utilities.SummaryStatistics summaryStats;
 
 	private final ReplannerIdentifier.LastExpectations lastExpectations;
@@ -45,6 +49,20 @@ public class LogDataWrapper {
 		this.lastExpectations = lastExpectations;
 	}
 
+	public Ages getAges() {
+		return this.ages;
+	}
+
+	public Utilities.SummaryStatistics getSummaryStats() {
+		return this.summaryStats;
+	}
+	
+	public ReplannerIdentifier.LastExpectations getLastExpectations() {
+		return this.lastExpectations;
+	}
+	
+	// TODO remove detailed getters further below
+	
 	public Double getLambdaBar() {
 		return this.lastExpectations.lambdaBar;
 	}
@@ -80,6 +98,10 @@ public class LogDataWrapper {
 		return this.lastExpectations.getSumOfUnweightedCountDifferences2();
 	}
 
+	public Map<Id<Person>, Double> getSimilarities() {
+		return this.lastExpectations.personId2similarity;
+	}
+	
 	public Double getLastRealizedUtilitySum() {
 		// return this.accelerator.getRealizedUtilitySum();
 		return this.summaryStats.realizedUtilitySum;

@@ -34,7 +34,7 @@ import org.matsim.api.core.v01.population.Person;
  * @author Gunnar Flötteröd
  * 
  */
-class Ages {
+public class Ages {
 
 	// -------------------- MEMBERS --------------------
 
@@ -71,6 +71,11 @@ class Ages {
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
+
+	// TODO NEW, decide where to move this class and what to make public
+	public Map<Id<Person>, Integer> getPersonId2AgeView() {
+		return Collections.unmodifiableMap(this.personId2age);
+	}
 
 	void update(final Set<Id<Person>> replanners) {
 		this.personId2age = Collections

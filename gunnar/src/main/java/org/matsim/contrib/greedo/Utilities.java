@@ -32,7 +32,7 @@ import org.matsim.api.core.v01.population.Person;
  * @author Gunnar Flötteröd
  *
  */
-class Utilities {
+public class Utilities {
 
 	// -------------------- INNER Entry CLASS --------------------
 
@@ -80,10 +80,11 @@ class Utilities {
 
 	// -------------------- INNER SummaryStatistics CLASS --------------------
 
-	class SummaryStatistics {
+	// TODO decide about scope; this is used in the logging package
+	public class SummaryStatistics {
 
 		// set to an unmodifiable instance
-		final Map<Id<Person>, Double> personId2expectedUtilityChange;
+		public final Map<Id<Person>, Double> personId2expectedUtilityChange;
 
 		final double expectedUtilitySum;
 		final double realizedUtilitySum;

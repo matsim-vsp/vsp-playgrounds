@@ -21,6 +21,7 @@ package gunnar.ihop4.sampersutilities;
 
 import java.util.LinkedList;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -124,6 +125,7 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	@Override
 	public void handleEvent(Event event) {
+		// Logger.getLogger(this.getClass()).warn("unprocessed event: " + event);
 	}
 
 	@Override
@@ -136,6 +138,7 @@ public class SampersScoringFunction implements ScoringFunction {
 		if (this.stuck) {
 			this.score = this.utlFct.getStuckScore(this.person);
 		} else {
+			// TODO Score should be zero upon creation of this object.
 			for (SampersTour tour : this.tours) {
 				this.score += this.utlFct.getUtility(tour, this.person);
 			}

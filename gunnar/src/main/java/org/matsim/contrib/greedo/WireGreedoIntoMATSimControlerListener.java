@@ -36,6 +36,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
+import org.matsim.contrib.greedo.logging.AsymptoticAgeLogger;
 import org.matsim.contrib.greedo.logging.AvgAge;
 import org.matsim.contrib.greedo.logging.AvgAgeWeight;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
@@ -97,6 +98,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private final ReplanningEfficiencyEstimator replanningEfficiencyEstimator;
 
+	private final AsymptoticAgeLogger asymptoticAgeLogger;
+
 	private Plans lastPhysicalPopulationState = null;
 
 	// below only for logging
@@ -106,7 +109,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 	// private Double realizedUtilitySum = null;
 
 	private ReplannerIdentifier.LastExpectations lastExpectations = new ReplannerIdentifier.LastExpectations(null, null,
-			null, null, null, null, null, null, null, null, null, null, null, null);
+			null, null, null, null, null, null, null, null, null, null, null, null, new LinkedHashMap<>());
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -154,6 +157,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
+
+		this.asymptoticAgeLogger = new AsymptoticAgeLogger(new File("./output/"), "asymptoticAges.", ".txt", 1);
 	}
 
 	// -------------------- IMPLEMENTATION OF ReplannerSelector --------------------
@@ -318,8 +323,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.lastPhysicalPopulationState.set(person);
 			}
 		}
-
 		this.lastExpectations = replannerIdentifier.getLastExpectations();
+
+		this.asymptoticAgeLogger.dump(this.ages.getAges(), this.lastExpectations.personId2similarity,
+				utilityStats.personId2expectedUtilityChange, this.lastExpectations.unconstrainedBeta, this.iteration());
+
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
 	}

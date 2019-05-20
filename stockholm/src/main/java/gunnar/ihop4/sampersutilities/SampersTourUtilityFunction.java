@@ -103,8 +103,11 @@ class SampersTourUtilityFunction {
 		final Purpose purpose = tour.getPurpose();
 		final double income_SEK_yr = SampersAttributeUtils.getIncome_SEK_yr(person);
 
+		/* Mode ASC */
+		double result = this.utlParams.getModeASC(purpose, mode, income_SEK_yr);
+		
 		/* Schedule delay */
-		double result = this.getScheduleDelayCost(tour, income_SEK_yr);
+		result += this.getScheduleDelayCost(tour, income_SEK_yr);
 
 		/* Time */ {
 			final double travelTime_min = tour.getRealizedTravelTime_min();
@@ -132,7 +135,7 @@ class SampersTourUtilityFunction {
 				throw new RuntimeException("tour distance = " + dist_km + " km");
 			}
 			result += this.utlParams.getLinDistanceCoeff_1_km(purpose, mode, income_SEK_yr) * dist_km
-					+ this.utlParams.getLogDistanceCoeff_1_km(purpose, mode, income_SEK_yr) * Math.log(0.01 + dist_km);
+					+ this.utlParams.getLogDistanceCoeff_lnArgInKm(purpose, mode, income_SEK_yr) * Math.log(0.01 + dist_km);
 		}
 
 		return result;

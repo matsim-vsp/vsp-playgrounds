@@ -21,6 +21,7 @@ package org.matsim.contrib.greedo;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -238,11 +239,39 @@ public class ReplannerIdentifier {
 					.sumOfEntries2(weightedNonReplannerCountDifferences);
 		}
 
+		// >>>>> NEW 2019-05-20 >>>>>
+
+		final Map<Id<Person>, Double> personId2similarity = new LinkedHashMap<>();
+		for (Id<Person> personId : this.population.getPersons().keySet()) {
+			final SpaceTimeIndicators<Id<?>> hypotheticalSlotUsage = this.personId2hypothetialSlotUsage.get(personId);
+			final SpaceTimeIndicators<Id<?>> physicalSlotUsage = this.personId2physicalSlotUsage.get(personId);
+			double similarity = 0.0;
+			for (int timeBin = 0; timeBin < this.greedoConfig.getBinCnt(); timeBin++) {
+				if (hypotheticalSlotUsage != null) {
+					for (SpaceTimeIndicators<Id<?>>.Visit hypotheticalVisit : hypotheticalSlotUsage
+							.getVisits(timeBin)) {
+						similarity += weightedReplannerCountDifferences.getBinValue(hypotheticalVisit.spaceObject,
+								timeBin);
+					}
+				}
+				if (physicalSlotUsage != null) {
+					for (SpaceTimeIndicators<Id<?>>.Visit physicalVisit : physicalSlotUsage.getVisits(timeBin)) {
+						similarity -= weightedReplannerCountDifferences.getBinValue(physicalVisit.spaceObject, timeBin);
+					}
+				}
+			}
+			similarity /= this.population.getPersons().size();
+			personId2similarity.put(personId, similarity);
+		}
+
+		// <<<<< NEW 2019-05-20 <<<<<
+
 		this.lastExpectations = new LastExpectations(this.lambdaBar, this.beta, this.unconstrainedBeta, this.delta,
 				lastExpectedUtilityChangeSumAccelerated, sumOfUnweightedReplannerCountDifferences2,
 				sumOfWeightedReplannerCountDifferences2, sumOfUnweightedNonReplannerCountDifferences2,
 				sumOfWeightedNonReplannerCountDifferences2, nonReplannerUtilityChangeSum, replannerSizeSum,
-				nonReplannerSizeSum, replanners.size(), this.population.getPersons().size() - replanners.size());
+				nonReplannerSizeSum, replanners.size(), this.population.getPersons().size() - replanners.size(),
+				personId2similarity);
 
 		// <<< collect statistics, only for logging <<<
 
@@ -271,6 +300,7 @@ public class ReplannerIdentifier {
 		public final Double nonReplannerSizeSum;
 		public final Integer numberOfReplanners;
 		public final Integer numberOfNonReplanners;
+		public final Map<Id<Person>, Double> personId2similarity;
 
 		LastExpectations(final Double lambdaBar, final Double beta, final Double unconstrainedBeta, final Double delta,
 				final Double lastExpectedUtilityChangeSumAccelerated,
@@ -279,7 +309,7 @@ public class ReplannerIdentifier {
 				final Double sumOfUnweightedNonReplannerCountDifferences2,
 				final Double sumOfWeightedNonReplannerCountDifferences2, final Double nonReplannerUtilityChangeSum,
 				final Double replannerSizeSum, final Double nonReplannerSizeSum, final Integer numberOfReplanners,
-				final Integer numberOfNonReplanners) {
+				final Integer numberOfNonReplanners, final Map<Id<Person>, Double> personId2similarity) {
 			this.lambdaBar = lambdaBar;
 			this.beta = beta;
 			this.unconstrainedBeta = unconstrainedBeta;
@@ -294,6 +324,7 @@ public class ReplannerIdentifier {
 			this.nonReplannerSizeSum = nonReplannerSizeSum;
 			this.numberOfReplanners = numberOfReplanners;
 			this.numberOfNonReplanners = numberOfNonReplanners;
+			this.personId2similarity = Collections.unmodifiableMap(personId2similarity);
 		}
 
 		public Double getSumOfUtilityChanges() {
