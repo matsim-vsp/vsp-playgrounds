@@ -19,36 +19,42 @@
 
 package playground.ikaddoura.analysis.od;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.matsim.api.core.v01.TransportMode;
-
 /**
 * @author ikaddoura
 */
 
-public class RunODAnalysisNemo {
-	
-	public static void main(String[] args) throws IOException {
-				
-		final String runDirectory = "/Users/ihab/Desktop/nemo/without-bridge/";
-		final String runId = "nemo_bike-Highways_001";
+public class ODRelation {
 
-//		final String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/sameCRS/plz.shp";		
-		final String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/grids/grid4/grid4.shp";		
+	private final String odId;
+	private final String origin;
+	private final String destination;
+	private double trips;
 
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
-		
-		final String zoneId = "ID";
-		
-		final List<String> modes = new ArrayList<>();
-//		modes.add(TransportMode.car);
-				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, "EPSG:25832", zoneId, modes, helpLegModes, stageActivitySubString, 100.);
-		reader.run();
+	public ODRelation(String odId, String origin, String destination) {
+		this.odId = odId;
+		this.origin = origin;
+		this.destination = destination;
+		this.trips = 1;
+	}
+
+	public String getOdId() {
+		return odId;
+	}
+
+	public String getOrigin() {
+		return origin;
+	}
+
+	public String getDestination() {
+		return destination;
+	}
+
+	public Double getTrips() {
+		return trips;
+	}
+
+	public void setTrips(double trips) {
+		this.trips = trips;
 	}
 
 }

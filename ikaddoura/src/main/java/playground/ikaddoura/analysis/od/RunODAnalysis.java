@@ -17,15 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing;
+package playground.ikaddoura.analysis.od;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
-
-import playground.ikaddoura.analysis.od.ODAnalysis;
 
 /**
 * @author ikaddoura
@@ -34,32 +32,20 @@ import playground.ikaddoura.analysis.od.ODAnalysis;
 public class RunODAnalysis {
 	
 	public static void main(String[] args) throws IOException {
-		
-		String rootDirectory = null;
-		
-		if (args.length == 1) {
-			rootDirectory = args[0];
-		} else {
-			throw new RuntimeException("Please set the root directory. Aborting...");
-		}
-		
-		if (!rootDirectory.endsWith("/")) rootDirectory = rootDirectory + "/";
 
-		final String runDirectory = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
-		final String runId = "berlin-v5.2-10pct";
-		final String shapeFile = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/berlin-sav-v5.2-10pct/input/shp-berlin-hundekopf-areas/berlin_hundekopf.shp";
+		final String runId = "snz-drt-0";
+		final String runDirectory = "../runs-svn/avoev/2019-05/output_2019-05-08_snz-drt-0/";
+		final String shapeFile = "../shared-svn/projects/avoev/data/berlkoenig-od-trips/Bezirksregionen_zone_UTM32N/Bezirksregionen_zone_UTM32N_fixed.shp";		
+		final String crs = "EPSG:25832";
+		final double scaleFactor = 4.;
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
 		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
 		
-		final String zoneId = "SCHLUESSEL";
 		final List<String> modes = new ArrayList<>();
-//		modes.add(TransportMode.car);
-//		modes.add(TransportMode.pt);
-//		modes.add(TransportMode.walk);
-//		modes.add("bicycle");
-//		modes.add(TransportMode.ride);
+		modes.add(TransportMode.drt);
 				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, "GK4", zoneId, modes, helpLegModes, stageActivitySubString, 10.);
+		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, crs , zoneId, modes, helpLegModes, stageActivitySubString, scaleFactor);
 		reader.run();
 	}
 

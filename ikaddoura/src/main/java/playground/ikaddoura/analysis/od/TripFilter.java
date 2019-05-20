@@ -19,36 +19,58 @@
 
 package playground.ikaddoura.analysis.od;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
-import org.matsim.api.core.v01.TransportMode;
 
 /**
 * @author ikaddoura
 */
 
-public class RunODAnalysisNemo {
+public class TripFilter {
 	
-	public static void main(String[] args) throws IOException {
-				
-		final String runDirectory = "/Users/ihab/Desktop/nemo/without-bridge/";
-		final String runId = "nemo_bike-Highways_001";
-
-//		final String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/sameCRS/plz.shp";		
-		final String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/grids/grid4/grid4.shp";		
-
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
+	private final double timeStart;
+	private final double timeEnd;
+	private final String personIdPrefix;
+	private final List<String> modes;
+	
+	public TripFilter(double consideredTimeStart, double consideredTimeEnd, String consideredPersonIdPrefix, List<String> consideredModes) {
+		this.timeStart = consideredTimeStart;
+		this.timeEnd = consideredTimeEnd;
+		this.personIdPrefix = consideredPersonIdPrefix;
+		this.modes = consideredModes;
+	}
+	
+	public boolean considerTrip(ODTrip odTrip) {
 		
-		final String zoneId = "ID";
+		// check modes
+		if (!modes.isEmpty()) {
+			boolean consideredMode = false;
+			for (String mode : modes) {
+				if (mode.equals(odTrip.getMode())) {
+					consideredMode = true;
+				}
+			}
+			if (!consideredMode) return false;
+		}
 		
-		final List<String> modes = new ArrayList<>();
-//		modes.add(TransportMode.car);
-				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, "EPSG:25832", zoneId, modes, helpLegModes, stageActivitySubString, 100.);
-		reader.run();
+		// check time
+		if (odTrip.getDepartureTime() < timeStart || odTrip.getDepartureTime() >= timeEnd) {
+			return false;
+		}
+		
+		// check personIdPrefix
+		if (personIdPrefix != "") {
+			if (!odTrip.getPersonId().toString().startsWith(personIdPrefix)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "_timeStart-" + timeStart + "_timeEnd-" + timeEnd + "_personIdPrefix-" + personIdPrefix
+				+ "_modePrefix-" + modes.toString();
 	}
 
 }
