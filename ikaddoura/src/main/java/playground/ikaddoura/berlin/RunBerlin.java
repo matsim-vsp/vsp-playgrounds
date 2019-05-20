@@ -29,7 +29,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.run.RunBerlinScenario;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 
@@ -124,7 +124,7 @@ public class RunBerlin {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				controler.getScenario(),
 				null,
 				visualizationScriptDirectory,
@@ -136,9 +136,7 @@ public class RunBerlin {
 				filters,
 				null,
 				modes,
-				null,
-				null,
-				0., null);
+				null);
 		analysis.run();
 				
 		log.info("Done.");

@@ -50,9 +50,6 @@ public class IKAnalysisRunBerlin2 {
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
-		String taxiMode = "taxi";
-		String carMode = "car";
-		double rewardSAVuserFormerCarUser = 5.3;
 		String analyzeSubpopulation = null;
 		String shapeFileBerlinZone = null;
 		
@@ -90,19 +87,10 @@ public class IKAnalysisRunBerlin2 {
 			if (!args[10].equals("null")) modesString = args[10];
 			log.info("modes: " + modesString);
 			
-			if (!args[10].equals("null")) taxiMode = args[11];
-			log.info("taxiMode: " + taxiMode);
-			
-			if (!args[10].equals("null")) carMode = args[12];
-			log.info("carMode: " + carMode);
-			
-			rewardSAVuserFormerCarUser = Double.valueOf(args[13]);
-			log.info("rewardSAVuserFormerCarUser: " + rewardSAVuserFormerCarUser);
-			
-			analyzeSubpopulation = args[14];
+			analyzeSubpopulation = args[11];
 			log.info("analyzeSubpopulation: " + analyzeSubpopulation);
 			
-			shapeFileBerlinZone = args[15];
+			shapeFileBerlinZone = args[12];
 			log.info("shapeFileBerlinZone: " + shapeFileBerlinZone);
 			
 		} else {
@@ -125,10 +113,6 @@ public class IKAnalysisRunBerlin2 {
 			scalingFactor = 4;
 			
 			modesString = "car,pt,bike,walk,transit_walk,drt";
-			
-			taxiMode = TransportMode.drt;
-			carMode = "car";
-			rewardSAVuserFormerCarUser = 5.3;
 			
 			analyzeSubpopulation = null;
 		}
@@ -165,7 +149,7 @@ public class IKAnalysisRunBerlin2 {
 			modes.add(mode);
 		}
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -177,9 +161,6 @@ public class IKAnalysisRunBerlin2 {
 				filter1,
 				filter0,
 				modes,
-				taxiMode,
-				carMode,
-				rewardSAVuserFormerCarUser,
 				analyzeSubpopulation);
 		analysis.run();
 	}

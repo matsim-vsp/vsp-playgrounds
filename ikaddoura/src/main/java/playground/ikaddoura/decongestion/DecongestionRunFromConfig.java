@@ -39,7 +39,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 
 /**
  * Starts an interval-based decongestion pricing simulation run.

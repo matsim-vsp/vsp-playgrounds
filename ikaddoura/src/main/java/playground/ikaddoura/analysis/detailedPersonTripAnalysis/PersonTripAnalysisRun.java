@@ -144,7 +144,7 @@ public class PersonTripAnalysisRun {
 		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, null);
 		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, null);
 		
-		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, null, null, null, null);
+		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, null, null, null);
 	}
 }
 		

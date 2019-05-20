@@ -157,7 +157,7 @@ public class IKAnalysisRunBerlin {
 			modes.add(mode);
 		}
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -169,9 +169,6 @@ public class IKAnalysisRunBerlin {
 				filter1,
 				filter0,
 				modes,
-				taxiMode,
-				carMode,
-				rewardSAVuserFormerCarUser,
 				analyzeSubpopulation);
 		analysis.run();
 	}

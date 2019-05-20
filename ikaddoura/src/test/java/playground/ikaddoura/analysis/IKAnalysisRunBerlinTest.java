@@ -129,7 +129,7 @@ public class IKAnalysisRunBerlinTest {
 		modes.add(TransportMode.pt);
 		modes.add("bicycle");
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -141,9 +141,6 @@ public class IKAnalysisRunBerlinTest {
 				filters1,
 				filters0,
 				modes,
-				taxiMode,
-				carMode,
-				rewardSAVformerCarUser,
 				analyzeSubpopulation);
 		analysis.run();
 	

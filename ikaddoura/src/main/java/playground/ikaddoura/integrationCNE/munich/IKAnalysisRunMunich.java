@@ -32,7 +32,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 
 
 public class IKAnalysisRunMunich {
@@ -61,7 +61,7 @@ public class IKAnalysisRunMunich {
 		modes.add(TransportMode.ride);
 		modes.add(TransportMode.walk);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -73,9 +73,6 @@ public class IKAnalysisRunMunich {
 				new ArrayList<>(),
 				new ArrayList<>(),
 				modes,
-				null,
-				null,
-				0.,
 				null);
 		analysis.run();
 	

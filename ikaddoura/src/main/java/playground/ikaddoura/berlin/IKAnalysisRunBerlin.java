@@ -32,7 +32,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 
@@ -79,7 +79,7 @@ public class IKAnalysisRunBerlin {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				null,
 				visualizationScriptInputDirectory,
@@ -91,9 +91,7 @@ public class IKAnalysisRunBerlin {
 				filters1,
 				null,
 				modes,
-				null,
-				null,
-				0., null);
+				null);
 		analysis.run();
 	
 		log.info("Done.");

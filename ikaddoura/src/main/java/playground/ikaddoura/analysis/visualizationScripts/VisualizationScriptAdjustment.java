@@ -31,14 +31,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 
 /**
 * @author ikaddoura
 */
 
 public class VisualizationScriptAdjustment {
-	private static final Logger log = Logger.getLogger(IKAnalysisRun.class);
+	private static final Logger log = Logger.getLogger(IKAnalysis.class);
 
 	private final String runIdMarker = "policyCaseRunId";
 	private final String rundIdToCompareWithMarker = "baseCaseRunId";

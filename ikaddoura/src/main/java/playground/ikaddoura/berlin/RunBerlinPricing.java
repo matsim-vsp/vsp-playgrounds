@@ -35,7 +35,7 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.run.RunBerlinScenario;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.vsp.congestion.controler.AdvancedMarginalCongestionPricingContolerListener;
@@ -203,7 +203,7 @@ public class RunBerlinPricing {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario,
 				null,
 				visualizationScriptInputDirectory,
@@ -215,9 +215,7 @@ public class RunBerlinPricing {
 				filters,
 				null,
 				modes,
-				null,
-				null,
-				0., null);
+				null);
 		analysis.run();
 	
 		log.info("Done.");

@@ -489,8 +489,7 @@ public class PersonTripAnalysis {
 			BasicPersonTripAnalysisHandler basicHandler,
 			NoiseAnalysisHandler noiseHandler,
 			PersonMoneyLinkHandler moneyHandler,
-			DelayAnalysis delayAnalysis,
-			SAVInsteadOfCarAnalysisHandler savFixCostHandler
+			DelayAnalysis delayAnalysis
 			) {
 	
 		String fileName = outputPath + "aggregated_info.csv";
@@ -749,12 +748,6 @@ public class PersonTripAnalysis {
 
 			int savUsersFormerCarUsers = 0;
 			int savUsersFormerNonCarUsers = 0;
-			
-			if (savFixCostHandler != null) {
-				savUsersFormerCarUsers = savFixCostHandler.getSavUsersFormerCarUsers();
-				savUsersFormerNonCarUsers = savFixCostHandler.getSavUsersFormerNonCarUsers();
-				paymentsSAVUserFormerCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerCarUsers();
-			}
 			
 			// TODO: other money payments by users?
 			
