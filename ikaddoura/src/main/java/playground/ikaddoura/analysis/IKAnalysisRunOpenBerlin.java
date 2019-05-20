@@ -34,8 +34,8 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
-public class IKAnalysisRunBerlin {
-	private static final Logger log = Logger.getLogger(IKAnalysisRunBerlin.class);
+public class IKAnalysisRunOpenBerlin {
+	private static final Logger log = Logger.getLogger(IKAnalysisRunOpenBerlin.class);
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -119,10 +119,6 @@ public class IKAnalysisRunBerlin {
 			scalingFactor = 10;
 			
 			modesString = TransportMode.car + "," + TransportMode.pt;
-			
-			taxiMode = TransportMode.taxi;
-			carMode = "car";
-			rewardSAVuserFormerCarUser = 5.3;
 			
 			analyzeSubpopulation = null;
 		}

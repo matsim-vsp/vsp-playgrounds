@@ -50,9 +50,6 @@ public class IKAnalysisRunSnzBln {
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
-		String taxiMode = null;
-		String carMode = null;
-		double rewardSAVuserFormerCarUser = 0.;
 		String analyzeSubpopulation = null;
 		
 		if (args.length > 0) {
@@ -79,10 +76,6 @@ public class IKAnalysisRunSnzBln {
 			scalingFactor = 4;
 			
 			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride;
-			
-			taxiMode = null;
-			carMode = null;
-			rewardSAVuserFormerCarUser = 0.0;
 			
 			analyzeSubpopulation = null;
 		}
