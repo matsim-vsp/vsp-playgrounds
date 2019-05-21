@@ -33,7 +33,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 
 /**
- * @author dgrether, dziemke
+ * @author dgrether, dziemke, tthunig
  */
 public class Controller {
 
@@ -55,7 +55,6 @@ public class Controller {
 		c.getConfig().controler().setCreateGraphs(false);
 		// add the signals module if signal systems are used
 		if (signalsConfigGroup.isUseSignalSystems()) {
-//			c.addOverridingModule(new SignalsModule());
 			Signals.configure( c );
 		}
 		c.addOverridingModule(new AbstractModule() {
