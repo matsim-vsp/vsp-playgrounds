@@ -70,8 +70,14 @@ PersonDepartureEventHandler , PersonArrivalEventHandler , LinkEnterEventHandler,
 PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	
 	private final static Logger log = Logger.getLogger(BasicPersonTripAnalysisHandler.class);
-	private final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-	private final String helpActivitySubString = "interaction";
+	private final String[] helpLegModes;
+	private final String helpActivitySubString;	
+	
+	public BasicPersonTripAnalysisHandler(String[] helpLegModes, String helpActivitySubString) {
+		this.helpLegModes = helpLegModes;
+		this.helpActivitySubString = helpActivitySubString;	
+	}
+
 	@Inject
 	private Scenario scenario;
 	

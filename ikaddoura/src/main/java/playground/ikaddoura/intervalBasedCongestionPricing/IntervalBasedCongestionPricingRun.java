@@ -37,8 +37,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysisRun;
-
 /**
  * Starts an interval-based congestion pricing simulation run.
  * 
@@ -99,9 +97,6 @@ public class IntervalBasedCongestionPricingRun {
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.run();
 		
-		log.info("Analyzing the final iteration...");
-		PersonTripBasicAnalysisRun analysis = new PersonTripBasicAnalysisRun(scenario.getConfig().controler().getOutputDirectory());
-		analysis.run();
 	}
 }
 

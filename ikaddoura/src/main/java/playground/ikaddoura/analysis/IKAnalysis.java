@@ -62,34 +62,19 @@ import playground.ikaddoura.analysis.vtts.VTTSHandler;
  * 
  * Provides several analysis:
  * 
- * basic aggregated analysis 
- * --> aggregated results: number of trips, number of stuck trips, travel time, travel distance, caused/affected noise cost, toll payments, user benefits, welfare
- * 
- * basic person-specific information
- * person ; number of trips; ...
- * 
- * basic trip-specific information
- * --> person ; trip no.; leg mode ; stuckAbort (trip) ; departure time (trip) ; trip arrival time (trip) ; travel time (trip) ; travel distance (trip) ; toll payment (trip)
- * 
- * time-specific trip travel times, distances, toll payments, externality-specific toll payments (congestion tolls, noise tolls, air pollution tolls)
- * 
- * delay information
- * 
- * daily traffic volume per link
- * 
- * hourly traffic volume per link
- * 
- * spatial analysis: number of activities per zone, average toll payment, user benefit etc. per zone
- * 
- * mode switch analysis
- * 
- * modal split for different population filters
- * 
- * writes out the network as a shapefile.
- * 
- *
- * used packages: linkDemand, dynamicLinkDemand, detailedPersonTripAnalysis, decongestion.delayAnalysis, gisAnalysis, modeSwitchAnalysis, modalSplitUserType, vtts
- * 
+ * - some aggregated analysis 
+ * - person-specific information
+ * - trip-specific information
+ * - time-specific trip travel times, distances, toll payments, externality-specific toll payments (congestion tolls, noise tolls, air pollution tolls)
+ * - delay information
+ * - spatial information:
+ * 		- daily traffic volume per link
+ * 		- hourly traffic volume per link
+ * 		- number of activities per zone, average toll payment, user benefit etc. per zone
+ * - mode switch analysis
+ * - modal split for different population filters
+ * - writes out the network as a shapefile.
+ *  
  */
 public class IKAnalysis {
 	private static final Logger log = Logger.getLogger(IKAnalysis.class);
@@ -123,6 +108,17 @@ public class IKAnalysis {
 
 	private final String analyzeSubpopulation;
 	
+	/**
+	 * @param scenario
+	 * @param visualizationScriptInputDirectory
+	 * @param scenarioCRS
+	 * @param scalingFactor
+	 * @param modes
+	 * @param analyzeSubpopulation
+	 * @param zoneId
+	 * @param helpLegModes
+	 * @param stageActivitySubString
+	 */
 	public IKAnalysis(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String analyzeSubpopulation, String zoneId, String[] helpLegModes, String stageActivitySubString) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
@@ -156,6 +152,23 @@ public class IKAnalysis {
 		this.stageActivitySubString = stageActivitySubString;
 	}
 	
+	/**
+	 * @param scenario1
+	 * @param scenario0
+	 * @param visualizationScriptInputDirectory
+	 * @param scenarioCRS
+	 * @param shapeFileZones
+	 * @param zonesCRS
+	 * @param homeActivityPrefix
+	 * @param scalingFactor
+	 * @param filters1
+	 * @param filters0
+	 * @param modes
+	 * @param analyzeSubpopulation
+	 * @param zoneId
+	 * @param helpLegModes
+	 * @param stageActivitySubString
+	 */
 	public IKAnalysis(Scenario scenario1, Scenario scenario0,
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String analyzeSubpopulation, String zoneId, String[] helpLegModes, String stageActivitySubString) {
@@ -201,6 +214,11 @@ public class IKAnalysis {
 		this.stageActivitySubString = stageActivitySubString;
 	}
 
+	/**
+	 * @param scenario
+	 * @param crs
+	 * @param scaleFactor
+	 */
 	public IKAnalysis(Scenario scenario, String crs, int scaleFactor) {
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -274,7 +292,7 @@ public class IKAnalysis {
 		ODEventAnalysisHandler odHandler1 = null;
 
 		if (scenario1 != null) {
-			basicHandler1 = new BasicPersonTripAnalysisHandler();
+			basicHandler1 = new BasicPersonTripAnalysisHandler(this.helpLegModes, this.stageActivitySubString);
 			basicHandler1.setScenario(scenario1);
 
 			delayAnalysis1 = new DelayAnalysis();
@@ -319,7 +337,7 @@ public class IKAnalysis {
 		ODEventAnalysisHandler odHandler0 = null;
 		
 		if (scenario0 != null) {
-			basicHandler0 = new BasicPersonTripAnalysisHandler();
+			basicHandler0 = new BasicPersonTripAnalysisHandler(this.helpLegModes, this.stageActivitySubString);
 			basicHandler0.setScenario(scenario0);
 
 			delayAnalysis0 = new DelayAnalysis();

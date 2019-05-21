@@ -41,8 +41,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysisRun;
-
 /**
  * Starts an interval-based decongestion pricing simulation run.
  * 
@@ -183,8 +181,6 @@ public class DecongestionRun {
 
         controler.run();
         
-        PersonTripBasicAnalysisRun analysis = new PersonTripBasicAnalysisRun(outputDirectory);
-		analysis.run();
 	}
 }
 

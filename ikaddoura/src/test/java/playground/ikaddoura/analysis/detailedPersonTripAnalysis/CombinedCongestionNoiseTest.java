@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -115,7 +116,10 @@ public class CombinedCongestionNoiseTest {
 	
 	public CongestionAndNoiseHandler analyseScenario(String eventsFile, Scenario scenario) {
 
-		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);	
 		basicHandler.setScenario(scenario);
 		CongestionAnalysisHandler congestionHandler = new CongestionAnalysisHandler(basicHandler);
 		NoiseAnalysisHandler noiseHandler = new NoiseAnalysisHandler();

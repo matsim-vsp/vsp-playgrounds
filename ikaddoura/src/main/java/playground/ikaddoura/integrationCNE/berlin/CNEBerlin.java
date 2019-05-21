@@ -45,7 +45,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
 import playground.ikaddoura.integrationCNE.CNEIntegration;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
@@ -278,9 +277,6 @@ public class CNEBerlin {
 		controler.run();
 		
 		// analysis
-		
-		PersonTripCongestionNoiseAnalysisRun analysis = new PersonTripCongestionNoiseAnalysisRun(controler.getConfig().controler().getOutputDirectory());
-		analysis.run();
 		
 		String immissionsDir = controler.getConfig().controler().getOutputDirectory() + "/ITERS/it." + controler.getConfig().controler().getLastIteration() + "/immissions/";
 		String receiverPointsFile = controler.getConfig().controler().getOutputDirectory() + "/receiverPoints/receiverPoints.csv";

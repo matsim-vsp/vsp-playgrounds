@@ -111,7 +111,10 @@ public class PersonTripAnalysisRun {
 			e1.printStackTrace();
 		}
 	
-		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 		basicHandler.setScenario(scenario);
 
 		EventsManager events = EventsUtils.createEventsManager();

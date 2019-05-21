@@ -26,7 +26,6 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.noise.NoiseCalculationOnline;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.NoiseModule;
 import org.matsim.contrib.noise.data.NoiseAllocationApproach;
@@ -38,8 +37,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
 
 /**
 * @author ikaddoura
@@ -120,11 +117,6 @@ public class RunBaseCase {
 		
 		controler.addOverridingModule(new NoiseModule(scenario));
 		controler.run();
-		
-		// analysis
-		
-		PersonTripCongestionNoiseAnalysisRun analysis = new PersonTripCongestionNoiseAnalysisRun(controler.getConfig().controler().getOutputDirectory());
-		analysis.run();
 		
 		// delete unnecessary iterations folder here.
 		int firstIt = controler.getConfig().controler().getFirstIteration();

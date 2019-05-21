@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -15,7 +16,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
 import playground.ikaddoura.integrationCNE.CNEventsReader;
 import playground.vsp.createTestNetworks.ForkNetworkCreator;
 
@@ -28,7 +28,7 @@ import playground.vsp.createTestNetworks.ForkNetworkCreator;
  */
 public class BasicPersonTripAnalysisTest {
 	
-	private static final Logger log = Logger.getLogger(PersonTripCongestionNoiseAnalysisRun.class);
+	private static final Logger log = Logger.getLogger(BasicPersonTripAnalysisTest.class);
 
 	private static final boolean printResults = true;
 	
@@ -171,7 +171,10 @@ public class BasicPersonTripAnalysisTest {
 	
 	public BasicPersonTripAnalysisHandler analyseScenario(String eventsFile, Scenario scenario) {
 
-		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();	
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);	
 		basicHandler.setScenario(scenario);
 		
 		EventsManager events = EventsUtils.createEventsManager();

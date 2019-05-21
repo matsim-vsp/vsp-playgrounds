@@ -7,9 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -33,9 +31,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.CongestionAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysis;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysis;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
 import playground.vsp.congestion.events.CongestionEventsReader;
 import playground.vsp.createTestNetworks.ForkNetworkCreator;
@@ -43,7 +38,7 @@ import playground.vsp.createTestNetworks.ForkNetworkCreator;
 
 public class PersonTripAnalysisTest {
 
-	private static final Logger log = Logger.getLogger(PersonTripCongestionNoiseAnalysisRun.class);
+	private static final Logger log = Logger.getLogger(PersonTripAnalysisTest.class);
 
 	private String outputPath;
 	
@@ -72,7 +67,10 @@ public class PersonTripAnalysisTest {
 		
 		// standard events analysis
 	
-		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);	
 		basicHandler.setScenario(scenario);
 
 		VTTSHandler vttsHandler = new VTTSHandler(scenario);
@@ -127,31 +125,13 @@ public class PersonTripAnalysisTest {
 			NoiseEventsReader noiseEventReader = new NoiseEventsReader(eventsNoise);		
 			noiseEventReader.readFile(eventsFile);
 			log.info("Reading noise events file... Done.");	
-		}	
+		}
 		
-		// print the results
+		PersonTripAnalysis analysis = new PersonTripAnalysis();
+		analysis.printTripInformation(outputPath, TransportMode.car, basicHandler, noiseHandler, null);
+		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
+		analysis.printPersonInformation(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
 		
-		PersonTripCongestionNoiseAnalysis analysis = new PersonTripCongestionNoiseAnalysis();
-		PersonTripBasicAnalysis basicAnalysis = new PersonTripBasicAnalysis();
-
-		log.info("Print trip information...");
-		analysis.printTripInformation(outputPath, TransportMode.car, basicHandler, vttsHandler, congestionHandler, noiseHandler);
-		analysis.printTripInformation(outputPath, null, basicHandler, vttsHandler, congestionHandler, noiseHandler);
-		log.info("Print trip information... Done.");
-
-		log.info("Print person information...");
-		analysis.printPersonInformation(outputPath, TransportMode.car, personId2userBenefit, basicHandler, vttsHandler, congestionHandler, noiseHandler);	
-		analysis.printPersonInformation(outputPath, null, personId2userBenefit, basicHandler, vttsHandler, congestionHandler, noiseHandler);	
-		log.info("Print person information... Done.");
-		
-		SortedMap<Double, List<Double>> departureTime2tolls = basicAnalysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
-		basicAnalysis.printAvgValuePerParameter(outputPath + "tollsPerDepartureTime_car.csv", departureTime2tolls);
-		
-		SortedMap<Double, List<Double>> tripDistance2tolls = basicAnalysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2tripDistance(), basicHandler.getPersonId2tripNumber2payment(), 2000., 40 * 1000.);
-		basicAnalysis.printAvgValuePerParameter(outputPath + "tollsPerTripDistance_car.csv", tripDistance2tolls);
-		
-		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, vttsHandler, congestionHandler, noiseHandler);
-		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, vttsHandler, congestionHandler, noiseHandler);
 	}
 	
 	@Test
@@ -165,13 +145,7 @@ public class PersonTripAnalysisTest {
 			String line = br.readLine();
 			while(line != null) {
 				if (line.startsWith("person")) {
-					Assert.assertTrue("Output changed!?", line.equals("person Id;number of car trips;" +
-							"at least one stuck and abort car trip (yes/no);avg. VTTS per car trip [monetary units per hour];" +
-							"car total travel time (day) [sec];car total travel distance (day) [m];" +
-							"travel related user benefits (based on the selected plans score) [monetary units];" +
-							"total toll payments (day) [monetary units];caused noise cost (day) [monetary units];" +
-							"affected noise cost (day) [monetary units];caused congestion (day) [sec];" +
-							"affected congestion (day) [sec];affected congestion cost (day) [monetary units]"));
+					Assert.assertTrue("Output changed!?", line.equals("person Id;number of car trips;at least one stuck and abort car trip (yes/no);number of stuck and abort events (day);car total travel time (day) [sec];car total in-vehicle time (day) [sec];car total waiting time (for taxi/pt) (day) [sec];car total travel distance (day) [m];travel related user benefits (based on the selected plans score) [monetary units];total money payments (day) [monetary units];caused noise cost (day) [monetary units];affected noise cost (day) [monetary units]"));
 				} else {
 					personInfos.add(line.split(";"));
 				}
@@ -183,11 +157,7 @@ public class PersonTripAnalysisTest {
 			line = br.readLine();
 			while(line != null) {
 				if (line.startsWith("person")) {
-					Assert.assertTrue("Output changed!?", line.equals("person Id;trip no.;mode;stuck and abort trip (yes/no);" +
-							"VTTS (trip) [monetary units per hour];departure time (trip) [sec];arrival time (trip) [sec];" +
-							"travel time (trip) [sec];travel distance (trip) [m];affected congestion (trip) [sec];" +
-							"affected congestion cost (trip) [monetary units];caused congestion (trip) [sec];" +
-							"approximate caused noise cost (trip) [monetary units]"));
+					Assert.assertTrue("Output changed!?", line.equals("person Id;number of car trips;at least one stuck and abort car trip (yes/no);number of stuck and abort events (day);car total travel time (day) [sec];car total in-vehicle time (day) [sec];car total waiting time (for taxi/pt) (day) [sec];car total travel distance (day) [m];travel related user benefits (based on the selected plans score) [monetary units];total money payments (day) [monetary units];caused noise cost (day) [monetary units];affected noise cost (day) [monetary units]"));
 				} else {
 					tripInfos.add(line.split(";"));
 				}
@@ -247,14 +217,8 @@ public class PersonTripAnalysisTest {
 		}
 		Assert.assertEquals("Number of car trips wrong", 3, Integer.parseInt(aggregatedInfos.get(2)[1]));
 		Assert.assertEquals("Car travel distance wrong", 12.0, 
-				Double.parseDouble(aggregatedInfos.get(5)[1]), MatsimTestUtils.EPSILON);
+				Double.parseDouble(aggregatedInfos.get(6)[1]), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Car travel time wrong", 0.5138888888888888, 
 				Double.parseDouble(aggregatedInfos.get(7)[1]), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Total congestion wrong", 0.027777777777777776, 
-				Double.parseDouble(aggregatedInfos.get(12)[1]), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Affected noise cost wrong", 100.0, 
-				Double.parseDouble(aggregatedInfos.get(15)[1]), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Caused noise cost wrong", 100.0, 
-				Double.parseDouble(aggregatedInfos.get(16)[1]), MatsimTestUtils.EPSILON);
 	}
 }
