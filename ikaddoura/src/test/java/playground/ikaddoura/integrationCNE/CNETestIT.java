@@ -23,6 +23,7 @@
 package playground.ikaddoura.integrationCNE;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -175,6 +176,7 @@ public class CNETestIT {
 		return longUncongestedRouteDemand;
 	}
 	
+	@Ignore
 	@Test
 	public final void test2(){
 		
