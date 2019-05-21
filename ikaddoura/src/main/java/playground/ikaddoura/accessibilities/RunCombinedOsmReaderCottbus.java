@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.cottbus;
+package playground.ikaddoura.accessibilities;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedList;

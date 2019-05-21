@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.cottbus;
+package playground.ikaddoura.accessibilities;
 
 import java.util.ArrayList;
 import java.util.List;
