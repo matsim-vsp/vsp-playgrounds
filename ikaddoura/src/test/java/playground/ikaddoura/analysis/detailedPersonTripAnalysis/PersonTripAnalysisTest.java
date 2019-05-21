@@ -157,7 +157,7 @@ public class PersonTripAnalysisTest {
 			line = br.readLine();
 			while(line != null) {
 				if (line.startsWith("person")) {
-					Assert.assertTrue("Output changed!?", line.equals("person Id;number of car trips;at least one stuck and abort car trip (yes/no);number of stuck and abort events (day);car total travel time (day) [sec];car total in-vehicle time (day) [sec];car total waiting time (for taxi/pt) (day) [sec];car total travel distance (day) [m];travel related user benefits (based on the selected plans score) [monetary units];total money payments (day) [monetary units];caused noise cost (day) [monetary units];affected noise cost (day) [monetary units]"));
+					Assert.assertTrue("Output changed!?", line.equals("person Id;trip no.;mode;stuck and abort trip (yes/no);departure time (trip) [sec];enter vehicle time (trip) [sec];leave vehicle time (trip) [sec];arrival time (trip) [sec];travel time (trip) [sec];in-vehicle time (trip) [sec];waiting time (for taxi/pt) (trip) [sec];travel distance (trip) [m];toll payments (trip) [monetary units];congestion toll payments (trip) [monetary units];noise toll payments (trip) [monetary units];air pollution toll payments (trip) [monetary units];approximate caused noise cost (trip) [monetary units]"));
 				} else {
 					tripInfos.add(line.split(";"));
 				}
@@ -174,27 +174,27 @@ public class PersonTripAnalysisTest {
 		Map<Id<Person>, Double> travelDistanceSums= new HashMap<Id<Person>, Double>();
 		for (String[] line : tripInfos) {
 			if (!travelTimeSums.containsKey(Id.createPersonId(line[0]))) {
-				travelTimeSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[7]));
-				travelDistanceSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[8]));
+				travelTimeSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[8]));
+				travelDistanceSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[11]));
 			} else {
 				double cache = travelTimeSums.get(Id.createPersonId(line[0]));
-				travelTimeSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[7]) + cache);
+				travelTimeSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[8]) + cache);
 				cache = travelDistanceSums.get(Id.createPersonId(line[0]));
-				travelDistanceSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[8]) + cache);
+				travelDistanceSums.put(Id.createPersonId(line[0]), Double.parseDouble(line[11]) + cache);
 			}
 		}
 		for (String[] personInfo : personInfos) {
 			Assert.assertEquals("TravelTimes are not equal for Person " + personInfo[0],
 					travelTimeSums.get(Id.createPersonId(personInfo[0])), Double.parseDouble(personInfo[4]), MatsimTestUtils.EPSILON);
 			Assert.assertEquals("TravelDistances are not equal for Person " + personInfo[0],
-					travelDistanceSums.get(Id.createPersonId(personInfo[0])), Double.parseDouble(personInfo[5]), MatsimTestUtils.EPSILON);
+					travelDistanceSums.get(Id.createPersonId(personInfo[0])), Double.parseDouble(personInfo[7]), MatsimTestUtils.EPSILON);
 		}
 		
 		// test scoring of the selected plans of both agents (where other plans exist)
 		Assert.assertEquals("Scoring of selected plan does not work right for Person " + Id.createPersonId(0),
-				987.654321, Double.parseDouble(personInfos.get(0)[6]), MatsimTestUtils.EPSILON);
+				987.654321, Double.parseDouble(personInfos.get(0)[8]), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Scoring of selected plan does not work right for Person " + Id.createPersonId(1),
-				123.456789, Double.parseDouble(personInfos.get(1)[6]), MatsimTestUtils.EPSILON);
+				123.456789, Double.parseDouble(personInfos.get(1)[8]), MatsimTestUtils.EPSILON);
 	}
 	
 	@Test
