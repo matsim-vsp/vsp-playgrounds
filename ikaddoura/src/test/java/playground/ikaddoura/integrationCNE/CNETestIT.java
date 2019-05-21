@@ -54,6 +54,7 @@ public class CNETestIT {
 	 * Test for isolated congestion pricing, isolated noise pricing and simultaneous congestion and noise pricing.
 	 *
 	 */
+	@Ignore
 	@Test
 	public final void test1(){
 
