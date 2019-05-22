@@ -132,7 +132,7 @@ public class SampersUtilityParameters {
 
 	private final ParameterPerStratum scheduleDelayTooShort_1_min = new ParameterPerStratum();
 	private final ParameterPerStratum scheduleDelayTooLong_1_min = new ParameterPerStratum();
-	
+
 	private final ParameterPerStratum modeASC = new ParameterPerStratum();
 
 	// -------------------- CONSTRUCTION --------------------
@@ -168,7 +168,7 @@ public class SampersUtilityParameters {
 				.addNext(new ConcreteParameterPerStratum(work, car, 300 * 1000, POSITIVE_INFINITY, -0.052));
 		this.logCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(work, pt, 300 * 1000, POSITIVE_INFINITY, -0.052));
-		
+
 		this.linTimeCoeff_1_min.addNext(new ConcreteParameterPerStratum(work, pt, 0, POSITIVE_INFINITY, -0.014));
 
 		this.linDistanceCoeff_1_km.addNext(new ConcreteParameterPerStratum(work, walk, 0, POSITIVE_INFINITY, -0.278));
@@ -180,39 +180,39 @@ public class SampersUtilityParameters {
 		this.modeASC.addNext(new ConcreteParameterPerStratum(work, bike, 0, POSITIVE_INFINITY, 0.433));
 		this.modeASC.addNext(new ConcreteParameterPerStratum(work, pt, 0, POSITIVE_INFINITY, -0.758));
 		this.modeASC.addNext(new ConcreteParameterPerStratum(work, walk, 0, POSITIVE_INFINITY, 0.101));
-		
+
 		// OTHER
 
 		this.linDistanceCoeff_1_km.addNext(new ConcreteParameterPerStratum(other, bike, 0, POSITIVE_INFINITY, -0.2442));
-		
+
 		this.linTimeCoeff_1_min.addNext(new ConcreteParameterPerStratum(other, car, 0.0, POSITIVE_INFINITY, -0.0434));
-		
+
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(other, car, 0, 50 * 1000, -0.008927));
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(other, pt, 0, 50 * 1000, -0.008927));
-		
+
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(other, car, 50 * 1000, 200 * 1000, -0.008269));
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(other, pt, 50 * 1000, 200 * 1000, -0.008269));
-		
+
 		this.linCostCoeff_1_SEK
 				.addNext(new ConcreteParameterPerStratum(other, car, 200 * 1000, POSITIVE_INFINITY, -0.004279));
 		this.linCostCoeff_1_SEK
 				.addNext(new ConcreteParameterPerStratum(other, pt, 200 * 1000, POSITIVE_INFINITY, -0.004279));
-		
+
 		this.logCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(other, car, 200 * 1000, POSITIVE_INFINITY, +0.3382));
 		this.logCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(other, pt, 200 * 1000, POSITIVE_INFINITY, +0.3382));
-		
+
 		this.logCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(other, car, 50 * 1000, 200 * 1000, +0.3348));
 		this.logCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(other, pt, 50 * 1000, 200 * 1000, +0.3348));
-		
+
 		this.logCostCoeff_lnArgInSEK.addNext(new ConcreteParameterPerStratum(other, car, 0, 50 * 1000, -0.393));
 		this.logCostCoeff_lnArgInSEK.addNext(new ConcreteParameterPerStratum(other, pt, 0, 50 * 1000, -0.393));
-		
+
 		this.linTimeCoeff_1_min.addNext(new ConcreteParameterPerStratum(other, pt, 0, POSITIVE_INFINITY, -0.01325));
-		
+
 		this.linDistanceCoeff_1_km.addNext(new ConcreteParameterPerStratum(other, walk, 0, POSITIVE_INFINITY, -0.3993));
 
 		this.modeASC.addNext(new ConcreteParameterPerStratum(other, car, 0, POSITIVE_INFINITY, 0.0));
@@ -222,7 +222,7 @@ public class SampersUtilityParameters {
 
 		// SCHEDULE DELAY COSTS.
 		// Should probably be derived from activity-specific travel costs. TODO Revisit!
-		
+
 		for (Purpose purpose : Purpose.values()) {
 			for (String mode : CONSIDERED_MODES) {
 				this.scheduleDelayCostEarly_1_min
@@ -237,9 +237,9 @@ public class SampersUtilityParameters {
 		}
 
 		// ========== BELOW: PARAMETERS THAT CURRENTLY ARE NOT USED! ==========
-		
+
 		// TODO Add mode-specific ASCs!
-		
+
 		// RECREATION
 
 		this.linDistanceCoeff_1_km
@@ -417,11 +417,13 @@ public class SampersUtilityParameters {
 	}
 
 	public double getScheduleDelayCostEarly_1_min(final Purpose purpose, final String mode, final Double income_money) {
-		return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money);
+		return this.scheduleDelayCostEarly_1_min.getOrZero(purpose, mode, income_money);
+		// return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money);
 	}
 
 	public double getScheduleDelayCostLate_1_min(final Purpose purpose, final String mode, final Double income_money) {
-		return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money);
+		return this.scheduleDelayCostLate_1_min.getOrZero(purpose, mode, income_money);
+		// return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money);
 	}
 
 	public double getScheduleDelayCostTooShort_1_min(final Purpose purpose, final String mode,
@@ -437,7 +439,7 @@ public class SampersUtilityParameters {
 	public double getStuckScore(final Purpose purpose, final String mode, final Double income_money) {
 		return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money) * 24 * 60; // TODO Revisit!
 	}
-	
+
 	public double getModeASC(final Purpose purpose, final String mode, final Double income_money) {
 		return this.modeASC.getOrZero(purpose, mode, income_money);
 	}

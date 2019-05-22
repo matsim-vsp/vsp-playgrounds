@@ -320,13 +320,15 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {
+				// TODO ensure that this does not affect the logged statistics
 				this.lastPhysicalPopulationState.set(person);
 			}
 		}
 		this.lastExpectations = replannerIdentifier.getLastExpectations();
 
 		this.asymptoticAgeLogger.dump(this.ages.getAges(), this.lastExpectations.personId2similarity,
-				utilityStats.personId2expectedUtilityChange, this.lastExpectations.unconstrainedBeta, this.iteration());
+				utilityStats.personId2expectedUtilityChange, this.lastExpectations.unconstrainedBeta, this.iteration(),
+				replannerIds);
 
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
