@@ -31,11 +31,11 @@ import org.matsim.core.utils.misc.Time;
  * @author Gunnar Flötteröd
  *
  */
-public class ActivityEmulatorImpl implements ActivityEmulator {
+public class RegularActivityEmulator implements ActivityEmulator {
 
 	private final EventsManager eventsManager;
 
-	public ActivityEmulatorImpl(EventsManager eventsManager) {
+	public RegularActivityEmulator(EventsManager eventsManager) {
 		this.eventsManager = eventsManager;
 	}
 
