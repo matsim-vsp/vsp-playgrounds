@@ -79,8 +79,10 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.lanes.LanesWriter;
+import org.matsim.pt.transitSchedule.TransitScheduleWriterV2;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
+import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
@@ -123,7 +125,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1_pt;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -136,6 +138,7 @@ public class TtRunCottbusSimulation {
 		V3, // double flow capacities of all signalized links and lanes
 		V4, // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
 		V4_1, // V4 but with simplified/corrected to-links of lanes, such that it is more similar to the cten model. some lanes also had to be created newly, such that signal systems and groups also had to be adjusted.
+		V4_1_pt // V4_1 including pt links
 	}
 	private final static boolean LONG_LANES = true;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
@@ -247,9 +250,9 @@ public class TtRunCottbusSimulation {
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
 	private static String RUNS_SVN = "../../runs-svn/cottbus/";
 	
-	private static final boolean WRITE_INITIAL_FILES = false;
+	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static double SCALING_FACTOR = .5;
+	private static double SCALING_FACTOR = .7;
 	
 	private static TtGeneralAnalysis ANALYSIS_TOOL;
 	
@@ -395,7 +398,7 @@ public class TtRunCottbusSimulation {
 					controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 				}
 
-				controler.run();
+//				controler.run();
 
 				// write output for random greensplits
 				if (SIGNAL_TYPE.equals(SignalType.MS_RANDOM_GREENSPLITS)) {
@@ -457,6 +460,13 @@ public class TtRunCottbusSimulation {
 		case V4_1:
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v4.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v4-1.xml");
+			break;
+		case V4_1_pt:
+			config.network().setInputFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/network-w-pt.xml.gz");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v4-1.xml");
+			config.transit().setVehiclesFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitVehicles.xml.gz");
+			config.transit().setTransitScheduleFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitSchedule.xml.gz");
+			config.transit().setUseTransit(true);
 			break;
 		default:
 			throw new RuntimeException("Network type not specified!");
@@ -723,6 +733,7 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4.xml");
 				break;
 			case V4_1:
+			case V4_1_pt:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4-1.xml");
 				break;
 			default:
@@ -735,7 +746,7 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(BTU_BASE_DIR + "output_signal_groups_v2.0.xml");
 			} else if (NETWORK_TYPE.equals(NetworkType.V4)){
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4.xml");
-			} else if (NETWORK_TYPE.equals(NetworkType.V4_1)){
+			} else if (NETWORK_TYPE.toString().startsWith("V4_1")){
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4-1.xml");
 			} else {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v2.xml");
@@ -898,8 +909,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case LAEMMER_NICO_GROUPS_14RE_3RE_7RE:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
-				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
 					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
 				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
@@ -921,8 +932,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case GERSHENSON:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_gershenson.xml");
-				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
 					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
 				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
@@ -933,8 +944,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case QUEUE_LEARNING:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_queueLearning.xml");
-				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
 					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
 				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
@@ -1679,7 +1690,7 @@ public class TtRunCottbusSimulation {
 		}
 		String outputDirTmp = scenario.getConfig().controler().getOutputDirectory();
 		// adapt output dir to be able to run it on the cluster
-		scenario.getConfig().controler().setOutputDirectory("/net/ils3/thunig/runs-svn/cottbus/createGridLock/run" + RUN_ID + "/");
+		scenario.getConfig().controler().setOutputDirectory("/net/ils3/thunig/" + outputDirTmp.substring(6, outputDirTmp.length()));
 		
 		// write population
 		new PopulationWriter(scenario.getPopulation()).write(outputDir + "plans.xml");
@@ -1697,6 +1708,14 @@ public class TtRunCottbusSimulation {
 			signalsConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalsConfigGroup.setSignalGroupsFile("signalGroups.xml");
 			signalsConfigGroup.setSignalControlFile("signalControl.xml");
+		}
+		
+		// write pt files if used
+		if (scenario.getConfig().transit().isUseTransit()) {
+			new TransitScheduleWriterV2(scenario.getTransitSchedule()).write(outputDir + "transitSchedule.xml");
+			new VehicleWriterV1(scenario.getTransitVehicles()).writeFile(outputDir + "transitVehicles.xml");
+			scenario.getConfig().transit().setTransitScheduleFile("transitSchedule.xml");
+			scenario.getConfig().transit().setVehiclesFile("transitVehicles.xml");
 		}
 		
 		// write config
