@@ -64,7 +64,7 @@ public class TtPricingController {
 	 *  1 - the pricing version
 	 */
 	public static void main(String[] args) {
-		Controler controler = TtBasicController.prepareBasicControler(args[0]);
+		Controler controler = TtBasicController.prepareBasicControler(args[0], null);
 		Scenario scenario = controler.getScenario();
 		Config config = controler.getConfig();
 
