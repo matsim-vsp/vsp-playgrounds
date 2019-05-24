@@ -26,7 +26,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.matsim.vsp.vsp-playgrounds.vsptelematics.ha1.HA1GUI</mainClass>
+							<mainClass>playground.vsptelematics.ha1.HA1GUI</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
