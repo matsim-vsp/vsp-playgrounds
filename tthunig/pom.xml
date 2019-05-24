@@ -20,16 +20,6 @@
 		</repository>
 	</repositories>
 	<dependencies>
-<!--	<dependency>
-		<groupId>com.github.matsim-org</groupId>
-		<artifactId>GTFS2MATSim</artifactId>
-		<version>-SNAPSHOT</version>
-	</dependency>-->
-<!--		<dependency>
-			<groupId>com.conveyal</groupId>
-			<artifactId>gtfs-lib</artifactId>
-			<version>3.3.0</version>
-		</dependency>-->
 	<dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-math</artifactId>
