@@ -33,9 +33,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.LogDataWrapper;
 
 import floetteroed.utilities.math.Covariance;
+import floetteroed.utilities.math.MathHelpers;
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
+import utils.RecursiveMovingAverage;
 
 /**
  * 
@@ -61,55 +63,50 @@ public class AsymptoticAgeLogger {
 
 	private class Entry {
 
-		private double lastExpectedUtilityChange = 0.0;
-		private double lastSimilarity = 0.0;
-		private int lastAge = 0;
-
-		private double expectedUtilityChangeSum = 0.0;
-		private double similaritySum = 0.0;
-		private int ageSum = 0;
-
-		private int updateCnt = 0;
+		private RecursiveMovingAverage expectedUtilityChangeAvg;
+		private RecursiveMovingAverage similarityAvg;
+		private RecursiveMovingAverage ageAvg;
 
 		Entry() {
+			this.expectedUtilityChangeAvg = new RecursiveMovingAverage(memoryLength);
+			this.similarityAvg = new RecursiveMovingAverage(memoryLength);
+			this.ageAvg = new RecursiveMovingAverage(memoryLength);
 		}
 
 		void update(final double expectedUtilityChange, final double similarity, final int age) {
-			this.lastExpectedUtilityChange = expectedUtilityChange;
-			this.lastSimilarity = similarity;
-			this.lastAge = age;
-			this.expectedUtilityChangeSum += expectedUtilityChange;
-			this.similaritySum += similarity;
-			this.ageSum += age;
-			this.updateCnt++;
+			this.expectedUtilityChangeAvg.add(expectedUtilityChange);
+			this.similarityAvg.add(similarity);
+			this.ageAvg.add(age);
 		}
 
 		double getLastExpectedUtilityChange() {
-			return this.lastExpectedUtilityChange;
+			return this.expectedUtilityChangeAvg.mostRecentValue();
 		}
 
 		double getLastSimilarity() {
-			return this.lastSimilarity;
+			return this.similarityAvg.mostRecentValue();
 		}
 
 		int getLastAge() {
-			return this.lastAge;
+			return MathHelpers.round(this.ageAvg.mostRecentValue());
 		}
 
 		double getAvgExpectedUtilityChange() {
-			return (this.expectedUtilityChangeSum / this.updateCnt);
+			return this.expectedUtilityChangeAvg.average();
 		}
 
 		double getAvgSimilarity() {
-			return (this.similaritySum / this.updateCnt);
+			return this.similarityAvg.average();
 		}
 
 		double getAvgAge() {
-			return ((double) this.ageSum) / this.updateCnt;
+			return this.ageAvg.average();
 		}
 	}
 
 	// -------------------- CONSTANTS --------------------
+
+	private final int memoryLength;
 
 	private final File folder;
 
@@ -131,7 +128,8 @@ public class AsymptoticAgeLogger {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public AsymptoticAgeLogger(final File folder, final String prefix, final String postFix) {
+	public AsymptoticAgeLogger(final int memoryLength, final File folder, final String prefix, final String postFix) {
+		this.memoryLength = memoryLength;
 		this.folder = folder;
 		this.prefix = prefix;
 		this.postfix = postFix;

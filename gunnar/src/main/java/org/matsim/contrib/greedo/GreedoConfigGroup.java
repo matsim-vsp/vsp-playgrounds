@@ -150,6 +150,21 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
 	}
 
+	// -------------------- correlationLoggingMemory --------------------
+
+	private int correlationLoggingMemory = 100;
+	
+	@StringGetter("correlationLoggingMemory")
+	public int getCorrelationLoggingMemory() {
+		return this.correlationLoggingMemory;
+	}
+
+	@StringSetter("correlationLoggingMemory")
+	public void setCorrelationLoggingMemory(final int correlationLoggingMemory) {
+		this.correlationLoggingMemory = correlationLoggingMemory;
+	}
+
+	
 	// -------------------- stepSize --------------------
 
 	public static enum StepSizeType {
