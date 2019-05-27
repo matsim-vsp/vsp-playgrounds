@@ -25,13 +25,14 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 
 	private final MatsimServices services;
 
-	private final FifoTransitPerformance transitPerformance;
+	// private final FifoTransitPerformance transitPerformance;
 
 	@Inject
-	public FirstSimpleSimulationEmulator(final MatsimServices services,
-			final FifoTransitPerformance transitPerformance) {
+	public FirstSimpleSimulationEmulator(final MatsimServices services
+			// ,final FifoTransitPerformance transitPerformance
+			) {
 		this.services = services;
-		this.transitPerformance = transitPerformance;
+		// this.transitPerformance = transitPerformance;
 	}
 
 	@Override
@@ -75,7 +76,9 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 					legEmulator = new CarLegEmulator(eventsManager, this.services.getScenario().getNetwork(),
 							this.services.getLinkTravelTimes(), this.services.getScenario().getActivityFacilities());
 				} else if (TransportMode.pt.equals(leg.getMode())) {
-					legEmulator = new FifoTransitLegEmulator(eventsManager, this.transitPerformance,
+					legEmulator = new FifoTransitLegEmulator(eventsManager, 
+							null,
+							// this.transitPerformance,
 							this.services.getScenario());
 				} else {
 					throw new RuntimeException("No LegEmulator available for this mode: " + leg.getMode());

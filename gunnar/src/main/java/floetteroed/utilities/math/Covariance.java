@@ -16,9 +16,8 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package floetteroed.utilities.math;
-
 
 /**
  * 
@@ -78,37 +77,35 @@ public class Covariance {
 	public Matrix getCovariance() {
 		final Matrix result = new Matrix(this.xSum.size(), this.ySum.size());
 		result.add(this.xySum, 1.0 / (this.n - 1.0));
-		result.addOuterProduct(this.xSum, this.ySum, (-1.0) / this.n
-				/ (this.n - 1.0));
+		result.addOuterProduct(this.xSum, this.ySum, (-1.0) / this.n / (this.n - 1.0));
 		return result;
 	}
 
-	public static Matrix turnCovarianceIntoCorrelation(final Matrix covariance) {
-		final Matrix result = covariance;
-		/*
-		 * (1) compute off-diagonal correlation values
-		 */
-		for (int i = 0; i < result.rowSize(); i++) {
-			for (int j = 0; j < i; j++) {
-				final double cov = result.getRow(i).get(j);
-				final double var1 = result.getRow(i).get(i);
-				final double var2 = result.getRow(j).get(j);
-				final double corr = cov / Math.sqrt(var1) / Math.sqrt(var2);
-				result.getRow(i).set(j, corr);
-				result.getRow(j).set(i, corr);
-			}
-		}
-		/*
-		 * (2) normalize main diagonal values to one
-		 */
-		for (int i = 0; i < result.rowSize(); i++) {
-			result.getRow(i).set(i, 1.0);
-		}
-		return result;
-	}
+//	public static Matrix turnCovarianceIntoCorrelation(final Matrix covariance) {
+//		final Matrix result = covariance;
+//		/*
+//		 * (1) compute off-diagonal correlation values
+//		 */
+//		for (int i = 0; i < result.rowSize(); i++) {
+//			for (int j = 0; j < i; j++) {
+//				final double cov = result.getRow(i).get(j);
+//				final double var1 = result.getRow(i).get(i);
+//				final double var2 = result.getRow(j).get(j);
+//				final double corr = cov / Math.sqrt(var1) / Math.sqrt(var2);
+//				result.getRow(i).set(j, corr);
+//				result.getRow(j).set(i, corr);
+//			}
+//		}
+//		/*
+//		 * (2) normalize main diagonal values to one
+//		 */
+//		// for (int i = 0; i < result.rowSize(); i++) {
+//		// result.getRow(i).set(i, 1.0);
+//		// }
+//		return result;
+//	}
 
-	// TODO NEW
-	public Matrix getCorrelation() {
-		return turnCovarianceIntoCorrelation(this.getCovariance());
-	}
+//	public Matrix getCorrelation() {
+//		return turnCovarianceIntoCorrelation(this.getCovariance());
+//	}
 }

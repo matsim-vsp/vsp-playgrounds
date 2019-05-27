@@ -19,12 +19,29 @@
  */
 package org.matsim.contrib.greedo;
 
-import org.apache.log4j.Logger;
-
+import floetteroed.utilities.math.Covariance;
+import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Regression;
 import floetteroed.utilities.math.Vector;
+import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
+ * Estimates a model of the following form:
+ * 
+ * (1 / beta) * deltaX2 + (-delta / beta) = deltaU - deltaU*
+ * 
+ * The regression coefficients are given by:
+ * 
+ * coeff0 = 1 / beta
+ * 
+ * coeff1 = -delta / beta
+ * 
+ * One hence obtains:
+ * 
+ * beta = 1 / coeff0
+ * 
+ * delta = -coeff1 * beta = -coeff1 / coeff0
+ * 
  *
  * @author Gunnar Flötteröd
  *
@@ -39,12 +56,17 @@ class ReplanningEfficiencyEstimator {
 
 	private final Regression regression;
 
+	private final Covariance deltaX2vsDeltaDeltaUCov;
+
+	private Double lastPredictedTotalUtilityImprovement = null;
+
 	private int observationCnt = 0;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt) {
 		this.regression = new Regression(inertia, 2);
+		this.deltaX2vsDeltaDeltaUCov = new Covariance(2, 2);
 		this.minObservationCnt = minObservationCnt;
 	}
 
@@ -52,19 +74,20 @@ class ReplanningEfficiencyEstimator {
 
 	void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
 			final Double anticipatedSlotUsageChange2) {
-		Logger.getLogger(this.getClass())
-				.info("update with anticipatedUtilityChange = " + anticipatedUtilityChange
-						+ ", realizedUtilityChange = " + realizedUtilityChange + ", anticipatedSlotUsageChange2 = "
-						+ anticipatedSlotUsageChange2 + ", observationCnt = " + this.observationCnt);
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
 				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
-			this.regression.update(new Vector(anticipatedSlotUsageChange2, 1.0),
-					anticipatedUtilityChange - realizedUtilityChange);
+			{
+				final Vector regressionInput = new Vector(anticipatedSlotUsageChange2, 1.0);
+				this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
+						- this.regression.predict(regressionInput);
+				this.regression.update(regressionInput, anticipatedUtilityChange - realizedUtilityChange);
+			}
+			{
+				final Vector x = new Vector(anticipatedSlotUsageChange2,
+						anticipatedUtilityChange - realizedUtilityChange);
+				this.deltaX2vsDeltaDeltaUCov.add(x, x);
+			}
 			this.observationCnt++;
-			Logger.getLogger(this.getClass()).info("update accepted, leading to 1/beta = " + (1.0 / this.getBeta())
-					+ " based on in total " + this.observationCnt + " observations.");
-		} else {
-			Logger.getLogger(this.getClass()).info("update rejected");
 		}
 	}
 
@@ -77,6 +100,44 @@ class ReplanningEfficiencyEstimator {
 	}
 
 	Double getDelta() {
-		return this.regression.getCoefficients().get(1);
+		return (-this.regression.getCoefficients().get(1) / this.regression.getCoefficients().get(0));
 	}
+
+	// --------------- IMPLEMENTATION OF Statistic FACTORIES ---------------
+
+	public Statistic<LogDataWrapper> newDeltaXvsDeltaDeltaUStatistic() {
+		return new Statistic<LogDataWrapper>() {
+
+			@Override
+			public String label() {
+				return "Corr(DeltaX2,DeltaU-DeltaU*)";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				final Matrix _C = deltaX2vsDeltaDeltaUCov.getCovariance();
+				return Statistic.toString(_C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1)));
+			}
+		};
+	}
+
+	public Statistic<LogDataWrapper> newAvgPredictedDeltaUtility() {
+		return new Statistic<LogDataWrapper>() {
+
+			@Override
+			public String label() {
+				return "PredictedMeanUtilityImprovement";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				if (lastPredictedTotalUtilityImprovement != null) {
+					return Statistic.toString(lastPredictedTotalUtilityImprovement / arg0.getPopulationSize());
+				} else {
+					return Statistic.toString(null);
+				}
+			}
+		};
+	}
+
 }

@@ -35,7 +35,7 @@ public class LogDataWrapper {
 	// private final WireGreedoIntoMATSimControlerListener accelerator;
 
 	private final Ages ages;
-	
+
 	Utilities.SummaryStatistics summaryStats;
 
 	private final ReplannerIdentifier.LastExpectations lastExpectations;
@@ -56,13 +56,13 @@ public class LogDataWrapper {
 	public Utilities.SummaryStatistics getSummaryStats() {
 		return this.summaryStats;
 	}
-	
+
 	public ReplannerIdentifier.LastExpectations getLastExpectations() {
 		return this.lastExpectations;
 	}
-	
+
 	// TODO remove detailed getters further below
-	
+
 	public Double getLambdaBar() {
 		return this.lastExpectations.lambdaBar;
 	}
@@ -79,16 +79,17 @@ public class LogDataWrapper {
 		return this.lastExpectations.delta;
 	}
 
-	public Double getPredictedUtilityChange() {
-		if ((this.lastExpectations.sumOfReplannerUtilityChanges != null)
-				&& (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
-				&& (this.getBeta() != null)) {
-			return (this.lastExpectations.sumOfReplannerUtilityChanges
-					- this.lastExpectations.sumOfWeightedReplannerCountDifferences2 / this.getBeta());
-		} else {
-			return null;
-		}
-	}
+	// public Double getPredictedUtilityChange() {
+	// if ((this.lastExpectations.sumOfReplannerUtilityChanges != null)
+	// && (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
+	// && (this.getBeta() != null)) {
+	// return (this.lastExpectations.sumOfReplannerUtilityChanges
+	// - this.lastExpectations.sumOfWeightedReplannerCountDifferences2 /
+	// this.getBeta());
+	// } else {
+	// return null;
+	// }
+	// }
 
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.lastExpectations.getSumOfWeightedCountDifferences2();
@@ -101,7 +102,7 @@ public class LogDataWrapper {
 	public Map<Id<Person>, Double> getSimilarities() {
 		return this.lastExpectations.personId2similarity;
 	}
-	
+
 	public Double getLastRealizedUtilitySum() {
 		// return this.accelerator.getRealizedUtilitySum();
 		return this.summaryStats.realizedUtilitySum;

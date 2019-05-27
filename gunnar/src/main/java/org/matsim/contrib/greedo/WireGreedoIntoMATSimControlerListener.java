@@ -44,7 +44,6 @@ import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityTotal;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgPredictedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
@@ -127,6 +126,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(
 				this.greedoConfig.getReplanningEfficiencyEstimationInertia(), this.greedoConfig.getWarmUpIterations());
 
+		this.asymptoticAgeLogger = new AsymptoticAgeLogger(new File("./output/"), "asymptoticAges.", ".txt");
+
 		this.statsWriter = new StatisticsWriter<>(
 				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
@@ -137,6 +138,15 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new Delta());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaXvsDeltaDeltaUStatistic());
+		this.statsWriter
+				.addSearchStatistic(this.asymptoticAgeLogger.newAgeVsSimilarityByExpDeltaUtilityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAvgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAgeTimesExpDeltaUtilityVsSimilarityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAvgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelationStatistic());
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerSize());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
@@ -151,14 +161,12 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityTotal());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
-		this.statsWriter.addSearchStatistic(new AvgPredictedDeltaUtility());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newAvgPredictedDeltaUtility());
 		// this.statsWriter.addSearchStatistic(new RelativeUtilityEfficiency());
 		// this.statsWriter.addSearchStatistic(new RelativeSlotVariability());
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
-
-		this.asymptoticAgeLogger = new AsymptoticAgeLogger(new File("./output/"), "asymptoticAges.", ".txt", 1);
 	}
 
 	// -------------------- IMPLEMENTATION OF ReplannerSelector --------------------
@@ -326,9 +334,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 		this.lastExpectations = replannerIdentifier.getLastExpectations();
 
-		this.asymptoticAgeLogger.dump(this.ages.getAges(), this.lastExpectations.personId2similarity,
-				utilityStats.personId2expectedUtilityChange, this.lastExpectations.unconstrainedBeta, this.iteration(),
-				replannerIds);
+		this.asymptoticAgeLogger.dump(this.ages.getAges(), utilityStats.personId2expectedUtilityChange,
+				this.lastExpectations.personId2similarity, replannerIds, this.iteration());
 
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
