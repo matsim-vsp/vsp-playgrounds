@@ -263,6 +263,8 @@ public final class ODAnalysis {
 
 			try {
 				printODLines(time2odRelations, zones, outputDirectory + runId + ".od-analysis_HOURLY_" + modes.toString() + ".shp");
+				writeDataTableHourly(time2odRelations, zones, outputDirectory + runId + ".od-analysis_HOURLY_" + modes.toString() + "_from-to-format.csv");
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -313,6 +315,39 @@ public final class ODAnalysis {
 			writer.newLine();
 		}
 
+		writer.close();
+
+		log.info("Table written to file.");
+	}
+	
+	private void writeDataTableHourly(Map<String, Map<String, ODRelation>> time2odRelations, Map<String, Geometry> zones, String fileName) throws IOException {
+		
+		BufferedWriter writer = IOUtils.getBufferedWriter(fileName);
+		writer.write("origin;destination");
+		for (String time : time2odRelations.keySet()) {
+			writer.write(";" + time);
+		}
+		writer.newLine();
+		
+		List<String> zoneIds = new ArrayList<>();
+		zoneIds.addAll(zones.keySet());
+		zoneIds.add("other");
+
+		for (String zoneFrom : zoneIds) {
+			for (String zoneTo : zoneIds) {
+				writer.write(zoneFrom + ";" + zoneTo);
+				for (String time : time2odRelations.keySet()) {
+					
+					double trips = 0.;				
+					if (time2odRelations.get(time).get(zoneFrom + "-" + zoneTo) != null) {
+						trips = time2odRelations.get(time).get(zoneFrom + "-" + zoneTo).getTrips();
+					}
+					writer.write(";" + trips * this.scaleFactor);
+				}
+				writer.newLine();
+			}
+		}
+		
 		writer.close();
 
 		log.info("Table written to file.");
