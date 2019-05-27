@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package ch.ethz.matsim.ier.run;
+package org.matsim.contrib.ier.run;
 
 import org.matsim.core.config.ReflectiveConfigGroup;
 

@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package ch.ethz.matsim.ier.replannerselection;
+package org.matsim.contrib.ier.replannerselection;
 
 import java.util.Set;
 

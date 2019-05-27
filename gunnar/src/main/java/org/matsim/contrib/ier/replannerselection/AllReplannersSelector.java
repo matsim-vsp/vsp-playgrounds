@@ -17,19 +17,35 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package ch.ethz.matsim.ier.emulator;
+package org.matsim.contrib.ier.replannerselection;
 
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
+import java.util.Set;
+
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.events.handler.EventHandler;
 
 /**
+ * By doing nothing, this ReplannerSelector accepts everything from the
+ * IERReplanning.
  *
  * @author Gunnar Flötteröd
  *
  */
-public interface LegEmulator {
+public class AllReplannersSelector implements ReplannerSelector {
 
-	public double emulateLegAndReturnEndTime_s(Leg leg, Person person, Activity previousActivity,
-			Activity followingActivity, double time_s);
+	@Override
+	public void afterReplanning() {
+	}
+
+	@Override
+	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
+		return new EventHandlerProvider() {
+			@Override
+			public EventHandler get(Set<Id<Person>> personIds) {
+				return new EventHandler() {
+				};
+			}
+		};
+	}
 }

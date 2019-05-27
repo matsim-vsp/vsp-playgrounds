@@ -1,4 +1,4 @@
-package ch.ethz.matsim.ier;
+package org.matsim.contrib.ier;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -15,6 +15,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.ier.emulator.AgentEmulator;
+import org.matsim.contrib.ier.emulator.SimulationEmulator;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector.EventHandlerProvider;
+import org.matsim.contrib.ier.run.IERConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -31,12 +36,6 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
-import ch.ethz.matsim.ier.emulator.AgentEmulator;
-import ch.ethz.matsim.ier.emulator.SimulationEmulator;
-import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
-import ch.ethz.matsim.ier.replannerselection.ReplannerSelector.EventHandlerProvider;
-import ch.ethz.matsim.ier.run.IERConfigGroup;
 
 /**
  * This class replaces the standard MATSim replanning. It fullfills a number of

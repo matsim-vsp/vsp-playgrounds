@@ -1,4 +1,4 @@
-package ch.ethz.matsim.ier.emulator;
+package org.matsim.contrib.ier.emulator;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;

@@ -1,4 +1,4 @@
-package ch.ethz.matsim.ier.run;
+package org.matsim.contrib.ier.run;
 
 import java.net.URL;
 
@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.ier.IERModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -14,8 +15,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
-
-import ch.ethz.matsim.ier.IERModule;
 
 public class RunExample {
 	static public void main(String[] args) {

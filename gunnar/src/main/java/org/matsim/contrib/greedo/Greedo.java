@@ -21,6 +21,8 @@ package org.matsim.contrib.greedo;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.ier.IERModule;
+import org.matsim.contrib.ier.run.IERConfigGroup;
 import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
 import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
@@ -29,9 +31,6 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 
 import com.google.inject.Singleton;
-
-import ch.ethz.matsim.ier.IERModule;
-import ch.ethz.matsim.ier.run.IERConfigGroup;
 
 /**
  *

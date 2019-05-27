@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package ch.ethz.matsim.ier.emulator;
+package org.matsim.contrib.ier.emulator;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

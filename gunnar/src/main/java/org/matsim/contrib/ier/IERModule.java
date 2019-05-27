@@ -1,13 +1,12 @@
-package ch.ethz.matsim.ier;
+package org.matsim.contrib.ier;
 
+import org.matsim.contrib.ier.emulator.AgentEmulator;
+import org.matsim.contrib.ier.emulator.FirstSimpleSimulationEmulator;
+import org.matsim.contrib.ier.emulator.SimulationEmulator;
+import org.matsim.contrib.ier.replannerselection.AllReplannersSelector;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.corelisteners.PlansReplanning;
-
-import ch.ethz.matsim.ier.emulator.AgentEmulator;
-import ch.ethz.matsim.ier.emulator.FirstSimpleSimulationEmulator;
-import ch.ethz.matsim.ier.emulator.SimulationEmulator;
-import ch.ethz.matsim.ier.replannerselection.AllReplannersSelector;
-import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 
 /**
  * This module overrides the default replanning.

@@ -58,6 +58,7 @@ import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.UnconstrainedBeta;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.events.handler.EventHandler;
@@ -67,7 +68,6 @@ import org.matsim.core.replanning.selectors.BestPlanSelector;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import ch.ethz.matsim.ier.replannerselection.ReplannerSelector;
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
 
