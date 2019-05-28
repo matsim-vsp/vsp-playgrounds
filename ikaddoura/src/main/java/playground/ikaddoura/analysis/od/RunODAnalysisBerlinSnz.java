@@ -24,21 +24,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.scenario.ScenarioUtils;
 
 /**
 * @author ikaddoura
 */
 
-public class RunODAnalysis {
+public class RunODAnalysisBerlinSnz {
 	
 	public static void main(String[] args) throws IOException {
 
 		final String runId = "snz-drt-0";
-		final String runDirectory = "../runs-svn/avoev/2019-05/output_2019-05-08_snz-drt-0/";
-		final String shapeFile = "../shared-svn/projects/avoev/data/berlkoenig-od-trips/Bezirksregionen_zone_UTM32N/Bezirksregionen_zone_UTM32N_fixed.shp";		
+		final String runDirectory = "../../runs-svn/avoev/2019-05/output_2019-05-08_snz-drt-0/";
+		final String shapeFile = "../../shared-svn/projects/avoev/data/berlkoenig-od-trips/Bezirksregionen_zone_UTM32N/Bezirksregionen_zone_UTM32N_fixed.shp";		
 		final String crs = "EPSG:25832";
 		final double scaleFactor = 4.;
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
@@ -56,7 +60,13 @@ public class RunODAnalysis {
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(runDirectory + runId + ".output_events.xml.gz");
 		
-		ODAnalysis odAnalysis = new ODAnalysis(runDirectory, null, runId, shapeFile, crs , zoneId, modes, scaleFactor);
+		Config config = ConfigUtils.createConfig();
+		config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
+		config.network().setInputCRS(crs);
+		config.global().setCoordinateSystem(crs);
+		Network network = ScenarioUtils.loadScenario(config).getNetwork();
+		
+		ODAnalysis odAnalysis = new ODAnalysis(runDirectory, network, runId, shapeFile, crs , zoneId, modes, scaleFactor);
 		odAnalysis.process(handler1);
 	}
 

@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
@@ -103,8 +105,20 @@ public final class ODAnalysis {
 			}
 		}
 		
-		File file = new File(outputDirectory);
-		file.mkdirs();
+		{
+			File file = new File(outputDirectory);
+			file.mkdirs();
+		}
+		
+		{
+			File file = new File(outputDirectory + "shapefiles_aggregated-od-analysis/");
+			file.mkdirs();
+		}
+		
+		{
+			File file = new File(outputDirectory + "shapefiles_trip-od-analysis/");
+			file.mkdirs();
+		}
 
     	Map<String, Geometry> zones = new HashMap<>();
         if (shapeFile != null) {
@@ -140,6 +154,9 @@ public final class ODAnalysis {
 				ODTrip odTrip = new ODTrip();
 				odTrip.setPersonId(personId);
 				Id<Link> departureLink = handler1.getPersonId2tripNumber2departureLink().get(personId).get(tripNr);
+				if (network.getLinks().get(departureLink) == null) {
+					throw new RuntimeException("departure link is null. Aborting...");
+				}
 				Coord departureLinkCoord = network.getLinks().get(departureLink).getCoord();
 				odTrip.setOriginCoord(departureLinkCoord);
 				odTrip.setOrigin(getDistrictId(zones, departureLinkCoord ));
@@ -189,7 +206,7 @@ public final class ODAnalysis {
             try {
 				writeData(filteredOdRelations, zones, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + ".csv");
 				writeDataTable(filteredOdRelations, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + "_from-to-format.csv");
-	            printODLinesForEachAgent(filteredTrips, outputDirectory + runId + ".trip-od-analysis_DAY_" + modes.toString() + ".shp");
+	            printODLinesForEachAgent(filteredTrips, outputDirectory + "shapefiles_trip-od-analysis/" + runId + ".trip-od-analysis_DAY_" + modes.toString() + ".shp");
 
             } catch (IOException e) {
 				e.printStackTrace();
@@ -198,23 +215,32 @@ public final class ODAnalysis {
 			Map<String, Map<String, ODRelation>> time2odRelation = new HashMap<>();
 			time2odRelation.put(from + "-" + to, filteredOdRelations);
 			try {
-				printODLines(time2odRelation, zones, outputDirectory + runId + ".od-analysis_DAY_" + modes.toString() + ".shp");
+				printODLines(time2odRelation, zones, outputDirectory + "shapefiles_aggregated-od-analysis/" + runId + ".od-analysis_DAY_" + modes.toString() + ".shp");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
 		{
-			Map<String, Map<String, ODRelation>> time2odRelations = new HashMap<>();
+			LinkedHashMap<String, Map<String, ODRelation>> time2odRelations = new LinkedHashMap<>();
 
-			// hourly data, qgis time manager plugin can't handle time >= 24 * 3600.
-			for (int hour = 1; hour <= 24; hour++) {
+			List<Tuple<Double, Double>> timeBins = new ArrayList<>();
+			timeBins.add(new Tuple<Double, Double>(0., 6.));
+			timeBins.add(new Tuple<Double, Double>(6., 9.));
+			timeBins.add(new Tuple<Double, Double>(9., 12.));
+			timeBins.add(new Tuple<Double, Double>(12., 15.));
+			timeBins.add(new Tuple<Double, Double>(15., 18.));
+			timeBins.add(new Tuple<Double, Double>(18., 21.));
+			timeBins.add(new Tuple<Double, Double>(21., 24.));
+
+			for (Tuple<Double,Double> timeBin : timeBins) {
+				
 				Map<String, ODRelation> filteredOdRelations = new HashMap<>();
 				List<ODTrip> filteredTrips = new ArrayList<>();
 				int filteredTripCounter = 0;
 
-				double from = (hour - 1) * 3600.;
-				double to = hour * 3600.;
+				double from = timeBin.getFirst() * 3600.;
+				double to = timeBin.getSecond() * 3600.;
 
 				TripFilter hourFilter = new TripFilter(from, to, "", modes);
 				log.info("###### " + from + " to " + to);
@@ -238,9 +264,9 @@ public final class ODAnalysis {
 				}
 				log.info("filtered trips (sample size): " + filteredTripCounter);
 				try {
-					writeData(filteredOdRelations, zones, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + ".csv");
-					writeDataTable(filteredOdRelations, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + "_from-to-format.csv");
-					printODLinesForEachAgent(filteredTrips, outputDirectory + runId + ".trip-od-analysis_" + hour + "_" + modes.toString() + ".shp");
+					writeData(filteredOdRelations, zones, outputDirectory + runId + ".od-analysis_" + timeBin.getFirst() + "-" + timeBin.getSecond() + "_" + modes.toString() + ".csv");
+					writeDataTable(filteredOdRelations, outputDirectory + runId + ".od-analysis_" + timeBin.getFirst() + "-" + timeBin.getSecond() + "_" + modes.toString() + "_from-to-format.csv");
+					printODLinesForEachAgent(filteredTrips, outputDirectory + "shapefiles_trip-od-analysis/" + runId + ".trip-od-analysis_" + timeBin.getFirst() + "-" + timeBin.getSecond() + "_" + modes.toString() + ".shp");
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -252,18 +278,18 @@ public final class ODAnalysis {
 					Map<String, Map<String, ODRelation>> time2odRelation = new HashMap<>();
 					time2odRelation.put(from + "-" + to, filteredOdRelations);
 					try {
-						printODLines(time2odRelation, zones, outputDirectory + runId + ".od-analysis_" + hour + "_" + modes.toString() + ".shp");
+						printODLines(time2odRelation, zones, outputDirectory + "shapefiles_aggregated-od-analysis/" + runId + ".od-analysis_" + timeBin.getFirst() + "-" + timeBin.getSecond() + "_" + modes.toString() + ".shp");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 
-				time2odRelations.put(from + "-" + to, filteredOdRelations);
+				time2odRelations.put(timeBin.getFirst() + "-" + timeBin.getSecond(), filteredOdRelations);
 			}
 
 			try {
-				printODLines(time2odRelations, zones, outputDirectory + runId + ".od-analysis_HOURLY_" + modes.toString() + ".shp");
-				writeDataTableHourly(time2odRelations, zones, outputDirectory + runId + ".od-analysis_HOURLY_" + modes.toString() + "_from-to-format.csv");
+				printODLines(time2odRelations, zones, outputDirectory + "shapefiles_aggregated-od-analysis/" + runId + ".od-analysis_AllTimeBins_" + modes.toString() + ".shp");
+				writeDataTableTimeBins(time2odRelations, zones, outputDirectory + runId + ".od-analysis_AllTimeBins_" + modes.toString() + "_from-to-format.csv");
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -320,7 +346,7 @@ public final class ODAnalysis {
 		log.info("Table written to file.");
 	}
 	
-	private void writeDataTableHourly(Map<String, Map<String, ODRelation>> time2odRelations, Map<String, Geometry> zones, String fileName) throws IOException {
+	private void writeDataTableTimeBins(Map<String, Map<String, ODRelation>> time2odRelations, Map<String, Geometry> zones, String fileName) throws IOException {
 		
 		BufferedWriter writer = IOUtils.getBufferedWriter(fileName);
 		writer.write("origin;destination");
