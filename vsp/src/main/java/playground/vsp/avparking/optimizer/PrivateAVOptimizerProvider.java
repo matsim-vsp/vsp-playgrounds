@@ -19,23 +19,22 @@
 
 package playground.vsp.avparking.optimizer;
 
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
-import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
+
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
+
 import playground.vsp.avparking.AvParkingContext;
 
 public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
@@ -72,8 +71,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	@Override
 	public TaxiOptimizer get() {
-		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
 		return PrivateAVTaxiDispatcher.create(eventsManager, taxiCfg, fleet, network, timer, travelTime,
-				travelDisutility, scheduler, new RuleBasedTaxiOptimizerParams(optimizerConfig), manager, context);
+				travelDisutility, scheduler, manager, context);
 	}
 }

@@ -19,6 +19,10 @@
 
 package playground.vsp.avparking.optimizer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -34,7 +38,6 @@ import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
@@ -49,22 +52,19 @@ import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-import playground.vsp.avparking.AvParkingContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import playground.vsp.avparking.AvParkingContext;
 
 public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public static PrivateAVTaxiDispatcher create(EventsManager eventsManager, TaxiConfigGroup taxiCfg, Fleet fleet,
 			Network network, MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility,
-			TaxiScheduler scheduler, DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger,
+			TaxiScheduler scheduler, ParkingSearchManager parkingManger,
 			AvParkingContext context) {
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
 				parkingManger, router);
-		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, scheduler, params, parkingManger,
+		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, scheduler, parkingManger,
 				context, router, requestInserter, eventsManager);
 	}
 
@@ -87,10 +87,10 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	private final List<Link> avParkings;
 
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
-			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
+			TravelTime travelTime, TaxiScheduler scheduler,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
 			PrivateAVRequestInserter requestInserter, EventsManager eventsManager) {
-		super(eventsManager, taxiCfg, fleet, scheduler, params, requestInserter);
+		super(eventsManager, taxiCfg, fleet, scheduler, requestInserter);
 		this.fleet = fleet;
 		this.scheduler = scheduler;
 		this.network = network;
