@@ -17,21 +17,27 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.recipes;
+package org.matsim.contrib.greedo.logging;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.LogDataWrapper;
+
+import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AcceptAllRecipe implements ReplannerIdentifierRecipe {
+public class ReplanningRecipe implements Statistic<LogDataWrapper> {
 
 	@Override
-	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
-		return true;
+	public String label() {
+		return this.getClass().getSimpleName();
 	}
-}
 
+	@Override
+	public String value(LogDataWrapper arg0) {
+		return Statistic.toString(arg0.getLastExpectations().replannerIdentifierRecipeName);
+	}
+
+}

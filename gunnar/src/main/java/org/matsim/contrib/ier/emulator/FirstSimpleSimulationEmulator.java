@@ -25,14 +25,13 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 
 	private final MatsimServices services;
 
-	// private final FifoTransitPerformance transitPerformance;
+	private final FifoTransitPerformance transitPerformance;
 
 	@Inject
-	public FirstSimpleSimulationEmulator(final MatsimServices services
-			// ,final FifoTransitPerformance transitPerformance
-			) {
+	public FirstSimpleSimulationEmulator(final MatsimServices services,
+			final FifoTransitPerformance transitPerformance) {
 		this.services = services;
-		// this.transitPerformance = transitPerformance;
+		this.transitPerformance = transitPerformance;
 	}
 
 	@Override
@@ -57,8 +56,8 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 				 */
 
 				final Activity activity = (Activity) element;
-				time_s = (new RegularActivityEmulator(eventsManager)).emulateActivityAndReturnEndTime_s(activity, person,
-						time_s, isFirstElement, isLastElement);
+				time_s = (new RegularActivityEmulator(eventsManager)).emulateActivityAndReturnEndTime_s(activity,
+						person, time_s, isFirstElement, isLastElement);
 
 			} else if (element instanceof Leg) {
 
@@ -76,12 +75,11 @@ public class FirstSimpleSimulationEmulator implements SimulationEmulator {
 					legEmulator = new CarLegEmulator(eventsManager, this.services.getScenario().getNetwork(),
 							this.services.getLinkTravelTimes(), this.services.getScenario().getActivityFacilities());
 				} else if (TransportMode.pt.equals(leg.getMode())) {
-					legEmulator = new FifoTransitLegEmulator(eventsManager, 
-							null,
-							// this.transitPerformance,
+					legEmulator = new FifoTransitLegEmulator(eventsManager, this.transitPerformance,
 							this.services.getScenario());
 				} else {
-					throw new RuntimeException("No LegEmulator available for this mode: " + leg.getMode());
+					legEmulator = new OnlyDepartureArrivalLegEmulator(eventsManager,
+							this.services.getScenario().getActivityFacilities());
 				}
 				time_s = legEmulator.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity,
 						time_s);

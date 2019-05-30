@@ -33,11 +33,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.greedo.datastructures.CountIndicatorUtils;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
-import org.matsim.contrib.greedo.recipes.AcceptAllRecipe;
-import org.matsim.contrib.greedo.recipes.Mah2007Recipe;
-import org.matsim.contrib.greedo.recipes.Mah2009Recipe;
-import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
-import org.matsim.contrib.greedo.recipes.UniformReplanningRecipe;
 import org.matsim.core.utils.collections.Tuple;
 
 import floetteroed.utilities.DynamicData;
@@ -73,7 +68,7 @@ public class ReplannerIdentifier {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final Double overrideLambda, final double unconstrainedBeta, final double delta,
+	ReplannerIdentifier(ReplanningEfficiencyEstimator replanningEfficiencyEstimator,
 			final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
@@ -114,19 +109,41 @@ public class ReplannerIdentifier {
 		final double sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
-		this.unconstrainedBeta = unconstrainedBeta;
-		if (overrideLambda != null) {
-			this.lambdaBar = overrideLambda;
-			this.beta = 2.0 * overrideLambda * sumOfWeightedCountDifferences2 / Math.max(this.totalUtilityChange, 1e-8);
-		} else {
-			if (unconstrainedBeta <= 0) {
-				throw new RuntimeException("(unconstrainedBeta < 0) calls for (overrideLambda != null)");
-			}
-			this.beta = unconstrainedBeta;
-			this.lambdaBar = 0.5 * unconstrainedBeta * this.totalUtilityChange
-					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
+		this.unconstrainedBeta = replanningEfficiencyEstimator.getBeta();
+		this.delta = replanningEfficiencyEstimator.getDelta();
+
+		final boolean betaValid = ((this.unconstrainedBeta <= 0) || !replanningEfficiencyEstimator.hadEnoughData());
+		if (this.greedoConfig.getReplannerIdentifierRecipe() instanceof AccelerationRecipe) {
+			((AccelerationRecipe) this.greedoConfig.getReplannerIdentifierRecipe()).setUseBackupRecipe(betaValid);
 		}
-		this.delta = delta; // only bookkeeping
+		if (betaValid) {
+			this.beta = this.unconstrainedBeta;
+			this.lambdaBar = 0.5 * this.unconstrainedBeta * this.totalUtilityChange
+					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
+		} else {
+			this.lambdaBar = this.greedoConfig.getExogenousReplanningRate(iteration);
+			this.beta = 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2 / Math.max(this.totalUtilityChange, 1e-8);
+		}
+
+		// if ((this.greedoConfig.getReplannerIdentifierRecipe() instanceof
+		// AccelerationRecipe)
+		// && (this.unconstrainedBeta <= 0) ||
+		// !replanningEfficiencyEstimator.hadEnoughData()) {
+		// ((AccelerationRecipe)
+		// this.greedoConfig.getReplannerIdentifierRecipe()).setUseBackupRecipe(true);
+		// this.lambdaBar = this.greedoConfig.getExogenousReplanningRate(iteration);
+		// this.beta = 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2 /
+		// Math.max(this.totalUtilityChange, 1e-8);
+		// } else {
+		// if (this.greedoConfig.getReplannerIdentifierRecipe() instanceof
+		// AccelerationRecipe) {
+		// ((AccelerationRecipe)
+		// this.greedoConfig.getReplannerIdentifierRecipe()).setUseBackupRecipe(false);
+		// }
+		// this.beta = unconstrainedBeta;
+		// this.lambdaBar = 0.5 * unconstrainedBeta * this.totalUtilityChange
+		// / Math.max(sumOfWeightedCountDifferences2, 1e-8);
+		// }
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -139,23 +156,6 @@ public class ReplannerIdentifier {
 				this.currentWeightedCounts, this.lambdaBar);
 		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalUtilityChange;
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
-
-		// Instantiate the re-planning recipe.
-
-		final ReplannerIdentifierRecipe recipe;
-		if (GreedoConfigGroup.ModeType.sample == this.greedoConfig.getModeTypeField()) {
-			recipe = new UniformReplanningRecipe(this.lambdaBar);
-		} else if (GreedoConfigGroup.ModeType.off == this.greedoConfig.getModeTypeField()) {
-			recipe = new AcceptAllRecipe();
-		} else if (GreedoConfigGroup.ModeType.accelerate == this.greedoConfig.getModeTypeField()) {
-			recipe = new AccelerationRecipe();
-		} else if (GreedoConfigGroup.ModeType.mah2007 == this.greedoConfig.getModeTypeField()) {
-			recipe = new Mah2007Recipe(this.personId2UtilityChange, this.lambdaBar);
-		} else if (GreedoConfigGroup.ModeType.mah2009 == this.greedoConfig.getModeTypeField()) {
-			recipe = new Mah2009Recipe(this.personId2UtilityChange, this.lambdaBar);
-		} else {
-			throw new RuntimeException("Unknown mode: " + this.greedoConfig.getModeTypeField());
-		}
 
 		// Go through all vehicles and decide which driver gets to re-plan.
 
@@ -186,8 +186,8 @@ public class ReplannerIdentifier {
 					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar, this.beta, interactionResiduals,
 					inertiaResidual, this.personId2UtilityChange.get(personId), sumOfInteractionResiduals2);
 
-			final boolean replanner = recipe.isReplanner(personId, scoreUpdater.getScoreChangeIfOne(),
-					scoreUpdater.getScoreChangeIfZero());
+			final boolean replanner = this.greedoConfig.getReplannerIdentifierRecipe().isReplanner(personId,
+					scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero());
 
 			if (replanner) {
 				replanners.add(personId);
@@ -271,7 +271,7 @@ public class ReplannerIdentifier {
 				sumOfWeightedReplannerCountDifferences2, sumOfUnweightedNonReplannerCountDifferences2,
 				sumOfWeightedNonReplannerCountDifferences2, nonReplannerUtilityChangeSum, replannerSizeSum,
 				nonReplannerSizeSum, replanners.size(), this.population.getPersons().size() - replanners.size(),
-				personId2similarity);
+				personId2similarity, this.greedoConfig.getReplannerIdentifierRecipe().getDeployedRecipeName());
 
 		// <<< collect statistics, only for logging <<<
 
@@ -301,6 +301,12 @@ public class ReplannerIdentifier {
 		public final Integer numberOfReplanners;
 		public final Integer numberOfNonReplanners;
 		public final Map<Id<Person>, Double> personId2similarity;
+		public final String replannerIdentifierRecipeName;
+
+		LastExpectations() {
+			this(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+					new LinkedHashMap<>(), null);
+		}
 
 		LastExpectations(final Double lambdaBar, final Double beta, final Double unconstrainedBeta, final Double delta,
 				final Double lastExpectedUtilityChangeSumAccelerated,
@@ -309,7 +315,8 @@ public class ReplannerIdentifier {
 				final Double sumOfUnweightedNonReplannerCountDifferences2,
 				final Double sumOfWeightedNonReplannerCountDifferences2, final Double nonReplannerUtilityChangeSum,
 				final Double replannerSizeSum, final Double nonReplannerSizeSum, final Integer numberOfReplanners,
-				final Integer numberOfNonReplanners, final Map<Id<Person>, Double> personId2similarity) {
+				final Integer numberOfNonReplanners, final Map<Id<Person>, Double> personId2similarity,
+				final String replannerIdentifierRecipeName) {
 			this.lambdaBar = lambdaBar;
 			this.beta = beta;
 			this.unconstrainedBeta = unconstrainedBeta;
@@ -325,6 +332,7 @@ public class ReplannerIdentifier {
 			this.numberOfReplanners = numberOfReplanners;
 			this.numberOfNonReplanners = numberOfNonReplanners;
 			this.personId2similarity = Collections.unmodifiableMap(personId2similarity);
+			this.replannerIdentifierRecipeName = replannerIdentifierRecipeName;
 		}
 
 		public Double getSumOfUtilityChanges() {

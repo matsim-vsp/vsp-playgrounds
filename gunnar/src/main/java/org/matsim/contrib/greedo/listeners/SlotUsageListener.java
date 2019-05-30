@@ -54,8 +54,8 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	private final PrivateTrafficLinkUsageListener privateTrafficLinkUsageListener;
 
-	private final TransitVehicleUsageListener transitVehicleUsageListener;
-	
+	// private final TransitVehicleUsageListener transitVehicleUsageListener;
+
 	private boolean hasBeenResetOnceAndForAll = false;
 
 	private Integer lastResetIteration = null;
@@ -67,15 +67,16 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		this.personId2indicators = new ConcurrentHashMap<>(); // Shared by different listeners.
 		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(timeDiscretization,
 				this.personId2indicators, linkWeights, personWeights);
-		this.transitVehicleUsageListener = new TransitVehicleUsageListener(timeDiscretization, this.personId2indicators,
-				transitVehicleWeights, personWeights);
+		// this.transitVehicleUsageListener = new
+		// TransitVehicleUsageListener(timeDiscretization, this.personId2indicators,
+		// transitVehicleWeights, personWeights);
 	}
 
 	// -------------------- SETTERS --------------------
 
 	public void updatePersonWeights(final Map<Id<Person>, Double> personWeights) {
 		this.privateTrafficLinkUsageListener.updatePersonWeights(personWeights);
-		this.transitVehicleUsageListener.updatePersonWeights(personWeights);
+		// this.transitVehicleUsageListener.updatePersonWeights(personWeights);
 	}
 
 	// -------------------- CONTENT ACCESS --------------------
@@ -84,7 +85,7 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		// Need a deep copy because of subsequent (pSim) resets.
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
-	
+
 	public Integer getLastResetIteration() {
 		return this.lastResetIteration;
 	}
@@ -104,8 +105,8 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		if (!this.hasBeenResetOnceAndForAll) {
 			this.lastResetIteration = iteration;
 			this.privateTrafficLinkUsageListener.reset(iteration);
-			this.transitVehicleUsageListener.reset(iteration);
-		}		
+			// this.transitVehicleUsageListener.reset(iteration);
+		}
 	}
 
 	@Override
@@ -120,7 +121,7 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	@Override
 	public synchronized void handleEvent(final PersonEntersVehicleEvent event) {
-		this.transitVehicleUsageListener.handleEvent(event);
+		// this.transitVehicleUsageListener.handleEvent(event);
 	}
 
 	@Override

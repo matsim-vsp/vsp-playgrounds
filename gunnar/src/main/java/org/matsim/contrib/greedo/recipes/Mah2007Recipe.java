@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.LogDataWrapper;
 
 /**
  *
@@ -66,6 +67,18 @@ public class Mah2007Recipe implements ReplannerIdentifierRecipe {
 	@Override
 	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
 		return this.replannerIds.contains(personId);
+	}
+
+	@Override
+	public void update(LogDataWrapper logDataWrapper) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getDeployedRecipeName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

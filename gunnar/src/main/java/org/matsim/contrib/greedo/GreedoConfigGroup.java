@@ -27,14 +27,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
+import org.matsim.contrib.greedo.recipes.MSARecipe;
+import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
+import org.matsim.contrib.greedo.recipes.SelfRegulatingMSA;
 import org.matsim.core.config.ReflectiveConfigGroup;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.StringUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleCapacity;
@@ -62,15 +62,19 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// members that are set through configure(..)
 
-	private Integer populationSize = null;
+	// private Integer populationSize = null;
 
-	private Integer firstIteration = null;
+	// private Integer firstIteration = null;
 
 	private ConcurrentMap<Id<Link>, Double> concurrentLinkWeights = null;
 
 	private ConcurrentMap<Id<Vehicle>, Double> concurrentTransitVehicleWeights = null;
 
-	private double[] replanningRates = null;
+	// private double[] replanningRates = null;
+
+	private ReplannerIdentifierRecipe replannerIdentifierRecipe = null;
+
+	// private ReplannerIdentifierRecipe secondaryReplannerIdentifierRecipe = null;
 
 	// the (necessary) configuration
 
@@ -82,8 +86,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
 			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
 
-		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.firstIteration = scenario.getConfig().controler().getFirstIteration();
+		// this.populationSize = scenario.getPopulation().getPersons().size();
+		// this.firstIteration = scenario.getConfig().controler().getFirstIteration();
 
 		this.concurrentLinkWeights = new ConcurrentHashMap<>();
 		if (capacitatedLinkIds != null) {
@@ -114,18 +118,25 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 		// Pre-compute re-planning rates. To have consistent results when randomizing
 		// per iteration.
-		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
-		this.replanningRates = new double[scenario.getConfig().controler().getLastIteration()
-				- scenario.getConfig().controler().getFirstIteration() + 1];
-		for (int it = 0; it < this.replanningRates.length; it++) {
-			double rate = this.getInitialMeanReplanningRate()
-					* Math.pow(1.0 + it, this.getReplanningRateIterationExponent());
-			if (this.getBinomialNumberOfReplanners()) {
-				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
-				rate = ((double) distr.sample()) / this.populationSize;
-			}
-			this.replanningRates[it] = rate;
-		}
+		// final RandomGenerator rng = new
+		// Well19937c(MatsimRandom.getRandom().nextLong());
+		// this.replanningRates = new
+		// double[scenario.getConfig().controler().getLastIteration()
+		// - scenario.getConfig().controler().getFirstIteration() + 1];
+		// for (int it = 0; it < this.replanningRates.length; it++) {
+		// double rate = this.getInitialMeanReplanningRate()
+		// * Math.pow(1.0 + it, this.getReplanningRateIterationExponent());
+		// if (this.getBinomialNumberOfReplanners()) {
+		// final BinomialDistribution distr = new BinomialDistribution(rng,
+		// this.populationSize, rate);
+		// rate = ((double) distr.sample()) / this.populationSize;
+		// }
+		// this.replanningRates[it] = rate;
+		// }
+
+		this.replannerIdentifierRecipe = this.newReplannerIdentifierRecipe(this.getPrimaryReplannerIdentifierType());
+		// this.secondaryReplannerIdentifierRecipe = this
+		// .newReplannerIdentifierRecipe(this.getSecondaryReplannerIdentifierType());
 	}
 
 	// getters
@@ -143,17 +154,91 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	public double getExogenousReplanningRate(int iteration) {
-		return this.replanningRates[iteration - this.firstIteration];
+		return (this.getInitialMeanReplanningRate()
+				* Math.pow(1.0 + iteration, this.getReplanningRateIterationExponent()));
 	}
 
 	public double getAgeWeight(final double age) {
 		return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
 	}
 
+	public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
+		return this.replannerIdentifierRecipe;
+	}
+
+	// public ReplannerIdentifierRecipe getSecondaryReplannerIdentifierRecipe() {
+	// return this.secondaryReplannerIdentifierRecipe;
+	// }
+
+	// -------------------- replannerIdentifier --------------------
+
+	public static enum ReplannerIdentifierType {
+		accelerate, MSA, adaptiveMSA
+	}
+
+	private ReplannerIdentifierType replannerIdentifierType = ReplannerIdentifierType.accelerate;
+	// private ReplannerIdentifierType secondaryReplannerIdentifierType =
+	// ReplannerIdentifierType.MSA;
+
+	private ReplannerIdentifierRecipe newReplannerIdentifierRecipe(final ReplannerIdentifierType type) {
+		if (ReplannerIdentifierType.accelerate.equals(type)) {
+			return new AccelerationRecipe(this.newReplannerIdentifierRecipe(ReplannerIdentifierType.MSA));
+		} else if (ReplannerIdentifierType.MSA.equals(type)) {
+			return new MSARecipe(this.getInitialMeanReplanningRate(), this.getReplanningRateIterationExponent());
+		} else if (ReplannerIdentifierType.adaptiveMSA.equals(type)) {
+			return new SelfRegulatingMSA(0.1, 1.9);
+		} else {
+			throw new RuntimeException("Unknown ReplannerIdentifierType: " + type);
+		}
+	}
+
+	@StringGetter("replannerIdentifier")
+	public ReplannerIdentifierType getPrimaryReplannerIdentifierType() {
+		return this.replannerIdentifierType;
+	}
+
+	@StringSetter("replannerIdentifier")
+	public void setPrimaryReplannerIdentifierType(final ReplannerIdentifierType replannerIdentifierType) {
+		this.replannerIdentifierType = replannerIdentifierType;
+	}
+
+	// @StringGetter("secondaryReplannerIdentifier")
+	// public ReplannerIdentifierType getSecondaryReplannerIdentifierType() {
+	// return this.secondaryReplannerIdentifierType;
+	// }
+	//
+	// @StringSetter("secondaryReplannerIdentifier")
+	// public void setSecondaryReplannerIdentifierType(final ReplannerIdentifierType
+	// secondaryReplannerIdentifierType) {
+	// this.secondaryReplannerIdentifierType = secondaryReplannerIdentifierType;
+	// }
+
+	// -------------------- mode --------------------
+	//
+	// public static enum ModeType {
+	// off, accelerate, MSA, adaptiveMSA
+	// };
+	//
+	// private ModeType modeTypeField = ModeType.accelerate;
+	//
+	// @StringGetter("mode")
+	// public ModeType getModeTypeField() {
+	// return this.modeTypeField;
+	// }
+	//
+	// @StringSetter("mode")
+	// public void setModeTypeField(final ModeType modeTypeField) {
+	// this.modeTypeField = modeTypeField;
+	// }
+	//
+	// public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
+	// return this.primaryReplannerIdentifierRecipe;
+	// }
+
 	// -------------------- correlationLoggingMemory --------------------
 
 	private int correlationLoggingMemory = 100;
-	
+
 	@StringGetter("correlationLoggingMemory")
 	public int getCorrelationLoggingMemory() {
 		return this.correlationLoggingMemory;
@@ -164,24 +249,23 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.correlationLoggingMemory = correlationLoggingMemory;
 	}
 
-	
 	// -------------------- stepSize --------------------
-
-	public static enum StepSizeType {
-		exogenous, adaptive
-	};
-
-	private StepSizeType stepSizeField = StepSizeType.adaptive;
-
-	@StringGetter("stepSize")
-	public StepSizeType getStepSizeField() {
-		return this.stepSizeField;
-	}
-
-	@StringSetter("stepSize")
-	public void setStepSizeField(final StepSizeType stepSizeField) {
-		this.stepSizeField = stepSizeField;
-	}
+	//
+	// public static enum StepSizeType {
+	// exogenous, adaptive
+	// };
+	//
+	// private StepSizeType stepSizeField = StepSizeType.adaptive;
+	//
+	// @StringGetter("stepSize")
+	// public StepSizeType getStepSizeField() {
+	// return this.stepSizeField;
+	// }
+	//
+	// @StringSetter("stepSize")
+	// public void setStepSizeField(final StepSizeType stepSizeField) {
+	// this.stepSizeField = stepSizeField;
+	// }
 
 	// --------------- replanningEfficiencyEstimationInertia ---------------
 
@@ -279,24 +363,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("replanningRateIterationExponent")
 	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
-	}
-
-	// -------------------- mode --------------------
-
-	public static enum ModeType {
-		off, sample, accelerate, mah2007, mah2009
-	};
-
-	private ModeType modeTypeField = ModeType.accelerate;
-
-	@StringGetter("mode")
-	public ModeType getModeTypeField() {
-		return this.modeTypeField;
-	}
-
-	@StringSetter("mode")
-	public void setModeTypeField(final ModeType modeTypeField) {
-		this.modeTypeField = modeTypeField;
 	}
 
 	// -------------------- ageWeightExponent --------------------

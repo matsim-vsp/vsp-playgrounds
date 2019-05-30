@@ -19,11 +19,13 @@
  */
 package org.matsim.contrib.greedo;
 
-import floetteroed.utilities.math.Covariance;
+import org.apache.commons.math3.stat.correlation.Covariance;
+
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Regression;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
+import utils.RecursiveMovingAverage;
 
 /**
  * Estimates a model of the following form:
@@ -56,7 +58,9 @@ class ReplanningEfficiencyEstimator {
 
 	private final Regression regression;
 
-	private final Covariance deltaX2vsDeltaDeltaUCov;
+	private final RecursiveMovingAverage deltaX2;
+
+	private final RecursiveMovingAverage anticipatedDeltaUMinusRealizedDeltaU;
 
 	private Double lastPredictedTotalUtilityImprovement = null;
 
@@ -64,10 +68,11 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt) {
+	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt, final int covarianceMemoryLength) {
 		this.regression = new Regression(inertia, 2);
-		this.deltaX2vsDeltaDeltaUCov = new Covariance(2, 2);
 		this.minObservationCnt = minObservationCnt;
+		this.deltaX2 = new RecursiveMovingAverage(covarianceMemoryLength);
+		this.anticipatedDeltaUMinusRealizedDeltaU = new RecursiveMovingAverage(covarianceMemoryLength);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -76,17 +81,15 @@ class ReplanningEfficiencyEstimator {
 			final Double anticipatedSlotUsageChange2) {
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
 				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
-			{
-				final Vector regressionInput = new Vector(anticipatedSlotUsageChange2, 1.0);
-				this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
-						- this.regression.predict(regressionInput);
-				this.regression.update(regressionInput, anticipatedUtilityChange - realizedUtilityChange);
-			}
-			{
-				final Vector x = new Vector(anticipatedSlotUsageChange2,
-						anticipatedUtilityChange - realizedUtilityChange);
-				this.deltaX2vsDeltaDeltaUCov.add(x, x);
-			}
+			
+			this.deltaX2.add(anticipatedSlotUsageChange2);
+			this.anticipatedDeltaUMinusRealizedDeltaU.add(anticipatedUtilityChange - realizedUtilityChange);
+
+			final Vector regressionInput = new Vector(anticipatedSlotUsageChange2, 1.0);
+			this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
+					- this.regression.predict(regressionInput);
+			this.regression.update(regressionInput, anticipatedUtilityChange - realizedUtilityChange);
+
 			this.observationCnt++;
 		}
 	}
@@ -115,8 +118,15 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				final Matrix _C = deltaX2vsDeltaDeltaUCov.getCovariance();
-				return Statistic.toString(_C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1)));
+				final Covariance covariance = new Covariance();
+				final double[] deltaX2Data = deltaX2.getDataAsPrimitiveDoubleArray();
+				final double[] disappointmentData = anticipatedDeltaUMinusRealizedDeltaU.getDataAsPrimitiveDoubleArray();
+				
+				final double cov12 = covariance.covariance(deltaX2Data, disappointmentData);
+				final double var1 = covariance.covariance(deltaX2Data, deltaX2Data);
+				final double var2 = covariance.covariance(disappointmentData, disappointmentData);
+				
+				return Statistic.toString(cov12 / Math.sqrt(var1 * var2));
 			}
 		};
 	}

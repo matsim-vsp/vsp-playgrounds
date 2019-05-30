@@ -25,7 +25,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -41,11 +40,9 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
  * @author Gunnar Flötteröd
  *
  */
-public class FifoTransitLegEmulator implements LegEmulator {
+public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	// -------------------- MEMBERS --------------------
-
-	private final EventsManager eventsManager;
 
 	private final FifoTransitPerformance fifoTransitPerformance;
 
@@ -55,9 +52,9 @@ public class FifoTransitLegEmulator implements LegEmulator {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public FifoTransitLegEmulator(final EventsManager eventsManager, final FifoTransitPerformance fifoTransitPerformance,
-			final Scenario scenario) {
-		this.eventsManager = eventsManager;
+	public FifoTransitLegEmulator(final EventsManager eventsManager,
+			final FifoTransitPerformance fifoTransitPerformance, final Scenario scenario) {
+		super(eventsManager, scenario.getActivityFacilities());
 		this.fifoTransitPerformance = fifoTransitPerformance;
 		this.transitLines = scenario.getTransitSchedule().getTransitLines();
 		this.stopFacilities = scenario.getTransitSchedule().getFacilities();
@@ -66,8 +63,7 @@ public class FifoTransitLegEmulator implements LegEmulator {
 	// -------------------- IMPLEMENTATION OF LegEmulator --------------------
 
 	@Override
-	public double emulateLegAndReturnEndTime_s(Leg leg, Person person, Activity previousActivity,
-			Activity followingActivity, double time_s) {
+	public double emulateBetweenDepartureAndArrival(Leg leg, Person person, double time_s) {
 
 		final ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
 		final Id<TransitStopFacility> accessStopId = route.getAccessStopId();

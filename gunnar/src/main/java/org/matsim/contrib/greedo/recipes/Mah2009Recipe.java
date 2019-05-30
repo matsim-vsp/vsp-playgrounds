@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.LogDataWrapper;
 import org.matsim.core.gbl.MatsimRandom;
 
 /**
@@ -94,5 +95,17 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
 		final double replanProba = this.replanProbaConstant * this.meanLambda * this.person2utilityGain.get(personId);
 		return (MatsimRandom.getRandom().nextDouble() < replanProba);
+	}
+
+	@Override
+	public void update(LogDataWrapper logDataWrapper) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getDeployedRecipeName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

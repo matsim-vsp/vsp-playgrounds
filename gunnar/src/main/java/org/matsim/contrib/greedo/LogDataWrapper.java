@@ -40,15 +40,23 @@ public class LogDataWrapper {
 
 	private final ReplannerIdentifier.LastExpectations lastExpectations;
 
+	private final int iteration;
+	
 	public LogDataWrapper(// final WireGreedoIntoMATSimControlerListener accelerator,
 			final Ages ages, Utilities.SummaryStatistics summaryStats,
-			final ReplannerIdentifier.LastExpectations lastExpectations) {
+			final ReplannerIdentifier.LastExpectations lastExpectations,
+			final int iteration) {
 		// this.accelerator = accelerator;
 		this.ages = ages;
 		this.summaryStats = summaryStats;
 		this.lastExpectations = lastExpectations;
+		this.iteration = iteration;
 	}
 
+	public int getIteration() {
+		return this.iteration;
+	}
+	
 	public Ages getAges() {
 		return this.ages;
 	}
@@ -124,7 +132,7 @@ public class LogDataWrapper {
 		// return this.accelerator.getRealizedUtilityChangeSum();
 		return this.summaryStats.realizedUtilityChangeSum;
 	}
-
+	
 	public List<Integer> getSortedAges() {
 		// return this.accelerator.getSortedAgesView();
 		return this.ages.getSortedAges();

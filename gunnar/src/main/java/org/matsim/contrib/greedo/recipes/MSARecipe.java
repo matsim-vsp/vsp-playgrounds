@@ -22,46 +22,48 @@ package org.matsim.contrib.greedo.recipes;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.LogDataWrapper;
+import org.matsim.core.gbl.MatsimRandom;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AccelerationRecipe implements ReplannerIdentifierRecipe {
+public class MSARecipe implements ReplannerIdentifierRecipe {
 
-	private final ReplannerIdentifierRecipe backupRecipe;
+	// -------------------- CONSTANTS --------------------
 
-	private boolean useBackupRecipe = false;
+	private final double initialStepSize;
 
-	public AccelerationRecipe(final ReplannerIdentifierRecipe backupRecipe) {
-		this.backupRecipe = backupRecipe;
+	private final double iterationExponent;
+
+	// -------------------- MEMBERS --------------------
+
+	private int iteration = 0;
+
+	// -------------------- CONSTRUCTION --------------------
+
+	public MSARecipe(final double initialStepSize, final double iterationExponent) {
+		this.initialStepSize = initialStepSize;
+		this.iterationExponent = iterationExponent;
+	}
+
+	// --------------- IMPLEMENATION OF ReplannerIdentifierRecipe ---------------
+
+	@Override
+	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
+		final double proba = this.initialStepSize * Math.pow(1.0 + this.iteration, this.iterationExponent);
+		return (MatsimRandom.getRandom().nextDouble() < proba);
 	}
 
 	@Override
-	public void update(final LogDataWrapper logDataWrapper) {
-		this.backupRecipe.update(logDataWrapper);
-	}
-
-	public void setUseBackupRecipe(final boolean useBackupRecipe) {
-		this.useBackupRecipe = useBackupRecipe;
-	}
-
-	@Override
-	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
-		if (this.useBackupRecipe) {
-			return this.backupRecipe.isReplanner(personId, deltaScoreIfYes, deltaScoreIfNo);
-		} else {
-			return (deltaScoreIfYes < deltaScoreIfNo);
-		}
+	public void update(LogDataWrapper logDataWrapper) {
+		this.iteration = logDataWrapper.getIteration();
 	}
 
 	@Override
 	public String getDeployedRecipeName() {
-		if (this.useBackupRecipe) {
-			return this.backupRecipe.getClass().getSimpleName();
-		} else {
-			return this.getClass().getSimpleName();
-		}
+		return this.getClass().getSimpleName();
 	}
+
 }

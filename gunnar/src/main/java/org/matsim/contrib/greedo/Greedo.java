@@ -22,7 +22,9 @@ package org.matsim.contrib.greedo;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.ier.IERModule;
+import org.matsim.contrib.ier.emulator.FifoTransitPerformance;
 import org.matsim.contrib.ier.run.IERConfigGroup;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
 import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
 import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
@@ -173,20 +175,16 @@ public class Greedo {
 		final AbstractModule greedoModule = new AbstractModule() {
 			@Override
 			public void install() {
-				// TODO For now only car traffic!
-				// if (this.config.transit().isUseTransit()) {
-				// log.warn("Transit is included -- this is only tested with deterministic SBB
-				// transit.");
-				// this.bind(FifoTransitPerformance.class);
-				// this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-				// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-				// } else {
-				log.warn("Experimental code; no transit emulation!");
-				this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-				// }
+			 	this.bind(FifoTransitPerformance.class);
+				 if (config.transit().isUseTransit()) {
+				 log.warn("Transit emulation is included. This is experimental code.");
+				 	this.addEventHandlerBinding().to(FifoTransitPerformance.class);
+				 } else {
+					 log.warn("No transit emulation.");
+					 this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+				 }
 				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
 				this.addEventHandlerBinding().toProvider(WireGreedoIntoMATSimControlerListener.class);
-				
 			}
 		};
 		final AbstractModule ierModule = new IERModule(WireGreedoIntoMATSimControlerListener.class);

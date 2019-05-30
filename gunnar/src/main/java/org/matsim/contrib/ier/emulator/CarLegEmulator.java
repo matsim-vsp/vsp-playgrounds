@@ -22,13 +22,10 @@ package org.matsim.contrib.ier.emulator;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -42,38 +39,20 @@ import org.matsim.vehicles.Vehicle;
  * @author Gunnar Flötteröd
  *
  */
-public class CarLegEmulator implements LegEmulator {
-
-	private final EventsManager eventsManager;
+public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	private final Network network;
-	private final ActivityFacilities activityFacilities;
-
 	private final TravelTime travelTime;
 
 	public CarLegEmulator(final EventsManager eventsManager, final Network network, final TravelTime travelTime,
 			ActivityFacilities activityFacilities) {
-		this.eventsManager = eventsManager;
+		super(eventsManager, activityFacilities);
 		this.network = network;
 		this.travelTime = travelTime;
-		this.activityFacilities = activityFacilities;
-	}
-
-	private Id<Link> getLinkId(Activity activity) {
-		if (activity.getFacilityId() != null) {
-			return activityFacilities.getFacilities().get(activity.getFacilityId()).getLinkId();
-		} else {
-			return activity.getLinkId();
-		}
 	}
 
 	@Override
-	public double emulateLegAndReturnEndTime_s(final Leg leg, final Person person, final Activity previousActivity,
-			final Activity nextActivity, double time_s) {
-
-		// Every leg starts with a departure.
-		this.eventsManager.processEvent(
-				new PersonDepartureEvent(time_s, person.getId(), getLinkId(previousActivity), leg.getMode()));
+	public double emulateBetweenDepartureAndArrival(final Leg leg, final Person person, double time_s) {
 
 		if (!(leg.getRoute() instanceof NetworkRoute)) {
 			throw new RuntimeException(
@@ -104,10 +83,6 @@ public class CarLegEmulator implements LegEmulator {
 			this.eventsManager.processEvent(new VehicleLeavesTrafficEvent(time_s, person.getId(),
 					networkRoute.getEndLinkId(), vehicleId, leg.getMode(), 0.0));
 		}
-
-		// Every leg ends with an arrival.
-		this.eventsManager
-				.processEvent(new PersonArrivalEvent(time_s, person.getId(), getLinkId(nextActivity), leg.getMode()));
 
 		return time_s;
 	}
