@@ -96,7 +96,7 @@ public class DrtEventsReader extends MatsimXmlParser {
 				Id<Person> personId = Id.create(attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_PERSON),
 						Person.class);
 
-				return new PassengerRequestRejectedEvent(time, mode, requestId, cause, personId);
+				return new PassengerRequestRejectedEvent(time, mode, requestId, personId, cause);
 			}
 		};
 
@@ -122,8 +122,8 @@ public class DrtEventsReader extends MatsimXmlParser {
 				Id<Person> personId = Id.create(attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_PERSON),
 						Person.class);
 
-				return new PassengerRequestScheduledEvent(time, mode, requestId, vehicleId, pickUpTime, dropOffDistance,
-						personId);
+				return new PassengerRequestScheduledEvent(time, mode, requestId, personId, vehicleId, pickUpTime,
+						dropOffDistance);
 			}
 		};
 
