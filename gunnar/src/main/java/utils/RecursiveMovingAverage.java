@@ -60,7 +60,7 @@ public class RecursiveMovingAverage {
 	public double sum() {
 		return this.sum;
 	}
-	
+
 	public double average() {
 		return this.sum / this.data.size();
 	}
@@ -68,13 +68,21 @@ public class RecursiveMovingAverage {
 	public double mostRecentValue() {
 		return this.data.getFirst();
 	}
-	
+
+	public double[] getDataAsPrimitiveDoubleArray() {
+		final double[] result = new double[this.data.size()];
+		for (int i = 0; i < this.data.size(); i++) {
+			result[i] = this.data.get(i);
+		}
+		return result;
+	}
+
 	public static void main(String[] args) {
 		int memory = 4;
 		double[] data = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 };
 		double[] result = { 0, 0, 0, 0, 0.25, 0.5, 0.75, 1, 0.75, 0.5, 0.25, 0 };
 		int[] size = { 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
-		
+
 		RecursiveMovingAverage rma = new RecursiveMovingAverage(memory);
 		System.out.println("average-error\tsize-error");
 		for (int i = 0; i < data.length; i++) {
