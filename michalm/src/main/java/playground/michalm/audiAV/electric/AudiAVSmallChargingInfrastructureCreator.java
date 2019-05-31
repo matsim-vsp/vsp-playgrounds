@@ -19,19 +19,19 @@
 
 package playground.michalm.audiAV.electric;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.ev.data.Charger;
-import org.matsim.contrib.ev.data.ChargerImpl;
-import org.matsim.contrib.ev.data.ChargingInfrastructureImpl;
 import org.matsim.contrib.ev.data.file.ChargerReader;
 import org.matsim.contrib.ev.data.file.ChargerWriter;
+import org.matsim.contrib.ev.infrastructure.Charger;
+import org.matsim.contrib.ev.infrastructure.ChargerImpl;
+import org.matsim.contrib.ev.infrastructure.ChargingInfrastructureImpl;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AudiAVSmallChargingInfrastructureCreator {
 	public static void main(String[] args) {
