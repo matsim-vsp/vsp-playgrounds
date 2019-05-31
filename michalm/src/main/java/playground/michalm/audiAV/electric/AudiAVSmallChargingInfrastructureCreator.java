@@ -23,10 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.ev.data.file.ChargerReader;
-import org.matsim.contrib.ev.data.file.ChargerWriter;
 import org.matsim.contrib.ev.infrastructure.Charger;
 import org.matsim.contrib.ev.infrastructure.ChargerImpl;
+import org.matsim.contrib.ev.infrastructure.ChargerReader;
+import org.matsim.contrib.ev.infrastructure.ChargerWriter;
 import org.matsim.contrib.ev.infrastructure.ChargingInfrastructureImpl;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
