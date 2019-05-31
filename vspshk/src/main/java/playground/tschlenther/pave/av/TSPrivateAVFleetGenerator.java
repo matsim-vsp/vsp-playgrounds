@@ -21,9 +21,6 @@
  */
 package playground.tschlenther.pave.av;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -42,13 +39,15 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * @author tschlenther
  *
  */
 public class TSPrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 
-	private Map<Id<DvrpVehicle>, DvrpVehicle> vehiclesForIteration;
+	private ImmutableMap<Id<DvrpVehicle>, DvrpVehicle> vehiclesForIteration;
 
 	private final Population population;
 	
@@ -64,12 +63,12 @@ public class TSPrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 		this.population= scenario.getPopulation();
 		this.network = scenario.getNetwork();
 //		this.manager = manager;
-		vehiclesForIteration = new HashMap<>();
+		vehiclesForIteration = ImmutableMap.of();
 	}
 	
 	
 	@Override
-	public Map<Id<DvrpVehicle>, ? extends DvrpVehicle> getVehicles() {
+	public ImmutableMap<Id<DvrpVehicle>, ? extends DvrpVehicle> getVehicles() {
 		return vehiclesForIteration;
 	}
 

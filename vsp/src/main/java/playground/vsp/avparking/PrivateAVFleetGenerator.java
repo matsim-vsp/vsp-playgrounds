@@ -22,21 +22,32 @@
  */
 package playground.vsp.avparking;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.dvrp.fleet.*;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleImpl;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.Fleet;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
 
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author  jbischoff
@@ -46,7 +57,7 @@ import java.util.Map;
 
 public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 
-	private Map<Id<DvrpVehicle>, DvrpVehicle> vehiclesForIteration;
+	private ImmutableMap<Id<DvrpVehicle>, DvrpVehicle> vehiclesForIteration;
 
 	private final Population population;
 	
@@ -64,12 +75,12 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 		this.population= scenario.getPopulation();
 		this.network = scenario.getNetwork();
 //		this.manager = manager;
-		vehiclesForIteration = new HashMap<>();
+		vehiclesForIteration = ImmutableMap.of();
 	}
 	
 	
 	@Override
-	public Map<Id<DvrpVehicle>, ? extends DvrpVehicle> getVehicles() {
+	public ImmutableMap<Id<DvrpVehicle>, ? extends DvrpVehicle> getVehicles() {
 		return vehiclesForIteration;
 	}
 
