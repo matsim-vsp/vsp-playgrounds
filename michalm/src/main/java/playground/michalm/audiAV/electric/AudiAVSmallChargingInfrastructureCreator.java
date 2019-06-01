@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.ev.infrastructure.Charger;
-import org.matsim.contrib.ev.infrastructure.ChargerImpl;
 import org.matsim.contrib.ev.infrastructure.ChargerReader;
+import org.matsim.contrib.ev.infrastructure.ChargerSpecification;
 import org.matsim.contrib.ev.infrastructure.ChargerWriter;
-import org.matsim.contrib.ev.infrastructure.ChargingInfrastructureImpl;
+import org.matsim.contrib.ev.infrastructure.ChargingInfrastructureSpecification;
+import org.matsim.contrib.ev.infrastructure.ChargingInfrastructureSpecificationImpl;
+import org.matsim.contrib.ev.infrastructure.ImmutableChargerSpecification;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
 import org.matsim.core.network.NetworkUtils;
@@ -54,20 +55,20 @@ public class AudiAVSmallChargingInfrastructureCreator {
 			String s = scenarios[i];
 			int c = counts[i];
 
-			final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
-			new ChargerReader(network, chargingInfrastructure).readFile(chFilePrefix + c + "_" + s + ".xml");
+			final ChargingInfrastructureSpecification chargingInfrastructure = new ChargingInfrastructureSpecificationImpl();
+			new ChargerReader(chargingInfrastructure).readFile(chFilePrefix + c + "_" + s + ".xml");
 
-			List<Charger> fractChargers = new ArrayList<>();
+			List<ChargerSpecification> fractChargers = new ArrayList<>();
 			int totalPlugs = 0;
-			for (Charger ch : chargingInfrastructure.getChargers().values()) {
-				int plugs = (int)uniform.floorOrCeil(fraction * ch.getPlugs());
+			for (ChargerSpecification ch : chargingInfrastructure.getChargerSpecifications().values()) {
+				int plugs = (int)uniform.floorOrCeil(fraction * ch.getPlugCount());
 				if (plugs > 0) {
-					fractChargers.add(new ChargerImpl(ch.getId(), ch.getPower(), plugs, ch.getLink()));
+					fractChargers.add(ImmutableChargerSpecification.newBuilder(ch).plugCount(plugs).build());
 					totalPlugs += plugs;
 				}
 			}
 
-			new ChargerWriter(fractChargers).write(fractChFilePrefix + totalPlugs + "_" + s + ".xml");
+			new ChargerWriter(fractChargers.stream()).write(fractChFilePrefix + totalPlugs + "_" + s + ".xml");
 		}
 	}
 }
