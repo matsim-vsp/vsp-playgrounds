@@ -26,7 +26,7 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.etaxi.run.RunETaxiBenchmark;
 import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.contrib.ev.discharging.AuxEnergyConsumption;
-import org.matsim.contrib.ev.dvrp.DvrpAuxConsumptionFactory;
+import org.matsim.contrib.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.core.config.Config;
@@ -51,7 +51,8 @@ public class RunEAVBenchmark {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				bind(AuxEnergyConsumption.Factory.class).toInstance(new DvrpAuxConsumptionFactory(() -> TEMPERATURE));
+				bind(AuxEnergyConsumption.Factory.class).toInstance(
+						ev -> new OhdeSlaskiAuxEnergyConsumption(() -> TEMPERATURE));
 			}
 		});
 
