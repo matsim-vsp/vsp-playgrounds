@@ -86,7 +86,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 				// The transit router may produce pure (transit) walk trips. Interpret as a
 				// non-PT walking trip. (MATSim-type justification: Keep "Scoring" independent
-				// of "innovation".)
+				// of "innovation".) The Sampers scoring only knows "walk" anyway.
 				if (TransportMode.transit_walk.equals(leg.getMode())) {
 					leg.setMode(TransportMode.walk);
 				}

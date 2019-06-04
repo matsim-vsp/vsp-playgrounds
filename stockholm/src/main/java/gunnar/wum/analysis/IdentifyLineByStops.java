@@ -22,6 +22,8 @@ package gunnar.wum.analysis;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Scenario;
@@ -56,8 +58,15 @@ public class IdentifyLineByStops {
 		System.out.println("STARTED ...");
 
 		String mode = "ferry";
-		Set<String> requiredStopNames = new LinkedHashSet<>(
-				Arrays.asList(new String[] { "Nybrokajen", "Nacka strand", "Lidingö", "Frihamnen" }));
+
+		// line 80
+		// final Set<String> requiredStopNames = new LinkedHashSet<>(
+		// Arrays.asList(new String[] { "Nybrokajen", "Nacka strand", "Lidingö",
+		// "Frihamnen" }));
+		
+		// line 89
+		final Set<String> requiredStopNames = new LinkedHashSet<>(Arrays.asList(new String[] { "Klara Mälarstrand",
+				"Lilla Essingen", "Ekensberg", "Kungshättan brygga", "Tappström" }));
 
 		String reducedScheduleFile = "/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitSchedule_reduced.xml.gz";
 		String reducedTransitVehiclesFile = "/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz";
@@ -67,22 +76,22 @@ public class IdentifyLineByStops {
 		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(reducedTransitVehiclesFile);
 
 		for (TransitLine line : scenario.getTransitSchedule().getTransitLines().values()) {
-			
-			Set<String> stopNames = new LinkedHashSet<>();
+
+			List<String> foundStopNames = new LinkedList<>();
 			for (TransitRoute route : line.getRoutes().values()) {
 				if (mode.equalsIgnoreCase(route.getTransportMode())) {
 					for (TransitRouteStop stop : route.getStops()) {
-						stopNames.add(stop.getStopFacility().getName());
+						foundStopNames.add(stop.getStopFacility().getName());
 					}
 				}
 			}
 
-			Set<String> matches = matches(stopNames, requiredStopNames);
+			Set<String> matches = matches(new LinkedHashSet<>(foundStopNames), requiredStopNames);
 			if (matches.size() > 0) {
-				System.out.println("Line " + line.getId() + " matches " + matches.size() + " / " + requiredStopNames.size() + " : " + matches);
+				System.out.println("Line " + line.getId() + " matches " + matches.size() + " / "
+						+ requiredStopNames.size() + " : " + matches + "; full stop sequence: " + foundStopNames);
 			}
 
-		
 		}
 
 		System.out.println("... DONE.");
