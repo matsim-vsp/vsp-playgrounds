@@ -51,8 +51,7 @@ public class RunEAVBenchmark {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				bind(AuxEnergyConsumption.Factory.class).toInstance(
-						new DvrpAuxConsumptionFactory(mode, () -> TEMPERATURE, (vehicle, time) -> (time >= vehicle.getServiceBeginTime() && time <= vehicle.getServiceEndTime())));
+				bind(AuxEnergyConsumption.Factory.class).toInstance(new DvrpAuxConsumptionFactory(() -> TEMPERATURE));
 			}
 		});
 
