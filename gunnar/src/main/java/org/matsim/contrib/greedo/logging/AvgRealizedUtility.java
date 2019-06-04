@@ -19,17 +19,14 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
 public class AvgRealizedUtility extends PopulationAverageStatistic {
-
-	// @Override
-	// public String label() {
-	// return AverageRealizedUtility.class.getSimpleName();
-	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.matsim.vsp</groupId>
 		<artifactId>vsp-playgrounds</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+        <version>12.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
@@ -19,12 +19,12 @@
 		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>benjamin</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 <!-- 		<dependency> -->
 <!-- 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
 <!-- 			<artifactId>kai</artifactId> -->
-<!-- 			<version>0.11.0-SNAPSHOT</version> -->
+        <!-- 			<version>12.0-SNAPSHOT</version> -->
 <!-- 		</dependency> -->
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>

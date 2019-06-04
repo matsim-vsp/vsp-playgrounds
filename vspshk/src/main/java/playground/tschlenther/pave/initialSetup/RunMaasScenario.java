@@ -21,17 +21,15 @@
  */
 package playground.tschlenther.pave.initialSetup;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
-import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModes;
-import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
+import org.matsim.contrib.dvrp.run.*;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
@@ -46,13 +44,8 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
-
-import playground.jbischoff.avparking.optimizer.PrivateAVScheduler;
 import playground.tschlenther.pave.av.TSPrivateAVFleetGenerator;
+import playground.vsp.avparking.optimizer.PrivateAVScheduler;
 
 /**
  * @author tschlenther
@@ -83,7 +76,6 @@ public class RunMaasScenario {
 		config.qsim().setSimStarttimeInterpretation(StarttimeInterpretation.onlyUseStarttime);
 		config.qsim().setSnapshotStyle(SnapshotStyle.withHoles);
 		config.global().setNumberOfThreads(8);
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);

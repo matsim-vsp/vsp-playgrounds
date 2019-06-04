@@ -36,7 +36,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
@@ -241,8 +241,12 @@ public class RunOpenBerlinScenario {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario,
 				null,
 				visualizationScriptInputDirectory,
@@ -255,8 +259,7 @@ public class RunOpenBerlinScenario {
 				null,
 				modes,
 				null,
-				null,
-				0., null);
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

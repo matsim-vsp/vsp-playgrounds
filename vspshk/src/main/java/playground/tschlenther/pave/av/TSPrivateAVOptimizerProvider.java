@@ -21,14 +21,11 @@
  */
 package playground.tschlenther.pave.av;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
-import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -71,13 +68,11 @@ public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	@Override
 	public TaxiOptimizer get() {
-		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		TSPrivateAVRequestInserter requestInserter = new TSPrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
 				router);
-		return new TSPrivateAVTaxiDispatcher(eventsManager, taxiCfg, fleet, scheduler,
-				new RuleBasedTaxiOptimizerParams(optimizerConfig), requestInserter);
+		return new TSPrivateAVTaxiDispatcher(eventsManager, taxiCfg, fleet, scheduler, requestInserter);
 	}
 
 }

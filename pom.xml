@@ -5,7 +5,7 @@
 	<groupId>org.matsim.vsp</groupId>
 	<artifactId>vsp-playgrounds</artifactId>
 	<packaging>pom</packaging>
-	<version>0.11.0-SNAPSHOT</version>
+	<version>12.0-SNAPSHOT</version>
 	<name>VSP-Playgrounds</name>
 
 	<scm>
@@ -145,7 +145,6 @@
 		<module>gleich</module>
 		<module>gunnar</module>
 		<module>ikaddoura</module>
-		<module>jbischoff</module>
 		<module>kai</module>
 		<module>kairuns</module>
 		<module>kturner</module>
@@ -169,21 +168,21 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>12.0-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>12.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>12.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

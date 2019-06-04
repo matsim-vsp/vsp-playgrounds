@@ -32,7 +32,6 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.locationchoice.utils.PlanUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
@@ -47,19 +46,60 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class ModifyPopulation {
 
-	private static final String INPUT_BASE_DIR = "../../runs-svn/berlin_scenario_2016/be_218/";
+//	private static final String INPUT_BASE_DIR = "../../runs-svn/berlin_scenario_2016/be_218/";
+//	private static final String INPUT_BASE_DIR = "../../runs-svn/cottbus/createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/";
+	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/cb_spn_gemeinde_nachfrage_landuse_woMines/";
 	
 	public static void main(String[] args) {
 		
 		Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(INPUT_BASE_DIR + "be_218.output_network.xml.gz");
-		config.plans().setInputFile(INPUT_BASE_DIR + "be_218.output_plans.xml.gz");
+//		config.network().setInputFile(INPUT_BASE_DIR + "be_218.output_network.xml.gz");
+//		config.plans().setInputFile(INPUT_BASE_DIR + "be_218.output_plans.xml.gz");
+		
+		config.global().setCoordinateSystem("EPSG:25833");
+//		config.network().setInputFile(INPUT_BASE_DIR + "1000.output_network.xml.gz");
+//		config.plans().setInputFile(INPUT_BASE_DIR + "1000.output_plans.xml.gz");
+		config.plans().setInputFile(INPUT_BASE_DIR + "commuter_population_wgs84_utm33n.xml.gz");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-//		removeAllLinkInfos(scenario.getPopulation());		
+		new PopulationWriter(removeAllLinkInfos(scenario.getPopulation())).write(INPUT_BASE_DIR + "commuter_population_wgs84_utm33n_woLinks.xml.gz");		
 		
-		new PopulationWriter(onlyKeepSelectedPlanAndCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_218.output_plans_selected_carOnly.xml.gz");
+//		new PopulationWriter(onlyKeepSelectedPlanAndCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_218.output_plans_selected_carOnly.xml.gz");
+		
+//		new PopulationWriter(onlyKeepMorningPeak(scenario.getPopulation())).write(INPUT_BASE_DIR + "1000.output_plans_morningPeak.xml.gz");
+	}
+	
+	public static Population onlyKeepMorningPeak(Population population) {
+		Population newPop = PopulationUtils.createPopulation(ConfigUtils.createConfig());
+		// remove work-home trips. keep only home-work as dummy-dummy
+		for (Person p : population.getPersons().values()){
+			Person newP = newPop.getFactory().createPerson(p.getId());
+			newPop.addPerson(newP);
+			Plan reducedPlan = newPop.getFactory().createPlan();
+			newP.addPlan(reducedPlan);
+			
+			// consider only the selected plan
+			Plan plan = p.getSelectedPlan();			
+			boolean firstLeg = true;
+			for (PlanElement pe : plan.getPlanElements()){
+				if (pe instanceof Activity) {
+					Activity act = (Activity) pe;
+					if (act.getType().equals("home") && firstLeg) {
+						act.setType("dummy");
+						reducedPlan.addActivity(act);
+					} else if (act.getType().equals("work")) {
+						act.setType("dummy");
+						reducedPlan.addActivity(act);
+					}
+				} else if (pe instanceof Leg && firstLeg){
+					reducedPlan.addLeg((Leg) pe);
+					
+					firstLeg = false;
+				}
+			}
+		}
+		return newPop;
 	}
 	
 	public static Population onlyKeepSelectedPlanAndCarUsers(Population population){
@@ -80,7 +120,7 @@ public class ModifyPopulation {
 		return carPop;
 	}
 	
-	public static void removeAllLinkInfos(Population population){
+	public static Population removeAllLinkInfos(Population population){
 		for (Person p : population.getPersons().values()) {
 			for (Plan plan : p.getPlans()) {
 				for (PlanElement pe : plan.getPlanElements()) {
@@ -95,6 +135,7 @@ public class ModifyPopulation {
 				}
 			}
 		}
+		return population;
 	}
 	
 	public static void removeRoutesLeaveFirstPlan(Population population){
@@ -126,7 +167,8 @@ public class ModifyPopulation {
 			for (int i = 1; i <= numberOfCopiesPerPerson; i++) {
 				Person clone = fac.createPerson(Id.createPersonId(originalPerson.getId() + "_" + (i+1)));
 				for (Plan plan : originalPerson.getPlans()) {
-					clone.addPlan(PlanUtils.createCopy(plan));
+					throw new UnsupportedOperationException("Plan Utils have been used here but import does not work anymore. Fix me!");
+//					clone.addPlan(PlanUtils.createCopy(plan));
 				}
 				scaledPop.addPerson(clone);
 			}

@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -30,7 +32,7 @@ public class Delta implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return Delta.class.getSimpleName();
+		return this.getClass().getSimpleName().toString();
 	}
 
 	@Override

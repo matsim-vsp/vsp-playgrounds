@@ -21,6 +21,7 @@ package org.matsim.contrib.greedo.recipes;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.LogDataWrapper;
 
 /**
  *
@@ -29,43 +30,38 @@ import org.matsim.api.core.v01.population.Person;
  */
 public class AccelerationRecipe implements ReplannerIdentifierRecipe {
 
-	// -------------------- MEMBERS --------------------
+	private final ReplannerIdentifierRecipe backupRecipe;
 
-	// private final boolean randomizeIfNotScoreImprover;
+	private boolean useBackupRecipe = false;
 
-	// private final double baselineLambda;
-
-	// private final double meanLambda;
-
-	// -------------------- CONSTRUCTION --------------------
-
-	public AccelerationRecipe(
-			// final boolean randomizeIfNotScoreImprover,
-			// final double baselineLambda,
-			// final double meanLambda
-			) {
-		// this.randomizeIfNotScoreImprover = randomizeIfNotScoreImprover;
-		// this.baselineLambda = baselineLambda;
-		// this.meanLambda = meanLambda;
+	public AccelerationRecipe(final ReplannerIdentifierRecipe backupRecipe) {
+		this.backupRecipe = backupRecipe;
 	}
 
-	// --------------- IMPLEMENTATION OF AccelerationRecipe ---------------
+	@Override
+	public void update(final LogDataWrapper logDataWrapper) {
+		this.backupRecipe.update(logDataWrapper);
+	}
+
+	public void setUseBackupRecipe(final boolean useBackupRecipe) {
+		this.useBackupRecipe = useBackupRecipe;
+	}
 
 	@Override
 	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
-		return (deltaScoreIfYes < deltaScoreIfNo);
-		//
-		// // if (MatsimRandom.getRandom().nextDouble() < this.baselineLambda) {
-		// // return true;
-		// // } else {
-		// final boolean isScoreReducer = (Math.min(deltaScoreIfYes, deltaScoreIfNo) <
-		// 0);
-		// // if (isScoreReducer || !this.randomizeIfNotScoreImprover) {
-		// if (isScoreReducer) {
-		// return (deltaScoreIfYes < deltaScoreIfNo);
-		// } else { // !scoreImprover && randomizeIfNotScoreImprover
-		// return (MatsimRandom.getRandom().nextDouble() < this.meanLambda);
-		// }
-		// }
+		if (this.useBackupRecipe) {
+			return this.backupRecipe.isReplanner(personId, deltaScoreIfYes, deltaScoreIfNo);
+		} else {
+			return (deltaScoreIfYes < deltaScoreIfNo);
+		}
+	}
+
+	@Override
+	public String getDeployedRecipeName() {
+		if (this.useBackupRecipe) {
+			return this.backupRecipe.getClass().getSimpleName();
+		} else {
+			return this.getClass().getSimpleName();
+		}
 	}
 }

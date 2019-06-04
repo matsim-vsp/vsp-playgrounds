@@ -19,6 +19,7 @@
 
 package playground.mdziakowski.activityReLocation;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.*;
@@ -39,10 +40,12 @@ import java.util.*;
 
 public class RunReLocationPlans {
 
+    private static final Logger log = Logger.getLogger(RunReLocationPlans.class);
+
     public static void main(String[] args) throws MalformedURLException {
 
         String planFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-1pct/input/berlin-v5.3-1pct.plans.xml.gz";
-        String shapeFile = "D:/Arbeit/Berlin/ReLocation/BerlinShape/Bezirke_GK4.shp";
+        String shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_5000_intersect_Id.shp";
         String facilitiesFile = "D:/Arbeit/Berlin/ReLocation/MyOwnFacilities.xml";
 
         Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -54,7 +57,12 @@ public class RunReLocationPlans {
         populationReader.readURL(new URL(planFile));
 
         Map<String, Geometry> allDistricts = readShapeFile(shapeFile);
-        Map<String, List<Coord>> newFacilities = new HashMap<>();
+
+        Map<String, List<Coord>> oldLeisureFacilities = new HashMap<>();
+        Map<String, List<Coord>> oldShoppingFacilities = new HashMap<>();
+
+        Map<String, List<Coord>> newLeisureFacilities = new HashMap<>();
+        Map<String, List<Coord>> newShoppingFacilities = new HashMap<>();
 
         ActivityFacilities activityFacilities = scenario.getActivityFacilities();
 
@@ -63,12 +71,22 @@ public class RunReLocationPlans {
             for (ActivityOption activityOption : activityFacility.getActivityOptions().values()) {
                 if (activityOption.getType().contains("leisure")) {
                     String name = inDistrict(allDistricts, coord);
-                    if (newFacilities.containsKey(name)) {
-                        newFacilities.get(name).add(coord);
+                    if (newLeisureFacilities.containsKey(name)) {
+                        newLeisureFacilities.get(name).add(coord);
                     } else {
                         List<Coord> coords = new ArrayList<>();
                         coords.add(coord);
-                        newFacilities.put(name, coords);
+                        newLeisureFacilities.put(name, coords);
+                    }
+                }
+                if (activityOption.getType().contains("shopping")) {
+                    String name = inDistrict(allDistricts, coord);
+                    if (newShoppingFacilities.containsKey(name)) {
+                        newShoppingFacilities.get(name).add(coord);
+                    } else {
+                        List<Coord> coords = new ArrayList<>();
+                        coords.add(coord);
+                        newShoppingFacilities.put(name, coords);
                     }
                 }
             }
@@ -82,10 +100,61 @@ public class RunReLocationPlans {
                 for (PlanElement planElement : plan.getPlanElements()) {
                     if (planElement instanceof Activity) {
                         Activity activity = (Activity) planElement;
+                        Coord coord = activity.getCoord();
                         if (activity.getType().contains("leisure")) {
-                            if (!(inDistrict(allDistricts,activity.getCoord()).equals("nichtBerlin"))) {
-                                List<Coord> coords = newFacilities.get(inDistrict(allDistricts, activity.getCoord()));
-                                activity.setCoord(coords.get(new Random().nextInt(coords.size())));
+                            String name = inDistrict(allDistricts, coord);
+                            if (oldLeisureFacilities.containsKey(name)) {
+                                oldLeisureFacilities.get(name).add(coord);
+                            } else {
+                                List<Coord> coords = new ArrayList<>();
+                                coords.add(coord);
+                                oldLeisureFacilities.put(name, coords);
+                            }
+                        }
+                        if (activity.getType().contains("shopping")) {
+                            String name = inDistrict(allDistricts, coord);
+                            if (oldShoppingFacilities.containsKey(name)) {
+                                oldShoppingFacilities.get(name).add(coord);
+                            } else {
+                                List<Coord> coords = new ArrayList<>();
+                                coords.add(coord);
+                                oldShoppingFacilities.put(name, coords);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (allDistricts.size() != newLeisureFacilities.size()) {
+            log.warn((allDistricts.size() - newLeisureFacilities.size()) + " Zones have 0 leisure Activities");
+        }
+        checkingAmountOfActivitiesPerZone(newLeisureFacilities);
+
+        if (allDistricts.size() != newShoppingFacilities.size()) {
+            log.warn((allDistricts.size() - newShoppingFacilities.size()) + " Zones have 0 shopping Activities");
+        }
+        checkingAmountOfActivitiesPerZone(newShoppingFacilities);
+
+        for (Person person : population.getPersons().values()) {
+            for (Plan plan : person.getPlans()) {
+                for (PlanElement planElement : plan.getPlanElements()) {
+                    if (planElement instanceof Activity) {
+                        Activity activity = (Activity) planElement;
+                        if (activity.getType().contains("leisure")) {
+                            if (!(inDistrict(allDistricts,activity.getCoord()).equals("noZone"))) {
+                                List<Coord> coords = newLeisureFacilities.get(inDistrict(allDistricts, activity.getCoord()));
+                                if (coords != null) {
+                                    activity.setCoord(coords.get(new Random().nextInt(coords.size())));
+                                }
+                            }
+                        }
+                        if (activity.getType().contains("shopping")) {
+                            if (!(inDistrict(allDistricts,activity.getCoord()).equals("noZone"))) {
+                                List<Coord> coords = newLeisureFacilities.get(inDistrict(allDistricts, activity.getCoord()));
+                                if (coords != null) {
+                                    activity.setCoord(coords.get(new Random().nextInt(coords.size())));
+                                }
                             }
                         }
                     }
@@ -99,12 +168,20 @@ public class RunReLocationPlans {
         System.out.println("Done");
     }
 
+    private static void checkingAmountOfActivitiesPerZone(Map<String, List<Coord>> newFacilities) {
+        for (Map.Entry<String, List<Coord>> amountList : newFacilities.entrySet()) {
+            if (amountList.getValue().size() == 0) {
+                log.warn(amountList.getKey() + " has 0 activities, maybe use lager zones");
+            }
+        }
+    }
+
     private static Map<String, Geometry> readShapeFile(String shapeFile){
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
         Map<String, Geometry> districts = new HashMap<>();
 
         for (SimpleFeature feature : features) {
-            String id = (String) feature.getAttribute("Name");
+            String id = feature.getID();
             Geometry geometry = (Geometry) feature.getDefaultGeometry();
             districts.put(id, geometry);
         }
@@ -120,7 +197,7 @@ public class RunReLocationPlans {
                 return nameDistrict;
             }
         }
-        return "nichtBerlin";
+        return "noZone";
     }
 
 }

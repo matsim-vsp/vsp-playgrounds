@@ -32,7 +32,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 
@@ -50,6 +50,10 @@ public class IKAnalysisRunBerlin {
 		final String zonesCRS = TransformationFactory.DHDN_GK4;
 		final String homeActivityPrefix = "home";
 		final int scalingFactor = 100;
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
 		
 		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
@@ -79,7 +83,7 @@ public class IKAnalysisRunBerlin {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				null,
 				visualizationScriptInputDirectory,
@@ -92,8 +96,7 @@ public class IKAnalysisRunBerlin {
 				null,
 				modes,
 				null,
-				null,
-				0., null);
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

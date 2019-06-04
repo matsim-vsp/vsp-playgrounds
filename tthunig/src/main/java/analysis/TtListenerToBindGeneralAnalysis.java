@@ -55,7 +55,7 @@ public class TtListenerToBindGeneralAnalysis implements IterationEndsListener {
 		// handle last iteration
 		if (event.getIteration() == scenario.getConfig().controler().getLastIteration()) {
 			// write spatial analysis
-//			writer.writeSpatialAnaylsis(event.getIteration());
+			writer.writeSpatialAnaylsis(event.getIteration());
 			// close overall writing stream
 			writer.closeAllStreams();
 			// plot overall iteration results

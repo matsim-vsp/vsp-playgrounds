@@ -226,8 +226,9 @@ public class RunCtenSignalPlans2MatsimConversion {
 	
 	public static void main(String[] args) throws IOException {
 //		String inputFilename = "btu/solution_splits_expanded.xml";
-		String inputFilename = "btu/optimized.xml";
-		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v1_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//		String inputFilename = "btu/optimized.xml";
+		String inputFilename = "btu_new/sol_green_exp.xml";
+		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 		
 //		FileWriter fw = new FileWriter(new File(directory + "randoms/tt_cten.txt"));
 //		BufferedWriter out = new BufferedWriter(fw);

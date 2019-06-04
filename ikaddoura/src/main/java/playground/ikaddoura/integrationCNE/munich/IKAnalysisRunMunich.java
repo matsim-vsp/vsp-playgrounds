@@ -32,7 +32,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 
 
 public class IKAnalysisRunMunich {
@@ -60,8 +60,12 @@ public class IKAnalysisRunMunich {
 		modes.add("pt_COMMUTER_REV_COMMUTER");
 		modes.add(TransportMode.ride);
 		modes.add(TransportMode.walk);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -74,9 +78,7 @@ public class IKAnalysisRunMunich {
 				new ArrayList<>(),
 				modes,
 				null,
-				null,
-				0.,
-				null);
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

@@ -21,11 +21,6 @@ package playground.dgrether.signalsystems.cottbus;
 
 import java.util.Collection;
 
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.core.scenario.MutableScenario;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;

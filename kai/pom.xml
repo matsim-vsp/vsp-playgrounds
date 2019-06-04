@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.matsim.vsp</groupId>
 		<artifactId>vsp-playgrounds</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+        <version>12.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
@@ -12,7 +12,7 @@
 
 	<properties>
 		<kotlin.version>1.2.0</kotlin.version>
-		<matsim.version>0.11.0-SNAPSHOT</matsim.version>
+        <matsim.version>12.0-SNAPSHOT</matsim.version>
 	</properties>
 
 	<build>
@@ -65,7 +65,7 @@
         <dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>otfvis</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -85,7 +85,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>analysis</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
@@ -96,17 +96,17 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>noise</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>matsim4urbansim</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>0.11.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>kairuns</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
@@ -117,7 +117,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		 <!-- 
 		<dependency>
@@ -129,12 +129,12 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>emissions</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>minibus</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
 		<!-- 
 		<dependency>
@@ -146,18 +146,18 @@
 		 <dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>taxi</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+             <version>12.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>drt</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
 		</dependency>
         <dependency>
             <groupId>org.matsim.contrib</groupId>
             <artifactId>common</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
         </dependency>
 		<dependency>
 			<groupId>com.github.matsim-vsp</groupId>

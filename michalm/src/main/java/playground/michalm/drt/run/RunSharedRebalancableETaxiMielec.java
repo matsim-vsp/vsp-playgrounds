@@ -42,7 +42,7 @@ public class RunSharedRebalancableETaxiMielec {
 		DrtConfigGroup drtCfg = DrtConfigGroup.get(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
 
-		MinCostFlowRebalancingParams rebalancingParams = drtCfg.getMinCostFlowRebalancing();
+		MinCostFlowRebalancingParams rebalancingParams = drtCfg.getMinCostFlowRebalancing().get();
 		rebalancingParams.setInterval(600);
 		rebalancingParams.setCellSize(500);
 

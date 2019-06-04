@@ -20,6 +20,7 @@
  */
 package analysis;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,15 +41,13 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.network.filter.NetworkFilterManager;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.vehicles.Vehicle;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import playground.dgrether.analysis.eventsfilter.FeatureNetworkLinkCenterCoordFilter;
-import playground.dgrether.signalsystems.cottbus.CottbusUtils;
 
 /**
  * @author tthunig
@@ -68,11 +67,13 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 	private Map<Id<Person>, Double> pers2lastDepatureTime = new HashMap<>();
 
 	
-	public TtSubnetworkAnalyzer(String filterFeatureFilename, Network fullNetwork) {		
-		Tuple<CoordinateReferenceSystem, SimpleFeature> featureTuple = CottbusUtils.loadFeature(filterFeatureFilename);
+	public TtSubnetworkAnalyzer(String filterFeatureFilename, Network fullNetwork) {	
+		ShapeFileReader shapeReader = new ShapeFileReader();
+		Collection<SimpleFeature> features = shapeReader.readFileAndInitialize(filterFeatureFilename);
+		
 		NetworkFilterManager netFilter = new NetworkFilterManager(fullNetwork);
 		FeatureNetworkLinkCenterCoordFilter filter = new FeatureNetworkLinkCenterCoordFilter(
-				MGC.getCRS(TransformationFactory.WGS84_UTM33N), featureTuple.getSecond(), featureTuple.getFirst());
+				MGC.getCRS(TransformationFactory.WGS84_UTM33N), features.iterator().next(), shapeReader.getCoordinateSystem());
 		netFilter.addLinkFilter(filter);
 		subNetwork = netFilter.applyFilters();
 	}
@@ -121,8 +122,8 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
-		if (vehiclesInSubNetwork.contains(event.getVehicleId())) {
-			double currentDelay = event.getTime() - veh2earliestLinkExitTime.get(event.getVehicleId());
+		if (subNetwork.getLinks().containsKey(event.getLinkId())) {
+			double currentDelay = event.getTime() - veh2earliestLinkExitTime.remove(event.getVehicleId());
 			totalDelaySubnetwork += currentDelay;
 			totalTtSubnetwork += currentDelay;
 		}
@@ -135,20 +136,23 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 		if (vehiclesInSubNetwork.contains(event.getVehicleId())) {
 			vehiclesInSubNetwork.remove(event.getVehicleId());
 			
-			// consider delay on last link
-			double currentDelay = event.getTime() - veh2earliestLinkExitTime.get(event.getVehicleId());
-			totalDelaySubnetwork += currentDelay;
-			totalTtSubnetwork += currentDelay;
+			// consider delay on last link if link belongs to the subnetwork
+			if (subNetwork.getLinks().containsKey(event.getLinkId())) {
+				double currentDelay = event.getTime() - veh2earliestLinkExitTime.remove(event.getVehicleId());
+				totalDelaySubnetwork += currentDelay;
+				totalTtSubnetwork += currentDelay;
+			}
 		}
 	}
 
 	@Override
 	public void reset(int iteration) {
-		this.vehiclesInSubNetwork.clear();
 		this.numberOfTripsInSubnetwork = 0;
 		this.numberOfTripsInTotal = 0;
-		this.totalDistanceSubnetwork = 0.0;
-		this.totalTtSubnetwork = 0.0;
+		this.totalDistanceSubnetwork = 0.;
+		this.totalTtSubnetwork = 0.;
+		this.totalDelaySubnetwork = 0.;
+		this.vehiclesInSubNetwork.clear();
 		this.pers2lastDepatureTime.clear();
 		this.veh2earliestLinkExitTime.clear();
 	}

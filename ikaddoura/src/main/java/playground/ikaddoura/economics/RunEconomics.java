@@ -68,7 +68,10 @@ public class RunEconomics {
 		String basicDirectoryInput = "./test/input/playground/ikaddoura/economics/";
 		String basicDirectoryOutput = "./test/output/playground/ikaddoura/economics/";
 
-		BasicPersonTripAnalysisHandler analysis0 = new BasicPersonTripAnalysisHandler();
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler analysis0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);	
 		Scenario scenario0 = null;
 		
 		{
@@ -94,7 +97,7 @@ public class RunEconomics {
 		
 		}
 		
-		BasicPersonTripAnalysisHandler analysis1 = new BasicPersonTripAnalysisHandler();
+		BasicPersonTripAnalysisHandler analysis1 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 		Scenario scenario1 = null;
 		
 		{

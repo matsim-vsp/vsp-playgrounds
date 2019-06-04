@@ -24,7 +24,7 @@ import org.matsim.run.gui.Gui;
 public class HA1GUI {
 
 	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik HA1", Controller.class);
+		Gui.show("ITS MATSim GUI with signals", Controller.class);
 	}
 
 	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml

@@ -2,7 +2,6 @@ package playground.gleich.analysis;
 
 import java.io.IOException;
 
-import playground.gleich.analysis.analysisRunner.analysisRunner.AnalysisRunner;
 import playground.gleich.analysis.experiencedTrips.RunExperiencedTripsAnalysis;
 import playground.gleich.analysis.pt.PaxCount.PaxCountFromEvents;
 
@@ -31,14 +30,14 @@ public class FilePathGuesser {
 //		String[] argsToPass = {networkFile, scheduleFile, eventsFile, null, monitoredModes, outputFile + "experiencedTrips.csv", null};
 //		RunExperiencedTripsAnalysis.main(argsToPass);
 		
-		AnalysisRunner anaRunner = new AnalysisRunner(networkFile, scheduleFile, transitVehiclesFile, plansFile, 
-				coordinateSystem, eventsFile, outputFile + "AnalysisRunner");
-		try {
-			anaRunner.runAllAnalyzers();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		AnalysisRunner anaRunner = new AnalysisRunner(networkFile, scheduleFile, transitVehiclesFile, plansFile, 
+//				coordinateSystem, eventsFile, outputFile + "AnalysisRunner");
+//		try {
+//			anaRunner.runAllAnalyzers();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 }

@@ -128,7 +128,14 @@ public class PersonTripScenarioComparison {
 
 		Map<String, BufferedWriter> bufferedWriter = new HashMap<>();
 		
-		bufferedWriter.put("all", IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_all_subpopulation-" + analysisSubpopulation + ".csv"));
+		String subpopulationfileName;
+		if (analysisSubpopulation == null) {
+			subpopulationfileName = "";
+		} else {
+			subpopulationfileName = "_subpopulation-" + analysisSubpopulation;
+		}
+		
+		bufferedWriter.put("all", IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_all" + subpopulationfileName + ".csv"));
 		
 		for (String mode : modes) {
 			switchAndCoordType2Coord.put(mode+"2"+mode+"Origin", new HashMap<>());
@@ -143,10 +150,10 @@ public class PersonTripScenarioComparison {
 			switchAndCoordType2Coord.put("x2"+mode+"Destination", new HashMap<>());
 			switchAndCoordType2Coord.put("x2"+mode+"HomeCoord", new HashMap<>());
 			
-			bufferedWriter.put(mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "_subpopulation-" + analysisSubpopulation + ".csv"));
-			bufferedWriter.put("x2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_x2" + mode + "_subpopulation-" + analysisSubpopulation + ".csv"));
-			bufferedWriter.put(mode + "2x", IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2x_subpopulation-" + analysisSubpopulation + ".csv"));
-			bufferedWriter.put(mode + "2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2" + mode + "_subpopulation-" + analysisSubpopulation + ".csv"));
+			bufferedWriter.put(mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + subpopulationfileName + ".csv"));
+			bufferedWriter.put("x2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_x2" + mode + subpopulationfileName + ".csv"));
+			bufferedWriter.put(mode + "2x", IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2x" + subpopulationfileName +".csv"));
+			bufferedWriter.put(mode + "2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2" + mode + subpopulationfileName + ".csv"));
 
 			for (String mode2 : modes) {
 
@@ -156,8 +163,8 @@ public class PersonTripScenarioComparison {
 
 
 				if (!mode2.equals(mode)) {
-					bufferedWriter.put(mode2 + "2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode2 + "2" + mode + "_subpopulation-" + analysisSubpopulation + ".csv"));
-					bufferedWriter.put(mode + "2" + mode2, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2" + mode2 + "_subpopulation-" + analysisSubpopulation + ".csv"));
+					bufferedWriter.put(mode2 + "2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode2 + "2" + mode + subpopulationfileName + ".csv"));
+					bufferedWriter.put(mode + "2" + mode2, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2" + mode2 + subpopulationfileName + ".csv"));
 					
 					switchType2tripTTwithStuckingAgents.put(mode2 + "2" + mode, new ArrayList<>());
 					switchType2tripTTwithStuckingAgents.put(mode + "2" + mode2, new ArrayList<>());
@@ -404,7 +411,7 @@ public class PersonTripScenarioComparison {
 		log.info("Comparing the two scenarios for each person...");
 
 		{
-			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all_subpopulation-" + analysisSubpopulation + ".csv");
+			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all" + subpopulationfileName + ".csv");
 	        writer.write("PersonId;subpopulation;homeCoordX;homeCoordY;totalTrips;score0 [utils];score1 [utils];stuck0;stuck1");
 	        writer.newLine();
 	       
@@ -469,7 +476,7 @@ public class PersonTripScenarioComparison {
 		}
 		
 		{
-			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all-non-stucking-persons_subpopulation-" + analysisSubpopulation + ".csv");
+			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all-non-stucking-persons" + subpopulationfileName + ".csv");
 	        writer.write("PersonId;subpopulation;homeCoordX;homeCoordY;totalTrips;score0 [utils];score1 [utils];monetary payments 0 [EUR]; monetary payments 1 [EUR]");
 	        writer.newLine();
 	       
@@ -566,7 +573,7 @@ public class PersonTripScenarioComparison {
 		
 		{
 	        for (String modeA : modes) {
-				BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_" + modeA + "2" +  modeA + "_subpopulation-" + analysisSubpopulation + ".csv");
+				BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_" + modeA + "2" +  modeA + subpopulationfileName + ".csv");
 				writer.write("PersonId;subpopulation;homeCoordX;homeCoordY;totalTrips;mode2modeTrips;score0 [utils];score1 [utils];stuck0;stuck1");
 	        	writer.newLine();
 	       
@@ -630,7 +637,7 @@ public class PersonTripScenarioComparison {
 		{
 	        for (String modeA : modes) {
 
-	        	BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_x2" + modeA + "_subpopulation-" + analysisSubpopulation + ".csv");
+	        	BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_x2" + modeA + subpopulationfileName+ ".csv");
 	        	writer.write("PersonId;subpopulation;homeCoordX;homeCoordY;totalTrips;x2modeTrips;score0 [utils];score1 [utils];stuck0;stuck1");
 	        	writer.newLine();
 	       
@@ -691,7 +698,7 @@ public class PersonTripScenarioComparison {
 		{
 	        for (String modeA : modes) {
 
-				BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_" + modeA + "2x" + "_subpopulation-" + analysisSubpopulation + ".csv");
+				BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_" + modeA + "2x" + subpopulationfileName + ".csv");
 	        	writer.write("PersonId;subpopulation;homeCoordX;homeCoordY;totalTrips;mode2xTrips;score0 [utils];score1 [utils];stuck0;stuck1");
 	        	writer.newLine();
 	       
@@ -751,11 +758,11 @@ public class PersonTripScenarioComparison {
 		}
 		        	
 		for (String modeSwitchType : switchAndCoordType2Coord.keySet()) {
-			printCoordinates(switchAndCoordType2Coord.get(modeSwitchType), analysisOutputDirectory  + "/modeSwitchAnalysis_actCoord_" + modeSwitchType + "_subpopulation-" + analysisSubpopulation + ".csv");
+			printCoordinates(switchAndCoordType2Coord.get(modeSwitchType), analysisOutputDirectory  + "/modeSwitchAnalysis_actCoord_" + modeSwitchType + subpopulationfileName + ".csv");
 		}
 		
 		{
-			BufferedWriter aggregatedTripWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysis_aggregated_subpopulation-" + analysisSubpopulation + ".csv");
+			BufferedWriter aggregatedTripWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysis_aggregated" + subpopulationfileName + ".csv");
 			aggregatedTripWriter.write("trip-switch-type;number of trips (with stucking agents, sample size);number of trips (without stucking agents, sample size);average change in trip travel time (with stucking agents) [sec];average change in trip travel time (without stucking agents) [sec];average change in beeline speed (without stucking agents) [m/s]");
 			aggregatedTripWriter.newLine();
 			
@@ -798,8 +805,8 @@ public class PersonTripScenarioComparison {
 		
 
 		{
-			BufferedWriter aggregatedTripWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysisMatrix_aggregated_numberOfTrips_subpopulation-" + analysisSubpopulation + ".csv");
-			BufferedWriter aggregatedDiffAvgTTWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysisMatrix_aggregated_diffAvgTT_subpopulation-" + analysisSubpopulation + ".csv");
+			BufferedWriter aggregatedTripWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysisMatrix_aggregated_numberOfTrips" + subpopulationfileName + ".csv");
+			BufferedWriter aggregatedDiffAvgTTWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysisMatrix_aggregated_diffAvgTT" + subpopulationfileName + ".csv");
 			for (String mode : modes) {
 				aggregatedTripWriter.write(";" + mode);
 				aggregatedDiffAvgTTWriter.write(";" + mode);
@@ -910,9 +917,17 @@ public class PersonTripScenarioComparison {
 		}
 	
 		try {
-			printCSVFile(sameScorePersons, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_same-score-persons_score-tolerance-" + scoreDifferenceTolerance + "_subpopulation-" + analysisSubpopulation + ".csv");
-			printCSVFile(winners, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_winners_score-tolerance-" + scoreDifferenceTolerance + "_subpopulation-" + analysisSubpopulation + ".csv");
-			printCSVFile(losers, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_losers_score-tolerance-" + scoreDifferenceTolerance + "_subpopulation-" + analysisSubpopulation + ".csv");
+			
+			String subpopulationfileName;
+			if (analysisSubpopulation == null) {
+				subpopulationfileName = "";
+			} else {
+				subpopulationfileName = "_subpopulation-" + analysisSubpopulation;
+			}
+			
+			printCSVFile(sameScorePersons, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_same-score-persons_score-tolerance-" + scoreDifferenceTolerance + subpopulationfileName + ".csv");
+			printCSVFile(winners, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_winners_score-tolerance-" + scoreDifferenceTolerance + subpopulationfileName + ".csv");
+			printCSVFile(losers, person2score0score1, this.analysisOutputDirectory + "winner-loser-analysis_losers_score-tolerance-" + scoreDifferenceTolerance + subpopulationfileName + ".csv");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

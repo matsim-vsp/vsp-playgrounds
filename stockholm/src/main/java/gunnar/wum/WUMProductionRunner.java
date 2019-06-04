@@ -162,7 +162,8 @@ public class WUMProductionRunner {
 		});
 
 		if (greedo != null) {
-			controler.addOverridingModule(greedo);
+			throw new RuntimeException("fixme");
+			// controler.addOverridingModule(greedo);
 		}
 
 		controler.run();
@@ -170,16 +171,25 @@ public class WUMProductionRunner {
 
 	static void runProductionScenarioWithSampersDynamics() {
 
+		final Greedo greedo = new Greedo();
+		
 		final String configFileName = "./config.xml";
+		// final String configFileName = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-
+		if (greedo != null) {
+			greedo.meet(config);
+		}
+		
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		removeModeInformation(scenario);
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
-
+		if (greedo != null) {
+			greedo.meet(scenario);
+		}
+		
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersDifferentiatedPTScoringFunctionModule());
@@ -198,6 +208,11 @@ public class WUMProductionRunner {
 				return components;
 			}
 		});
+		if (greedo != null) {
+			for (AbstractModule module : greedo.getModules()) {
+				controler.addOverridingModule(module);
+			}
+		}
 		controler.run();
 	}
 

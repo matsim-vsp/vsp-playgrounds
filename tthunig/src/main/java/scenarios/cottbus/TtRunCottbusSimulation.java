@@ -79,8 +79,10 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.lanes.LanesWriter;
+import org.matsim.pt.transitSchedule.TransitScheduleWriterV2;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
+import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
@@ -123,7 +125,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1_pt;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -136,11 +138,12 @@ public class TtRunCottbusSimulation {
 		V3, // double flow capacities of all signalized links and lanes
 		V4, // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
 		V4_1, // V4 but with simplified/corrected to-links of lanes, such that it is more similar to the cten model. some lanes also had to be created newly, such that signal systems and groups also had to be adjusted.
+		V4_1_pt // V4_1 including pt links
 	}
 	private final static boolean LONG_LANES = true;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines1000itcap07MSNetV4_1;
+	private final static PopulationType POP_TYPE = PopulationType.WoMinesAllModes;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -174,16 +177,23 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap10MSNetV4,
 		WoMines100itcap07MSNetV4_1,
 		WoMines1000itcap03MSNetV4_1,
+		WoMines1000itcap04MSNetV4_1,
 		WoMines1000itcap05MSNetV4_1,
-		WoMines1000itcap07MSNetV4_1,
-		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
+		WoMines1000itcap06MSNetV4_1,
+		WoMines1000itcap07MSNetV4_1, WoMines1000itcap07MSNetV4_1_morning,
+		WoMines1000itcap08MSNetV4_1,
+		WoMines1000itcap09MSNetV4_1,
+		WoMines1000itcap10MSNetV4_1,
+		NicoOutputPlans, // the plans that nico used in his MA: netV1, MS, 100it
+		WoMinesAllModes // not only car (55% mode share), but all (100%) agents from commuter statistics
 	}
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS_BTU_OPT_SYLVIA;
+	private static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_RANDOM_GREENSPLITS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
+		MS_INTG0, MS_INTG0_SYLVIA, // MS with modified end times, such that zero intergreen times are used
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
 		ALL_MS_INSIDE_ENVELOPE_REST_GREEN, // all MS systems fixed-time, rest all green
 		ALL_MS_AS_SYLVIA_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as sylvia with MS basis, rest all green. note: green basis for sylvia does not work
@@ -201,7 +211,8 @@ public class TtRunCottbusSimulation {
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 		LAEMMER_FLEXIBLE, // version implemented by pierre schade in his thesis
-		GERSHENSON
+		GERSHENSON,
+		QUEUE_LEARNING
 	}
 	
 	// parameters for specific signal control
@@ -227,20 +238,21 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
-	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/createNewBC/";
+	private static String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-//	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-13_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-13_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/"; // random green splits
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v1_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v2_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
+	private static String RUNS_SVN = "../../runs-svn/cottbus/";
 	
-	private static final boolean WRITE_INITIAL_FILES = false;
+	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = .7;
+	private static double SCALING_FACTOR = .7;
 	
 	private static TtGeneralAnalysis ANALYSIS_TOOL;
 	
@@ -259,6 +271,15 @@ public class TtRunCottbusSimulation {
 //			selfTunWt = Double.valueOf(args[4]);
 //			warmUpIt = Integer.valueOf(args[5]);
 //		}
+
+		// for runs on the cluster. note: start from jobfiles directory in shared-svn, ie. 5x to runs-svn, 4x to projects
+		if (args != null && args.length > 0) {
+			OUTPUT_BASE_DIR = args[0];
+			INPUT_BASE_DIR = args[1];
+			RUNS_SVN = args[2];
+			SCALING_FACTOR = Double.valueOf(args[3]);
+			SIGNAL_TYPE = SignalType.valueOf(args[4]);
+		}
 		
 		// prepare output for random greensplits
 		FileWriter fw = null;
@@ -377,7 +398,7 @@ public class TtRunCottbusSimulation {
 					controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 				}
 
-				controler.run();
+//				controler.run();
 
 				// write output for random greensplits
 				if (SIGNAL_TYPE.equals(SignalType.MS_RANDOM_GREENSPLITS)) {
@@ -439,6 +460,13 @@ public class TtRunCottbusSimulation {
 		case V4_1:
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v4.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v4-1.xml");
+			break;
+		case V4_1_pt:
+			config.network().setInputFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/network-w-pt.xml.gz");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v4-1.xml");
+			config.transit().setVehiclesFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitVehicles.xml.gz");
+			config.transit().setTransitScheduleFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitSchedule.xml.gz");
+			config.transit().setUseTransit(true);
 			break;
 		default:
 			throw new RuntimeException("Network type not specified!");
@@ -506,8 +534,8 @@ public class TtRunCottbusSimulation {
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-05-17_sameEndTimes_ksOptTripPlans_btu_solution.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_solution.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-08-14_sameEndTimes_ksOptTripPlans_agent2com_solution_splits_expanded.xml");
-//			config.plans().setInputFile(BTU_BASE_DIR + "randoms/2018-11-30_ksRandomTripPlans_coord" + signalCoordIndex + ".xml");
-			config.plans().setInputFile(BTU_BASE_DIR + "btu/sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
+			config.plans().setInputFile(BTU_BASE_DIR + "randoms/2018-11-30_ksRandomTripPlans_coord" + signalCoordIndex + ".xml");
+//			config.plans().setInputFile(BTU_BASE_DIR + "btu/sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-11-20_sameEndTimes_ksOptTripPlans_agent2com_optimized.xml");
 			break;
 		case BTU_POP_BTU_ROUTES_90:
@@ -533,88 +561,106 @@ public class TtRunCottbusSimulation {
 //			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs300:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-11-58-38_100it_MS_cap07_stuck600_tbs300/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-7-11-58-38_100it_MS_cap07_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MStbs300:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs900:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MStbs900stuck600:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-58-32_100it_MS_cap07_stuck600_tbs900/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-8-11-58-32_100it_MS_cap07_stuck600_tbs900/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSRand:
-			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
 			break;	
 		case WoMines100itcap07MSideal:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-13-14-14_100it_MSideal_cap07_stuck600/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-01-17-13-14-14_100it_MSideal_cap07_stuck600/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSideal:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSidealNetV1_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-13-13-58-41_100it_MS-ideal_cap07_stuck120_tbs900_networkV1-1/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-13-13-58-41_100it_MS-ideal_cap07_stuck120_tbs900_networkV1-1/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSidealNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-12-18-28_100it_MSideal_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-22-12-18-28_100it_MSideal_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSidealNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-18-0-58_100it_MS_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-03-3-18-0-58_100it_MS_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_2:
-			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-56-38_v1-3_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-12-56-38_v1-3_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-57-3_v1-3_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-12-57-3_v1-3_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV1_3:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap13MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-20-59-8_v1-4_MS_100it_BaseCase_cap13/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-20-59-8_v1-4_MS_100it_BaseCase_cap13/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap1MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-54-29_v1-4_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-14-54-29_v1-4_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-57-21_v1-4_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-14-57-21_v1-4_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV1_4:
-			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap05MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-25-0-16-48_100it_netV4_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-25-0-16-48_100it_netV4_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap09MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-25-8-13-26_100it_netV4_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-25-8-13-26_100it_netV4_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap10MSNetV4:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-07-29-13-53-2_100it_netV4_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-07-29-13-53-2_100it_netV4_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
 			break;	
 		case WoMines100itcap07MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-08-24-12-40-20_100it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-08-24-12-40-20_100it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
 		case WoMines1000itcap03MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-26-10-37-50_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap03/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-26-10-37-50_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap03/1000.output_plans.xml.gz");
+			break;	
+		case WoMines1000itcap04MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-12-6-11-38-42_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap04/1000.output_plans.xml.gz");
 			break;	
 		case WoMines1000itcap05MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-19-12-1-43_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-1-43_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap05/1000.output_plans.xml.gz");
 			break;
+		case WoMines1000itcap06MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-01-30-17-29-40_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap06/1000.output_plans.xml.gz");
+			break;	
 		case WoMines1000itcap07MSNetV4_1:
-			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
 			break;
+		case WoMines1000itcap07MSNetV4_1_morning:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2018-11-19-12-14-4_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans_morningPeak.xml.gz");
+			break;
+		case WoMines1000itcap08MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-02-4-13-50-58_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap08/1000.output_plans.xml.gz");
+			break;	
+		case WoMines1000itcap09MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-01-28-22-12-37_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap09/1000.output_plans.xml.gz");
+			break;
+		case WoMines1000itcap10MSNetV4_1:
+			config.plans().setInputFile(RUNS_SVN + "createNewBC/2019-02-18-10-3-21_1000it_netV4-1_tbs900_stuck120_beta2_MS_cap10/1000.output_plans.xml.gz");
+			break;	
 		case NicoOutputPlans:
-			config.plans().setInputFile("../../runs-svn/cottbus/NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
+			config.plans().setInputFile(RUNS_SVN + "NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
 			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
@@ -624,6 +670,9 @@ public class TtRunCottbusSimulation {
 				config.plans().setInputFile(OUTPUT_BASE_DIR + "2017-02-3_100it_ReRoute0.1_tbs10_ChExp0.9_beta2_lanes_2link_ALL_NODES_ALL_GREEN_5plans_GRID_LOCK_BTU_BTU_NET_3600'12'3/output_plans.xml.gz");
 //				config.plans().setInputFile(OUTPUT_BASE_DIR + "2017-02-3_100it_ReRoute0.1_tbs10_ChExp0.9_beta2_lanes_2link_ALL_NODES_DOWNSTREAM_5plans_GRID_LOCK_BTU_BTU_NET_3600'12'3/output_plans.xml.gz");						
 			}
+			break;
+		case WoMinesAllModes:
+			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_woLinks.xml.gz");
 			break;
 		default:
 			throw new RuntimeException("Population type not specified!");
@@ -684,6 +733,7 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4.xml");
 				break;
 			case V4_1:
+			case V4_1_pt:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4-1.xml");
 				break;
 			default:
@@ -696,7 +746,7 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(BTU_BASE_DIR + "output_signal_groups_v2.0.xml");
 			} else if (NETWORK_TYPE.equals(NetworkType.V4)){
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4.xml");
-			} else if (NETWORK_TYPE.equals(NetworkType.V4_1)){
+			} else if (NETWORK_TYPE.toString().startsWith("V4_1")){
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4-1.xml");
 			} else {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v2.xml");
@@ -719,6 +769,22 @@ public class TtRunCottbusSimulation {
 				} else if (NETWORK_TYPE.toString().startsWith("V2") || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V2"))){
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v2.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
+			case MS_INTG0:
+				if (NETWORK_TYPE.toString().startsWith("V4") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))){
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v4_intG0.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
+			case MS_INTG0_SYLVIA:
+				if (NETWORK_TYPE.toString().startsWith("V4") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))){
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_sylvia_no_13_v4_intG0.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -758,6 +824,8 @@ public class TtRunCottbusSimulation {
 					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_optimized.xml");
 //					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_optimized_2019_01_04.xml");
 //					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt_expanded.xml");
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu_new/signal_control_sol.xml");
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu_new/signal_control_sol_green_exp.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -841,8 +909,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case LAEMMER_NICO_GROUPS_14RE_3RE_7RE:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
-				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
 					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
 				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
@@ -864,9 +932,24 @@ public class TtRunCottbusSimulation {
 				break;
 			case GERSHENSON:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_gershenson.xml");
-				if (NETWORK_TYPE.toString().startsWith("V4") || 
-						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))) {
-					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
+				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
+			case QUEUE_LEARNING:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_queueLearning.xml");
+				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
+				} else if (NETWORK_TYPE.equals(NetworkType.V4) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -915,6 +998,8 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+// 		config.travelTimeCalculator().setTraveltimeBinSize( 30 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 60 );
 		// TODO
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
@@ -934,28 +1019,34 @@ public class TtRunCottbusSimulation {
 			config.strategy().addStrategySettings(strat);
 		}
 		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
-			strat.setWeight(0.0);
-			config.strategy().addStrategySettings(strat);
-			config.timeAllocationMutator().setMutationRange(1800); // 1800 is default
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
+//			config.timeAllocationMutator().setMutationRange(1800); // 1800 is default
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.9);
+			strat.setWeight(0.8);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.BestScore.toString());
-			strat.setWeight(0.0);
-			config.strategy().addStrategySettings(strat);
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultSelector.BestScore.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
+//		}
+//		{
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
+//			strat.setWeight(0.0);
+//			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
-			strat.setWeight(0.0);
+			strat.setStrategyName(DefaultStrategy.SubtourModeChoice.toString());
+			strat.setWeight(0.1);
 			config.strategy().addStrategySettings(strat);
 		}
 
@@ -1029,6 +1120,17 @@ public class TtRunCottbusSimulation {
 			config.planCalcScore().addActivityParams(workAct);
 		}
 		
+		// TODO
+//		config.planCalcScore().getModes().get("pt").setConstant(alternativeSpecificConstantPt); // default is 0
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setBeelineDistanceFactor( 1.3 ); // default is 1.3
+		config.plansCalcRoute().getModeRoutingParams().get("pt").setTeleportedModeFreespeedFactor( 2.0 ); // default is 2.0
+		String[] modes = {"pt", "car"};
+		config.subtourModeChoice().setModes(modes);
+//		config.subtourModeChoice().setProbaForRandomSingleTripMode( 0.5 ); // default is 0.0. for non-chain based modes (e.g. pt+walk)
+		
+		// TODO
+		config.global().setNumberOfThreads(2); // 2 is default
+		
 		config.global().setCoordinateSystem("EPSG:25833"); //UTM33
 		
 		// TODO
@@ -1036,22 +1138,19 @@ public class TtRunCottbusSimulation {
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
 		decongestionSettings.setWriteOutputIteration(200);
 		decongestionSettings.setUpdatePriceInterval(1);
-		decongestionSettings.setTollBlendFactor(1.0);
+//		decongestionSettings.setTollBlendFactor(1.0);
 		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
 		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
 		decongestionSettings.setToleratedAverageDelaySec(1);
 		decongestionSettings.setWriteLinkInfoCharts(true);
-		decongestionSettings.setMsa(true);
+		decongestionSettings.setMsa(true); // does this also work for BangBang?
 
-		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
-		decongestionSettings.setTollAdjustment(1);
-		decongestionSettings.setInitialToll(1);
-		decongestionSettings.setKp(0.003);
+		decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
+//		decongestionSettings.setTollAdjustment(1);
+//		decongestionSettings.setInitialToll(1);
+		decongestionSettings.setKp(0.003); // TODO 0.0067 (2*VTTS/3600)
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKd(0.);
-//		decongestionSettings.setKd(0.005);
-//		decongestionSettings.setKi(0.005);
-//		decongestionSettings.setKp(0.005);
 
 		config.addModule(decongestionSettings);
 		
@@ -1085,7 +1184,11 @@ public class TtRunCottbusSimulation {
 		if (DELETE_ROUTES) {
 			ModifyPopulation.removeRoutesLeaveFirstPlan(scenario.getPopulation());
 		}
-		
+
+		// TODO delete bottleneck links for coord14
+//		scenario.getNetwork().getLinks().get(Id.createLinkId("1356-5867-7871")).setCapacity(1);
+//		scenario.getNetwork().getLinks().get(Id.createLinkId("5771-5772")).setCapacity(1);
+
 		if (LONG_LANES){
 			// lengthen all lanes
 			ModifyNetwork.lengthenAllLanes(scenario);
@@ -1250,6 +1353,8 @@ public class TtRunCottbusSimulation {
 				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
         signalsConfigurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
+//        signalsConfigurator.addSignalControllerFactory(QueueLearningSignalControler.IDENTIFIER,
+//        			QueueLearningSignalControler.QueueLearningFactory.class);
 
 		// bind gershenson config
 		controler.addOverridingModule(new AbstractModule() {
@@ -1265,8 +1370,7 @@ public class TtRunCottbusSimulation {
 			TollHandler tollHandler = new TollHandler(scenario);
 			
 			// add correct TravelDisutilityFactory for tolls if ReRoute is used
-			StrategySettings[] strategies = config.strategy().getStrategySettings()
-					.toArray(new StrategySettings[0]);
+			StrategySettings[] strategies = config.strategy().getStrategySettings().toArray(new StrategySettings[0]);
 			for (int i = 0; i < strategies.length; i++) {
 				if (strategies[i].getStrategyName().equals(DefaultStrategy.ReRoute.toString())){
 					if (strategies[i].getWeight() > 0.0){ // ReRoute is used
@@ -1290,36 +1394,29 @@ public class TtRunCottbusSimulation {
 			EventHandler congestionHandler = null;
 			switch (PRICING_TYPE){
 			case CP_V3:
-				congestionHandler = new CongestionHandlerImplV3(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV3(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V4:
-				congestionHandler = new CongestionHandlerImplV4(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV4(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V7:
-				congestionHandler = new CongestionHandlerImplV7(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV7(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V8:
-				congestionHandler = new CongestionHandlerImplV8(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV8(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V9:
-				congestionHandler = new CongestionHandlerImplV9(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV9(controler.getEvents(), controler.getScenario());
 				break;
 			case CP_V10:
-				congestionHandler = new CongestionHandlerImplV10(controler.getEvents(), 
-						controler.getScenario());
+				congestionHandler = new CongestionHandlerImplV10(controler.getEvents(), controler.getScenario());
 				break;
 			default:
 				break;
 			}
-			controler.addControlerListener(
-					new MarginalCongestionPricingContolerListener(controler.getScenario(), 
-							tollHandler, congestionHandler));
-		
+			controler.addControlerListener(new MarginalCongestionPricingContolerListener(controler.getScenario(),
+					tollHandler, congestionHandler));
+
 		} else if (PRICING_TYPE.equals(PricingType.FLOWBASED)) {
 			
 			throw new UnsupportedOperationException("Not yet implemented!");
@@ -1448,8 +1545,7 @@ public class TtRunCottbusSimulation {
 			runName += "_laneCapFromNet";
 		}
 		
-		StrategySettings[] strategies = config.strategy().getStrategySettings()
-				.toArray(new StrategySettings[0]);
+		StrategySettings[] strategies = config.strategy().getStrategySettings().toArray(new StrategySettings[0]);
 		for (int i = 0; i < strategies.length; i++) {
 			double weight = strategies[i].getWeight();
 			if (weight != 0.0){
@@ -1473,8 +1569,7 @@ public class TtRunCottbusSimulation {
 		if (SIGMA != 0.0)
 			runName += "_sigma" + SIGMA;
 		if (config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate() != 0.0)
-			runName += "_distCost"
-					+ config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
+			runName += "_distCost" + config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
 
 		if (config.qsim().isUseLanes()){
 			runName += "_lanes";
@@ -1595,7 +1690,7 @@ public class TtRunCottbusSimulation {
 		}
 		String outputDirTmp = scenario.getConfig().controler().getOutputDirectory();
 		// adapt output dir to be able to run it on the cluster
-		scenario.getConfig().controler().setOutputDirectory("/net/ils3/thunig/runs-svn/cottbus/createGridLock/run" + RUN_ID + "/");
+		scenario.getConfig().controler().setOutputDirectory("/net/ils3/thunig/" + outputDirTmp.substring(6, outputDirTmp.length()));
 		
 		// write population
 		new PopulationWriter(scenario.getPopulation()).write(outputDir + "plans.xml");
@@ -1613,6 +1708,14 @@ public class TtRunCottbusSimulation {
 			signalsConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalsConfigGroup.setSignalGroupsFile("signalGroups.xml");
 			signalsConfigGroup.setSignalControlFile("signalControl.xml");
+		}
+		
+		// write pt files if used
+		if (scenario.getConfig().transit().isUseTransit()) {
+			new TransitScheduleWriterV2(scenario.getTransitSchedule()).write(outputDir + "transitSchedule.xml");
+			new VehicleWriterV1(scenario.getTransitVehicles()).writeFile(outputDir + "transitVehicles.xml");
+			scenario.getConfig().transit().setTransitScheduleFile("transitSchedule.xml");
+			scenario.getConfig().transit().setVehiclesFile("transitVehicles.xml");
 		}
 		
 		// write config

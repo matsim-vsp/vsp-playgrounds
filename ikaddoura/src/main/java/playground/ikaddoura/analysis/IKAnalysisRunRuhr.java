@@ -50,20 +50,22 @@ public class IKAnalysisRunRuhr {
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
-		String taxiMode = null;
-		String carMode = null;
-		double rewardSAVuserFormerCarUser = 0.;
 		String analyzeSubpopulation = null;
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "ID";
 		
 		if (args.length > 0) {
 			throw new RuntimeException();
 			
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run3_gesundeStadt-mit-RSV/output/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019_simulationsbasierteZukunftsforschung/run3_gesundeStadt-mit-RSV/";
 			runId = "run3_gesundeStadt-mit-RSV";		
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/run0_bc-ohne-RSV/output/";
-			runIdToCompareWith = "run0_bc-ohne-RSV";
+			
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019_simulationsbasierteZukunftsforschung/run2_gesundeStadt-ohne-RSV/";
+			runIdToCompareWith = "run2_gesundeStadt-ohne-RSV";
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
@@ -78,10 +80,6 @@ public class IKAnalysisRunRuhr {
 			scalingFactor = 100;
 			
 			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride;
-			
-			taxiMode = null;
-			carMode = null;
-			rewardSAVuserFormerCarUser = 0.0;
 			
 			analyzeSubpopulation = null;
 		}
@@ -118,7 +116,7 @@ public class IKAnalysisRunRuhr {
 			modes.add(mode);
 		}
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -130,10 +128,8 @@ public class IKAnalysisRunRuhr {
 				filter1,
 				filter0,
 				modes,
-				taxiMode,
-				carMode,
-				rewardSAVuserFormerCarUser,
-				analyzeSubpopulation);
+				analyzeSubpopulation,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	}
 	

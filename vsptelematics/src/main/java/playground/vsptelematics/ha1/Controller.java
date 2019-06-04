@@ -22,6 +22,8 @@ package playground.vsptelematics.ha1;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.builder.Signals;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -33,13 +35,16 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 
 /**
- * @author dgrether, dziemke
+ * @author dgrether, dziemke, tthunig
  */
 public class Controller {
 
 	public static void main(String[] args) {
 		Config config = ConfigUtils.loadConfig( args[0]) ;
 		config.qsim().setUsingFastCapacityUpdate(false);
+		// add config groups for adaptive signals
+		ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
@@ -53,11 +58,9 @@ public class Controller {
 		Controler c = new Controler(scenario);
 		c.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		c.getConfig().controler().setCreateGraphs(false);
-		// add the signals module if signal systems are used
-		if (signalsConfigGroup.isUseSignalSystems()) {
-//			c.addOverridingModule(new SignalsModule());
-			Signals.configure( c );
-		}
+		// add the signals module
+		new Signals.Configurator( c ) ;
+		
 		c.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {

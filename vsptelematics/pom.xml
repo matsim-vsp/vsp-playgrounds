@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.matsim.vsp</groupId>
     <artifactId>vsp-playgrounds</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>12.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
@@ -10,55 +10,36 @@
   <name>vsptelematics</name>
   <description>matsim code for the telematics lecture at vsp</description>
 
+	<properties>
+		<!-- release> -->
+		<matsim.version>12.0-SNAPSHOT</matsim.version>
+	</properties>
+
+
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>playground.vsptelematics.roadpricing.RoadpricingGUI</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
+		<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>playground.vsptelematics.ha1.HA1GUI</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 				<executions>
 					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- bind to the packaging phase -->
+						<id>make-assembly</id>
+						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> -->
-			<!-- <groupId>org.codehaus.mojo</groupId> -->
-			<!-- <artifactId>buildnumber-maven-plugin</artifactId> -->
-			<!-- <version>1.0</version> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <phase>validate</phase> -->
-			<!-- <goals> -->
-			<!-- <goal>create</goal> -->
-			<!-- </goals> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- <configuration> -->
-			<!-- <doCheck>false</doCheck> -->
-			<!-- <doUpdate>false</doUpdate> -->
-			<!-- <revisionOnScmFailure>unknown</revisionOnScmFailure> -->
-			<!-- <timestampFormat>{0,date,yyyy-MM-dd HH:mm:ss}</timestampFormat> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -87,17 +68,17 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>roadpricing</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>otfvis</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 	</dependencies>
 </project>

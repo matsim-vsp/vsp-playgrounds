@@ -21,8 +21,10 @@
  */
 package scenarios.illustrative.braess.run;
 
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -63,8 +65,17 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
-import playground.vsp.congestion.handlers.*;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV7;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
+import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
@@ -86,10 +97,6 @@ import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
  * It analyzes the simulation with help of TtAnalyzeBraess.java.
@@ -107,15 +114,15 @@ public final class RunBraessSimulation {
 	private static final int SIMULATION_PERIOD = 1; // in hours
 	private static final double SIMULATION_START_TIME = 0.0; // seconds from midnight
 	
-	private static final InitRoutes INIT_ROUTES_TYPE = InitRoutes.NONE;
+	private static final InitRoutes INIT_ROUTES_TYPE = InitRoutes.ONLY_OUTER;
 	// initial score for all initial plans (if to low, to many agents switch to outer routes simultaneously)
 	private static final Double INIT_PLAN_SCORE = null;
 	
 	// defines which kind of signals should be used. use 'SIGNAL_LOGIC = SignalControlLogic.NONE' if signals should not be used
-	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_V2Z;
+	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_Z2V;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
-	private static final int SECONDS_Z_GREEN = 1;
-	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
+	private static final int SECONDS_Z_GREEN = 5;
+	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.SIMPLE_RESPONSIVE;
 	
 	// defines which kind of lanes should be used
 	private static final LaneType LANE_TYPE = LaneType.NONE;
@@ -137,7 +144,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/byPass/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/cournotNash/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -151,7 +158,7 @@ public final class RunBraessSimulation {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(2000);
+		config.controler().setLastIteration(1700);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
@@ -164,11 +171,11 @@ public final class RunBraessSimulation {
 		laemmerConfigGroup.setMaxCycleTime(90);
 		laemmerConfigGroup.setDesiredCycleTime(60);
 		laemmerConfigGroup.setIntergreenTime(0);
-		laemmerConfigGroup.setMinGreenTime(0);
+		laemmerConfigGroup.setMinGreenTime(1);
 		
 		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		// TODO modify sylvia config parameter here if you like
-		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+		sylviaConfig.setSignalGroupMaxGreenScale(2);
 		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 
 		// set brain exp beta
@@ -196,12 +203,12 @@ public final class RunBraessSimulation {
 
 		// define strategies:
 //		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
-		config.strategy().setFractionOfIterationsToDisableInnovation(.9);
+//		config.strategy().setFractionOfIterationsToDisableInnovation(.9);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
-			strat.setWeight(0.01);
-//			strat.setDisableAfter(config.controler().getLastIteration() - 20);
+			strat.setWeight(0.1);
+			strat.setDisableAfter(config.controler().getLastIteration() - 100);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -221,7 +228,7 @@ public final class RunBraessSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.99);
+			strat.setWeight(0.9);
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
@@ -247,7 +254,7 @@ public final class RunBraessSimulation {
 		config.qsim().setRemoveStuckVehicles(false);
 
 		config.qsim().setStartTime(3600 * SIMULATION_START_TIME);
-		// set end time to shorten simulation run time: 2 hours after the last agent departs
+		// set end time to shorten simulation run time: 5 hours after the last agent departs
 		config.qsim().setEndTime(3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 5));
 //		config.qsim().setEndTime(3600 * 24);
 		
@@ -263,6 +270,8 @@ public final class RunBraessSimulation {
 		config.vspExperimental().setWritingOutputEvents(true);
 		config.planCalcScore().setWriteExperiencedPlans(true);
 
+		// TODO
+//		config.controler().setWriteEventsInterval(100);
 		config.controler().setWriteEventsInterval(config.controler().getLastIteration());
 		config.controler().setWritePlansInterval(config.controler().getLastIteration());
 
@@ -330,14 +339,19 @@ public final class RunBraessSimulation {
 		case NONE:
 			break;
 		case SIMPLE_RESPONSIVE:
-			// add responsive signal controler if enabled
+			// responsive signal controler assumes Z2V fixed-time control as basis
+			if (!SIGNAL_BASE_PLAN.equals(SignalBasePlan.SIGNAL4_X_SECOND_Z_Z2V))
+				throw new UnsupportedOperationException("The responsive signal controler used here assumes the Z2V fixed-time control as basis.");
+			
+			// add responsive signal controler
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
-					bind(ResponsiveLocalDelayMinimizingSignal.class).asEagerSingleton();
 					addControlerListenerBinding().to(ResponsiveLocalDelayMinimizingSignal.class);
 				}
 			});
+			
+			new Signals.Configurator( controler ) ;
 			break;
 		default:
 //			SignalsModule signalsModule = new SignalsModule();

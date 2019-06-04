@@ -41,8 +41,8 @@ public class RunBerlinModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "berlin-v5.3-25pct-snz-1";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/berlin-v5.3-25pct-snz-1/";
+		final String runId = "2019-04-11_senozon-berlin-run1";
+		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/avoev/2019-04-11_senozon-berlin-run1/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
@@ -67,7 +67,7 @@ public class RunBerlinModeAnalysis {
 //		filter.setPersonAttribute("berlin");
 //		filter.setPersonAttributeName("home-activity-zone");
 		
-		filter.setZoneFile("/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-shp/berlin.shp");
+		filter.setZoneFile("/Users/ihab/Documents/workspace/shared-svn/projects/avoev/matsim-input-files/berlin/berlin.shp");
 		filter.setRelevantActivityType("home");
 		
 		filter.preProcess(scenario);
@@ -89,6 +89,7 @@ public class RunBerlinModeAnalysis {
 		distanceGroups.add(new Tuple<>(5000., 10000.));
 		distanceGroups.add(new Tuple<>(10000., 20000.));
 		distanceGroups.add(new Tuple<>(20000., 100000.));
+		distanceGroups.add(new Tuple<>(100000., 999999999999.));
 		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
 		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}
@@ -110,6 +111,7 @@ public class RunBerlinModeAnalysis {
 				config.vehicles().setVehiclesFile(null);
 				config.transit().setTransitScheduleFile(null);
 				config.transit().setVehiclesFile(null);
+				config.facilities().setInputFile(null);
 				scenario = ScenarioUtils.loadScenario(config);
 				return scenario;
 				
@@ -125,6 +127,7 @@ public class RunBerlinModeAnalysis {
 				config.vehicles().setVehiclesFile(null);
 				config.transit().setTransitScheduleFile(null);
 				config.transit().setVehiclesFile(null);
+				config.facilities().setInputFile(null);
 				scenario = ScenarioUtils.loadScenario(config);
 				return scenario;
 			}

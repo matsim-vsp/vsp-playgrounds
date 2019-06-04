@@ -58,14 +58,12 @@ public class SpaceTimeIndicators<L> {
 
 	// -------------------- MEMBERS --------------------
 
-	// outer list: time bins; inner list: space references
-	// private final List<List<L>> data;
+	// outer list: time bins; inner list: visits
 	private final List<List<Visit>> data;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public SpaceTimeIndicators(final int timeBinCnt) {
-		// this.data = new ArrayList<List<L>>(timeBinCnt);
 		this.data = new ArrayList<List<Visit>>(timeBinCnt);
 		for (int bin = 0; bin < timeBinCnt; bin++) {
 			this.data.add(null);
@@ -88,33 +86,20 @@ public class SpaceTimeIndicators<L> {
 		return result;
 	}
 
-	// public Iterable<L> getVisitedSpaceObjects(final int timeBin) {
-	// if (this.data.get(timeBin) != null) {
-	// return this.data.get(timeBin);
-	// } else {
-	// return new EmptyIterable<L>();
-	// }
-	// }
 	public Iterable<Visit> getVisits(final int timeBin) {
 		if (this.data.get(timeBin) != null) {
 			return this.data.get(timeBin);
 		} else {
-			// return new EmptyIterable<L>();
 			return new EmptyIterable<Visit>();
 		}
 	}
 
-	// TODO One could put into this weight both the link- and the person weights!
-
 	public void visit(final L spaceObj, final int timeBin, final double weight) {
-		// List<L> spaceObjList = this.data.get(timeBin);
 		List<Visit> spaceObjList = this.data.get(timeBin);
 		if (spaceObjList == null) {
-			// spaceObjList = new ArrayList<L>(1);
 			spaceObjList = new ArrayList<Visit>(1);
 			this.data.set(timeBin, spaceObjList);
 		}
-		// spaceObjList.add(spaceObj);
 		spaceObjList.add(new Visit(spaceObj, weight));
 	}
 }

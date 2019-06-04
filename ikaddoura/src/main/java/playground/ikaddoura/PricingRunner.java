@@ -37,7 +37,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysisRun;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
@@ -238,11 +237,7 @@ public class PricingRunner {
 		}
 		
 		controler.run();
-		
-		log.info("Analyzing the final iteration...");
-		PersonTripBasicAnalysisRun analysis = new PersonTripBasicAnalysisRun(scenario.getConfig().controler().getOutputDirectory());
-		analysis.run();
-		
+				
 		try {
 			MATSimVideoUtils.createLegHistogramVideo(controler.getConfig().controler().getOutputDirectory());
 		} catch (IOException e1) {

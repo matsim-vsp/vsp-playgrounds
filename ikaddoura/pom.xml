@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.matsim.vsp</groupId>
     <artifactId>vsp-playgrounds</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+      <version>12.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
@@ -22,73 +22,73 @@
 	<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>otfvis</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+        <version>12.0-SNAPSHOT</version>
 		<scope>compile</scope>
 	</dependency>
 	<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>analysis</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+        <version>12.0-SNAPSHOT</version>
 		<scope>compile</scope>
 	</dependency>
 	<dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>multimodal</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+        <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>noise</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>dvrp</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>taxi</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>drt</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.matsim.contrib</groupId>
         <artifactId>av</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
   		<groupId>org.matsim.contrib</groupId>
   		<artifactId>cadytsIntegration</artifactId>
-  		<version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
   	  </dependency>
   	  <dependency>
   		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
   		<artifactId>vsp</artifactId>
-  		<version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
   		<scope>compile</scope>
   	  </dependency>
   	  <dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>decongestion</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+          <version>12.0-SNAPSHOT</version>
 		<scope>compile</scope>
 	  </dependency>
 
 <!-- 	  <dependency> -->
 <!--   		<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
 <!--   		<artifactId>agarwalamit</artifactId> -->
-<!--   		<version>0.11.0-SNAPSHOT</version> -->
+      <!--   		<version>12.0-SNAPSHOT</version> -->
 <!--   		<scope>compile</scope> -->
 <!--   	</dependency> -->
 
@@ -128,11 +128,11 @@
 	    <version>0.10.0</version>
 	</dependency>
 	
-	<dependency>
-	    <groupId>com.github.matsim-vsp</groupId>
-	    <artifactId>avoev</artifactId>
-	    <version>master-SNAPSHOT</version>
-	</dependency>
+<!-- 	<dependency> -->
+<!-- 	    <groupId>com.github.matsim-vsp</groupId> -->
+<!-- 	    <artifactId>avoev</artifactId> -->
+<!-- 	    <version>master-SNAPSHOT</version> -->
+<!-- 	</dependency> -->
 	
 	<dependency>
   		<groupId>com.github.matsim-vsp</groupId>

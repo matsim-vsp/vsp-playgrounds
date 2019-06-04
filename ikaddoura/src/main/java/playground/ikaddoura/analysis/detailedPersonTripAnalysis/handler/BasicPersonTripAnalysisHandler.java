@@ -70,8 +70,14 @@ PersonDepartureEventHandler , PersonArrivalEventHandler , LinkEnterEventHandler,
 PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	
 	private final static Logger log = Logger.getLogger(BasicPersonTripAnalysisHandler.class);
-	private final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-	private final String helpActivitySubString = "interaction";
+	private final String[] helpLegModes;
+	private final String helpActivitySubString;	
+	
+	public BasicPersonTripAnalysisHandler(String[] helpLegModes, String helpActivitySubString) {
+		this.helpLegModes = helpLegModes;
+		this.helpActivitySubString = helpActivitySubString;	
+	}
+
 	@Inject
 	private Scenario scenario;
 	
@@ -81,7 +87,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	private final Map<Id<Person>, Coord> personId2enterCoord = new HashMap<>();
 	private final Map<Id<Vehicle>,Double> ptVehicleId2totalDistance = new HashMap<>();
 	private final Map<Id<Vehicle>,Double> taxiVehicleId2totalDistance = new HashMap<>();
-	private final Map<Id<Vehicle>,Double> carVehicleId2totalDistance = new HashMap<>();
+	private final Map<Id<Vehicle>,Double> networkModeVehicleId2totalDistance = new HashMap<>();
 
 	private final Set<Id<Person>> ptDrivers = new HashSet<>();
 	private final Set<Id<Vehicle>> ptVehicles = new HashSet<>();
@@ -155,7 +161,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		ptVehicles.clear();
 		taxiDrivers.clear();
 		taxiVehicleId2totalDistance.clear();
-		carVehicleId2totalDistance.clear();
+		networkModeVehicleId2totalDistance.clear();
 		personId2stuckAndAbortEvents.clear();
 	}
 	
@@ -262,13 +268,12 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		} else if (taxiVehicleId2totalDistance.get(event.getVehicleId()) != null) {
 			taxiVehicleId2totalDistance.put(event.getVehicleId(), taxiVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
 		
-		} else if (carVehicleId2totalDistance.get(event.getVehicleId()) != null) {
-			carVehicleId2totalDistance.put(event.getVehicleId(), carVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
+		} else if (networkModeVehicleId2totalDistance.get(event.getVehicleId()) != null) {
+			networkModeVehicleId2totalDistance.put(event.getVehicleId(), networkModeVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
 
 		} else {
 			if (warnCnt2 <= 5) {
 				log.warn("Link enter event of a vehicle with a not considered mode: " + event.toString());
-				log.warn("So far link enter events are only considered for vehicles of the following modes: car, pt, taxi");
 				if (warnCnt2 == 5) {
 					log.warn("Further warnings of this type are not printed out.");
 				}
@@ -448,11 +453,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			} else if (tripNumber2legMode.get(tripNumber).equals(TransportMode.taxi)) {
 				distanceTravelled = (taxiVehicleId2totalDistance.get(event.getVehicleId()) - personId2distanceEnterValue.get(event.getPersonId())); 
 
-			} else if (tripNumber2legMode.get(tripNumber).equals(TransportMode.car)) {
-				distanceTravelled = (carVehicleId2totalDistance.get(event.getVehicleId()) - personId2distanceEnterValue.get(event.getPersonId()));
-				
 			} else {
-				// other modes are not considered in the link-based distance computation
+				distanceTravelled = (networkModeVehicleId2totalDistance.get(event.getVehicleId()) - personId2distanceEnterValue.get(event.getPersonId()));			
 			}
 			
 			Map<Integer,Double> tripNumber2distance = personId2tripNumber2tripDistance.get(event.getPersonId());
@@ -482,8 +484,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			
 		} else {
 			// normal person enters vehicle
-			if (carVehicleId2totalDistance.get(event.getVehicleId()) == null) {
-				carVehicleId2totalDistance.put(event.getVehicleId(), 0.);
+			if (networkModeVehicleId2totalDistance.get(event.getVehicleId()) == null) {
+				networkModeVehicleId2totalDistance.put(event.getVehicleId(), 0.);
 //				log.info("Starting vehicle distance computation for private vehicle " + event.getVehicleId());
 			}
 		}
@@ -526,10 +528,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			} else if ((tripNumber2legMode.get(tripNumber)).equals(TransportMode.taxi)){
 				personId2distanceEnterValue.put(event.getPersonId(), taxiVehicleId2totalDistance.get(event.getVehicleId()));
 
-			} else if ((tripNumber2legMode.get(tripNumber)).equals(TransportMode.car)){
-				personId2distanceEnterValue.put(event.getPersonId(), carVehicleId2totalDistance.get(event.getVehicleId()));
 			} else {
-				// other modes are not considered in the link-based distance computation
+				personId2distanceEnterValue.put(event.getPersonId(), networkModeVehicleId2totalDistance.get(event.getVehicleId()));
 			}
 			
 		}		
@@ -776,7 +776,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	}
 
 	public Map<Id<Vehicle>, Double> getCarVehicleId2totalDistance() {
-		return carVehicleId2totalDistance;
+		return networkModeVehicleId2totalDistance;
 	}
 
 	public Map<Id<Person>, Integer> getPersonId2stuckAndAbortEvents() {

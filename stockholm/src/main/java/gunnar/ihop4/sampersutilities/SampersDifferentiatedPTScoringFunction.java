@@ -90,12 +90,12 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 				if (TransportMode.transit_walk.equals(leg.getMode())) {
 					leg.setMode(TransportMode.walk);
 				}
-				
+
 				// Any other PT mode should not be possible.
 				if (TransportMode.pt.equals(leg.getMode()) || PT_SUBMODES.contains(leg.getMode())) {
 					throw new RuntimeException("Encountered single-trip leg with mode: " + leg.getMode());
 				}
-				
+
 				super.handleLeg(leg);
 
 			} else if (this.tmpLegs.size() > 1) {
@@ -118,12 +118,10 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 				final double firstWaitingTime_s = this.tmpActs.getFirst().getEndTime()
 						- this.tmpActs.getFirst().getStartTime();
 
-				double distance_m = 0.0; // "avstånd"
-				double transferTime_s = 0; // "bytestid"
-				double inVehicleTime_s = 0; // "restid i fordonet"
-				for (int i = 1; i < this.tmpLegs.size() - 1; i++) {
+				double transferTime_s = 0.0; // "bytestid"
+				double inVehicleTime_s = 0.0; // "restid i fordonet"
+				for (int i = 1; i < this.tmpLegs.size() - 1; i++) { // leave out access and egress
 					final Leg leg = this.tmpLegs.get(i);
-					distance_m += leg.getRoute().getDistance();
 					if (TransportMode.transit_walk.equals(leg.getMode())) {
 						transferTime_s += leg.getTravelTime();
 					} else if (PT_SUBMODES.contains(leg.getMode())) {
@@ -140,7 +138,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 				final double generalizedTravelTime_s = super.utlFct.getGeneralizedPTTravelTime_s(accessEgressTime_s,
 						firstWaitingTime_s, inVehicleTime_s, transferTime_s, numberOfTransfers);
-				final SampersPTSummaryLeg summaryLeg = new SampersPTSummaryLeg(generalizedTravelTime_s, distance_m);
+				final SampersPTSummaryLeg summaryLeg = new SampersPTSummaryLeg(generalizedTravelTime_s);
 				super.handleLeg(summaryLeg);
 			}
 
@@ -155,11 +153,9 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 	class SampersPTSummaryLeg implements Leg {
 
 		private final double generalizedTravelTime_s;
-		private final double totalDistance_m;
 
-		private SampersPTSummaryLeg(final double generalizedTravelTime_s, final double totalDistance_m) {
+		private SampersPTSummaryLeg(final double generalizedTravelTime_s) {
 			this.generalizedTravelTime_s = generalizedTravelTime_s;
-			this.totalDistance_m = totalDistance_m;
 		}
 
 		@Override
@@ -172,7 +168,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 			return new Route() {
 				@Override
 				public double getDistance() {
-					return totalDistance_m;
+					return 0.0; // does not play a role in PT legs
 				}
 
 				@Override

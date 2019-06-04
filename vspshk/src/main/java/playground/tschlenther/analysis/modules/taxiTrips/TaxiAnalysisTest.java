@@ -11,8 +11,8 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.jbischoff.taxi.evaluation.TaxiCustomerWaitTimeAnalyser;
-import playground.jbischoff.taxi.evaluation.TravelDistanceTimeEvaluator;
+import playground.tschlenther.stuffFromJoschka.TaxiCustomerWaitTimeAnalyser;
+import playground.tschlenther.stuffFromJoschka.TravelDistanceTimeEvaluator;
 
 public class TaxiAnalysisTest {
 

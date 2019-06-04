@@ -29,7 +29,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.run.RunBerlinScenario;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 
@@ -103,6 +103,10 @@ public class RunBerlin {
 		final String homeActivity = "home";
 		final int scalingFactor = scaleFactor;
 		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "SCHLUESSEL";
+		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(controler.getScenario());
@@ -124,7 +128,7 @@ public class RunBerlin {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				controler.getScenario(),
 				null,
 				visualizationScriptDirectory,
@@ -137,8 +141,7 @@ public class RunBerlin {
 				null,
 				modes,
 				null,
-				null,
-				0., null);
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 				
 		log.info("Done.");

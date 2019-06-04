@@ -35,7 +35,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.savPricing.RunBerlinTaxiScenarioA;
@@ -151,7 +151,11 @@ public class RunBerlinTaxiPricingScenarioA {
 		modes.add(TransportMode.walk);
 		modes.add(TransportMode.transit_walk);
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
+		
+		IKAnalysis analysis = new IKAnalysis(
 				controler.getScenario(),
 				null,
 				visualizationScriptDirectory,
@@ -163,9 +167,8 @@ public class RunBerlinTaxiPricingScenarioA {
 				filters,
 				null,
 				modes,
-				TransportMode.taxi,
-				TransportMode.car,
-				dailyRewardTaxiInsteadOfPrivateCar, null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 		
 		// noise post-analysis

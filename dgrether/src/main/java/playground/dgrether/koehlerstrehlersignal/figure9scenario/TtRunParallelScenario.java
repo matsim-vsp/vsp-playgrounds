@@ -19,9 +19,6 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.figure9scenario;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.controler.Controler;
@@ -32,9 +29,7 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 
-import playground.dgrether.analysis.charts.DgTravelTimeCalculatorChart;
 import playground.dgrether.analysis.charts.utils.DgChartWriter;
 import playground.dgrether.koehlerstrehlersignal.analysis.DgMfd;
 import playground.dgrether.linkanalysis.DgCountPerIterationGraph;
@@ -100,36 +95,36 @@ public class TtRunParallelScenario {
 
 				if ( e.getIteration() % 10 == 0 ) {
 //					DgTravelTimeCalculatorChart ttcalcChart = new DgTravelTimeCalculatorChart((TravelTimeCalculator)e.getServices().getLinkTravelTimes());
-					DgTravelTimeCalculatorChart ttcalcChart = null ;
-					if ( true ) {
-						throw new RuntimeException( "The above fails after I made TravelTimeCalculator final.  But I don't think that it can have worked before since some " +
-												"other changes.  kai, feb'19" ) ;
-					}
-
-					ttcalcChart.setStartTime(0.0);
-					ttcalcChart.setEndTime(3600.0 * 1.5);
-					List<Id<Link>> list = new ArrayList<>();
-					list.add(Id.create("23", Link.class));
-					list.add(Id.create("34", Link.class));
-					list.add(Id.create("45", Link.class));
-					ttcalcChart.addLinkId(list);
-					list = new ArrayList<>();
-					list.add(Id.create("27", Link.class));
-					list.add(Id.create("78", Link.class));
-					list.add(Id.create("85", Link.class));
-					ttcalcChart.addLinkId(list);
-					list = new ArrayList<>();
-					list.add(Id.create("54", Link.class));
-					list.add(Id.create("43", Link.class));
-					list.add(Id.create("32", Link.class));
-					ttcalcChart.addLinkId(list);
-					list = new ArrayList<>();
-					list.add(Id.create("58", Link.class));
-					list.add(Id.create("87", Link.class));
-					list.add(Id.create("72", Link.class));
-					ttcalcChart.addLinkId(list);
-					DgChartWriter.writeChart(e.getServices().getControlerIO().getIterationFilename(e.getIteration(), "ttcalculator"),
-							ttcalcChart.createChart());
+//					DgTravelTimeCalculatorChart ttcalcChart = null ;
+//					if ( true ) {
+//						throw new RuntimeException( "The above fails after I made TravelTimeCalculator final.  But I don't think that it can have worked before since some " +
+//												"other changes.  kai, feb'19" ) ;
+//					}
+//
+//					ttcalcChart.setStartTime(0.0);
+//					ttcalcChart.setEndTime(3600.0 * 1.5);
+//					List<Id<Link>> list = new ArrayList<>();
+//					list.add(Id.create("23", Link.class));
+//					list.add(Id.create("34", Link.class));
+//					list.add(Id.create("45", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					list = new ArrayList<>();
+//					list.add(Id.create("27", Link.class));
+//					list.add(Id.create("78", Link.class));
+//					list.add(Id.create("85", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					list = new ArrayList<>();
+//					list.add(Id.create("54", Link.class));
+//					list.add(Id.create("43", Link.class));
+//					list.add(Id.create("32", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					list = new ArrayList<>();
+//					list.add(Id.create("58", Link.class));
+//					list.add(Id.create("87", Link.class));
+//					list.add(Id.create("72", Link.class));
+//					ttcalcChart.addLinkId(list);
+//					DgChartWriter.writeChart(e.getServices().getControlerIO().getIterationFilename(e.getIteration(), "ttcalculator"),
+//							ttcalcChart.createChart());
 
 					DgCountPerIterationGraph chart = new DgCountPerIterationGraph(e.getServices().getConfig().controler());
 					chart.addCountEventHandler(handler23);

@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.matsim.contrib.greedo.GreedoProgressListener;
+import org.matsim.contrib.greedo_DEPRECATED.GreedoProgressListener;
 import org.matsim.contrib.opdyts.OpdytsProgressListener;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;

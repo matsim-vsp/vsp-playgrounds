@@ -34,7 +34,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 public class LinkDemandAnalysisRun {
 
 	private static String runId = "run3_gesundeStadt-mit-RSV";
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/"+ runId +"/output/";
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/nemo/wissenschaftsforum2019/"+ runId +"/";
 
 	private String outputDirectory;
 
@@ -68,7 +68,7 @@ public class LinkDemandAnalysisRun {
 		EventsManager events = EventsUtils.createEventsManager();
 				
 		Set<String> modesToInclude = new HashSet<>();
-		modesToInclude.add("bike");
+		modesToInclude.add("car");
 		ModeFilter filter = new ModeFilter(modesToInclude);
 		
 		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork(), filter);

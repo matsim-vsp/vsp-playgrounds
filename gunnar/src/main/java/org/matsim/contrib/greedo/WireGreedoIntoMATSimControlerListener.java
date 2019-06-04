@@ -20,78 +20,54 @@
 package org.matsim.contrib.greedo;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
-import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.contrib.greedo.datastructures.Ages;
-import org.matsim.contrib.greedo.datastructures.PopulationState;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
-import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
+import org.matsim.contrib.greedo.logging.AsymptoticAgeLogger;
 import org.matsim.contrib.greedo.logging.AvgAge;
 import org.matsim.contrib.greedo.logging.AvgAgeWeight;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityTotal;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
+import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
-import org.matsim.contrib.greedo.logging.AvgUnweightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedUtilityChange;
 import org.matsim.contrib.greedo.logging.Beta;
 import org.matsim.contrib.greedo.logging.Delta;
-import org.matsim.contrib.greedo.logging.DriversInPhysicalSim;
-import org.matsim.contrib.greedo.logging.DriversInPseudoSim;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
-import org.matsim.contrib.greedo.logging.LogDataWrapper;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
-import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
-import org.matsim.contrib.pseudosimulation.PSim;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
-import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.contrib.greedo.logging.ReplanningRecipe;
+import org.matsim.contrib.greedo.logging.UnconstrainedBeta;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.events.StartupEvent;
-import org.matsim.core.controler.listener.IterationEndsListener;
-import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.replanning.GenericPlanStrategy;
-import org.matsim.core.replanning.StrategyManager;
-import org.matsim.core.router.util.TravelTime;
+import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.population.PersonUtils;
+import org.matsim.core.replanning.selectors.BestPlanSelector;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
@@ -102,393 +78,252 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
  * 
  */
 @Singleton
-public class WireGreedoIntoMATSimControlerListener
-		implements StartupListener, IterationEndsListener, LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
-		PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
+public class WireGreedoIntoMATSimControlerListener implements Provider<EventHandler>, ReplannerSelector {
 
-	// -------------------- CONSTANTS --------------------
+	// -------------------- MEMBERS --------------------
 
-	private static final Logger log = Logger.getLogger(Controler.class);
+	private final MatsimServices services;
 
-	// -------------------- INJECTED MEMBERS --------------------
+	private final GreedoConfigGroup greedoConfig;
 
-	@Inject
-	private MatsimServices services;
+	private final StatisticsWriter<LogDataWrapper> statsWriter;
 
-	/*
-	 * We know if we are in a pSim iteration or in a "real" iteration. The
-	 * MobsimSwitcher is updated at iterationStarts, i.e. always *before* the mobsim
-	 * (or psim) is executed. The SearchAccelerator, on the other hand, is invoked
-	 * at iterationEnds, i.e. *after* the corresponding mobsim (or psim) run.
-	 * 
-	 */
-	@Inject
-	private MobSimSwitcher mobsimSwitcher;
+	private final Utilities utilities;
 
-	@Inject
-	private TravelTime linkTravelTimes;
+	private final Ages ages;
 
-	@Inject
-	private TransitEmulator transitEmulator;
+	private final SlotUsageListener physicalSlotUsageListener;
 
-	@Inject
-	private GreedoProgressListener greedoProgressListener;
+	private final List<SlotUsageListener> hypotheticalSlotUsageListeners = new LinkedList<>();
 
-	// -------------------- NON-INJECTED MEMBERS --------------------
+	private final ReplanningEfficiencyEstimator replanningEfficiencyEstimator;
 
-	private Set<Id<Person>> replanners = null;
+	private final AsymptoticAgeLogger asymptoticAgeLogger;
 
-	private PopulationState hypotheticalPopulationState = null;
+	private Plans lastPhysicalPopulationState = null;
 
-	private Double expectedUtilityChangeSumAccelerated = null;
+	// below only for logging
 
-	private Double expectedUtilityChangeSumUniform = null;
+	// private Double realizedUtilityChangeSum = null;
 
-	private Double realizedUtilityChangeSum = null;
+	// private Double realizedUtilitySum = null;
 
-	private Double realizedUtilitySum = null;
-
-	// >>> created upon startup >>>
-
-	private SlotUsageListener slotUsageListener;
-
-	private StatisticsWriter<LogDataWrapper> statsWriter;
-
-	private Utilities utilities;
-
-	private Ages ages;
-
-	// <<< created upon startup <<<
+	private ReplannerIdentifier.LastExpectations lastExpectations = new ReplannerIdentifier.LastExpectations();
 
 	// -------------------- CONSTRUCTION --------------------
 
 	@Inject
-	public WireGreedoIntoMATSimControlerListener() {
-	}
+	public WireGreedoIntoMATSimControlerListener(final MatsimServices services) {
 
-	// -------------------- GETTERS, MAINLY FOR LOGGING --------------------
-
-	public Integer getDriversInPhysicalSim() {
-		if (this.lastPhysicalSlotUsages != null) {
-			return this.lastPhysicalSlotUsages.size();
-		} else {
-			return null;
-		}
-	}
-
-	public Double getLambdaRealized() {
-		if (this.replanners == null) {
-			return null;
-		} else {
-			return ((double) this.replanners.size()) / this.services.getScenario().getPopulation().getPersons().size();
-		}
-	}
-
-	public Double getLastExpectedUtilityChangeSumAccelerated() {
-		return this.expectedUtilityChangeSumAccelerated;
-	}
-
-	public Double getLastExpectedUtilityChangeSumUniform() {
-		return this.expectedUtilityChangeSumUniform;
-	}
-
-	public Double getLastRealizedUtilityChangeSum() {
-		return this.realizedUtilityChangeSum;
-	}
-
-	public Double getLastRealizedUtilitySum() {
-		return this.realizedUtilitySum;
-	}
-
-	public List<Integer> getSortedAgesView() {
-		return this.ages.getSortedAgesView();
-	}
-
-	public Double getAveragAge() {
-		return this.ages.getAverageAge();
-	}
-
-	public Double getAverageWeight() {
-		return this.ages.getAverageWeight();
-	}
-
-	public Integer getPopulationSize() {
-		return this.services.getScenario().getPopulation().getPersons().size();
-	}
-
-	public Integer getNumberOfReplanners() {
-		if (this.replanners == null) {
-			return null;
-		} else {
-			return this.replanners.size();
-		}
-	}
-
-	public Integer getNumberOfNonReplanners() {
-		if (this.replanners == null) {
-			return null;
-		} else {
-			return (this.getPopulationSize() - this.replanners.size());
-		}
-	}
-
-	// --------------- IMPLEMENTATION OF StartupListener ---------------
-
-	private GreedoConfigGroup greedoConfig = null;
-
-	@Override
-	public void notifyStartup(final StartupEvent event) {
-
-		this.greedoProgressListener.callToNotifyStartup_greedo(event);
-
+		this.services = services;
 		this.greedoConfig = ConfigUtils.addOrGetModule(this.services.getConfig(), GreedoConfigGroup.class);
 		this.utilities = new Utilities();
-		this.ages = new Ages(this.services.getScenario().getPopulation().getPersons().keySet());
-		this.slotUsageListener = new SlotUsageListener(this.greedoConfig.getTimeDiscretization(),
-				this.ages.getPersonWeights(), this.greedoConfig.getLinkWeights(),
-				this.greedoConfig.getTransitVehicleWeights());
+		this.ages = new Ages(services.getScenario().getPopulation().getPersons().keySet(), this.greedoConfig);
+		this.physicalSlotUsageListener = new SlotUsageListener(this.greedoConfig.newTimeDiscretization(),
+				this.ages.getWeights(), this.greedoConfig.getConcurrentLinkWeights(),
+				this.greedoConfig.getConcurrentTransitVehicleWeights());
+
+		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(
+				this.greedoConfig.getReplanningEfficiencyEstimationInertia(), this.greedoConfig.getWarmUpIterations(),
+				this.greedoConfig.getCorrelationLoggingMemory());
+
+		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getCorrelationLoggingMemory(),
+				new File("./output/"), "asymptoticAges.", ".txt");
 
 		this.statsWriter = new StatisticsWriter<>(
-				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
-				false);
+				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
-
-		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
-		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
-
+		this.statsWriter.addSearchStatistic(new ReplanningRecipe());
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
 		this.statsWriter.addSearchStatistic(new LambdaBar());
 		this.statsWriter.addSearchStatistic(new Beta());
+		this.statsWriter.addSearchStatistic(new UnconstrainedBeta());
 		this.statsWriter.addSearchStatistic(new Delta());
-
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
-
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaXvsDeltaDeltaUStatistic());
+		this.statsWriter
+				.addSearchStatistic(this.asymptoticAgeLogger.newAgeVsSimilarityByExpDeltaUtilityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAvgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAgeTimesExpDeltaUtilityVsSimilarityCorrelationStatistic());
+		this.statsWriter.addSearchStatistic(
+				this.asymptoticAgeLogger.newAvgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelationStatistic());
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerSize());
-
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedNonReplannerCountDifferences2());
-
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedNonReplannerCountDifferences2());
-
-		this.statsWriter.addSearchStatistic(new AvgUnweightedUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgUnweightedReplannerUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgUnweightedNonReplannerUtilityChange());
-
-		this.statsWriter.addSearchStatistic(new AvgWeightedUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgWeightedReplannerUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgWeightedNonReplannerUtilityChange());
-
+		this.statsWriter.addSearchStatistic(new AvgNonReplannerUtilityChange());
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
+		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityTotal());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
-
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newAvgPredictedDeltaUtility());
+		// this.statsWriter.addSearchStatistic(new RelativeUtilityEfficiency());
+		// this.statsWriter.addSearchStatistic(new RelativeSlotVariability());
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
 	}
 
-	// -------------------- IMPLEMENTATION OF EventHandlers --------------------
+	// -------------------- IMPLEMENTATION OF ReplannerSelector --------------------
 
-	@Override
-	public void reset(final int iteration) {
-		this.greedoProgressListener.callToReset_greedo(iteration);
-		this.slotUsageListener.reset(iteration);
+	private LogDataWrapper lastLogDataWrapper = null;
+
+	private int iteration() {
+		return this.physicalSlotUsageListener.getLastResetIteration();
 	}
 
 	@Override
-	public void handleEvent(final VehicleEntersTrafficEvent event) {
-		if (this.mobsimSwitcher.isQSimIteration()) {
-			this.slotUsageListener.handleEvent(event);
+	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
+
+		this.lastPhysicalPopulationState = new Plans(this.services.getScenario().getPopulation());
+		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			// TODO Hedge against selectedPlan == null ?
+			this.utilities.updateRealizedUtility(person.getId(),
+					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
 		}
-	}
 
-	@Override
-	public void handleEvent(final LinkEnterEvent event) {
-		if (this.mobsimSwitcher.isQSimIteration()) {
-			this.slotUsageListener.handleEvent(event);
-		}
-	}
+		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
+		this.lastLogDataWrapper = new LogDataWrapper(this.ages, utilityStats, this.lastExpectations, this.iteration());
+		this.statsWriter.writeToFile(this.lastLogDataWrapper);
 
-	@Override
-	public void handleEvent(final PersonEntersVehicleEvent event) {
-		if (this.mobsimSwitcher.isQSimIteration()) {
-			this.slotUsageListener.handleEvent(event);
-		}
-	}
+		this.greedoConfig.getReplannerIdentifierRecipe().update(this.lastLogDataWrapper);
 
-	@Override
-	public void handleEvent(final VehicleLeavesTrafficEvent event) {
-		if (this.mobsimSwitcher.isQSimIteration()) {
-			this.slotUsageListener.handleEvent(event);
-		}
-	}
-
-	// --------------- IMPLEMENTATION OF IterationEndsListener ---------------
-
-	private PopulationState lastPhysicalPopulationState = null;
-	private Map<Id<Person>, SpaceTimeIndicators<Id<?>>> lastPhysicalSlotUsages = null;
-
-	private int pseudoSimIterationCnt = 0;
-
-	private boolean nextMobsimIsExpectedToBePhysical = true; // A safeguard.
-
-	@Override
-	public void notifyIterationEnds(final IterationEndsEvent event) {
-
-		this.greedoProgressListener.callToNotifyIterationEnds_greedo(event);
-
-		if (this.mobsimSwitcher.isQSimIteration()) {
-			log.info("physical mobsim run in iteration " + event.getIteration() + " ends.");
-			if (!this.nextMobsimIsExpectedToBePhysical) {
-				throw new RuntimeException("Did not expect a physical mobsim run!");
+		this.hypotheticalSlotUsageListeners.clear(); // Redundant, see afterReplanning().
+		return new EventHandlerProvider() {
+			@Override
+			public synchronized EventHandler get(final Set<Id<Person>> personIds) {
+				final SlotUsageListener listener = new SlotUsageListener(greedoConfig.newTimeDiscretization(),
+						ages.getWeights().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
+								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
+						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
+				listener.resetOnceAndForAll(iteration());
+				hypotheticalSlotUsageListeners.add(listener);
+				return listener;
 			}
-			this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
-			this.greedoProgressListener.extractedLastPhysicalPopulationState(event.getIteration());
-			this.lastPhysicalSlotUsages = this.slotUsageListener.getNewIndicatorView();
-			this.pseudoSimIterationCnt = 0;
-		} else {
-			log.info("pseudoSim run in iteration " + event.getIteration() + " ends.");
-			if (this.nextMobsimIsExpectedToBePhysical) {
-				throw new RuntimeException("Expected a physical mobsim run!");
-			}
-			this.pseudoSimIterationCnt++;
-		}
+		};
+	}
 
-		if (this.pseudoSimIterationCnt == (ConfigUtils.addOrGetModule(this.services.getConfig(), PSimConfigGroup.class)
-				.getIterationsPerCycle() - 1)) {
+	@Override
+	public void afterReplanning() {
 
-			final int greedoIt = this.greedoConfig.getGreedoIteration(event.getIteration());
-			this.greedoProgressListener.observedLastPSimIterationWithinABlock(event.getIteration());
-
-			/*
-			 * Extract, for each agent, the expected (hypothetical) score change and do some
-			 * book-keeping.
-			 */
-
+		if (this.greedoConfig.getAdjustStrategyWeights()) {
+			final BestPlanSelector<Plan, Person> bestPlanSelector = new BestPlanSelector<>();
 			for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
-				final double realizedUtility = this.lastPhysicalPopulationState.getSelectedPlan(person.getId())
-						.getScore();
-				final double expectedUtility = person.getSelectedPlan().getScore();
-				this.utilities.update(person.getId(), realizedUtility, expectedUtility);
+				person.setSelectedPlan(bestPlanSelector.selectPlan(person));
+				PersonUtils.removeUnselectedPlans(person);
 			}
-			final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
-
-			/*
-			 * Book-keeping.
-			 */
-
-			if (utilityStatsBeforeReplanning.previousDataValid) {
-
-				this.realizedUtilitySum = utilityStatsBeforeReplanning.previousRealizedUtilitySum;
-				this.realizedUtilityChangeSum = utilityStatsBeforeReplanning.currentRealizedUtilitySum
-						- utilityStatsBeforeReplanning.previousRealizedUtilitySum;
-				this.expectedUtilityChangeSumUniform = this.greedoConfig.getReplanningRate(greedoIt)
-						* (utilityStatsBeforeReplanning.previousExpectedUtilitySum
-								- utilityStatsBeforeReplanning.previousRealizedUtilitySum);
-
-				this.expectedUtilityChangeSumAccelerated = 0.0;
-				for (Id<Person> replannerId : this.replanners) {
-					this.expectedUtilityChangeSumAccelerated += this.utilities.getUtilities(replannerId)
-							.getPreviousExpectedUtilityChange();
-				}
-			}
-
-			/*
-			 * Extract hypothetical selected plans.
-			 */
-
-			final Collection<Plan> selectedHypotheticalPlans = new ArrayList<>(
-					this.services.getScenario().getPopulation().getPersons().size());
-			for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
-				selectedHypotheticalPlans.add(person.getSelectedPlan());
-			}
-
-			/*
-			 * Execute one pSim with the full population.
-			 * 
-			 * TODO Can probably be avoided.
-			 */
-
-			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> lastPseudoSimSlotUsages;
-			{
-				final SlotUsageListener pSimSlotUsageListener = new SlotUsageListener(
-						this.greedoConfig.getTimeDiscretization(), this.ages.getPersonWeights(),
-						this.greedoConfig.getLinkWeights(), this.greedoConfig.getTransitVehicleWeights());
-				final EventsManager eventsManager = EventsUtils.createEventsManager();
-				eventsManager.addHandler(pSimSlotUsageListener);
-				final PSim pSim = new PSim(this.services.getScenario(), eventsManager, selectedHypotheticalPlans,
-						this.linkTravelTimes, this.transitEmulator);
-				pSim.run();
-				lastPseudoSimSlotUsages = pSimSlotUsageListener.getNewIndicatorView();
-			}
-
-			/*
-			 * Memorize the most recent hypothetical population state and re-set the
-			 * population to its most recent physical state.
-			 */
-
-			this.hypotheticalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
-			this.lastPhysicalPopulationState.set(this.services.getScenario().getPopulation());
-
-			/*
-			 * DECIDE WHO GETS TO RE-PLAN.
-			 * 
-			 * At this point, one has (i) the link usage statistics from the last physical
-			 * MATSim network loading (lastPhysicalLinkUsages), and (ii) the hypothetical
-			 * link usage statistics that would result from a 100% re-planning rate if
-			 * network congestion did not change (lastPseudoSimLinkUsages).
-			 * 
-			 * Now (approximately) solve an optimization problem that aims at balancing
-			 * simulation advancement (changing link usage patterns) and simulation
-			 * stabilization (keeping link usage patterns as they are).
-			 * 
-			 */
-
-			final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.greedoConfig, greedoIt,
-					this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages, this.services.getScenario().getPopulation(),
-					utilityStatsBeforeReplanning.personId2currentDeltaUtility, this.ages);
-			this.replanners = replannerIdentifier.drawReplanners();
-			// Passing (greedoIt + 1) to ages.update because it will be used in the next
-			// Greedo iteration.
-			this.ages.update(this.replanners, this.greedoConfig.getAgeWeights(greedoIt + 1));
-			this.slotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
-
-			this.statsWriter.writeToFile(new LogDataWrapper(this, replannerIdentifier, lastPseudoSimSlotUsages.size()));
-
-			this.greedoProgressListener.madeReplanningDecisions(event.getIteration());
-
-			this.nextMobsimIsExpectedToBePhysical = true;
-			this.setWeightOfHypotheticalReplanning(1e9);
-
-		} else {
-
-			this.nextMobsimIsExpectedToBePhysical = false;
-			this.setWeightOfHypotheticalReplanning(0);
-
 		}
+
+		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			this.utilities.updateExpectedUtility(person.getId(), person.getSelectedPlan().getScore());
+		}
+		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
+
+		// >>>>> SANITY TEST >>>>>
+		final double val1 = utilityStats.expectedUtilityChangeSum;
+		final double val2 = utilityStats.personId2expectedUtilityChange.values().stream().mapToDouble(x -> x).sum();
+		Logger.getLogger(this.getClass()).info("val1 = " + val1 + ", val2 = " + val2);
+		// <<<<< SANITY TEST <<<<<
+
+		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> hypotheticalSlotUsageIndicators = new LinkedHashMap<>();
+		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
+			hypotheticalSlotUsageIndicators.putAll(listener.getNewIndicatorView());
+		}
+		this.hypotheticalSlotUsageListeners.clear(); // Release as soon as possible.
+
+		// final double meanLambda = Double.NaN;
+		// if
+		// (GreedoConfigGroup.StepSizeType.adaptive.equals(this.greedoConfig.getStepSizeField()))
+		// {
+		// Logger.getLogger(this.getClass())
+		// .info("relativeSlotVariability = " +
+		// this.lastLogDataWrapper.getRelativeSlotVariability());
+		// Logger.getLogger(this.getClass())
+		// .info("relativeUtilityEfficiency = " +
+		// this.lastLogDataWrapper.getRelativeUtilityEfficiency());
+		// // meanLambda = this.replanningEfficiencyEstimator.getLambda();
+		// if ((this.lastLogDataWrapper.getRelativeSlotVariability() != null)
+		// && (this.lastLogDataWrapper.getRelativeUtilityEfficiency() != null)) {
+		// meanLambda = Math.min(1.0, Math.max(0.0, 0.5 *
+		// this.lastLogDataWrapper.getRelativeSlotVariability()
+		// / this.lastLogDataWrapper.getRelativeUtilityEfficiency()));
+		// } else {
+		// meanLambda = 0.5;
+		// }
+		// Logger.getLogger(this.getClass()).info("meanLambda = " + meanLambda);
+		// } else if
+		// (GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField()))
+		// {
+		// meanLambda = this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		// } else {
+		// throw new RuntimeException("Unknown step size logic: " +
+		// this.greedoConfig.getStepSizeField());
+		// }
+
+		// this.betaNumerator = this.tryMSAUpdate(this.betaNumerator,
+		// this.lastLogDataWrapper.getEstimatedBetaNumerator(),
+		// this.iteration());
+		// this.betaDenominator = this.tryMSAUpdate(this.betaDenominator,
+		// this.lastLogDataWrapper.getEstimatedBetaDenominator(), this.iteration());
+		// final Double betaScaled;
+		// if ((this.betaNumerator != null) && (this.betaDenominator != null)) {
+		// betaScaled = this.greedoConfig.getBetaScale() * (this.betaNumerator /
+		// Math.max(this.betaDenominator, 1e-8));
+		// } else {
+		// betaScaled = null;
+		// }
+
+		this.replanningEfficiencyEstimator.update(this.lastLogDataWrapper.getLastExpectedUtilityChangeSumAccelerated(),
+				this.lastLogDataWrapper.getLastRealizedUtilityChangeSum(),
+				this.lastLogDataWrapper.getSumOfWeightedReplannerCountDifferences2());
+
+		// final Double unconstrainedBeta =
+		// this.replanningEfficiencyEstimator.getBeta();
+		// final Double overrideLambda;
+		// if ((unconstrainedBeta <= 0) ||
+		// !this.replanningEfficiencyEstimator.hadEnoughData()
+		// ||
+		// GreedoConfigGroup.StepSizeType.exogenous.equals(this.greedoConfig.getStepSizeField()))
+		// {
+		// overrideLambda =
+		// this.greedoConfig.getExogenousReplanningRate(this.iteration());
+		// } else {
+		// overrideLambda = null;
+		// }
+
+		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.replanningEfficiencyEstimator,
+				this.greedoConfig, this.iteration(), this.physicalSlotUsageListener.getNewIndicatorView(),
+				hypotheticalSlotUsageIndicators, this.services.getScenario().getPopulation(),
+				utilityStats.personId2expectedUtilityChange);
+		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
+		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
+			if (!replannerIds.contains(person.getId())) {
+				// TODO ensure that this does not affect the logged statistics
+				this.lastPhysicalPopulationState.set(person);
+			}
+		}
+		this.lastExpectations = replannerIdentifier.getLastExpectations();
+
+		this.asymptoticAgeLogger.dump(this.ages.getAges(), utilityStats.personId2expectedUtilityChange,
+				this.lastExpectations.personId2similarity, replannerIds, this.iteration());
+
+		this.ages.update(replannerIds);
+		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeights());
 	}
 
-	// -------------------- REPLANNING FUNCTIONALITY --------------------
+	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------
 
-	private void setWeightOfHypotheticalReplanning(final double weight) {
-		this.greedoProgressListener.setWeightOfHypotheticalReplanning(weight);
-		final StrategyManager strategyManager = this.services.getStrategyManager();
-		for (GenericPlanStrategy<Plan, Person> strategy : strategyManager.getStrategies(null)) {
-			if (strategy instanceof AcceptIntendedReplanningStrategy) {
-				strategyManager.changeWeightOfStrategy(strategy, null, weight);
-			}
-		}
-	}
-
-	public void replan(final HasPlansAndId<Plan, Person> person) {
-		if ((this.replanners != null) && this.replanners.contains(person.getId())) {
-			this.hypotheticalPopulationState.set(person);
-		}
+	@Override
+	public EventHandler get() {
+		// Expecting this to be called only once; returning always the same instance.
+		return this.physicalSlotUsageListener;
 	}
 }

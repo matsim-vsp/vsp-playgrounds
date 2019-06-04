@@ -32,7 +32,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 
@@ -132,8 +132,12 @@ public class IKAnalysisRunBerlinDRT {
 		modes.add(TransportMode.transit_walk);
 		modes.add("bicycle");
 		modes.add(TransportMode.ride);
+		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		final String zoneId = "NO";
 
-		IKAnalysisRun analysis = new IKAnalysisRun(
+		IKAnalysis analysis = new IKAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -145,9 +149,8 @@ public class IKAnalysisRunBerlinDRT {
 				filters1,
 				filters0,
 				modes,
-				taxiMode,
-				carMode,
-				rewardSAVformerCarUser, null);
+				null,
+				zoneId, helpLegModes, stageActivitySubString);
 		analysis.run();
 	
 		log.info("Done.");

@@ -32,7 +32,6 @@ import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
@@ -232,7 +231,7 @@ public final class RunBerlinTaxiScenarioA {
 		config = berlin.prepareConfig(modules.toArray(modulesArray));
 
 		//no special adjustments (in contrast to Drt)
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
+//		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();
 
 		hasPreparedConfig = true ;

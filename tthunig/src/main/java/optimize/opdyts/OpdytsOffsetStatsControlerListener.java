@@ -20,7 +20,6 @@
 package optimize.opdyts;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -42,9 +41,6 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.utils.io.IOUtils;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
-import playground.agarwalamit.opdyts.plots.StateVectorElementsSizePlotter;
-
 /**
  * 
  * @author tthunig copied from amit
@@ -62,6 +58,7 @@ public class OpdytsOffsetStatsControlerListener implements StartupListener, Shut
     private double objFunValue = 0.; // useful only to check if all decision variables start at the same point.
 
     public OpdytsOffsetStatsControlerListener() {
+		throw new RuntimeException("add dependency to agarwalamit (and enable outcommented code) to use opdyts here");
     }
 
     @Override
@@ -89,30 +86,30 @@ public class OpdytsOffsetStatsControlerListener implements StartupListener, Shut
 
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		final int iteration = event.getIteration();
-		ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(scenario.getPopulation());
-		modalShareFromPlans.run();
-		double objectiveFunctionValue = getValueOfObjFun();
-		try {
-			// write offsets
-			StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
-			stringBuilder.append(objectiveFunctionValue + "\t");
-			stringBuilder.append(String.valueOf(objFunValue) + "\t"); // useful only to check if all decision variables
-																		// start at the same point.
-			SignalsData data = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-			for (SignalSystemControllerData systemControl : data.getSignalControlData()
-					.getSignalSystemControllerDataBySystemId().values()) {
-				for (SignalPlanData plan : systemControl.getSignalPlanData().values()) {
-					stringBuilder.append(plan.getOffset() + "\t");
-				}
-			}
-
-			writer.write(stringBuilder.toString());
-			writer.newLine();
-			writer.flush();
-		} catch (IOException e) {
-			throw new RuntimeException("File not found.");
-		}
+//		final int iteration = event.getIteration();
+//		ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(scenario.getPopulation());
+//		modalShareFromPlans.run();
+//		double objectiveFunctionValue = getValueOfObjFun();
+//		try {
+//			// write offsets
+//			StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
+//			stringBuilder.append(objectiveFunctionValue + "\t");
+//			stringBuilder.append(String.valueOf(objFunValue) + "\t"); // useful only to check if all decision variables
+//																		// start at the same point.
+//			SignalsData data = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+//			for (SignalSystemControllerData systemControl : data.getSignalControlData()
+//					.getSignalSystemControllerDataBySystemId().values()) {
+//				for (SignalPlanData plan : systemControl.getSignalPlanData().values()) {
+//					stringBuilder.append(plan.getOffset() + "\t");
+//				}
+//			}
+//
+//			writer.write(stringBuilder.toString());
+//			writer.newLine();
+//			writer.flush();
+//		} catch (IOException e) {
+//			throw new RuntimeException("File not found.");
+//		}
 	}
 
 	@Override
@@ -135,12 +132,12 @@ public class OpdytsOffsetStatsControlerListener implements StartupListener, Shut
 
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
-		String inputFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), "stateVector_networkModes.txt");
-		if (!new File(inputFile).exists()) {
-			return;
-		}
-		String outputFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), "stateVector_networkModes.png");
-		StateVectorElementsSizePlotter.gnuHistogramLogScalePlot(inputFile, outputFile, "offsetStats");
+//		String inputFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), "stateVector_networkModes.txt");
+//		if (!new File(inputFile).exists()) {
+//			return;
+//		}
+//		String outputFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), "stateVector_networkModes.png");
+//		StateVectorElementsSizePlotter.gnuHistogramLogScalePlot(inputFile, outputFile, "offsetStats");
 	}
 
     private double getValueOfObjFun (){

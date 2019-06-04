@@ -41,6 +41,7 @@ import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
@@ -184,11 +185,6 @@ public class KNAccidentScenario {
 
 				this.bind( MyIterationCounter.class ).in(Singleton.class) ;
 
-
-				// ===
-
-
-
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
 				switch( runType ) {
 					case base:
@@ -199,23 +195,26 @@ public class KNAccidentScenario {
 					case bangbang:
 						this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
 						break;
-					case day2day: {
-						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
-						this.addMobsimListenerBinding().toInstance( abc ) ;
-						abc.setLastReplanningIteration(19);
-						abc.setReplanningProba(0.1);
-						break; }
-					case withinDayRerouting:{
+					case withinDayRerouting: {
 						Set<String> analyzedModes = new HashSet<>() ;
 						analyzedModes.add( TransportMode.car ) ;
 						final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 						this.addEventHandlerBinding().toInstance( travelTime ) ;
 						this.addMobsimListenerBinding().toInstance( travelTime );
 						this.bind( TravelTime.class ).toInstance( travelTime );
-						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();
-						this.addMobsimListenerBinding().toInstance( abc );
-						abc.setLastReplanningIteration( 19 );
-						abc.setReplanningProba( 0.1 );
+						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+						this.addMobsimListenerBinding().toInstance( abc ) ;
+						//				abc.setLastReplanningIteration(9);
+						abc.setReplanningProba(1.0);
+						break; }
+					case day2day: {
+						// this should do within-day replanning, but based on what was good solution in iteration before.  not sure if it works.
+						// kai, jun'19
+
+						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+						this.addMobsimListenerBinding().toInstance( abc ) ;
+						abc.setLastReplanningIteration(19);
+						abc.setReplanningProba(0.1);
 						break; }
 					default:
 						throw new IllegalStateException( "Unexpected value: " + runType );

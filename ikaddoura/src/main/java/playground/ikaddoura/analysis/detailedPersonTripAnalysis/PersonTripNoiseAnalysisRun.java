@@ -129,7 +129,10 @@ public class PersonTripNoiseAnalysisRun {
 			e1.printStackTrace();
 		}
 	
-		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
+		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 		basicHandler.setScenario(scenario);
 
 		NoiseAnalysisHandler noiseHandler = new NoiseAnalysisHandler();
@@ -190,7 +193,7 @@ public class PersonTripNoiseAnalysisRun {
 		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
 		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, noiseHandler);
 		
-		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis, null);
+		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis);
 		
 		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
 		analysis.printAvgValuePerParameter(outputPath + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);

@@ -96,7 +96,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -133,7 +133,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
 			
-			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -182,7 +182,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 			
-			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
@@ -232,7 +232,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 			
-			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			controler.addOverridingModule(new TaxiFareModule());

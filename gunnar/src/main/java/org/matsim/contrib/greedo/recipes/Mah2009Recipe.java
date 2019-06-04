@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.greedo.LogDataWrapper;
 import org.matsim.core.gbl.MatsimRandom;
 
 /**
@@ -48,8 +49,7 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 
 	public Mah2009Recipe(final Map<Id<Person>, Double> person2utilityGain, final double meanLambda) {
 
-		// TODO Inefficient; sort population according once beforehand.
-
+		// TODO Inefficient; sort population once beforehand.
 		double tmpReplanProbaConstant = Double.NEGATIVE_INFINITY;
 		for (Double gain : person2utilityGain.values()) {
 			tmpReplanProbaConstant = Math.max(tmpReplanProbaConstant, 1.0 / meanLambda / Math.max(minGain, gain));
@@ -84,9 +84,6 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 
 		} while (replanProbaSum > meanLambda * person2utilityGain.size());
 
-		// System.out.println("terminating");
-		// System.exit(0);
-
 		this.replanProbaConstant = tmpReplanProbaConstant;
 		this.person2utilityGain = person2utilityGain;
 		this.meanLambda = meanLambda;
@@ -98,5 +95,17 @@ public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
 		final double replanProba = this.replanProbaConstant * this.meanLambda * this.person2utilityGain.get(personId);
 		return (MatsimRandom.getRandom().nextDouble() < replanProba);
+	}
+
+	@Override
+	public void update(LogDataWrapper logDataWrapper) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getDeployedRecipeName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

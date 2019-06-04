@@ -82,7 +82,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 //		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
-		Controler controler1 = TaxiControlerCreator.createControler(config1, otfvis);
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, otfvis);
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 		
 		// taxi fares
@@ -131,7 +131,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams2.setDailyFixCostAllSAVusers(-10000.);
 //		optAVParams2.setFixCostsSAVinsteadOfCar(0);
 		
-		Controler controler2 = TaxiControlerCreator.createControler(config2, otfvis);
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares
@@ -205,7 +205,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 //		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
-		Controler controler1 = TaxiControlerCreator.createControler(config1, otfvis);
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, otfvis);
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 
 		// taxi fares
@@ -255,7 +255,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
 //		optAVParams2.setDailyFixCostAllSAVusers(1000.);
 		
-		Controler controler2 = TaxiControlerCreator.createControler(config2, otfvis);
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares

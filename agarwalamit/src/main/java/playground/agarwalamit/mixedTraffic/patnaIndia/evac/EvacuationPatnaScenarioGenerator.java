@@ -48,7 +48,6 @@ import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.router.ActivityWrapperFacility;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.TripRouter;
@@ -58,6 +57,7 @@ import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
+import org.matsim.facilities.FacilitiesUtils;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.UrbanDemandGenerator;
@@ -251,8 +251,8 @@ public class EvacuationPatnaScenarioGenerator {
 						);
 				List<? extends PlanElement> routeInfo = builder.build().calcRoute(
 						leg.getMode(), 
-						new ActivityWrapperFacility(home), 
-						new ActivityWrapperFacility(evacAct), 
+						FacilitiesUtils.toFacility(home, null),
+						FacilitiesUtils.toFacility(evacAct, null), 
 						home.getEndTime(), 
 						pOut);
 

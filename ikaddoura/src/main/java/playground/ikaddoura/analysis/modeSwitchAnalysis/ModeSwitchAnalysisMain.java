@@ -92,8 +92,11 @@ public class ModeSwitchAnalysisMain {
 			config.network().setInputFile(dir0networkFile);
 			
 			scenario0 = ScenarioUtils.loadScenario(config);
+			
+			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+			final String stageActivitySubString = "interaction";
 	        
-	        basicHandler0 = new BasicPersonTripAnalysisHandler();
+	        basicHandler0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler0.setScenario(scenario0);
 			
 			moneyHandler0 = new PersonMoneyLinkHandler();
@@ -117,7 +120,10 @@ public class ModeSwitchAnalysisMain {
 			
 			scenario1 = ScenarioUtils.loadScenario(config);
 	        
-	        basicHandler1 = new BasicPersonTripAnalysisHandler();
+			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+			final String stageActivitySubString = "interaction";
+			
+	        basicHandler1 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler1.setScenario(scenario1);
 			
 			moneyHandler1 = new PersonMoneyLinkHandler();

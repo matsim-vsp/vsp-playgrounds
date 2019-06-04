@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import org.matsim.contrib.greedo.LogDataWrapper;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -26,14 +28,8 @@ package org.matsim.contrib.greedo.logging;
  */
 public class NormalizedWeightedReplannerCountDifferences2 extends PopulationAverageStatistic {
 
-	// @Override
-	// public String label() {
-	// return this.getClass().getSimpleName();
-	// }
-
 	@Override
 	public String value(LogDataWrapper arg0) {
 		return this.averageOrEmpty(arg0.getSumOfWeightedReplannerCountDifferences2(), arg0.getNumberOfReplanners());
 	}
-
 }
