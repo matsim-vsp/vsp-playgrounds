@@ -123,8 +123,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.ages.getWeights(), this.greedoConfig.getConcurrentLinkWeights(),
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
-		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(
-				this.greedoConfig.getReplanningEfficiencyEstimationInertia(), this.greedoConfig.getWarmUpIterations(),
+		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(this.greedoConfig.getWarmUpIterations(),
 				this.greedoConfig.getCorrelationLoggingMemory());
 
 		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getCorrelationLoggingMemory(),
@@ -141,7 +140,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new Delta());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
-		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaXvsDeltaDeltaUStatistic());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaX2vsDeltaDeltaUStatistic());
 		this.statsWriter
 				.addSearchStatistic(this.asymptoticAgeLogger.newAgeVsSimilarityByExpDeltaUtilityCorrelationStatistic());
 		this.statsWriter.addSearchStatistic(

@@ -55,21 +55,23 @@ public class RobustBivariateRegression {
 
 	private void forceUpdate() {
 		final double[] xData = this.x.getDataAsPrimitiveDoubleArray();
-		final double[] yData = this.y.getDataAsPrimitiveDoubleArray();
-		final LeastAbsoluteDeviations yOfX = new LeastAbsoluteDeviations();
-		final LeastAbsoluteDeviations xOfY = new LeastAbsoluteDeviations();
-		for (int i = 0; i < xData.length; i++) {
-			final double xVal = xData[i];
-			final double yVal = yData[i];
-			yOfX.add(new Vector(xVal, 1.0), yVal);
-			xOfY.add(new Vector(yVal, 1.0), xVal);
+		if (xData.length > 0) {
+			final double[] yData = this.y.getDataAsPrimitiveDoubleArray();
+			final LeastAbsoluteDeviations yOfX = new LeastAbsoluteDeviations();
+			final LeastAbsoluteDeviations xOfY = new LeastAbsoluteDeviations();
+			for (int i = 0; i < xData.length; i++) {
+				final double xVal = xData[i];
+				final double yVal = yData[i];
+				yOfX.add(new Vector(xVal, 1.0), yVal);
+				xOfY.add(new Vector(yVal, 1.0), xVal);
+			}
+			yOfX.solve();
+			xOfY.solve();
+			this.cachedSlope = yOfX.getCoefficients().get(0);
+			this.cachedOffset = yOfX.getCoefficients().get(1);
+			this.cachedCorrelation = Math.sqrt(this.cachedSlope * xOfY.getCoefficients().get(0));
+			this.cacheValid = true;
 		}
-		yOfX.solve();
-		xOfY.solve();
-		this.cachedSlope = yOfX.getCoefficients().get(0);
-		this.cachedOffset = yOfX.getCoefficients().get(1);
-		this.cachedCorrelation = Math.sqrt(this.cachedSlope * xOfY.getCoefficients().get(0));
-		this.cacheValid = true;
 	}
 
 	private void updateIfNecessary() {

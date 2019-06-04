@@ -19,8 +19,12 @@
  */
 package org.matsim.contrib.greedo;
 
+import floetteroed.utilities.math.Covariance;
+import floetteroed.utilities.math.Matrix;
+import floetteroed.utilities.math.Regression;
+import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
-import utils.RobustBivariateRegression;
+import utils.RecursiveMovingAverage;
 
 /**
  * Estimates a model of the following form:
@@ -51,71 +55,77 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- MEMBERS --------------------
 
-	private final RobustBivariateRegression regression2;
+	private final RecursiveMovingAverage anticipatedSlotUsageChanges2;
 
-	// private final Regression regression;
-	// private final RecursiveMovingAverage deltaX2;
-	// private final RecursiveMovingAverage anticipatedDeltaUMinusRealizedDeltaU;
+	private final RecursiveMovingAverage anticipatedMinusRealizedUtilityChanges;
 
-	private Double lastPredictedTotalUtilityImprovement = null;
+	private Double beta = null;
 
-	private int observationCnt = 0;
+	private Double delta = null;
+
+	private Double correlation = null;
+
+	private Double currentPredictedTotalUtilityImprovement = null;
+
+	private Double upcomingPredictedTotalUtilityImprovement = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt, final int covarianceMemoryLength) {
-		// this.regression = new Regression(inertia, 2);
-		this.regression2 = new RobustBivariateRegression(covarianceMemoryLength);
+	ReplanningEfficiencyEstimator(final int minObservationCnt, final int memoryLength) {
 		this.minObservationCnt = minObservationCnt;
-		// this.deltaX2 = new RecursiveMovingAverage(covarianceMemoryLength);
-		// this.anticipatedDeltaUMinusRealizedDeltaU = new
-		// RecursiveMovingAverage(covarianceMemoryLength);
+		this.anticipatedSlotUsageChanges2 = new RecursiveMovingAverage(memoryLength);
+		this.anticipatedMinusRealizedUtilityChanges = new RecursiveMovingAverage(memoryLength);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
 	void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
 			final Double anticipatedSlotUsageChange2) {
+
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
 				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
 
-			// this.deltaX2.add(anticipatedSlotUsageChange2);
-			// this.anticipatedDeltaUMinusRealizedDeltaU.add(anticipatedUtilityChange -
-			// realizedUtilityChange);
+			this.anticipatedSlotUsageChanges2.add(anticipatedSlotUsageChange2);
+			this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange - realizedUtilityChange);
 
-			// final Vector regressionInput = new Vector(anticipatedSlotUsageChange2, 1.0);
-			// this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
-			// - this.regression.predict(regressionInput);
-			// this.regression.update(regressionInput, anticipatedUtilityChange -
-			// realizedUtilityChange);
+			final double[] deltaX2 = this.anticipatedSlotUsageChanges2.getDataAsPrimitiveDoubleArray();
+			final double[] deltaDeltaU = this.anticipatedMinusRealizedUtilityChanges.getDataAsPrimitiveDoubleArray();
+			final Regression regr = new Regression(1.0, 2);
+			final Covariance cov = new Covariance(2, 2);
+			for (int i = 0; i < deltaX2.length; i++) {
+				regr.update(new Vector(deltaX2[i], 1.0), deltaDeltaU[i]);
+				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
+				cov.add(covInput, covInput);
+			}
 
-			this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
-					- (this.regression2.getSlope() * anticipatedSlotUsageChange2 + this.regression2.getOffset());
-			this.regression2.add(anticipatedSlotUsageChange2, anticipatedUtilityChange - realizedUtilityChange);
+			if (this.hadEnoughData()) {
+				this.beta = (1.0 / regr.getCoefficients().get(0));
+				this.delta = (-regr.getCoefficients().get(1) * this.beta);
 
-			this.observationCnt++;
+				final Matrix _C = cov.getCovariance();
+				this.correlation = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+
+				this.currentPredictedTotalUtilityImprovement = this.upcomingPredictedTotalUtilityImprovement;
+			}
+			this.upcomingPredictedTotalUtilityImprovement = regr.predict(new Vector(anticipatedSlotUsageChange2, 1.0));
 		}
 	}
 
 	boolean hadEnoughData() {
-		return (this.observationCnt >= this.minObservationCnt);
+		return (this.anticipatedSlotUsageChanges2.size() >= this.minObservationCnt);
 	}
 
 	Double getBeta() {
-		// return (1.0 / this.regression.getCoefficients().get(0));
-		return (1.0 / this.regression2.getSlope());
-
+		return this.beta;
 	}
 
 	Double getDelta() {
-		// return (-this.regression.getCoefficients().get(1) /
-		// this.regression.getCoefficients().get(0));
-		return (-this.regression2.getOffset() / this.regression2.getSlope());
+		return this.delta;
 	}
 
 	// --------------- IMPLEMENTATION OF Statistic FACTORIES ---------------
 
-	public Statistic<LogDataWrapper> newDeltaXvsDeltaDeltaUStatistic() {
+	public Statistic<LogDataWrapper> newDeltaX2vsDeltaDeltaUStatistic() {
 		return new Statistic<LogDataWrapper>() {
 
 			@Override
@@ -125,18 +135,7 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				// final Covariance covariance = new Covariance();
-				// final double[] deltaX2Data = deltaX2.getDataAsPrimitiveDoubleArray();
-				// final double[] disappointmentData = anticipatedDeltaUMinusRealizedDeltaU
-				// .getDataAsPrimitiveDoubleArray();
-				//
-				// final double cov12 = covariance.covariance(deltaX2Data, disappointmentData);
-				// final double var1 = covariance.covariance(deltaX2Data, deltaX2Data);
-				// final double var2 = covariance.covariance(disappointmentData,
-				// disappointmentData);
-				//
-				// return Statistic.toString(cov12 / Math.sqrt(var1 * var2));
-				return Statistic.toString(regression2.getCorrelation());
+				return Statistic.toString(correlation);
 			}
 		};
 	}
@@ -151,8 +150,8 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				if (lastPredictedTotalUtilityImprovement != null) {
-					return Statistic.toString(lastPredictedTotalUtilityImprovement / arg0.getPopulationSize());
+				if (currentPredictedTotalUtilityImprovement != null) {
+					return Statistic.toString(currentPredictedTotalUtilityImprovement / arg0.getPopulationSize());
 				} else {
 					return Statistic.toString(null);
 				}

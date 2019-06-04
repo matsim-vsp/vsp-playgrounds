@@ -101,6 +101,10 @@ public class LeastAbsoluteDeviations {
 	}
 
 	public void solve() {
+		
+		if (this.xList.isEmpty()) {
+			return;
+		}
 
 		/*
 		 * Decision variables in the linear program are
