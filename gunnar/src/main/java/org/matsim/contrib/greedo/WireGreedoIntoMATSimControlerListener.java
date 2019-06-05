@@ -136,8 +136,10 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
 		this.statsWriter.addSearchStatistic(new LambdaBar());
 		this.statsWriter.addSearchStatistic(new Beta());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newBetaShortTerm());
 		this.statsWriter.addSearchStatistic(new UnconstrainedBeta());
 		this.statsWriter.addSearchStatistic(new Delta());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaShortTerm());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
 		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaX2vsDeltaDeltaUStatistic());

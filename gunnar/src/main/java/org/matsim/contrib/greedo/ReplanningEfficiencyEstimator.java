@@ -59,11 +59,17 @@ class ReplanningEfficiencyEstimator {
 
 	private final RecursiveMovingAverage anticipatedMinusRealizedUtilityChanges;
 
+	private Double betaShortTerm = null;
+
+	private Double deltaShortTerm = null;
+
 	private Double beta = null;
 
 	private Double delta = null;
 
-	private Double correlation = null;
+	private final Regression betaDeltaGeneratingRegression;
+
+	private Double correlationShortTerm = null;
 
 	private Double currentPredictedTotalUtilityImprovement = null;
 
@@ -72,6 +78,7 @@ class ReplanningEfficiencyEstimator {
 	// -------------------- CONSTRUCTION --------------------
 
 	ReplanningEfficiencyEstimator(final int minObservationCnt, final int memoryLength) {
+		this.betaDeltaGeneratingRegression = new Regression(1.0, 2);
 		this.minObservationCnt = minObservationCnt;
 		this.anticipatedSlotUsageChanges2 = new RecursiveMovingAverage(memoryLength);
 		this.anticipatedMinusRealizedUtilityChanges = new RecursiveMovingAverage(memoryLength);
@@ -85,9 +92,10 @@ class ReplanningEfficiencyEstimator {
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
 				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
 
+			// Short-term statistics.
+
 			this.anticipatedSlotUsageChanges2.add(anticipatedSlotUsageChange2);
 			this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange - realizedUtilityChange);
-
 			final double[] deltaX2 = this.anticipatedSlotUsageChanges2.getDataAsPrimitiveDoubleArray();
 			final double[] deltaDeltaU = this.anticipatedMinusRealizedUtilityChanges.getDataAsPrimitiveDoubleArray();
 			final Regression regr = new Regression(1.0, 2);
@@ -97,22 +105,37 @@ class ReplanningEfficiencyEstimator {
 				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
 				cov.add(covInput, covInput);
 			}
-
 			if (this.hadEnoughData()) {
-				this.beta = (1.0 / regr.getCoefficients().get(0));
-				this.delta = (-regr.getCoefficients().get(1) * this.beta);
-
+				this.betaShortTerm = (1.0 / regr.getCoefficients().get(0));
+				this.deltaShortTerm = (-regr.getCoefficients().get(1) * this.betaShortTerm);
 				final Matrix _C = cov.getCovariance();
-				this.correlation = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+				this.correlationShortTerm = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+			}
 
+			// Long-term statistics.
+
+			this.upcomingPredictedTotalUtilityImprovement = this.betaDeltaGeneratingRegression
+					.predict(new Vector(anticipatedSlotUsageChange2, 1.0));
+			this.betaDeltaGeneratingRegression.update(new Vector(anticipatedSlotUsageChange2, 1.0),
+					anticipatedUtilityChange - realizedUtilityChange);
+			if (this.hadEnoughData()) {
+				this.beta = (1.0 / this.betaDeltaGeneratingRegression.getCoefficients().get(0));
+				this.delta = (-this.betaDeltaGeneratingRegression.getCoefficients().get(1) * this.beta);
 				this.currentPredictedTotalUtilityImprovement = this.upcomingPredictedTotalUtilityImprovement;
 			}
-			this.upcomingPredictedTotalUtilityImprovement = regr.predict(new Vector(anticipatedSlotUsageChange2, 1.0));
 		}
 	}
 
-	boolean hadEnoughData() {
+	private boolean hadEnoughData() {
 		return (this.anticipatedSlotUsageChanges2.size() >= this.minObservationCnt);
+	}
+
+	Double getBetaShortTerm() {
+		return this.betaShortTerm;
+	}
+
+	Double getDeltaShortTerm() {
+		return this.deltaShortTerm;
 	}
 
 	Double getBeta() {
@@ -135,7 +158,7 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				return Statistic.toString(correlation);
+				return Statistic.toString(correlationShortTerm);
 			}
 		};
 	}
@@ -155,6 +178,34 @@ class ReplanningEfficiencyEstimator {
 				} else {
 					return Statistic.toString(null);
 				}
+			}
+		};
+	}
+
+	public Statistic<LogDataWrapper> newBetaShortTerm() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "BetaShortTerm";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(betaShortTerm);
+			}
+		};
+	}
+
+	public Statistic<LogDataWrapper> newDeltaShortTerm() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "DeltaShortTerm";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(deltaShortTerm);
 			}
 		};
 	}

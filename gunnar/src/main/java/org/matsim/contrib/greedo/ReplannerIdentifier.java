@@ -112,11 +112,11 @@ public class ReplannerIdentifier {
 		this.unconstrainedBeta = replanningEfficiencyEstimator.getBeta();
 		this.delta = replanningEfficiencyEstimator.getDelta();
 
-		final boolean betaValid = ((this.unconstrainedBeta <= 0) || !replanningEfficiencyEstimator.hadEnoughData());
 		if (this.greedoConfig.getReplannerIdentifierRecipe() instanceof AccelerationRecipe) {
-			((AccelerationRecipe) this.greedoConfig.getReplannerIdentifierRecipe()).setUseBackupRecipe(betaValid);
+			((AccelerationRecipe) this.greedoConfig.getReplannerIdentifierRecipe())
+					.setUseBackupRecipe(this.unconstrainedBeta == null);
 		}
-		if (betaValid) {
+		if (this.unconstrainedBeta != null) {
 			this.beta = this.unconstrainedBeta;
 			this.lambdaBar = 0.5 * this.unconstrainedBeta * this.totalUtilityChange
 					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
