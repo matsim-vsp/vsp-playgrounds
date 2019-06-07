@@ -1,15 +1,18 @@
 package playground.michalm.util.array2d;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import org.matsim.core.utils.io.IOUtils;
 
 /**
  * Reads 2D arrays (of different types) from files. To handle different types of data use <code>TypeStrategy</code>.
  * There are some predefined strategies for following types: double, int, String.
- * 
+ *
  * @author michalm
  */
 public class Array2DReader {
@@ -54,7 +57,7 @@ public class Array2DReader {
 					continue;
 				}
 
-				Object row = strategy.createRow(cols);
+				Object row = Array.newInstance(strategy.getComponentType(), cols);
 
 				for (int i = 0; i < cols; i++) {
 					if (!st.hasMoreTokens()) {
@@ -83,24 +86,27 @@ public class Array2DReader {
 	}
 
 	public static interface Strategy {
-		Object createRow(int cols);
+		Class<?> getComponentType();
 
 		void addToRow(Object row, int col, String element);
 	}
 
 	public static class DoubleStrategy implements Strategy {
-		public Object createRow(int cols) {
-			return new double[cols];
+		@Override
+		public Class<?> getComponentType() {
+			return double.class;
 		}
 
+		@Override
 		public void addToRow(Object row, int idx, String element) {
 			((double[])row)[idx] = Double.parseDouble(element);
 		}
 	}
 
 	public static class IntStrategy implements Strategy {
-		public Object createRow(int cols) {
-			return new int[cols];
+		@Override
+		public Class<?> getComponentType() {
+			return int.class;
 		}
 
 		public void addToRow(Object row, int idx, String element) {
@@ -109,8 +115,9 @@ public class Array2DReader {
 	}
 
 	public static class StringStrategy implements Strategy {
-		public Object createRow(int cols) {
-			return new String[cols];
+		@Override
+		public Class<?> getComponentType() {
+			return String.class;
 		}
 
 		public void addToRow(Object row, int idx, String element) {
