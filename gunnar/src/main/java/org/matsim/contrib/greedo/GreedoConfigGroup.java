@@ -260,7 +260,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- maxRelativeMemoryLength --------------------
 
-	private double maxRelativeMemoryLength = 0.5;
+	private double maxRelativeMemoryLength = 1.0;
 
 	@StringGetter("maxRelativeMemoryLength")
 	public double getMaxRelativeMemoryLength() {
