@@ -124,7 +124,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
 		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(this.greedoConfig.getWarmUpIterations(),
-				this.greedoConfig.getCorrelationLoggingMemory());
+				this.greedoConfig.getCorrelationLoggingMemory(), this.greedoConfig.getConstrainDeltaToZero(),
+				this.greedoConfig.getOnlyShortTermEfficiencyEstimation());
 
 		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getCorrelationLoggingMemory(),
 				new File("./output/"), "asymptoticAges.", ".txt");

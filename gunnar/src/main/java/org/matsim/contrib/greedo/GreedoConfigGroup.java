@@ -169,6 +169,34 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// public ReplannerIdentifierRecipe getSecondaryReplannerIdentifierRecipe() {
 	// return this.secondaryReplannerIdentifierRecipe;
 	// }
+	
+	// -------------------- onlyShortTermEfficiencyEstimation --------------------
+
+	private boolean onlyShortTermEfficiencyEstimation = false;
+
+	@StringGetter("onlyShortTermEfficiencyEstimation")
+	public boolean getOnlyShortTermEfficiencyEstimation() {
+		return this.onlyShortTermEfficiencyEstimation;
+	}
+
+	@StringSetter("onlyShortTermEfficiencyEstimation")
+	public void setOnlyShortTermEfficiencyEstimation(final boolean onlyShortTermEfficiencyEstimation) {
+		this.onlyShortTermEfficiencyEstimation = onlyShortTermEfficiencyEstimation;
+	}
+
+	// -------------------- constrainDeltaToZero --------------------
+
+	private boolean constrainDeltaToZero = false;
+
+	@StringGetter("constrainDeltaToZero")
+	public boolean getConstrainDeltaToZero() {
+		return this.constrainDeltaToZero;
+	}
+
+	@StringSetter("constrainDeltaToZero")
+	public void setConstrainDeltaToZero(final boolean constrainDeltaToZero) {
+		this.constrainDeltaToZero = constrainDeltaToZero;
+	}
 
 	// -------------------- replannerIdentifier --------------------
 

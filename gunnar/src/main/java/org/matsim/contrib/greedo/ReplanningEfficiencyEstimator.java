@@ -31,11 +31,13 @@ import utils.RecursiveMovingAverage;
  * 
  * (1 / beta) * deltaX2 + (-delta / beta) = deltaU - deltaU*
  * 
+ * 
  * The regression coefficients are given by:
  * 
  * coeff0 = 1 / beta
  * 
  * coeff1 = -delta / beta
+ * 
  * 
  * One hence obtains:
  * 
@@ -58,6 +60,8 @@ class ReplanningEfficiencyEstimator {
 	private final RecursiveMovingAverage anticipatedSlotUsageChanges2;
 
 	private final RecursiveMovingAverage anticipatedMinusRealizedUtilityChanges;
+	
+	private final boolean onlyShortTerm;
 
 	private Double betaShortTerm = null;
 
@@ -77,11 +81,28 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplanningEfficiencyEstimator(final int minObservationCnt, final int memoryLength) {
-		this.betaDeltaGeneratingRegression = new Regression(1.0, 2);
+	ReplanningEfficiencyEstimator(final int minObservationCnt, final int memoryLength,
+			final boolean constrainDeltaToZero, final boolean onlyShortTerm) {
+		this.betaDeltaGeneratingRegression = new Regression(1.0, constrainDeltaToZero ? 1 : 2);
 		this.minObservationCnt = minObservationCnt;
 		this.anticipatedSlotUsageChanges2 = new RecursiveMovingAverage(memoryLength);
 		this.anticipatedMinusRealizedUtilityChanges = new RecursiveMovingAverage(memoryLength);
+		this.onlyShortTerm = onlyShortTerm;
+	}
+
+	// -------------------- INTERNALS --------------------
+
+	private boolean constrainDeltaToZero() {
+		return (this.betaDeltaGeneratingRegression.getDimension() == 1);
+	}
+
+	private Vector regrInput(final double deltaX2) {
+		if (this.constrainDeltaToZero()) {
+			return new Vector(deltaX2);
+		} else {
+			return new Vector(deltaX2, 1.0);
+		}
+
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -98,16 +119,17 @@ class ReplanningEfficiencyEstimator {
 			this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange - realizedUtilityChange);
 			final double[] deltaX2 = this.anticipatedSlotUsageChanges2.getDataAsPrimitiveDoubleArray();
 			final double[] deltaDeltaU = this.anticipatedMinusRealizedUtilityChanges.getDataAsPrimitiveDoubleArray();
-			final Regression regr = new Regression(1.0, 2);
+			final Regression regr = new Regression(1.0, this.constrainDeltaToZero() ? 1 : 2);
 			final Covariance cov = new Covariance(2, 2);
 			for (int i = 0; i < deltaX2.length; i++) {
-				regr.update(new Vector(deltaX2[i], 1.0), deltaDeltaU[i]);
+				regr.update(this.regrInput(deltaX2[i]), deltaDeltaU[i]);
 				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
 				cov.add(covInput, covInput);
 			}
 			if (this.hadEnoughData()) {
 				this.betaShortTerm = (1.0 / regr.getCoefficients().get(0));
-				this.deltaShortTerm = (-regr.getCoefficients().get(1) * this.betaShortTerm);
+				this.deltaShortTerm = (this.constrainDeltaToZero() ? 0.0
+						: (-regr.getCoefficients().get(1) * this.betaShortTerm));
 				final Matrix _C = cov.getCovariance();
 				this.correlationShortTerm = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 			}
@@ -115,12 +137,13 @@ class ReplanningEfficiencyEstimator {
 			// Long-term statistics.
 
 			this.upcomingPredictedTotalUtilityImprovement = this.betaDeltaGeneratingRegression
-					.predict(new Vector(anticipatedSlotUsageChange2, 1.0));
-			this.betaDeltaGeneratingRegression.update(new Vector(anticipatedSlotUsageChange2, 1.0),
+					.predict(this.regrInput(anticipatedSlotUsageChange2));
+			this.betaDeltaGeneratingRegression.update(this.regrInput(anticipatedSlotUsageChange2),
 					anticipatedUtilityChange - realizedUtilityChange);
 			if (this.hadEnoughData()) {
 				this.beta = (1.0 / this.betaDeltaGeneratingRegression.getCoefficients().get(0));
-				this.delta = (-this.betaDeltaGeneratingRegression.getCoefficients().get(1) * this.beta);
+				this.delta = (this.constrainDeltaToZero() ? 0.0
+						: (-this.betaDeltaGeneratingRegression.getCoefficients().get(1) * this.beta));
 				this.currentPredictedTotalUtilityImprovement = this.upcomingPredictedTotalUtilityImprovement;
 			}
 		}
@@ -139,11 +162,11 @@ class ReplanningEfficiencyEstimator {
 	}
 
 	Double getBeta() {
-		return this.beta;
+		return (this.onlyShortTerm ? this.betaShortTerm : this.beta);
 	}
 
 	Double getDelta() {
-		return this.delta;
+		return (this.onlyShortTerm ? this.deltaShortTerm : this.delta);
 	}
 
 	// --------------- IMPLEMENTATION OF Statistic FACTORIES ---------------
