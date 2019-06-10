@@ -51,7 +51,7 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	private double score = 0.0;
 
-	private boolean stuck = false;
+	protected boolean stuck = false;
 
 	private double money_SEK = 0.0;
 

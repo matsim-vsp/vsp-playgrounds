@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.matsim.contrib.greedo_DEPRECATED.GreedoProgressListener;
 import org.matsim.contrib.opdyts.OpdytsProgressListener;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
@@ -38,7 +37,7 @@ import org.matsim.core.controler.events.StartupEvent;
  * @author Gunnar Flötteröd
  *
  */
-public class OpdytsGreedoProgressListener implements GreedoProgressListener, OpdytsProgressListener {
+public class OpdytsGreedoProgressListener implements OpdytsProgressListener {
 
 	private final String fileName;
 
@@ -76,37 +75,37 @@ public class OpdytsGreedoProgressListener implements GreedoProgressListener, Opd
 
 	// GREEDO
 
-	@Override
+	// @Override
 	public void callToNotifyStartup_greedo(StartupEvent event) {
 		msg("GREEDO", null, "call to notifyStartup", 1);
 	}
 
-	@Override
+	// @Override
 	public void callToReset_greedo(int iteration) {
 		msg("GREEDO", iteration, "reset", 1);
 	}
 
-	@Override
+	// @Override
 	public void callToNotifyIterationEnds_greedo(IterationEndsEvent event) {
 		msg("GREEDO", event.getIteration(), "call to notifyIterationEnds", 1);
 	}
 
-	@Override
+	// @Override
 	public void setWeightOfHypotheticalReplanning(double weight) {
 		msg("GREEDO", null, "setWeightOfHypotheticalReplanning(" + weight + ")", 2);
 	}
 
-	@Override
+	// @Override
 	public void extractedLastPhysicalPopulationState(int iteration) {
 		msg("GREEDO", iteration, "extracted last physical population state", 2);
 	}
 
-	@Override
+	// @Override
 	public void observedLastPSimIterationWithinABlock(int iteration) {
 		msg("GREEDO", iteration, "observed last psim iteration within a block", 2);
 	}
 
-	@Override
+	// @Override
 	public void madeReplanningDecisions(int iteration) {
 		msg("GREEDO", iteration, "made replanning decisions", 2);
 	}

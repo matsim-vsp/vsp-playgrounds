@@ -189,8 +189,8 @@ public class WUMProductionRunner {
 	static void runProductionScenarioWithSampersDynamics() {
 
 		final String configFileName = "./config.xml";
-		// final String configFileName =
-		// "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+//		 final String configFileName =
+//		 "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
