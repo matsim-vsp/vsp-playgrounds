@@ -37,7 +37,7 @@ import floetteroed.utilities.math.MathHelpers;
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
-import utils.RecursiveMovingAverage;
+import utils.MovingWindowAverage;
 
 /**
  * 
@@ -63,14 +63,14 @@ public class AsymptoticAgeLogger {
 
 	private class Entry {
 
-		private RecursiveMovingAverage expectedUtilityChangeAvg;
-		private RecursiveMovingAverage similarityAvg;
-		private RecursiveMovingAverage ageAvg;
+		private MovingWindowAverage expectedUtilityChangeAvg;
+		private MovingWindowAverage similarityAvg;
+		private MovingWindowAverage ageAvg;
 
 		Entry() {
-			this.expectedUtilityChangeAvg = new RecursiveMovingAverage(memoryLength);
-			this.similarityAvg = new RecursiveMovingAverage(memoryLength);
-			this.ageAvg = new RecursiveMovingAverage(memoryLength);
+			this.expectedUtilityChangeAvg = new MovingWindowAverage(1, memoryLength);
+			this.similarityAvg = new MovingWindowAverage(1, memoryLength);
+			this.ageAvg = new MovingWindowAverage(1, memoryLength);
 		}
 
 		void update(final double expectedUtilityChange, final double similarity, final int age) {

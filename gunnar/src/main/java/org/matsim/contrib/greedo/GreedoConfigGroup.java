@@ -169,19 +169,19 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// public ReplannerIdentifierRecipe getSecondaryReplannerIdentifierRecipe() {
 	// return this.secondaryReplannerIdentifierRecipe;
 	// }
-	
-	// -------------------- onlyShortTermEfficiencyEstimation --------------------
 
-	private boolean onlyShortTermEfficiencyEstimation = false;
+	// -------------------- acceptNegativeDisappointment --------------------
 
-	@StringGetter("onlyShortTermEfficiencyEstimation")
-	public boolean getOnlyShortTermEfficiencyEstimation() {
-		return this.onlyShortTermEfficiencyEstimation;
+	private boolean acceptNegativeDisappointment = false;
+
+	@StringGetter("acceptNegativeDisappointment")
+	public boolean getAcceptNegativeDisappointment() {
+		return this.acceptNegativeDisappointment;
 	}
 
-	@StringSetter("onlyShortTermEfficiencyEstimation")
-	public void setOnlyShortTermEfficiencyEstimation(final boolean onlyShortTermEfficiencyEstimation) {
-		this.onlyShortTermEfficiencyEstimation = onlyShortTermEfficiencyEstimation;
+	@StringSetter("acceptNegativeDisappointment")
+	public void setAcceptNegativeDisappointment(final boolean acceptNegativeDisappointment) {
+		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
 	}
 
 	// -------------------- constrainDeltaToZero --------------------
@@ -230,51 +230,46 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.replannerIdentifierType = replannerIdentifierType;
 	}
 
-	// @StringGetter("secondaryReplannerIdentifier")
-	// public ReplannerIdentifierType getSecondaryReplannerIdentifierType() {
-	// return this.secondaryReplannerIdentifierType;
-	// }
-	//
-	// @StringSetter("secondaryReplannerIdentifier")
-	// public void setSecondaryReplannerIdentifierType(final ReplannerIdentifierType
-	// secondaryReplannerIdentifierType) {
-	// this.secondaryReplannerIdentifierType = secondaryReplannerIdentifierType;
-	// }
+	// -------------------- minAbsoluteMemoryLength --------------------
 
-	// -------------------- mode --------------------
-	//
-	// public static enum ModeType {
-	// off, accelerate, MSA, adaptiveMSA
-	// };
-	//
-	// private ModeType modeTypeField = ModeType.accelerate;
-	//
-	// @StringGetter("mode")
-	// public ModeType getModeTypeField() {
-	// return this.modeTypeField;
-	// }
-	//
-	// @StringSetter("mode")
-	// public void setModeTypeField(final ModeType modeTypeField) {
-	// this.modeTypeField = modeTypeField;
-	// }
-	//
-	// public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
-	// return this.primaryReplannerIdentifierRecipe;
-	// }
+	private int minAbsoluteMemoryLength = 4;
 
-	// -------------------- correlationLoggingMemory --------------------
-
-	private int correlationLoggingMemory = 100;
-
-	@StringGetter("correlationLoggingMemory")
-	public int getCorrelationLoggingMemory() {
-		return this.correlationLoggingMemory;
+	@StringGetter("minAbsoluteMemoryLength")
+	public int getMinAbsoluteMemoryLength() {
+		return this.minAbsoluteMemoryLength;
 	}
 
-	@StringSetter("correlationLoggingMemory")
-	public void setCorrelationLoggingMemory(final int correlationLoggingMemory) {
-		this.correlationLoggingMemory = correlationLoggingMemory;
+	@StringSetter("minAbsoluteMemoryLength")
+	public void setMinAbsoluteMemoryLength(final int minAbsoluteMemoryLength) {
+		this.minAbsoluteMemoryLength = minAbsoluteMemoryLength;
+	}
+
+	// -------------------- maxAbsoluteMemoryLength --------------------
+
+	private int maxAbsoluteMemoryLength = Integer.MAX_VALUE;
+
+	@StringGetter("maxAbsoluteMemoryLength")
+	public int getMaxAbsoluteMemoryLength() {
+		return this.maxAbsoluteMemoryLength;
+	}
+
+	@StringSetter("maxAbsoluteMemoryLength")
+	public void setMaxAbsoluteMemoryLength(final int maxAbsoluteMemoryLength) {
+		this.maxAbsoluteMemoryLength = maxAbsoluteMemoryLength;
+	}
+
+	// -------------------- maxRelativeMemoryLength --------------------
+
+	private double maxRelativeMemoryLength = 0.5;
+
+	@StringGetter("maxRelativeMemoryLength")
+	public double getMaxRelativeMemoryLength() {
+		return this.maxRelativeMemoryLength;
+	}
+
+	@StringSetter("maxRelativeMemoryLength")
+	public void setMaxRelativeMemoryLength(final double maxRelativeMemoryLength) {
+		this.maxRelativeMemoryLength = maxRelativeMemoryLength;
 	}
 
 	// -------------------- stepSize --------------------
@@ -296,74 +291,77 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// }
 
 	// --------------- replanningEfficiencyEstimationInertia ---------------
-
-	private double replanningEfficiencyEstimationInertia = 1.0;
-
-	@StringGetter("replanningEfficiencyEstimationInertia")
-	public double getReplanningEfficiencyEstimationInertia() {
-		return this.replanningEfficiencyEstimationInertia;
-	}
-
-	@StringSetter("replanningEfficiencyEstimationInertia")
-	public void setReplanningEfficiencyEstimationInertia(double replanningEfficiencyEstimationInertia) {
-		this.replanningEfficiencyEstimationInertia = replanningEfficiencyEstimationInertia;
-	}
+	//
+	// private double replanningEfficiencyEstimationInertia = 1.0;
+	//
+	// @StringGetter("replanningEfficiencyEstimationInertia")
+	// public double getReplanningEfficiencyEstimationInertia() {
+	// return this.replanningEfficiencyEstimationInertia;
+	// }
+	//
+	// @StringSetter("replanningEfficiencyEstimationInertia")
+	// public void setReplanningEfficiencyEstimationInertia(double
+	// replanningEfficiencyEstimationInertia) {
+	// this.replanningEfficiencyEstimationInertia =
+	// replanningEfficiencyEstimationInertia;
+	// }
 
 	// --------------- warmupIterations ---------------
-
-	private int warmUpIterations = 3;
-
-	@StringGetter("warmUpIterations")
-	public int getWarmUpIterations() {
-		return this.warmUpIterations;
-	}
-
-	@StringSetter("warmUpIterations")
-	public void setWarmUpIterations(int warmUpIterations) {
-		this.warmUpIterations = warmUpIterations;
-	}
+	//
+	// private int warmUpIterations = 3;
+	//
+	// @StringGetter("warmUpIterations")
+	// public int getWarmUpIterations() {
+	// return this.warmUpIterations;
+	// }
+	//
+	// @StringSetter("warmUpIterations")
+	// public void setWarmUpIterations(int warmUpIterations) {
+	// this.warmUpIterations = warmUpIterations;
+	// }
 
 	// -------------------- eta --------------------
-
-	private double betaScale = 1.0;
-
-	@StringGetter("betaScale")
-	public double getBetaScale() {
-		return this.betaScale;
-	}
-
-	@StringSetter("betaScale")
-	public void setBetaScale(double betaScale) {
-		this.betaScale = betaScale;
-	}
+	//
+	// private double betaScale = 1.0;
+	//
+	// @StringGetter("betaScale")
+	// public double getBetaScale() {
+	// return this.betaScale;
+	// }
+	//
+	// @StringSetter("betaScale")
+	// public void setBetaScale(double betaScale) {
+	// this.betaScale = betaScale;
+	// }
 
 	// -------------------- minReplanningRate --------------------
-
-	private double minReplanningRate = 0.01;
-
-	@StringGetter("minReplanningRate")
-	public double getMinReplanningRate() {
-		return this.minReplanningRate;
-	}
-
-	@StringSetter("minReplanningRate")
-	public void setMinReplanningRate(double minReplanningRate) {
-		this.minReplanningRate = minReplanningRate;
-	}
+	//
+	// private double minReplanningRate = 0.01;
+	//
+	// @StringGetter("minReplanningRate")
+	// public double getMinReplanningRate() {
+	// return this.minReplanningRate;
+	// }
+	//
+	// @StringSetter("minReplanningRate")
+	// public void setMinReplanningRate(double minReplanningRate) {
+	// this.minReplanningRate = minReplanningRate;
+	// }
 
 	// -------------------- loadingEquivalentReplanningRate --------------------
-
-	private double loadingEquivalentReplanningRate = 0.01;
-
-	@StringGetter("loadingEquivalentReplanningRate")
-	public double getLoadingEquivalentReplanningRate() {
-		return this.loadingEquivalentReplanningRate;
-	}
-
-	@StringSetter("loadingEquivalentReplanningRate")
-	public void setLoadingEquivalentReplanningRate(double loadingEquivalentReplanningRate) {
-		this.loadingEquivalentReplanningRate = loadingEquivalentReplanningRate;
-	}
+	//
+	// private double loadingEquivalentReplanningRate = 0.01;
+	//
+	// @StringGetter("loadingEquivalentReplanningRate")
+	// public double getLoadingEquivalentReplanningRate() {
+	// return this.loadingEquivalentReplanningRate;
+	// }
+	//
+	// @StringSetter("loadingEquivalentReplanningRate")
+	// public void setLoadingEquivalentReplanningRate(double
+	// loadingEquivalentReplanningRate) {
+	// this.loadingEquivalentReplanningRate = loadingEquivalentReplanningRate;
+	// }
 
 	// -------------------- meanReplanningRate --------------------
 
@@ -450,18 +448,19 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	// -------------------- binomialNumberOfReplanners --------------------
-
-	private boolean binomialNumberOfReplanners = false;
-
-	@StringGetter("binomialNumberOfReplanners")
-	public boolean getBinomialNumberOfReplanners() {
-		return this.binomialNumberOfReplanners;
-	}
-
-	@StringSetter("binomialNumberOfReplanners")
-	public void setBinomialNumberOfReplanners(final boolean binomialNumberOfReplanners) {
-		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
-	}
+	//
+	// private boolean binomialNumberOfReplanners = false;
+	//
+	// @StringGetter("binomialNumberOfReplanners")
+	// public boolean getBinomialNumberOfReplanners() {
+	// return this.binomialNumberOfReplanners;
+	// }
+	//
+	// @StringSetter("binomialNumberOfReplanners")
+	// public void setBinomialNumberOfReplanners(final boolean
+	// binomialNumberOfReplanners) {
+	// this.binomialNumberOfReplanners = binomialNumberOfReplanners;
+	// }
 
 	// -------------------- detailedLogging --------------------
 

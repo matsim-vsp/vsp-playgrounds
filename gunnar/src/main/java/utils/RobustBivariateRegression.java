@@ -32,9 +32,9 @@ public class RobustBivariateRegression {
 
 	// -------------------- MEMBERS --------------------
 
-	private final RecursiveMovingAverage x;
+	private final MovingWindowAverage x;
 
-	private final RecursiveMovingAverage y;
+	private final MovingWindowAverage y;
 
 	private boolean cacheValid = false;
 
@@ -47,16 +47,16 @@ public class RobustBivariateRegression {
 	// -------------------- CONSTRUCTION --------------------
 
 	public RobustBivariateRegression(final int memory) {
-		this.x = new RecursiveMovingAverage(memory);
-		this.y = new RecursiveMovingAverage(memory);
+		this.x = new MovingWindowAverage(1, memory);
+		this.y = new MovingWindowAverage(1, memory);
 	}
 
 	// -------------------- INTERNALS --------------------
 
 	private void forceUpdate() {
-		final double[] xData = this.x.getDataAsPrimitiveDoubleArray();
+		final Double[] xData = this.x.getDataAsDoubleArray();
 		if (xData.length > 0) {
-			final double[] yData = this.y.getDataAsPrimitiveDoubleArray();
+			final Double[] yData = this.y.getDataAsDoubleArray();
 			final LeastAbsoluteDeviations yOfX = new LeastAbsoluteDeviations();
 			final LeastAbsoluteDeviations xOfY = new LeastAbsoluteDeviations();
 			for (int i = 0; i < xData.length; i++) {

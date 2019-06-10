@@ -116,7 +116,7 @@ public class ReplannerIdentifier {
 			((AccelerationRecipe) this.greedoConfig.getReplannerIdentifierRecipe())
 					.setUseBackupRecipe(this.unconstrainedBeta == null);
 		}
-		if (this.unconstrainedBeta != null) {
+		if ((this.unconstrainedBeta != null) && (this.unconstrainedBeta > 0.0)) {
 			this.beta = this.unconstrainedBeta;
 			this.lambdaBar = 0.5 * this.unconstrainedBeta * this.totalUtilityChange
 					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);

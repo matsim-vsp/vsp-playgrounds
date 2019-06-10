@@ -47,8 +47,6 @@ import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.AvgReplannerSize;
-import org.matsim.contrib.greedo.logging.Beta;
-import org.matsim.contrib.greedo.logging.Delta;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
@@ -123,11 +121,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.ages.getWeights(), this.greedoConfig.getConcurrentLinkWeights(),
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 
-		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(this.greedoConfig.getWarmUpIterations(),
-				this.greedoConfig.getCorrelationLoggingMemory(), this.greedoConfig.getConstrainDeltaToZero(),
-				this.greedoConfig.getOnlyShortTermEfficiencyEstimation());
+		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(
+				this.greedoConfig.getMinAbsoluteMemoryLength(), this.greedoConfig.getMaxRelativeMemoryLength(),
+				this.greedoConfig.getConstrainDeltaToZero(), this.greedoConfig.getAcceptNegativeDisappointment());
 
-		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getCorrelationLoggingMemory(),
+		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getMaxAbsoluteMemoryLength(),
 				new File("./output/"), "asymptoticAges.", ".txt");
 
 		this.statsWriter = new StatisticsWriter<>(
@@ -136,11 +134,9 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new ReplanningRecipe());
 		this.statsWriter.addSearchStatistic(new LambdaRealized());
 		this.statsWriter.addSearchStatistic(new LambdaBar());
-		this.statsWriter.addSearchStatistic(new Beta());
-		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newBetaShortTerm());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newBetaStatistic());
 		this.statsWriter.addSearchStatistic(new UnconstrainedBeta());
-		this.statsWriter.addSearchStatistic(new Delta());
-		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaShortTerm());
+		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaStatistic());
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
 		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newDeltaX2vsDeltaDeltaUStatistic());
