@@ -13,10 +13,10 @@ import org.matsim.facilities.*;
 
 public class GridNetParkingFacilityCreator {
 
-	private final static String pathToZoneOne = "C:/Users/Work/Bachelor Arbeit/input/GridNet/Zonen/Links.txt";
-	private final static String pathToZoneTwo = "C:/Users/Work/Bachelor Arbeit/input/GridNet/Zonen/Rechts.txt";
-	private static final String output = "C:/Users/Work/Bachelor Arbeit/input/GridNet/Facilites_links_rechts_V2.xml";
-	private static final String pathToNetFile = "C:/Users/Work/Bachelor Arbeit/input/GridNet/grid_network_length200.xml";
+	private final static String pathToZoneOne = "C:/Users/Work/VSP/WiMi/TeachParking/input/parkingSlots_oben_1perLink.csv";
+	private final static String pathToZoneTwo = "";
+	private static final String output = "C:/Users/Work/VSP/WiMi/TeachParking/input/parkingSlots_oben_1perLink.xml";
+	private static final String pathToNetFile = "C:/Users/Work/VSP/WiMi/TeachParking/input/example/grid_network.xml";
 	
 	public static void main(String[] args){
 		List<Id<Link>> zoneOneLinks = getLinkIDsOfZone(pathToZoneOne);
@@ -52,17 +52,22 @@ public class GridNetParkingFacilityCreator {
 
 	private static List<Id<Link>> getLinkIDsOfZone (String pathToZoneFile){
 		
-		List<Id<Link>> links = new ArrayList<Id<Link>>();
+		List<Id<Link>> links = new ArrayList<>();
 		
 		TabularFileParserConfig config = new TabularFileParserConfig();
-        config.setDelimiterTags(new String[] {"\t"});
+        config.setDelimiterTags(new String[] {"\t",";"});
         config.setFileName(pathToZoneFile);
         config.setCommentTags(new String[] { "#" });
         new TabularFileParser().parse(config, new TabularFileHandler() {
-			@Override
+			boolean header = true;
+
+        	@Override
 			public void startRow(String[] row) {
-				Id<Link> linkId = Id.createLinkId(row[0]);
-				links.add(linkId);
+				if(!header){
+					Id<Link> linkId = Id.createLinkId(row[0]);
+					links.add(linkId);
+				}
+				header = false;
 			}
 		
         });
