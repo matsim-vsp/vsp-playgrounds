@@ -19,12 +19,27 @@
 
 package playground.mdziakowski.activityReLocation;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.accessibility.osm.CombinedOsmReader;
+import org.matsim.contrib.accessibility.utils.AccessibilityFacilityUtils;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.population.io.PopulationReader;
@@ -37,67 +52,63 @@ import org.matsim.facilities.ActivityOption;
 import org.matsim.facilities.MatsimFacilitiesReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+public class RunReLocation {
 
-/**
- * overrides the coordinates from activities from an old plan file with new coordinates from a facility file
- * needs a shape file to make sure that the coordinates will replaced with a nearby facility 
- * 
- * @author mdziakowski
- */
+	private static String root;
+	private static String osmFile;
+	private static String planFile;
+	private static String shapeFile;
+	private static String output;
+	private static final String outPutCRS = "EPSG:31468";
+	private static final Logger log = Logger.getLogger(RunReLocation.class);
+	private static final Random random = new Random(55332654);
 
-public class RunReLocationPlansSauber {
+	public static void main(String[] args) {
 
-    private static final Logger log = Logger.getLogger(RunReLocationPlans.class);
-    private static Random random = new Random(55332654);
-    
-    public static void main(String[] args) {
-    	
-    	String planFile;
-    	String shapeFile;
-    	String facilitiesFile;
-    	String outputPlans;
-    	String logFile;	
-    	
-    	if ( args.length==0 || args[0].equals("")) {
+		if (args.length == 0 || args[0].equals("")) {
+			// path for the input
+			root = "./";
 
-	        planFile = "http://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5.3-10pct.plans.xml.gz";	
-	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_2000_intersect_Id.shp";
-	        facilitiesFile = "D:/Arbeit/Berlin/ReLocation/FirstBerlinBrandenburgFacilities/combinedFacilities.xml";
-	        outputPlans = "D:/Arbeit/Berlin/ReLocation/richtigerRun/PlansWithNewLocations2000.xml";
-	        logFile = "D:/Arbeit/Berlin/ReLocation/richtigerRun/log2000";
-	        
-    	} else {
-    		
-    		planFile = args[0];
-    		shapeFile = args[1];
-    		facilitiesFile = args[2];
-    		outputPlans = args[3];
-    		logFile = args[4];
-    		
-    	}
-    	
-        OutputDirectoryLogging.catchLogEntries();
-        try {
-        	OutputDirectoryLogging.initLoggingWithOutputDirectory(logFile);
-        } catch (IOException e1) {
-        	e1.printStackTrace();
-        }
-        
-        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+			// osm file for the new Locations. Must be in a .osm Format
+			osmFile = "";
+
+			// plan file where the locations should be changed
+			planFile = "";
+
+			// shape file with zones for the relocation
+			shapeFile = "";
+
+			// path for the output
+			output = root + "output/";
+		} else {
+			root = args[0];
+			osmFile = args[1];
+			planFile = args[2];
+			shapeFile = args[3];
+			output = args[0] + "output/";
+		}
+
+		setUpLog();
+		osmToFacilities();
+		reLocation();
+		
+	}
+
+	/**
+	 * overrides the coordinates from activities from an old plan file with new coordinates from a facility file
+	 * needs a shape file to make sure that the coordinates will replaced with a nearby facility 
+	 */
+	private static void reLocation() {
+		
+		log.info("starts relocation");
+		
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
         MatsimFacilitiesReader matsimFacilitiesReader = new MatsimFacilitiesReader(scenario);
-        matsimFacilitiesReader.readFile(facilitiesFile);
+        matsimFacilitiesReader.readFile(output + "/facilities.xml");
 
         PopulationReader populationReader = new PopulationReader(scenario);
-        try {
-            populationReader.readURL(new URL(planFile));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        populationReader.readFile(planFile);
 
         Map<String, Geometry> allZones = readShapeFile(shapeFile);
 
@@ -117,65 +128,49 @@ public class RunReLocationPlansSauber {
         oldLeisureActivities.clear();
         oldShoppingActivities.clear();       
 
-        createNewPopulation(outputPlans, allZones, newLeisureFacilities, newShoppingFacilities, population);
-      
-        System.out.println("Done");
-
-    }
-
-    /**
-     * creates a new population file with new coordinates for specific activities
-     * 
-     * @param outputPlans - the location for the output plan file
-     * @param allZones - a shape file with zones
-     * @param newLeisureFacilities - a map with zoneId and a list of coordinates for leisure
-     * @param newShoppingFacilities - a map with zoneId and a list of coordinates for shopping
-     * @param population - the population from the plans file that you want to change
-     */
-    
-	private static void createNewPopulation(String outputPlans, Map<String, Geometry> allZones,
-			Map<String, List<Coord>> newLeisureFacilities, Map<String, List<Coord>> newShoppingFacilities,
-			Population population) {
-		
-		 Population outPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
-		 for (Person person : population.getPersons().values()) {
-            for (Plan plan : person.getPlans()) {
-                for (PlanElement planElement : plan.getPlanElements()) {
-                    if (planElement instanceof Activity) {
-                        Activity activity = (Activity) planElement;
-                        String act = inDistrict(allZones, activity.getCoord());
-                        if (activity.getType().contains("leisure")) {
-                            if (!(act.equals("noZone"))) {
-                                List<Coord> coords = newLeisureFacilities.get(act);
-                                if (coords != null) {
-                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
-                                }
-                            }
-                        }
-                        if (activity.getType().contains("shopping")) {
-                            if (!(act.equals("noZone"))) {
-                                List<Coord> coords = newShoppingFacilities.get(act);
-                                if (coords != null) {
-                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            outPopulation.addPerson(person);
-        }
-
-        new PopulationWriter(outPopulation).write(outputPlans);
+        createNewPopulation(new String(output + "output_" + planFile), allZones, newLeisureFacilities, newShoppingFacilities, population);	
 	}
 
-    /**
+	
+	/**
+	 * sets up a log file
+	 */
+	private static void setUpLog() {
+		OutputDirectoryLogging.catchLogEntries();
+		try {
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(output + "/log");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * reads a osm file and writes the facilities out
+	 */
+	private static void osmToFacilities() {
+		log.info("startign with facilities");
+		CombinedOsmReader combinedOsmReader = new CombinedOsmReader(outPutCRS,
+				AccessibilityFacilityUtils.buildOsmLandUseToMatsimTypeMap(),
+				AccessibilityFacilityUtils.buildOsmBuildingToMatsimTypeMap(),
+				AccessibilityFacilityUtils.buildOsmAmenityToMatsimTypeMapV2(),
+				AccessibilityFacilityUtils.buildOsmLeisureToMatsimTypeMapV2(),
+				AccessibilityFacilityUtils.buildOsmTourismToMatsimTypeMapV2(),
+				AccessibilityFacilityUtils.buildUnmannedEntitiesList(), 0);
+		try {
+			combinedOsmReader.parseFile(osmFile);
+			combinedOsmReader.writeFacilities(output + "facilities.xml");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("facilities done");
+	}
+
+	/**
      * reads a shape file with the zones for your relocation
      * 
      * @param shapeFile - the shape file with the zones
      * @return a map with the zoneId as keys and a geometry as value
-     */
-    
+     */    
     private static Map<String, Geometry> readShapeFile(String shapeFile){
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
         Map<String, Geometry> districts = new HashMap<>();
@@ -197,7 +192,6 @@ public class RunReLocationPlansSauber {
      * @param matsimActivity - the activity type where your facilities should be 
      * @return a map with zoneIds as keys and a list with the coordinates from all facilities in that zone
      */
-      
     private static Map<String, List<Coord>> facilitiesToZone(ActivityFacilities activityFacilities,  Map<String, Geometry> allZones, String matsimActivity) {
         Map<String, List<Coord>> newFacilities = new HashMap<>();
         for (ActivityFacility activityFacility : activityFacilities.getFacilities().values()) {
@@ -221,7 +215,7 @@ public class RunReLocationPlansSauber {
         }
         return newFacilities;
     }
-
+    
     /**
      * checks if a coordinate is in a zone from the shape file 
      * 
@@ -229,7 +223,6 @@ public class RunReLocationPlansSauber {
      * @param coord - coordinate that will be checked
      * @return the the zoneId as a string or "noZone", if the coordinate can't be associated
      */
-    
     private static String inDistrict( Map<String, Geometry> allZones, Coord coord) {
         Point point = MGC.coord2Point(coord);
         for (String nameZone : allZones.keySet()) {
@@ -248,8 +241,7 @@ public class RunReLocationPlansSauber {
      * @param allZones - a shape file with zones
      * @param matsimActivity - the activity type that should be relocated
      * @return a map with zoneIds as keys and a list with the coordinates from all activities in that zone
-     */
-    
+     */ 
     private static Map<String, List<Coord>> oldActivitiesToZone(Population population, Map<String, Geometry> allZones, String matsimActivity) {
         Map<String, List<Coord>> oldActivities = new HashMap<>();
         for (Person person : population.getPersons().values()) {
@@ -282,8 +274,7 @@ public class RunReLocationPlansSauber {
      * @param newFacilities - the new facilities for the relocation and their zones
      * @param oldActivities - the old activities from the plans file and their zones
      * @param matsimtype - the activity type that should be checked for warnings
-     */
-    
+     */    
     private static void logWarnings(Map<String, Geometry> allZones, Map<String, List<Coord>> newFacilities, Map<String, List<Coord>> oldActivities, String matsimtype) {
 
         List<String> warningType1 = new ArrayList<>();
@@ -320,4 +311,48 @@ public class RunReLocationPlansSauber {
         }
     }
 
+    /**
+     * creates a new population file with new coordinates for specific activities
+     * 
+     * @param outputPlans - the location for the output plan file
+     * @param allZones - a shape file with zones
+     * @param newLeisureFacilities - a map with zoneId and a list of coordinates for leisure
+     * @param newShoppingFacilities - a map with zoneId and a list of coordinates for shopping
+     * @param population - the population from the plans file that you want to change
+     */  
+	private static void createNewPopulation(String outputPlans, Map<String, Geometry> allZones,
+			Map<String, List<Coord>> newLeisureFacilities, Map<String, List<Coord>> newShoppingFacilities,
+			Population population) {
+		
+		 Population outPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+		 for (Person person : population.getPersons().values()) {
+            for (Plan plan : person.getPlans()) {
+                for (PlanElement planElement : plan.getPlanElements()) {
+                    if (planElement instanceof Activity) {
+                        Activity activity = (Activity) planElement;
+                        String act = inDistrict(allZones, activity.getCoord());
+                        if (activity.getType().contains("leisure")) {
+                            if (!(act.equals("noZone"))) {
+                                List<Coord> coords = newLeisureFacilities.get(act);
+                                if (coords != null) {
+                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
+                                }
+                            }
+                        }
+                        if (activity.getType().contains("shopping")) {
+                            if (!(act.equals("noZone"))) {
+                                List<Coord> coords = newShoppingFacilities.get(act);
+                                if (coords != null) {
+                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            outPopulation.addPerson(person);
+        }
+
+        new PopulationWriter(outPopulation).write(outputPlans);
+	}
 }
