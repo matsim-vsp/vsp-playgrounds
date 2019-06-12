@@ -24,9 +24,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.ier.IERModule;
 import org.matsim.contrib.ier.emulator.FifoTransitPerformance;
 import org.matsim.contrib.ier.run.IERConfigGroup;
-import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -80,13 +77,10 @@ public class Greedo {
 
 		if (greedoConfig.getAdjustStrategyWeights()) {
 
-			/*
-			 * Preliminary analysis of innovation strategies.
-			 */
-
+			// Preliminary analysis of innovation strategies.
 			int expensiveStrategyCnt = 0;
 			int cheapStrategyCnt = 0;
-			double cheapStrategyWeightSum = 0.0;
+			double cheapStrategyWeightSum = 0.0; // TODO also use expensive strategy weight sum?
 			for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
 				final String strategyName = strategySettings.getStrategyName();
 				if (strategySettings.getWeight() > 0) {
@@ -99,11 +93,8 @@ public class Greedo {
 				}
 			}
 
-			/*
-			 * Adjust number of emulated iterations per cycle to number and type of
-			 * innovation strategies.
-			 */
-
+			// Adjust number of emulated iterations per cycle to number and type of
+			// innovation strategies.
 			final int originalIterationsPerCycle = ierConfig.getIterationsPerCycle();
 			if (cheapStrategyCnt > 0) {
 				// Make sure that every strategy can be used used on average at least once.
@@ -116,24 +107,25 @@ public class Greedo {
 					ierConfig.setIterationsPerCycle(expensiveStrategyCnt);
 				} else {
 					// No innovation strategies at all!
-					log.warn("No relevant strategies recognized.");
+					throw new RuntimeException("No innovation strategies recognized. "
+							+ "Greedo expects at least one. See greedo config module for recognized innovation strategies.");
 				}
 			}
 			if (ierConfig.getIterationsPerCycle() != originalIterationsPerCycle) {
-				log.warn("Adjusted number of emulated iterations per cycle from " + originalIterationsPerCycle + " to "
+				log.info("Adjusted number of emulated iterations per cycle from " + originalIterationsPerCycle + " to "
 						+ ierConfig.getIterationsPerCycle() + ".");
 			}
 
 			/*
-			 * Use minimal choice set and always remove the worse plan. This probably as
+			 * Use minimal choice set and always remove the worse plan. This is probably as
 			 * close as it can get to best-response in the presence of random innovation
 			 * strategies.
 			 */
 			config.strategy().setMaxAgentPlanMemorySize(1);
 			config.strategy().setPlanSelectorForRemoval("WorstPlanSelector");
-			log.warn("Approximating a best-response simulation through the following settings:");
-			log.warn("  maxAgentPlanMemorySize = 1");
-			log.warn("  planSelectorForRemoval = worstPlanSelector");
+			log.info("Approximating a best-response simulation through the following settings:");
+			log.info("  * maxAgentPlanMemorySize = 1");
+			log.info("  * planSelectorForRemoval = worstPlanSelector");
 
 			/*
 			 * Keep only plan innovation strategies. Re-weight for maximum emulation
@@ -152,7 +144,7 @@ public class Greedo {
 				} else {
 					strategySettings.setWeight(0.0); // i.e., dismiss
 				}
-				log.warn("Setting weight of strategy " + strategyName + " to " + strategySettings.getWeight() + ".");
+				log.info("Setting weight of strategy " + strategyName + " to " + strategySettings.getWeight() + ".");
 				probaSum += strategySettings.getWeight();
 			}
 			if (Math.abs(1.0 - probaSum) >= 1e-8) {
@@ -171,18 +163,19 @@ public class Greedo {
 		ConfigUtils.addOrGetModule(this.config, GreedoConfigGroup.class).configure(scenario);
 	}
 
+	// TODO Can these be summarized into one module?
 	public AbstractModule[] getModules() {
 		final AbstractModule greedoModule = new AbstractModule() {
 			@Override
 			public void install() {
-			 	this.bind(FifoTransitPerformance.class);
-				 if (config.transit().isUseTransit()) {
-				 log.warn("Transit emulation is included. This is experimental code.");
-				 	this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-				 } else {
-					 log.warn("No transit emulation.");
-					 this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-				 }
+				// TODO Consider Sebastian's lightweight solution.
+				this.bind(FifoTransitPerformance.class);
+				if (config.transit().isUseTransit()) {
+					log.warn("Transit emulation is included. This is experimental code.");
+					this.addEventHandlerBinding().to(FifoTransitPerformance.class);
+				} else {
+					log.info("No transit emulation.");
+				}
 				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
 				this.addEventHandlerBinding().toProvider(WireGreedoIntoMATSimControlerListener.class);
 			}

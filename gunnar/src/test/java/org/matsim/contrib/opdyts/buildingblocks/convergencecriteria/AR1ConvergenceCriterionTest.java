@@ -19,8 +19,6 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.convergencecriteria;
 
-import static org.junit.Assert.fail;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;

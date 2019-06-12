@@ -21,8 +21,6 @@ package utils;
 
 import java.util.Random;
 
-import org.apache.log4j.Logger;
-
 /**
  *
  * @author Gunnar Flötteröd

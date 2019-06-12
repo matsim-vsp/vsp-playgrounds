@@ -28,7 +28,6 @@ import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.opdyts.macrostate.LinkOccupancyAnalyzer;
 import org.matsim.vehicles.Vehicle;
 
 /**

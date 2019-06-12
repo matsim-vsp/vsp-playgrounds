@@ -19,8 +19,8 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.utils;
 
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
