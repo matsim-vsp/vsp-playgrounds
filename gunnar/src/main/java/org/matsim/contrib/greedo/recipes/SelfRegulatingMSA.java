@@ -57,7 +57,7 @@ public class SelfRegulatingMSA implements ReplannerIdentifierRecipe {
 
 	@Override
 	public void update(LogDataWrapper logDataWrapper) {
-		final Double lastChange = logDataWrapper.getLastRealizedUtilityChangeSum();
+		final Double lastChange = logDataWrapper.getRealizedUtilityChangeSum();
 		if (lastChange != null) {
 			this.beta += ((lastChange > 0) ? this.betaIncreaseSuccess : this.betaIncreaseFailure);
 		}

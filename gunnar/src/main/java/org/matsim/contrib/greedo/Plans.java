@@ -34,6 +34,8 @@ import org.matsim.core.population.PopulationUtils;
 /**
  * Copied and simplified from opdytsintegration.
  * 
+ * TODO This should be moved into a "matsimutils" package.
+ * 
  * @author Gunnar Flötteröd
  * 
  */

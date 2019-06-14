@@ -206,8 +206,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
 		if (this.replannerIdentifierRecipe == null) {
 			if (ReplannerIdentifierType.accelerate.equals(this.getReplannerIdentifierType())) {
-				this.replannerIdentifierRecipe = new AccelerationRecipe(
-						new MSARecipe(this.getInitialMeanReplanningRate(), this.getReplanningRateIterationExponent()));
+				this.replannerIdentifierRecipe = new AccelerationRecipe();
 			} else if (ReplannerIdentifierType.MSA.equals(this.getReplannerIdentifierType())) {
 				this.replannerIdentifierRecipe = new MSARecipe(this.getInitialMeanReplanningRate(),
 						this.getReplanningRateIterationExponent());

@@ -30,8 +30,8 @@ public class NormalizedUnweightedNonReplannerCountDifferences2 extends Populatio
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getSumOfUnweightedNonReplannerCountDifferences2(),
-				arg0.getNumberOfNonReplanners());
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().sumOfUnweightedNonReplannerCountDifferences2,
+				arg0.getReplanningSummaryStatistics().numberOfNonReplanners);
 	}
 
 }

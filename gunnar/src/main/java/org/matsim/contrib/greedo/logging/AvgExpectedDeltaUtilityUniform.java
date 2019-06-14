@@ -30,7 +30,8 @@ public class AvgExpectedDeltaUtilityUniform extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getLastExpectedUtilityChangeSumUniform(), arg0.getPopulationSize());
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().getSumOfUtilityChangesGivenUniformReplanning(),
+				arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 
 }

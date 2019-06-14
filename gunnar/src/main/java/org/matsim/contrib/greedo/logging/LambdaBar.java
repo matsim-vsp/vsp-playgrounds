@@ -37,7 +37,7 @@ public class LambdaBar implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getLambdaBar());
+		return Statistic.toString(arg0.getReplanningSummaryStatistics().lambdaBar);
 	}
 
 }

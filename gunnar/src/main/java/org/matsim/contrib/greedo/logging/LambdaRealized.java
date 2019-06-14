@@ -6,7 +6,7 @@ public class LambdaRealized extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getNumberOfReplanners().doubleValue(), arg0.getPopulationSize());
+		return this.averageOrEmpty(new Double(arg0.getReplanningSummaryStatistics().numberOfReplanners), arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 
 }

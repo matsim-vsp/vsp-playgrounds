@@ -30,7 +30,8 @@ public class NormalizedWeightedCountDifferences2 extends PopulationAverageStatis
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getSumOfWeightedCountDifferences2(), arg0.getPopulationSize());
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().getSumOfWeightedCountDifferences2(),
+				arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 
 }

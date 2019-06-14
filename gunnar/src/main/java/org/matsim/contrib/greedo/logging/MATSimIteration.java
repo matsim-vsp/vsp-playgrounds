@@ -28,7 +28,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class ReplanningRecipe implements Statistic<LogDataWrapper> {
+public class MATSimIteration implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
@@ -37,7 +37,6 @@ public class ReplanningRecipe implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getReplanningSummaryStatistics().replannerIdentifierRecipeName);
+		return Statistic.toString(arg0.getIteration());
 	}
-
 }

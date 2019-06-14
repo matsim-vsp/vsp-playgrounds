@@ -60,6 +60,9 @@ public class Greedo {
 		if (this.config != null) {
 			throw new RuntimeException("Have already met a config.");
 		}
+		if (config.controler().getFirstIteration() != 0) {
+			throw new RuntimeException("Expecting the simulation to start at iteration zero.");
+		}
 		this.config = config;
 
 		/*

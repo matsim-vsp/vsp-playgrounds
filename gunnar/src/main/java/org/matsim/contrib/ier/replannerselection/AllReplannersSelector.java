@@ -39,8 +39,8 @@ public class AllReplannersSelector implements ReplannerSelector {
 	}
 
 	@Override
-	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
-		return new EventHandlerProvider() {
+	public IEREventHandlerProvider beforeReplanningAndGetEventHandlerProvider() {
+		return new IEREventHandlerProvider() {
 			@Override
 			public EventHandler get(Set<Id<Person>> personIds) {
 				return new EventHandler() {

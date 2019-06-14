@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
@@ -32,14 +31,13 @@ import org.matsim.api.core.v01.population.Person;
  * @author Gunnar Flötteröd
  *
  */
-public class Utilities {
+class Utilities {
 
 	// -------------------- INNER Entry CLASS --------------------
 
 	private static class Entry {
 
-		private Double lastRealizedUtility = null;
-		private Double lastExpectedUtility = null;
+		private Double lastRealizedUtility = null; // reference point for change values
 		private Double lastExpectedUtilityChange = null;
 		private Double lastRealizedUtilityChange = null;
 
@@ -47,7 +45,6 @@ public class Utilities {
 		}
 
 		void updateExpectedUtility(final double expectedUtility) {
-			this.lastExpectedUtility = expectedUtility;
 			if (this.lastRealizedUtility != null) {
 				this.lastExpectedUtilityChange = expectedUtility - this.lastRealizedUtility;
 			}
@@ -64,105 +61,52 @@ public class Utilities {
 			return this.lastRealizedUtility;
 		}
 
-		Double getLastExpectedUtility() {
-			return this.lastExpectedUtility;
-		}
-
 		Double getLastExpectedUtilityChange() {
 			return this.lastExpectedUtilityChange;
 		}
-		
+
 		Double getLastRealizedUtilityChange() {
 			return this.lastRealizedUtilityChange;
 		}
-		
+
 	}
 
 	// -------------------- INNER SummaryStatistics CLASS --------------------
 
-	// TODO decide about scope; this is used in the logging package
-	public class SummaryStatistics {
+	class SummaryStatistics {
 
-		// set to an unmodifiable instance
-		public final Map<Id<Person>, Double> personId2expectedUtilityChange;
+		final Map<Id<Person>, Double> personId2expectedUtilityChange;
+		final public Double realizedUtilitySum;
+		final public Double realizedUtilityChangeSum;
 
-		final double expectedUtilitySum;
-		final double realizedUtilitySum;
-		final double expectedUtilityChangeSum;
-		final double realizedUtilityChangeSum;
-
-		final int validExpectedUtilityCnt;
-		final int validRealizedUtilityCnt;
-		final int validExpectedUtilityChangeCnt;
-		final int validRealizedUtilityChangeCnt;
-		
 		private SummaryStatistics() {
-
 			final Map<Id<Person>, Double> personId2expectedUtilityChange = new LinkedHashMap<>();
-
-			double expectedUtilitySum = 0.0;
-			double realizedUtilitySum = 0.0;
-			double expectedUtilityChangeSum = 0.0;
-			double realizedUtilityChangeSum = 0.0;
-
-			int validExpectedUtilityCnt = 0;
-			int validRealizedUtilityCnt = 0;
-			int validExpectedUtilityChangeCnt = 0;
-			int validRealizedUtilityChangeCnt = 0;
-			
+			Double realizedUtilitySum = null;
+			Double realizedUtilityChangeSum = null;
 			for (Map.Entry<Id<Person>, Entry> mapEntry : personId2entry.entrySet()) {
 				final Id<Person> personId = mapEntry.getKey();
 				final Entry entry = mapEntry.getValue();
-
-				if (entry.getLastExpectedUtility() != null) {
-					expectedUtilitySum += entry.getLastExpectedUtility();
-					validExpectedUtilityCnt++;
-				}
-				if (entry.getLastRealizedUtility() != null) {
-					realizedUtilitySum += entry.getLastRealizedUtility();
-					validRealizedUtilityCnt++;
-				}
 				if (entry.getLastExpectedUtilityChange() != null) {
 					personId2expectedUtilityChange.put(personId, entry.getLastExpectedUtilityChange());
-					expectedUtilityChangeSum += entry.getLastExpectedUtilityChange();
-					validExpectedUtilityChangeCnt++;
+				}
+				if (entry.getLastRealizedUtility() != null) {
+					if (realizedUtilitySum == null) {
+						realizedUtilitySum = entry.getLastRealizedUtility();
+					} else {
+						realizedUtilitySum += entry.getLastRealizedUtility();
+					}
 				}
 				if (entry.getLastRealizedUtilityChange() != null) {
-					realizedUtilityChangeSum += entry.getLastRealizedUtilityChange();
-					validRealizedUtilityChangeCnt++;
+					if (realizedUtilityChangeSum == null) {
+						realizedUtilityChangeSum = entry.getLastRealizedUtilityChange();
+					} else {
+						realizedUtilityChangeSum += entry.getLastRealizedUtilityChange();
+					}
 				}
 			}
-
 			this.personId2expectedUtilityChange = Collections.unmodifiableMap(personId2expectedUtilityChange);
-
-			this.expectedUtilitySum = expectedUtilitySum;
 			this.realizedUtilitySum = realizedUtilitySum;
-			this.expectedUtilityChangeSum = expectedUtilityChangeSum;
 			this.realizedUtilityChangeSum = realizedUtilityChangeSum;
-
-			this.validExpectedUtilityCnt = validExpectedUtilityCnt;
-			this.validRealizedUtilityCnt = validRealizedUtilityCnt;
-			this.validExpectedUtilityChangeCnt = validExpectedUtilityChangeCnt;
-			this.validRealizedUtilityChangeCnt = validRealizedUtilityChangeCnt;
-
-			Logger.getLogger(this.getClass()).info("Created instance:");
-			Logger.getLogger(this.getClass()).info(this.toString());
-		}
-
-		@Override
-		public String toString() {
-			final StringBuffer result = new StringBuffer();
-			result.append("Expected utility sum: " + this.expectedUtilitySum + "; number of valid persons: "
-					+ this.validExpectedUtilityCnt + "\n");
-			result.append("Realized utility sum: " + this.realizedUtilitySum + "; number of valid persons: "
-					+ this.validRealizedUtilityCnt + "\n");
-			result.append("Expected utility change sum: " + this.expectedUtilityChangeSum
-					+ "; number of valid persons: " + this.validExpectedUtilityChangeCnt + "\n");
-			result.append(
-					"number of individual expected utility changes: " + this.personId2expectedUtilityChange.size());
-			result.append("Realized utility change sum: " + this.realizedUtilityChangeSum
-					+ "; number of valid persons: " + this.validRealizedUtilityChangeCnt + "\n");
-			return result.toString();
 		}
 	}
 

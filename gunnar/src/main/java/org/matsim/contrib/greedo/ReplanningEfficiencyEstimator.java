@@ -85,6 +85,11 @@ class ReplanningEfficiencyEstimator {
 		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
 	}
 
+	ReplanningEfficiencyEstimator(final GreedoConfigGroup greedoConfig) {
+		this(greedoConfig.getMinAbsoluteMemoryLength(), greedoConfig.getMaxRelativeMemoryLength(),
+				greedoConfig.getConstrainDeltaToZero(), greedoConfig.getAcceptNegativeDisappointment());
+	}
+
 	// -------------------- INTERNALS --------------------
 
 	private Vector regrInput(final double deltaX2) {
@@ -97,7 +102,13 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
+	void update(final LogDataWrapper logDataWrapper) {
+		this.update(logDataWrapper.getReplanningSummaryStatistics().sumOfReplannerUtilityChanges,
+				logDataWrapper.getUtilitySummaryStatistics().realizedUtilityChangeSum,
+				logDataWrapper.getReplanningSummaryStatistics().sumOfWeightedReplannerCountDifferences2);
+	}
+
+	private void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
 			final Double anticipatedSlotUsageChange2) {
 
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
@@ -115,6 +126,7 @@ class ReplanningEfficiencyEstimator {
 				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
 				cov.add(covInput, covInput);
 			}
+
 			if (this.hadEnoughData()) {
 				this.beta = (1.0 / regr.getCoefficients().get(0));
 				this.delta = (this.constrainDeltaToZero ? 0.0 : (-regr.getCoefficients().get(1) * this.beta));
@@ -128,14 +140,6 @@ class ReplanningEfficiencyEstimator {
 
 	private boolean hadEnoughData() {
 		return (this.anticipatedSlotUsageChanges2.size() >= this.anticipatedSlotUsageChanges2.getMinLength());
-	}
-
-	Double getBetaShortTerm() {
-		return this.beta;
-	}
-
-	Double getDeltaShortTerm() {
-		return this.delta;
 	}
 
 	Double getBeta() {
@@ -168,13 +172,14 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String label() {
-				return "PredictedMeanUtilityImprovement";
+				return "PredictedAvgUtilityImprovement";
 			}
 
 			@Override
 			public String value(LogDataWrapper arg0) {
 				if (currentPredictedTotalUtilityImprovement != null) {
-					return Statistic.toString(currentPredictedTotalUtilityImprovement / arg0.getPopulationSize());
+					return Statistic.toString(currentPredictedTotalUtilityImprovement
+							/ arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 				} else {
 					return Statistic.toString(null);
 				}

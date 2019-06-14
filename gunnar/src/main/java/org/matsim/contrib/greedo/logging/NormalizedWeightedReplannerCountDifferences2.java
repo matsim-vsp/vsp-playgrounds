@@ -30,6 +30,7 @@ public class NormalizedWeightedReplannerCountDifferences2 extends PopulationAver
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getSumOfWeightedReplannerCountDifferences2(), arg0.getNumberOfReplanners());
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().sumOfWeightedReplannerCountDifferences2,
+				arg0.getReplanningSummaryStatistics().numberOfReplanners);
 	}
 }
