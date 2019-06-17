@@ -63,16 +63,29 @@ import org.matsim.core.scenario.ScenarioUtils;
 import java.util.Random;
 
 
-public class RunTelematicsParkingSearch {
+public class TelematicsParkingSearchController {
 
-
+    /**
+     * assumes that parkZone.txt lies next to the config file and contains a tabular file showing link id's in the first column that define the
+     * zone investigated by the ZoneParkingManager
+     */
     public static void main(String[] args){
 //        Config config = ConfigUtils.loadConfig("parkingsearch/config.xml", new ParkingSearchConfigGroup());
 
-        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/input/config.xml";
+//        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/input/config.xml";
+        String configStr = args[0];
+
+        run(configStr);
+    }
+
+
+    /**
+     * @param configStr
+     * 			path to the MATSim config
+     */
+    private static void run(String configStr) {
+
         Config config = ConfigUtils.loadConfig(configStr);
-
-
         String zone = configStr.substring(0,configStr.lastIndexOf("/") + 1 ) + "parkZone.txt";
         String[] zones = new String[1];
         zones[0] = zone;
@@ -82,16 +95,7 @@ public class RunTelematicsParkingSearch {
         ParkingSearchConfigGroup configGroup = ConfigUtils.addOrGetModule(config, ParkingSearchConfigGroup.class);
 
         config.controler().setLastIteration(1);
-        new RunTelematicsParkingSearch().run(config, zones);
-    }
 
-
-    /**
-     * @param config
-     * 			a standard MATSim config
-     * @param zones
-     */
-    public void run(Config config, String[] zones) {
         final Scenario scenario = ScenarioUtils.loadScenario(config);
         createPop(scenario);
         Controler controler = new Controler(scenario);
@@ -149,7 +153,7 @@ public class RunTelematicsParkingSearch {
 
     }
 
-    static public void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int simulatedHours) {
+    private static void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int simulatedHours) {
             // No need to route car routes in Routing module in advance, as they are
             // calculated on the fly
             if (!controler.getConfig().getModules().containsKey(DvrpConfigGroup.GROUP_NAME)){
