@@ -16,11 +16,11 @@ public class GridNetParkingFacilityCreator {
 	private final static String pathToZoneOne = "C:/Users/Work/VSP/WiMi/TeachParking/input/parkingSlots_oben_1perLink.csv";
 	private final static String pathToZoneTwo = "";
 	private static final String output = "C:/Users/Work/VSP/WiMi/TeachParking/input/parkingSlots_oben_1perLink.xml";
-	private static final String pathToNetFile = "C:/Users/Work/VSP/WiMi/TeachParking/input/example/grid_network.xml";
+	private static final String pathToNetFile = "C:/Users/Work/VSP/WiMi/TeachParking/input/grid/network.xml";
 	
 	public static void main(String[] args){
-		List<Id<Link>> zoneOneLinks = getLinkIDsOfZone(pathToZoneOne);
-		List<Id<Link>> zoneTwoLinks = getLinkIDsOfZone(pathToZoneTwo);
+		Map<Id<Link>,Double> zoneOneFacilities = mapLinkIDsOfZoneToParkingCapacity(pathToZoneOne);
+//		List<Id<Link>> zoneTwoLinks = mapLinkIDsOfZoneToParkingCapacity(pathToZoneTwo);
 		
 		Network network = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getNetwork();
 		MatsimNetworkReader netReader = new MatsimNetworkReader(network);
@@ -28,31 +28,31 @@ public class GridNetParkingFacilityCreator {
 		
 		ActivityFacilities facilities = FacilitiesUtils.createActivityFacilities();
 		ActivityFacilitiesFactory factory = facilities.getFactory();
-		ActivityOption option = factory.createActivityOption(ParkingUtils.PARKACTIVITYTYPE);
-		option.setCapacity(1.0);
-		
-		for(Id<Link> link : zoneOneLinks){
+
+		for(Id<Link> link : zoneOneFacilities.keySet()){
+			ActivityOption option = factory.createActivityOption(ParkingUtils.PARKACTIVITYTYPE);
 			Coord coord = network.getLinks().get(link).getCoord();
 			ActivityFacility facility = factory.createActivityFacility(Id.create("parking_" + link, ActivityFacility.class), link);
+			option.setCapacity(zoneOneFacilities.get(link));
 			facility.addActivityOption(option);
 			facility.setCoord(coord);
 			facilities.addActivityFacility(facility);
 		}
 		
-		for(Id<Link> link : zoneTwoLinks){
-			Coord coord = network.getLinks().get(link).getCoord();
-			ActivityFacility facility = factory.createActivityFacility(Id.create("parking_" + link, ActivityFacility.class), link);
-			facility.addActivityOption(option);
-			facility.setCoord(coord);
-			facilities.addActivityFacility(facility);
-		}
+//		for(Id<Link> link : zoneTwoLinks){
+//			Coord coord = network.getLinks().get(link).getCoord();
+//			ActivityFacility facility = factory.createActivityFacility(Id.create("parking_" + link, ActivityFacility.class), link);
+//			facility.addActivityOption(option);
+//			facility.setCoord(coord);
+//			facilities.addActivityFacility(facility);
+//		}
 		
 		new FacilitiesWriter(facilities).write(output);
 	}
 
-	private static List<Id<Link>> getLinkIDsOfZone (String pathToZoneFile){
+	private static Map<Id<Link>,Double> mapLinkIDsOfZoneToParkingCapacity(String pathToZoneFile){
 		
-		List<Id<Link>> links = new ArrayList<>();
+		Map<Id<Link>,Double> parkingSlots = new HashMap<>();
 		
 		TabularFileParserConfig config = new TabularFileParserConfig();
         config.setDelimiterTags(new String[] {"\t",";"});
@@ -65,13 +65,13 @@ public class GridNetParkingFacilityCreator {
 			public void startRow(String[] row) {
 				if(!header){
 					Id<Link> linkId = Id.createLinkId(row[0]);
-					links.add(linkId);
+					parkingSlots.put(linkId,Double.parseDouble(row[1]));
 				}
 				header = false;
 			}
 		
         });
-		return links;
+		return parkingSlots;
 	}
 
 }

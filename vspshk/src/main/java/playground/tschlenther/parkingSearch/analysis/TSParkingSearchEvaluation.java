@@ -70,7 +70,7 @@ public class TSParkingSearchEvaluation {
 	private Set<Id<Link>> readLinks(String fileName) {
 		final Set<Id<Link>> links = new HashSet<>();
 		TabularFileParserConfig config = new TabularFileParserConfig();
-	    config.setDelimiterTags(new String[] {"\t"});
+	    config.setDelimiterTags(new String[] {"\t", ";"});
 	    config.setFileName(fileName);
 	    new TabularFileParser().parse(config, new TabularFileHandler() {
 			@Override

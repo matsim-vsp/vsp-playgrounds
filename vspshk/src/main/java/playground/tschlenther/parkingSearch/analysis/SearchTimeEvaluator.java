@@ -22,6 +22,10 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.events.StartParkingSearchEvent;
 import org.matsim.contrib.parking.parkingsearch.events.StartParkingSearchEventHandler;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.mobsim.framework.events.MobsimBeforeCleanupEvent;
+import org.matsim.core.mobsim.framework.listeners.MobsimBeforeCleanupListener;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
@@ -33,7 +37,7 @@ import org.matsim.vehicles.Vehicle;
  * @author tschlenther
  *
  */
-public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartParkingSearchEventHandler, PersonEntersVehicleEventHandler{
+public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartParkingSearchEventHandler, PersonEntersVehicleEventHandler, IterationEndsListener {
 
 	Map<Id<Person>,Double> searchTime = new HashMap<>();
 	Map<Id<Vehicle>,Id<Person>> drivers = new HashMap<>();
@@ -116,7 +120,7 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 		}	
 		
 	}
-	
+
 	public void writeLinkTimeStamps(String filename){
 		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
 			try {
@@ -133,5 +137,16 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 			}	
 			
 		}
-	
+
+	/**
+	 * Notifies all observers of the Controler that a iteration is finished
+	 *
+	 * @param event
+	 */
+	@Override
+	public void notifyIterationEnds(IterationEndsEvent event) {
+		String iterationPath = event.getServices().getControlerIO().getIterationPath(event.getIteration());
+		writeStats(iterationPath + "parkingStatsPerTimeSlot.csv");
+		writeLinkTimeStamps(iterationPath + "parkingLinkTimeStamps.csv");
+	}
 }
