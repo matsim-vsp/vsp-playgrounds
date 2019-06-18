@@ -101,8 +101,6 @@ class ReplannerIdentifier {
 
 		final DynamicData<Id<?>> interactionResiduals = DynamicDataUtils.newDifference(this.upcomingWeightedCounts,
 				this.currentWeightedCounts, this.lambdaBar);
-//		double inertiaResidual = (1.0 - this.lambdaBar) * this.totalUtilityChange;
-		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
 		// Go through all persons and decide which driver gets to re-plan.
 
@@ -131,8 +129,7 @@ class ReplannerIdentifier {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
 					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar, this.beta, interactionResiduals,
-//					inertiaResidual, 
-					this.personId2hypotheticalUtilityChange.get(personId), sumOfInteractionResiduals2);
+					this.personId2hypotheticalUtilityChange.get(personId));
 
 			final boolean replanner = this.greedoConfig.getReplannerIdentifierRecipe().isReplanner(personId,
 					scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero());
@@ -165,10 +162,7 @@ class ReplannerIdentifier {
 				}
 			}
 
-			// Interaction residuals are updated by reference.
 			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0);
-//			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
-			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 		}
 
 		Double sumOfUnweightedReplannerCountDifferences2 = null;
