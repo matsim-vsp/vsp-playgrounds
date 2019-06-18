@@ -35,16 +35,16 @@ import java.util.*;
 
 	//we count the parking procedures and the total spent parking time per slot
 	//number of slots = simulatedHours * nrOfSLotsPerHour
-	private double monitoredHoursStart;
-	private double monitoredHoursEnd;
+	private double monitoredTimeStart;
+	private double monitoredTimeEnd;
 	private int nrOfSlotsPerHour = 12;
-	private double[] parkingProcedures = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
-	private double[] parkingTime = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
+	private double[] parkingProcedures = new double[(int) (monitoredTimeEnd - monitoredTimeStart)/3600*nrOfSlotsPerHour];
+	private double[] parkingTime = new double[(int) (monitoredTimeEnd - monitoredTimeStart)/3600*nrOfSlotsPerHour];
 	
 	public SearchTimeEvaluator(Set<Id<Link>> monitoredLinks, double startTime, double endTime) {
 		this.monitoredLinks = monitoredLinks;
-		this.monitoredHoursStart = startTime;
-		this.monitoredHoursEnd = endTime;
+		this.monitoredTimeStart = startTime;
+		this.monitoredTimeEnd = endTime;
 	}
 	
 	@Override
@@ -52,8 +52,8 @@ import java.util.*;
 		this.searchTime.clear();;
 		this.drivers.clear();
 		this.linkTimeStamps.clear();
-		this.parkingProcedures = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
-		this.parkingTime = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
+		this.parkingProcedures = new double[(int) (monitoredTimeEnd - monitoredTimeStart)/3600*nrOfSlotsPerHour];
+		this.parkingTime = new double[(int) (monitoredTimeEnd - monitoredTimeStart)/3600*nrOfSlotsPerHour];
 	}
 
 	@Override
@@ -76,11 +76,13 @@ import java.util.*;
 	public void handleEvent(PersonArrivalEvent event) {
 		DecimalFormat df = new DecimalFormat("##.##");
 		if (this.searchTime.containsKey(event.getPersonId())){
-			if (event.getLegMode().equals(TransportMode.car)){
-				double parkingTime = event.getTime() - searchTime.remove(event.getPersonId());
+			if (event.getLegMode().equals(TransportMode.car) &&
+                event.getTime() >=  monitoredTimeStart &&
+                event.getTime() <= monitoredTimeEnd){
+
+			    double parkingTime = event.getTime() - searchTime.remove(event.getPersonId());
 				int hour = (int) (event.getTime() / 3600);
-				int slot = (int) (event.getTime()/ (3600/nrOfSlotsPerHour) );
-				if ( monitoredHoursStart*nrOfSlotsPerHour < slot && slot < monitoredHoursEnd*nrOfSlotsPerHour ){
+				int slot = (int) (event.getTime() - monitoredTimeStart) / (3600/nrOfSlotsPerHour);
 					this.parkingProcedures[slot]++;
 					this.parkingTime[slot]+=parkingTime;
 					String stamp = "" + hour  + ";" + slot + ";" + df.format(event.getTime()) + ";" + event.getLinkId() + ";"+ df.format(parkingTime);
@@ -90,8 +92,7 @@ import java.util.*;
 			else{
 				this.searchTime.remove(event.getPersonId());
 			}
-		}
-		
+
 	}
 
 	public void writeStats(String filename){

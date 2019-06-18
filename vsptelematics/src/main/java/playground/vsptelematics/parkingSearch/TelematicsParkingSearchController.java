@@ -70,8 +70,8 @@ public class TelematicsParkingSearchController {
      */
     public static void main(String[] args){
 
-//        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/input/config.xml";
-        String configStr = args[0];
+        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/prepare/config.xml";
+//        String configStr = args[0];
 
         run(configStr);
     }
@@ -111,8 +111,8 @@ public class TelematicsParkingSearchController {
             }
         });
 
-        int start = (int) (config.qsim().getStartTime() / 3600);
-        int end = (int) (config.qsim().getEndTime() / 3600);
+        int start = (int) (config.qsim().getStartTime());
+        int end = (int) (config.qsim().getEndTime());
 
         installParkingModules(controler, scenario, zones, start, end);
         controler.run();
@@ -153,7 +153,7 @@ public class TelematicsParkingSearchController {
 
     }
 
-    private static void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int startOfEvaluatedHours, int endOfEvaluatedHours) {
+    private static void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int startOfEvaluatedTime, int endOfEvaluatedTime) {
             // No need to route car routes in Routing module in advance, as they are
             // calculated on the fly
             if (!controler.getConfig().getModules().containsKey(DvrpConfigGroup.GROUP_NAME)){
@@ -187,7 +187,7 @@ public class TelematicsParkingSearchController {
                     //analysis
 //                    addMobsimListenerBinding().to(TelematicsZoneOccupationListener.class).asEagerSingleton();
                     addMobsimListenerBinding().to(ZoneParkingOccupationListener.class).asEagerSingleton();
-                    SearchTimeEvaluator parkingEvaluator = new SearchTimeEvaluator(scenario.getNetwork().getLinks().keySet(), startOfEvaluatedHours, endOfEvaluatedHours);
+                    SearchTimeEvaluator parkingEvaluator = new SearchTimeEvaluator(scenario.getNetwork().getLinks().keySet(), startOfEvaluatedTime, endOfEvaluatedTime);
                     addEventHandlerBinding().toInstance(parkingEvaluator);
 
                     ParkingSearchEvaluator walkEvaluator = new ParkingSearchEvaluator();
