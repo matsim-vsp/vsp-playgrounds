@@ -70,8 +70,8 @@ public class TelematicsParkingSearchController {
      */
     public static void main(String[] args){
 
-        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/prepare/config.xml";
-//        String configStr = args[0];
+//        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/prepare/config.xml";
+        String configStr = args[0];
 
         run(configStr);
     }
