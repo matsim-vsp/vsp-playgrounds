@@ -81,11 +81,6 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// -------------------- CONTENT ACCESS --------------------
 
-	public Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getNewIndicatorView() {
-		// Need a deep copy because of subsequent (pSim) resets.
-		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
-	}
-
 	public Integer getLastResetIteration() {
 		return this.lastResetIteration;
 	}
@@ -96,6 +91,11 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		}
 		this.reset(iteration);
 		this.hasBeenResetOnceAndForAll = true;
+	}
+
+	public Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getNewIndicatorView() {
+		// Need a deep copy because of subsequent (pSim) resets.
+		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------

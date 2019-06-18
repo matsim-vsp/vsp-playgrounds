@@ -35,10 +35,6 @@ import org.matsim.core.events.handler.EventHandler;
 public class AllReplannersSelector implements ReplannerSelector {
 
 	@Override
-	public void afterReplanning() {
-	}
-
-	@Override
 	public IEREventHandlerProvider beforeReplanningAndGetEventHandlerProvider() {
 		return new IEREventHandlerProvider() {
 			@Override
@@ -47,5 +43,9 @@ public class AllReplannersSelector implements ReplannerSelector {
 				};
 			}
 		};
+	}
+	
+	@Override
+	public void afterReplanning() {
 	}
 }

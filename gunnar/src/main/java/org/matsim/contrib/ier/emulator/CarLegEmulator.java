@@ -52,7 +52,7 @@ public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 	}
 
 	@Override
-	public double emulateBetweenDepartureAndArrival(final Leg leg, final Person person, double time_s) {
+	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person, double time_s) {
 
 		if (!(leg.getRoute() instanceof NetworkRoute)) {
 			throw new RuntimeException(

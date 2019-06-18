@@ -83,10 +83,9 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		this.scoringFunctionFactory = scoringFunctionFactory;
 	}
 
+	@Override
 	public void notifyReplanning(ReplanningEvent event) {
 		try {
-
-			// this.replannerSelector.beforeReplanning();
 
 			final IEREventHandlerProvider handlerForLastReplanningIterationProvider = this.replannerSelector
 					.beforeReplanningAndGetEventHandlerProvider();
@@ -169,8 +168,6 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
 
 				Map<Id<Person>, Person> batch = new LinkedHashMap<>();
-				// List<Person> batch = new LinkedList<>();
-				// Set<Id<Person>> batchIds = new LinkedHashSet<>();
 
 				do {
 					batch.clear();

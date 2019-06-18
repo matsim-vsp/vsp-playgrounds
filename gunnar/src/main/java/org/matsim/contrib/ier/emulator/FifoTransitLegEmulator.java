@@ -63,7 +63,7 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 	// -------------------- IMPLEMENTATION OF LegEmulator --------------------
 
 	@Override
-	public double emulateBetweenDepartureAndArrival(Leg leg, Person person, double time_s) {
+	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(Leg leg, Person person, double time_s) {
 
 		final ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
 		final Id<TransitStopFacility> accessStopId = route.getAccessStopId();

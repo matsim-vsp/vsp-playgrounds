@@ -39,12 +39,12 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 	protected final EventsManager eventsManager;
 	protected final ActivityFacilities activityFacilities;
 
-	public OnlyDepartureArrivalLegEmulator(final EventsManager eventsManager, ActivityFacilities activityFacilities) {
+	public OnlyDepartureArrivalLegEmulator(final EventsManager eventsManager, final ActivityFacilities activityFacilities) {
 		this.eventsManager = eventsManager;
 		this.activityFacilities = activityFacilities;
 	}
 
-	private Id<Link> getLinkId(Activity activity) {
+	private Id<Link> getLinkId(final Activity activity) {
 		if (activity.getFacilityId() != null) {
 			return activityFacilities.getFacilities().get(activity.getFacilityId()).getLinkId();
 		} else {
@@ -60,7 +60,7 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 		this.eventsManager.processEvent(
 				new PersonDepartureEvent(time_s, person.getId(), getLinkId(previousActivity), leg.getMode()));
 
-		time_s = this.emulateBetweenDepartureAndArrival(leg, person, time_s);
+		time_s = this.emulateBetweenDepartureAndArrivalAndReturnEndTime_s(leg, person, time_s);
 
 		// Every leg ends with an arrival.
 		this.eventsManager
@@ -70,7 +70,7 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 	}
 
 	// Hook for stuff that happens between departure and arrival.
-	public double emulateBetweenDepartureAndArrival(final Leg leg, final Person person, double time_s) {
+	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person, double time_s) {
 		return (time_s + leg.getTravelTime());
 	}
 }
