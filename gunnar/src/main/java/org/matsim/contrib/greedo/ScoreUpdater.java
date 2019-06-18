@@ -48,9 +48,9 @@ public class ScoreUpdater<L> {
 
 	private final DynamicData<L> interactionResiduals;
 
-	private double inertiaResidual;
+	// private double inertiaResidual;
 
-	private final double individualUtilityChange;
+	// private final double individualUtilityChange;
 
 	private final SpaceTimeCounts<L> individualWeightedChanges;
 
@@ -66,12 +66,13 @@ public class ScoreUpdater<L> {
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
 			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals,
-			final double inertiaResidual, final double individualUtilityChange, Double sumOfInteractionResiduals2) {
+			// final double inertiaResidual,
+			final double individualUtilityChange, Double sumOfInteractionResiduals2) {
 
 		this.interactionResiduals = interactionResiduals;
-		this.inertiaResidual = inertiaResidual;
+		// this.inertiaResidual = inertiaResidual;
 
-		this.individualUtilityChange = individualUtilityChange;
+		// this.individualUtilityChange = individualUtilityChange;
 
 		/*
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
@@ -95,7 +96,7 @@ public class ScoreUpdater<L> {
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 
-		this.inertiaResidual -= (1.0 - meanLambda) * this.individualUtilityChange;
+		// this.inertiaResidual -= (1.0 - meanLambda) * this.individualUtilityChange;
 
 		// Compute individual score terms.
 
@@ -119,12 +120,17 @@ public class ScoreUpdater<L> {
 				sumOfWeightedIndividualChangesTimesInteractionResiduals, this.sumOfInteractionResiduals2);
 		final double interactionIfZero = this.expectedInteraction(0.0, sumOfWeightedIndividualChanges2,
 				sumOfWeightedIndividualChangesTimesInteractionResiduals, this.sumOfInteractionResiduals2);
-		final double inertiaIfOne = this.expectedInertia(1.0, individualUtilityChange, inertiaResidual);
-		final double inertiaIfMean = this.expectedInertia(meanLambda, individualUtilityChange, inertiaResidual);
-		final double inertiaIfZero = this.expectedInertia(0.0, individualUtilityChange, inertiaResidual);
+		// final double inertiaIfOne = this.expectedInertia(1.0,
+		// individualUtilityChange, inertiaResidual);
+		// final double inertiaIfMean = this.expectedInertia(meanLambda,
+		// individualUtilityChange, inertiaResidual);
+		// final double inertiaIfZero = this.expectedInertia(0.0,
+		// individualUtilityChange, inertiaResidual);
 
-		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean);
-		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean);
+		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean)
+				- beta * (1.0 - meanLambda) * individualUtilityChange;
+		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean)
+				- beta * (0.0 - meanLambda) * individualUtilityChange;
 	}
 
 	private double expectedInteraction(final double lambda, final double sumOfWeightedIndividualChanges2,
@@ -134,10 +140,11 @@ public class ScoreUpdater<L> {
 				+ 2.0 * lambda * sumOfWeightedIndividualChangesTimesInteractionResiduals + sumOfInteractionResiduals2;
 	}
 
-	private double expectedInertia(final double lambda, final double individualUtilityChange,
-			final double inertiaResidual) {
-		return (1.0 - lambda) * individualUtilityChange + inertiaResidual;
-	}
+	// private double expectedInertia(final double lambda, final double
+	// individualUtilityChange,
+	// final double inertiaResidual) {
+	// return (1.0 - lambda) * individualUtilityChange + inertiaResidual;
+	// }
 
 	// -------------------- IMPLEMENTATION --------------------
 
@@ -155,17 +162,17 @@ public class ScoreUpdater<L> {
 			this.interactionResiduals.put(spaceObj, timeBin, newResidual);
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
-		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
+		// this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
 	}
 
 	// -------------------- GETTERS --------------------
 
-	public double getUpdatedInertiaResidual() {
-		if (!this.residualsUpdated) {
-			throw new RuntimeException("Residuals have not yet updated.");
-		}
-		return this.inertiaResidual;
-	}
+	// public double getUpdatedInertiaResidual() {
+	// if (!this.residualsUpdated) {
+	// throw new RuntimeException("Residuals have not yet updated.");
+	// }
+	// return this.inertiaResidual;
+	// }
 
 	public double getUpdatedSumOfInteractionResiduals2() {
 		if (!this.residualsUpdated) {
