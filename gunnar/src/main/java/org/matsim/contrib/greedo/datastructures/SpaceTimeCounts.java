@@ -24,8 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.matsim.contrib.greedo.ScoreUpdater;
-
 import floetteroed.utilities.Tuple;
 
 /**
@@ -52,7 +50,7 @@ public class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final boolean weighted) {
+	private SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final boolean weighted) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
 				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
@@ -60,6 +58,10 @@ public class SpaceTimeCounts<L> {
 				}
 			}
 		}
+	}
+
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
+		this(parent, true);
 	}
 
 	private static <L> Tuple<L, Integer> newKey(final L spaceObj, final Integer timeBin) {

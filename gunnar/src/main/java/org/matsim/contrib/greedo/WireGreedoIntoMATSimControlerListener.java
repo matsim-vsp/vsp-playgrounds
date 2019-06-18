@@ -36,8 +36,6 @@ import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AsymptoticAgeLogger;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
-import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityTotal;
-import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
 import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
@@ -46,10 +44,6 @@ import org.matsim.contrib.greedo.logging.AvgReplannerSize;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.MATSimIteration;
-import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
-import org.matsim.contrib.greedo.logging.NormalizedUnweightedNonReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.NormalizedUnweightedReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.ReplanningRecipe;
@@ -112,11 +106,9 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
 		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(this.greedoConfig);
 
-		// TODO Reduce logging based on "detailedLogging" config switch.
 		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getMaxRelativeMemoryLength(),
 				new File("./output/"), "asymptoticAges.", ".txt");
 
-		// TODO Reduce logging based on "detailedLogging" config switch.
 		this.statsWriter = new StatisticsWriter<>(
 				new File(services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(), false);
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
@@ -139,15 +131,9 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 				this.asymptoticAgeLogger.newAvgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelationStatistic());
 		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerSize());
-		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
-		this.statsWriter.addSearchStatistic(new NormalizedUnweightedReplannerCountDifferences2());
-		this.statsWriter.addSearchStatistic(new NormalizedUnweightedNonReplannerCountDifferences2());
-		this.statsWriter.addSearchStatistic(new NormalizedWeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedWeightedNonReplannerCountDifferences2());
 		this.statsWriter.addSearchStatistic(new AvgNonReplannerUtilityChange());
-		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityTotal());
-		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());

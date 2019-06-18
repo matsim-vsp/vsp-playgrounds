@@ -162,7 +162,7 @@ public class AsymptoticAgeLogger {
 		}
 		return entry;
 	}
-
+	
 	// -------------------- IMPLEMENTATION --------------------
 
 	public void update(final LogDataWrapper logDataWrapper) {

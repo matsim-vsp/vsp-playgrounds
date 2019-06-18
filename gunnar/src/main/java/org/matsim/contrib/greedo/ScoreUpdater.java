@@ -42,7 +42,7 @@ import floetteroed.utilities.Tuple;
  *            the space coordinate type
  *
  */
-public class ScoreUpdater<L> {
+class ScoreUpdater<L> {
 
 	// -------------------- MEMBERS --------------------
 
@@ -58,7 +58,7 @@ public class ScoreUpdater<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
+	ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
 			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals,
 			final double individualUtilityChange) {
 
@@ -66,14 +66,13 @@ public class ScoreUpdater<L> {
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, true);
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, true));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
 
 		/*
 		 * Update the interaction residuals.
 		 */
 		this.interactionResiduals = interactionResiduals;
-
 		for (Map.Entry<Tuple<L, Integer>, Double> entry : this.individualWeightedChanges.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
@@ -90,7 +89,6 @@ public class ScoreUpdater<L> {
 		 */
 		double sumOfWeightedIndividualChanges2 = 0.0;
 		double sumOfWeightedIndividualChangesTimesInteractionResiduals = 0.0;
-
 		for (Map.Entry<Tuple<L, Integer>, Double> entry : this.individualWeightedChanges.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
@@ -100,17 +98,15 @@ public class ScoreUpdater<L> {
 					* this.interactionResiduals.getBinValue(spaceObj, timeBin);
 		}
 
-		final double interactionIfOne = this.expectedInteraction(1.0, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals);
-		final double interactionIfMean = this.expectedInteraction(meanLambda, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals);
-		final double interactionIfZero = this.expectedInteraction(0.0, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals);
+		final double scoreIfOne = this.expectedInteraction(1.0, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * 1.0 * individualUtilityChange;
+		final double scoreIfMean = this.expectedInteraction(meanLambda, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * meanLambda * individualUtilityChange;
+		final double scoreIfZero = this.expectedInteraction(0.0, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * 0.0 * individualUtilityChange;
 
-		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean)
-				- beta * (1.0 - meanLambda) * individualUtilityChange;
-		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean)
-				- beta * (0.0 - meanLambda) * individualUtilityChange;
+		this.scoreChangeIfOne = scoreIfOne - scoreIfMean;
+		this.scoreChangeIfZero = scoreIfZero - scoreIfMean;
 	}
 
 	// -------------------- INTERNALS --------------------
@@ -123,7 +119,7 @@ public class ScoreUpdater<L> {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	public void updateResiduals(final double newLambda) {
+	void updateResiduals(final double newLambda) {
 		if (this.residualsUpdated) {
 			throw new RuntimeException("Residuals have already been updated.");
 		}
@@ -140,11 +136,11 @@ public class ScoreUpdater<L> {
 
 	// -------------------- GETTERS --------------------
 
-	public double getScoreChangeIfOne() {
+	double getScoreChangeIfOne() {
 		return this.scoreChangeIfOne;
 	}
 
-	public double getScoreChangeIfZero() {
+	double getScoreChangeIfZero() {
 		return this.scoreChangeIfZero;
 	}
 }

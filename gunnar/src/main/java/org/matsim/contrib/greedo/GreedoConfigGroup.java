@@ -347,21 +347,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
 	}
 
-	// -------------------- detailedLogging --------------------
-
-	// TODO Some of these details may be necessary in ReplannerIdentifier.
-	private boolean detailedLogging = true;
-
-	@StringGetter("detailedLogging")
-	public boolean getDetailedLogging() {
-		return this.detailedLogging;
-	}
-
-	@StringSetter("detailedLogging")
-	public void setDetailedLogging(final boolean detailedLogging) {
-		this.detailedLogging = detailedLogging;
-	}
-
 	// -------------------- adjustStrategyWeights --------------------
 
 	private boolean adjustStrategyWeights = true;
