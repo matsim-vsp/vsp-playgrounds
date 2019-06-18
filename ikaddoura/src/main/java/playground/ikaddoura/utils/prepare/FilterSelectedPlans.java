@@ -39,8 +39,8 @@ public class FilterSelectedPlans {
 	
 	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
 	
-	private final static String inputPlans = "/Users/ihab/Desktop/ils4a/matsim-berlin/scenarios/berlin-v5.3-1pct/output-berlin-v5.3-1pct/berlin-v5.3-1pct.output_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Desktop/ils4a/matsim-berlin/scenarios/berlin-v5.3-1pct/output-berlin-v5.3-1pct/berlin-v5.3-1pct.output_plans.selected.xml.gz";
+	private final static String inputPlans = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/output_bln_5.4_1pct/run_bln_5.4_1pct.output_plans.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/output_bln_5.4_1pct/run_bln_5.4_1pct.output_plans.selected.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	

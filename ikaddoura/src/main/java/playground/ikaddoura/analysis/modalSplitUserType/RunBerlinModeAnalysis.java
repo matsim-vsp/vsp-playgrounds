@@ -41,8 +41,8 @@ public class RunBerlinModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "2019-04-11_senozon-berlin-run1";
-		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/avoev/2019-04-11_senozon-berlin-run1/";
+		final String runId = "berlin-v5.4-10pct_bln_5";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/output-berlin-v5.4-10pct_bln_5/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
@@ -62,13 +62,13 @@ public class RunBerlinModeAnalysis {
 		
 		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
 		
-//		filter.setSubpopulation("person");
+		filter.setSubpopulation("person");
 		
-//		filter.setPersonAttribute("berlin");
-//		filter.setPersonAttributeName("home-activity-zone");
+		filter.setPersonAttribute("berlin");
+		filter.setPersonAttributeName("home-activity-zone");
 		
-		filter.setZoneFile("/Users/ihab/Documents/workspace/shared-svn/projects/avoev/matsim-input-files/berlin/berlin.shp");
-		filter.setRelevantActivityType("home");
+//		filter.setZoneFile("/Users/ihab/Documents/workspace/shared-svn/projects/avoev/matsim-input-files/berlin/berlin.shp");
+//		filter.setRelevantActivityType("home");
 		
 		filter.preProcess(scenario);
 				
