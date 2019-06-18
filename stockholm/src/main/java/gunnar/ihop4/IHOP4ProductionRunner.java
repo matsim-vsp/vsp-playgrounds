@@ -52,7 +52,6 @@ import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarR
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -237,20 +236,22 @@ public class IHOP4ProductionRunner {
 
 		if (ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder() != null) {
 
-			final int simulatedSensorDataExtractionInterval;
-			if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
-				simulatedSensorDataExtractionInterval = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class)
-						.getIterationsPerCycle();
-			} else {
-				simulatedSensorDataExtractionInterval = 1;
-			}
+			System.err.println("Need to update this code to new Greedo.");
+			System.exit(0);
+			// final int simulatedSensorDataExtractionInterval;
+			// if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
+			// simulatedSensorDataExtractionInterval = ConfigUtils.addOrGetModule(config,
+			// PSimConfigGroup.class)
+			// .getIterationsPerCycle();
+			// } else {
+			// simulatedSensorDataExtractionInterval = 1;
+			// }
 
 			// final TollZoneMeasurementReader measReader = new
 			// TollZoneMeasurementReader(config);
 			final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(
 					ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
-					new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
-					simulatedSensorDataExtractionInterval);
+					new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24), 1); // simulatedSensorDataExtractionInterval);
 
 			measReader.setStartEndTime_s(startTime_s, endTime_s);
 			measReader.run();
@@ -748,16 +749,19 @@ public class IHOP4ProductionRunner {
 					this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
 						@Override
 						public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-							if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
-									.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)) {
-								try {
-									FileUtils.writeStringToFile(
-											new File(config.controler().getOutputDirectory(), "objfct.log"),
-											overallObjectiveFunction.value(null) + "\n", true);
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
-							}
+							System.err.println("Need to update this code");
+							System.exit(0);
+							// if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
+							// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0))
+							// {
+							// try {
+							// FileUtils.writeStringToFile(
+							// new File(config.controler().getOutputDirectory(), "objfct.log"),
+							// overallObjectiveFunction.value(null) + "\n", true);
+							// } catch (IOException e) {
+							// throw new RuntimeException(e);
+							// }
+							// }
 						}
 					});
 				}

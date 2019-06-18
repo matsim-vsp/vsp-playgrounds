@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.greedo.Greedo;
 import org.matsim.contrib.greedo.GreedoConfigGroup;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -118,7 +117,7 @@ public class WUMProductionRunner {
 		}
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup()); // , new PSimConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -188,9 +187,9 @@ public class WUMProductionRunner {
 	// TODO Maintaining only this!
 	static void runProductionScenarioWithSampersDynamics() {
 
-		final String configFileName = "./config.xml";
-//		 final String configFileName =
-//		 "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+// 		final String configFileName = "./config.xml";
+		 final String configFileName =
+		 "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
