@@ -31,6 +31,7 @@ import org.matsim.core.gbl.MatsimRandom;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class Mah2009Recipe implements ReplannerIdentifierRecipe {
 
 	// -------------------- CONSTANTS --------------------

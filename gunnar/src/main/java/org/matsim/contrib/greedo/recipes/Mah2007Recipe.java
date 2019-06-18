@@ -37,6 +37,7 @@ import org.matsim.contrib.greedo.LogDataWrapper;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class Mah2007Recipe implements ReplannerIdentifierRecipe {
 
 	// -------------------- MEMBERS --------------------
