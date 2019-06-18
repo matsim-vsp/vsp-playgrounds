@@ -70,7 +70,6 @@ public class TelematicsParkingSearchController {
      * zone investigated by the ZoneParkingManager
      */
     public static void main(String[] args){
-//        Config config = ConfigUtils.loadConfig("parkingsearch/config.xml", new ParkingSearchConfigGroup());
 
 //        String configStr = "C:/Users/Work/VSP/WiMi/TeachParking/input/config.xml";
         String configStr = args[0];
