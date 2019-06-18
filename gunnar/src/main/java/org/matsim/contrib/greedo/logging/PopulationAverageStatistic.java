@@ -28,19 +28,19 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public abstract class PopulationAverageStatistic implements Statistic<LogDataWrapper> {
+abstract class PopulationAverageStatistic implements Statistic<LogDataWrapper> {
 
-	@Override
-	public String label() {
-		return this.getClass().getSimpleName();
-	}
-
-	protected String averageOrEmpty(final Double sum, final Integer count) {
+	String averageOrEmpty(final Double sum, final Integer count) {
 		if ((sum != null) && (count != null)) {
 			return Double.toString(sum / count);
 		} else {
 			return "";
 		}
+	}
+
+	@Override
+	public String label() {
+		return this.getClass().getSimpleName();
 	}
 
 	@Override

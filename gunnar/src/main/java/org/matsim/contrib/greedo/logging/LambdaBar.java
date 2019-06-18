@@ -32,7 +32,7 @@ public class LambdaBar implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return LambdaBar.class.getSimpleName();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
