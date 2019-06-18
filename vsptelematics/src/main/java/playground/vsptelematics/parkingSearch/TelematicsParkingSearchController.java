@@ -51,7 +51,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.PrepareForSim;
 import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.listener.ControlerListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.qsim.PopulationModule;
@@ -112,8 +111,10 @@ public class TelematicsParkingSearchController {
             }
         });
 
-        int simulatedHours = (int) ( (config.qsim().getEndTime() - config.qsim().getStartTime()) / 3600 );
-        installParkingModules(controler, scenario, zones, simulatedHours);
+        int start = (int) (config.qsim().getStartTime() / 3600);
+        int end = (int) (config.qsim().getEndTime() / 3600);
+
+        installParkingModules(controler, scenario, zones, start, end);
         controler.run();
 
     }
@@ -152,7 +153,7 @@ public class TelematicsParkingSearchController {
 
     }
 
-    private static void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int simulatedHours) {
+    private static void installParkingModules(Controler controler, Scenario scenario, String[] pathToZones, int startOfEvaluatedHours, int endOfEvaluatedHours) {
             // No need to route car routes in Routing module in advance, as they are
             // calculated on the fly
             if (!controler.getConfig().getModules().containsKey(DvrpConfigGroup.GROUP_NAME)){
@@ -186,7 +187,7 @@ public class TelematicsParkingSearchController {
                     //analysis
 //                    addMobsimListenerBinding().to(TelematicsZoneOccupationListener.class).asEagerSingleton();
                     addMobsimListenerBinding().to(ZoneParkingOccupationListener.class).asEagerSingleton();
-                    SearchTimeEvaluator parkingEvaluator = new SearchTimeEvaluator(scenario.getNetwork().getLinks().keySet(), simulatedHours);
+                    SearchTimeEvaluator parkingEvaluator = new SearchTimeEvaluator(scenario.getNetwork().getLinks().keySet(), startOfEvaluatedHours, endOfEvaluatedHours);
                     addEventHandlerBinding().toInstance(parkingEvaluator);
 
                     ParkingSearchEvaluator walkEvaluator = new ParkingSearchEvaluator();

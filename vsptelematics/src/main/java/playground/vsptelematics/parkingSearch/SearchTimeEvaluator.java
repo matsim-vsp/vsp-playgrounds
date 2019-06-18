@@ -26,23 +26,25 @@ import java.util.*;
  * @author tschlenther
  *
  */
-public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartParkingSearchEventHandler, PersonEntersVehicleEventHandler, IterationEndsListener {
+ class SearchTimeEvaluator implements PersonArrivalEventHandler, StartParkingSearchEventHandler, PersonEntersVehicleEventHandler, IterationEndsListener {
 
 	Map<Id<Person>,Double> searchTime = new HashMap<>();
 	Map<Id<Vehicle>,Id<Person>> drivers = new HashMap<>();
 	private Set<Id<Link>> monitoredLinks;
 	private List<String> linkTimeStamps = new ArrayList<>();
-	
+
 	//we count the parking procedures and the total spent parking time per slot
 	//number of slots = simulatedHours * nrOfSLotsPerHour
-	private int simulatedHours;
+	private double monitoredHoursStart;
+	private double monitoredHoursEnd;
 	private int nrOfSlotsPerHour = 12;
-	private double[] parkingProcedures = new double[simulatedHours*nrOfSlotsPerHour];
-	private double[] parkingTime = new double[simulatedHours*nrOfSlotsPerHour];
+	private double[] parkingProcedures = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
+	private double[] parkingTime = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
 	
-	public SearchTimeEvaluator(Set<Id<Link>> monitoredLinks, int simulatedHours) {
+	public SearchTimeEvaluator(Set<Id<Link>> monitoredLinks, double startTime, double endTime) {
 		this.monitoredLinks = monitoredLinks;
-		this.simulatedHours = simulatedHours;
+		this.monitoredHoursStart = startTime;
+		this.monitoredHoursEnd = endTime;
 	}
 	
 	@Override
@@ -50,8 +52,8 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 		this.searchTime.clear();;
 		this.drivers.clear();
 		this.linkTimeStamps.clear();
-		this.parkingProcedures = new double[simulatedHours*nrOfSlotsPerHour];
-		this.parkingTime = new double[simulatedHours*nrOfSlotsPerHour];
+		this.parkingProcedures = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
+		this.parkingTime = new double[(int) (monitoredHoursEnd-monitoredHoursStart)*nrOfSlotsPerHour];
 	}
 
 	@Override
@@ -78,7 +80,7 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 				double parkingTime = event.getTime() - searchTime.remove(event.getPersonId());
 				int hour = (int) (event.getTime() / 3600);
 				int slot = (int) (event.getTime()/ (3600/nrOfSlotsPerHour) );
-				if ((slot)< (simulatedHours*nrOfSlotsPerHour) ){
+				if ( monitoredHoursStart*nrOfSlotsPerHour < slot && slot < monitoredHoursEnd*nrOfSlotsPerHour ){
 					this.parkingProcedures[slot]++;
 					this.parkingTime[slot]+=parkingTime;
 					String stamp = "" + hour  + ";" + slot + ";" + df.format(event.getTime()) + ";" + event.getLinkId() + ";"+ df.format(parkingTime);
