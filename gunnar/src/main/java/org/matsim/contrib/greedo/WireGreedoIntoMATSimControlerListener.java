@@ -201,7 +201,6 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 						ages.getWeightsView().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
 								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
 						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
-				listener.resetOnceAndForAll(iteration());
 				hypotheticalSlotUsageListeners.add(listener);
 				return listener;
 			}
@@ -222,13 +221,13 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 		final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> hypotheticalSlotUsageIndicators = new LinkedHashMap<>();
 		for (SlotUsageListener listener : this.hypotheticalSlotUsageListeners) {
-			hypotheticalSlotUsageIndicators.putAll(listener.getNewIndicatorView());
+			hypotheticalSlotUsageIndicators.putAll(listener.getIndicatorView());
 		}
 		this.hypotheticalSlotUsageListeners.clear();
 
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(
 				this.replanningEfficiencyEstimator.getBeta(), this.greedoConfig, this.iteration(),
-				this.physicalSlotUsageListener.getNewIndicatorView(), hypotheticalSlotUsageIndicators,
+				this.physicalSlotUsageListener.getIndicatorView(), hypotheticalSlotUsageIndicators,
 				this.utilities.newSummaryStatistics().personId2expectedUtilityChange);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
