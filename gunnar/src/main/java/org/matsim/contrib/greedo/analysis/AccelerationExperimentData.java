@@ -47,15 +47,15 @@ public class AccelerationExperimentData {
 	private final Double[][] performanceCorrelations;
 	private final Double[][] ageCorrelations;
 
-	// private double[][] agePercentile10;
-	// private double[][] agePercentile20;
-	// private double[][] agePercentile30;
-	// private double[][] agePercentile40;
-	// private double[][] agePercentile50;
-	// private double[][] agePercentile60;
-	// private double[][] agePercentile70;
-	// private double[][] agePercentile80;
-	// private double[][] agePercentile90;
+	private final Double[][] agePercentile10;
+	private final Double[][] agePercentile20;
+	private final Double[][] agePercentile30;
+	private final Double[][] agePercentile40;
+	private final Double[][] agePercentile50;
+	private final Double[][] agePercentile60;
+	private final Double[][] agePercentile70;
+	private final Double[][] agePercentile80;
+	private final Double[][] agePercentile90;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -76,16 +76,15 @@ public class AccelerationExperimentData {
 		this.expectedUtilityChanges = new Double[scenarioCnt][iterationCnt];
 		this.performanceCorrelations = new Double[scenarioCnt][iterationCnt];
 		this.ageCorrelations = new Double[scenarioCnt][iterationCnt];
-
-		// this.agePercentile10 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile20 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile30 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile40 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile50 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile60 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile70 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile80 = new double[scenarioCnt][iterationCnt];
-		// this.agePercentile90 = new double[scenarioCnt][iterationCnt];
+		this.agePercentile10 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile20 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile30 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile40 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile50 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile60 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile70 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile80 = new Double[scenarioCnt][iterationCnt];
+		this.agePercentile90 = new Double[scenarioCnt][iterationCnt];
 
 		for (int scenarioIndex = firstScenarioIndex; scenarioIndex < firstScenarioIndex
 				+ scenarioCnt; scenarioIndex++) {
@@ -97,7 +96,11 @@ public class AccelerationExperimentData {
 			AccelerationLogHandler handler = new AccelerationLogHandler(this.betas[scenarioIndex],
 					this.realizedLambdas[scenarioIndex], this.realizedUtilities[scenarioIndex],
 					this.expectedUtilityChanges[scenarioIndex], this.performanceCorrelations[scenarioIndex],
-					this.ageCorrelations[scenarioIndex]);
+					this.ageCorrelations[scenarioIndex], this.agePercentile10[scenarioIndex],
+					this.agePercentile20[scenarioIndex], this.agePercentile30[scenarioIndex],
+					this.agePercentile40[scenarioIndex], this.agePercentile50[scenarioIndex],
+					this.agePercentile60[scenarioIndex], this.agePercentile70[scenarioIndex],
+					this.agePercentile80[scenarioIndex], this.agePercentile90[scenarioIndex]);
 			parser.setDelimiterRegex("\\t");
 			parser.setOmitEmptyColumns(false);
 			try {
@@ -152,7 +155,7 @@ public class AccelerationExperimentData {
 	YIntervalSeries newRealizedLambdaSeries(final String key) {
 		return this.newSeries(key, this.realizedLambdas);
 	}
-	
+
 	YIntervalSeries newRealizedUtilitiesSeries(final String key) {
 		return this.newSeries(key, this.realizedUtilities);
 	}
@@ -167,6 +170,42 @@ public class AccelerationExperimentData {
 
 	YIntervalSeries newAgeCorrelationSeries(final String key) {
 		return this.newSeries(key, this.ageCorrelations);
+	}
+
+	YIntervalSeries newAgePercentile10Series(final String key) {
+		return this.newSeries(key, this.agePercentile10);
+	}
+
+	YIntervalSeries newAgePercentile20Series(final String key) {
+		return this.newSeries(key, this.agePercentile20);
+	}
+
+	YIntervalSeries newAgePercentile30Series(final String key) {
+		return this.newSeries(key, this.agePercentile30);
+	}
+
+	YIntervalSeries newAgePercentile40Series(final String key) {
+		return this.newSeries(key, this.agePercentile40);
+	}
+
+	YIntervalSeries newAgePercentile50Series(final String key) {
+		return this.newSeries(key, this.agePercentile50);
+	}
+
+	YIntervalSeries newAgePercentile60Series(final String key) {
+		return this.newSeries(key, this.agePercentile60);
+	}
+
+	YIntervalSeries newAgePercentile70Series(final String key) {
+		return this.newSeries(key, this.agePercentile70);
+	}
+
+	YIntervalSeries newAgePercentile80Series(final String key) {
+		return this.newSeries(key, this.agePercentile80);
+	}
+
+	YIntervalSeries newAgePercentile90Series(final String key) {
+		return this.newSeries(key, this.agePercentile90);
 	}
 
 }

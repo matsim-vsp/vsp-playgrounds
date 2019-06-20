@@ -21,21 +21,16 @@ package org.matsim.contrib.greedo.analysis;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.io.File;
-import java.io.IOException;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DeviationRenderer;
 import org.jfree.data.xy.YIntervalSeries;
 import org.jfree.data.xy.YIntervalSeriesCollection;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 
 /**
  *
@@ -46,13 +41,21 @@ public class AccelerationAnalyzer {
 
 	static void save(final JFreeChart chart, final String fileName) {
 		try {
-			ChartUtilities.saveChartAsPNG(new File(fileName + ".png"), chart, 1000, 600);
-			SVGGraphics2D g2 = new SVGGraphics2D(500, 300);
-			Rectangle r = new Rectangle(0, 0, 500, 300);
-			chart.draw(g2, r);
-			SVGUtils.writeToSVG(new File(fileName + ".svg"), g2.getSVGElement());
+			ChartUtilities.saveChartAsPNG(new File(fileName + ".png"), chart, 2000, 1200);
 
-		} catch (IOException e) {
+			// SVGGraphics2D g2 = new SVGGraphics2D(500, 300);
+			// Rectangle r = new Rectangle(0, 0, 500, 300);
+			// chart.draw(g2, r);
+			// SVGUtils.writeToSVG(new File(fileName + ".svg"), g2.getSVGElement());
+
+			// Transcoder transcoder = new PDFTranscoder();
+			// TranscoderInput transcoderInput = new TranscoderInput(new FileInputStream(new
+			// File(fileName + ".svg")));
+			// TranscoderOutput transcoderOutput = new TranscoderOutput(new
+			// FileOutputStream(new File(fileName + ".pdf")));
+			// transcoder.transcode(transcoderInput, transcoderOutput);
+
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -98,7 +101,8 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // REALIZED LAMBDA
-			final YIntervalSeries realizedLambdas = acceptNegativeDisappointment.newRealizedLambdaSeries("unconstrained");
+			final YIntervalSeries realizedLambdas = acceptNegativeDisappointment
+					.newRealizedLambdaSeries("unconstrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(realizedLambdas);
@@ -131,7 +135,8 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // REALIZED UTILITY
-			final YIntervalSeries realizedUtilities = acceptNegativeDisappointment.newRealizedUtilitiesSeries("unconstrained");
+			final YIntervalSeries realizedUtilities = acceptNegativeDisappointment
+					.newRealizedUtilitiesSeries("unconstrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(realizedUtilities);
@@ -164,7 +169,8 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // EXPECTED UTILITY CHANGES
-			final YIntervalSeries expectedUtilityChanges = acceptNegativeDisappointment.newExpectedUtilityChangesSeries("unconstrained");
+			final YIntervalSeries expectedUtilityChanges = acceptNegativeDisappointment
+					.newExpectedUtilityChangesSeries("unconstrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(expectedUtilityChanges);
@@ -197,7 +203,8 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // PERFORMANCE CORRELATIONS
-			final YIntervalSeries performanceCorrelations = acceptNegativeDisappointment.newPerformanceCorrelationSeries("unconstrained");
+			final YIntervalSeries performanceCorrelations = acceptNegativeDisappointment
+					.newPerformanceCorrelationSeries("unconstrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(performanceCorrelations);
@@ -230,7 +237,8 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // PERFORMANCE CORRELATIONS
-			final YIntervalSeries ageCorrelations = acceptNegativeDisappointment.newAgeCorrelationSeries("unconstrained");
+			final YIntervalSeries ageCorrelations = acceptNegativeDisappointment
+					.newAgeCorrelationSeries("unconstrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(ageCorrelations);
@@ -260,6 +268,47 @@ public class AccelerationAnalyzer {
 			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
 			save(chart, "age-correlations");
+		}
+
+		{ // AGE PERCENTILES
+			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+
+			final YIntervalSeries agePercentile10 = acceptNegativeDisappointment
+					.newAgePercentile10Series("10% unconstrained");
+			final YIntervalSeries agePercentile50 = acceptNegativeDisappointment
+					.newAgePercentile50Series("50% unconstrained");
+			final YIntervalSeries agePercentile90 = acceptNegativeDisappointment
+					.newAgePercentile90Series("90% unconstrained");
+
+			dataset.addSeries(agePercentile10);
+			dataset.addSeries(agePercentile50);
+			dataset.addSeries(agePercentile90);
+
+			final JFreeChart chart = ChartFactory.createXYLineChart("age percentiles", // chart title
+					"iteration", // x axis label
+					"percentile", // y axis label
+					dataset, // data
+					PlotOrientation.VERTICAL, true, // include legend
+					false, // tooltips
+					false // urls
+			);
+			chart.setBackgroundPaint(null);
+
+			final XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setBackgroundPaint(null);
+
+			final DeviationRenderer renderer = new DeviationRenderer(true, false);
+			renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
+			renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
+			plot.setRenderer(renderer);
+
+			// final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			// yAxis.setAutoRangeIncludesZero(false);
+			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+			save(chart, "age-percentiles");
 		}
 
 		System.out.println("...DONE");

@@ -41,18 +41,39 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 	private final Double[] expectedUtilityChanges;
 	private final Double[] performanceCorrelations;
 	private final Double[] ageCorrelations;
+	private final Double[] agePercentiles10;
+	private final Double[] agePercentiles20;
+	private final Double[] agePercentiles30;
+	private final Double[] agePercentiles40;
+	private final Double[] agePercentiles50;
+	private final Double[] agePercentiles60;
+	private final Double[] agePercentiles70;
+	private final Double[] agePercentiles80;
+	private final Double[] agePercentiles90;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public AccelerationLogHandler(final Double[] betas, final Double[] realizedLambdas,
 			final Double[] realizedUtilities, final Double[] expectedUtilityChanges,
-			final Double[] performanceCorrelations, final Double[] ageCorrelations) {
+			final Double[] performanceCorrelations, final Double[] ageCorrelations, final Double[] agePercentiles10,
+			final Double[] agePercentiles20, final Double[] agePercentiles30, final Double[] agePercentiles40,
+			final Double[] agePercentiles50, final Double[] agePercentiles60, final Double[] agePercentiles70,
+			final Double[] agePercentiles80, final Double[] agePercentiles90) {
 		this.betas = betas;
 		this.realizedLambdas = realizedLambdas;
 		this.realizedUtilities = realizedUtilities;
 		this.expectedUtilityChanges = expectedUtilityChanges;
 		this.performanceCorrelations = performanceCorrelations;
 		this.ageCorrelations = ageCorrelations;
+		this.agePercentiles10 = agePercentiles10;
+		this.agePercentiles20 = agePercentiles20;
+		this.agePercentiles30 = agePercentiles30;
+		this.agePercentiles40 = agePercentiles40;
+		this.agePercentiles50 = agePercentiles50;
+		this.agePercentiles60 = agePercentiles60;
+		this.agePercentiles70 = agePercentiles70;
+		this.agePercentiles80 = agePercentiles80;
+		this.agePercentiles90 = agePercentiles90;
 	}
 
 	// -------------------- INTERNALS --------------------
@@ -86,6 +107,16 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 				.doubleOrNull(this.getStringValue("Corr(DeltaX2,DeltaU-DeltaU*)"));
 		this.ageCorrelations[iteration] = this
 				.doubleOrNull(this.getStringValue("Corr(Age*ExpDeltaUtility;Similarity)"));
+		
+		this.agePercentiles10[iteration] = this.doubleOrNull(this.getStringValue("agePercentile10"));
+		this.agePercentiles20[iteration] = this.doubleOrNull(this.getStringValue("agePercentile20"));
+		this.agePercentiles30[iteration] = this.doubleOrNull(this.getStringValue("agePercentile30"));
+		this.agePercentiles40[iteration] = this.doubleOrNull(this.getStringValue("agePercentile40"));
+		this.agePercentiles50[iteration] = this.doubleOrNull(this.getStringValue("agePercentile50"));
+		this.agePercentiles60[iteration] = this.doubleOrNull(this.getStringValue("agePercentile60"));
+		this.agePercentiles70[iteration] = this.doubleOrNull(this.getStringValue("agePercentile70"));
+		this.agePercentiles80[iteration] = this.doubleOrNull(this.getStringValue("agePercentile80"));
+		this.agePercentiles90[iteration] = this.doubleOrNull(this.getStringValue("agePercentile90"));
 
 	}
 }
