@@ -35,6 +35,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AsymptoticAgeLogger;
+import org.matsim.contrib.greedo.logging.AvgAnticipatedDeltaUtility;
 import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
 import org.matsim.contrib.greedo.logging.AvgNonReplannerUtilityChange;
@@ -137,6 +138,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
 		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
+		this.statsWriter.addSearchStatistic(new AvgAnticipatedDeltaUtility());
 		this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newAvgPredictedDeltaUtility());
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(this.ages.newAgePercentile(percent));

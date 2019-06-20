@@ -258,16 +258,14 @@ class ReplannerIdentifier {
 			return this.replannerId2ageAtReplanning;
 		}
 
-		// public Double getSumOfUtilityChanges() {
-		// if ((this.sumOfReplannerUtilityChanges != null) &&
-		// (this.sumOfNonReplannerUtilityChanges != null)) {
-		// return (this.sumOfReplannerUtilityChanges +
-		// this.sumOfNonReplannerUtilityChanges);
-		// } else {
-		// return null;
-		// }
-		// }
-		//
+		public Double getSumOfAnticipatedUtilityChanges() {
+			if ((this.sumOfReplannerUtilityChanges != null) && (this.sumOfNonReplannerUtilityChanges != null)) {
+				return (this.sumOfReplannerUtilityChanges + this.sumOfNonReplannerUtilityChanges);
+			} else {
+				return null;
+			}
+		}
+
 		// public Double getSumOfUtilityChangesGivenUniformReplanning() {
 		// final Double sumOfUtilityChanges = this.getSumOfUtilityChanges();
 		// if ((sumOfUtilityChanges != null) && (this.lambdaBar != null)) {
