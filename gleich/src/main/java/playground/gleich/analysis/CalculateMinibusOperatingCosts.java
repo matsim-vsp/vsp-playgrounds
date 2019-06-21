@@ -93,7 +93,9 @@ public class CalculateMinibusOperatingCosts {
 		// input files with formal transit
 //		String inScheduleFile = "/home/gregor/git/capetown/output-minibus-w-transit/2018-11-09/ITERS/it.100/100.transitSchedule.xml.gz";
 //		String inTransitVehicleFile = "/home/gregor/git/capetown/output-minibus-w-transit/2018-11-09/ITERS/it.100/100.transitVehicles.xml.gz";
-		
+//		String networkFile = "/home/gregor/git/matsim/contribs/av/src/test/resources/intermodal_scenario/network.xml";
+//		String inScheduleFile = "/home/gregor/git/matsim/contribs/av/src/test/resources/intermodal_scenario/transitschedule.xml";
+//		String inTransitVehicleFile = "/home/gregor/git/matsim/contribs/av/src/test/resources/intermodal_scenario/transitVehicles.xml";
 
 		String coordRefSystem = "SA_Lo19";
 		String minibusIdentifier = "para_";
@@ -111,24 +113,35 @@ public class CalculateMinibusOperatingCosts {
 		double hoursDriven = 0.0;
 		double kmDriven = 0.0;
 		int numVehUsed = 0;
+		Set<Id<Vehicle>> vehIds = new HashSet<>();
+		
 		for (TransitLine line: inSchedule.getTransitLines().values()) {
 			for (TransitRoute route: line.getRoutes().values()) {
-				double routeLength = 0.0;
+				double routeLength = network.getLinks().get(route.getRoute().getStartLinkId()).getLength();
 				for (Id<Link> linkId: route.getRoute().getLinkIds()) {
 					routeLength = routeLength + network.getLinks().get(linkId).getLength();
 				}
-				Set<Id<Vehicle>> vehIds = new HashSet<>();
+				routeLength = routeLength + network.getLinks().get(route.getRoute().getEndLinkId()).getLength();
+
 				for (Departure dep: route.getDepartures().values()) {
 					if (! vehIds.contains(dep.getVehicleId())) {
 						vehIds.add(dep.getVehicleId());
 					}
 				}
-				double travelTime = route.getStops().get(route.getStops().size() - 1).getDepartureOffset() - route.getStops().get(0).getArrivalOffset(); // not exact
+				// travel time according to schedule, not exact
+//				double startTime = Double.isFinite(route.getStops().get(0).getArrivalOffset()) ? route.getStops().get(0).getArrivalOffset() : route.getStops().get(0).getDepartureOffset();
+				double endTime = Double.isFinite(route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) ? route.getStops().get(route.getStops().size() - 1).getDepartureOffset() : route.getStops().get(route.getStops().size() - 1).getArrivalOffset();
+				if (! (Double.isFinite(endTime)) ) {
+					throw new RuntimeException("no valid arrival or departure time offset at last stop of line " + line.getId() + " route " + route.getId());
+				}
+				double travelTime = endTime; // don't subtract offset at first stop, the vehicle will depart at offset 0 anyway ?!
 				hoursDriven = hoursDriven + travelTime * route.getDepartures().size() / 3600; // travelTime is in sec
 				kmDriven = kmDriven + routeLength * route.getDepartures().size() / 1000; // routeLength is in m
-				numVehUsed = numVehUsed + vehIds.size();
 			}
 		}
+		
+		// a vehicle could be used on multiple lines, so calculate according to that
+		numVehUsed = numVehUsed + vehIds.size();
 		
 		double totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
 		System.out.println("hoursDriven: " + hoursDriven + " -> cost " + hoursDriven * costPerHour);
@@ -136,5 +149,11 @@ public class CalculateMinibusOperatingCosts {
 		System.out.println("numVehUsed: " + numVehUsed + " -> cost " + numVehUsed * costPerDayFixVeh);
 		System.out.println("totalCost: " + totalCost);
 	}
+	
+	// tested with matsim/contribs/av/src/test/resources/intermodal_scenario
+//	hoursDriven: 26.666666666666664 -> cost 399.99999999999994
+//	kmDriven: 1000.0 -> cost 2000.0 ; km per veh per day: 250.0
+//	numVehUsed: 4 -> cost 2400.0
+//	totalCost: 4800.0
 
 }
