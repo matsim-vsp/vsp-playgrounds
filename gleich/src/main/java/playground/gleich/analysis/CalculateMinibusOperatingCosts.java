@@ -101,8 +101,8 @@ public class CalculateMinibusOperatingCosts {
 		String minibusIdentifier = "para_";
 		
 		double costPerHour = 15;
-		double costPerKm = 2;
-		double costPerDayFixVeh = 600;
+		double costPerKm = 1.75;
+		double costPerDayFixVeh = 700;
 		
 		// add vehicle types
 		CalculateMinibusOperatingCosts costCalculator = new CalculateMinibusOperatingCosts(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
