@@ -131,6 +131,10 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
 		double now = event.getSimulationTime() ;
+
+		if ( now < 8. * 3600. + 10.*60 ) {
+			return ;
+		}
 		
 		double replanningProba = 1. ;
 		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation(), replanningProba);

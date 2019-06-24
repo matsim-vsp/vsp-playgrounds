@@ -51,6 +51,7 @@ import org.matsim.core.replanning.strategies.KeepLastExecutedAsPlanStrategy;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.withinday.controller.ExecutedPlansServiceImpl;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
@@ -68,7 +69,7 @@ public class KNAccidentScenario {
 	private static final Logger log = Logger.getLogger(KNAccidentScenario.class) ;
 
 	enum RunType {base, manualDetour, bangbang, withinDayRerouting, day2day }
-	private static final RunType runType = RunType.day2day ;
+	private static final RunType runType = RunType.withinDayRerouting ;
 
 	@SuppressWarnings("unused")
 	private static final String KEEP_LAST_EXECUTED = "keepLastExecuted" ;
@@ -192,24 +193,37 @@ public class KNAccidentScenario {
 					case manualDetour:
 						this.addMobsimListenerBinding().to( ManualDetour.class ) ;
 						break;
-					case bangbang:
-						this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-						break;
-					case withinDayRerouting: {
+					case bangbang: {
 						Set<String> analyzedModes = new HashSet<>() ;
 						analyzedModes.add( TransportMode.car ) ;
-						final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
+						final WithinDayTravelTime travelTime = new WithinDayTravelTime(scenario, analyzedModes);
+
 						this.addEventHandlerBinding().toInstance( travelTime ) ;
 						this.addMobsimListenerBinding().toInstance( travelTime );
 						this.bind( TravelTime.class ).toInstance( travelTime );
+
+						this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+
+						break; }
+					case withinDayRerouting: {
+						Set<String> analyzedModes = new HashSet<>() ;
+						analyzedModes.add( TransportMode.car ) ;
+						final WithinDayTravelTime travelTime = new WithinDayTravelTime(scenario, analyzedModes);
+
+						this.addEventHandlerBinding().toInstance( travelTime ) ;
+						this.addMobsimListenerBinding().toInstance( travelTime );
+						this.bind( TravelTime.class ).toInstance( travelTime );
+
 						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
 						this.addMobsimListenerBinding().toInstance( abc ) ;
 						//				abc.setLastReplanningIteration(9);
 						abc.setReplanningProba(1.0);
+
 						break; }
 					case day2day: {
 						// this should do within-day replanning, but based on what was good solution in iteration before.  not sure if it works.
 						// kai, jun'19
+						this.bind( TravelTime.class ).to( LastIterationCarTraveltime.class ).in( Singleton.class ) ;
 
 						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
 						this.addMobsimListenerBinding().toInstance( abc ) ;
@@ -273,4 +287,11 @@ public class KNAccidentScenario {
 		}
 	}
 
+	private static class LastIterationCarTraveltime implements TravelTime {
+		@Inject private Map<String,TravelTime> travelTimes ;
+		@Override
+		public double getLinkTravelTime( Link link, double time, Person person, Vehicle vehicle ){
+			return travelTimes.get( TransportMode.car ).getLinkTravelTime( link, time, person, vehicle ) ;
+		}
+	}
 }

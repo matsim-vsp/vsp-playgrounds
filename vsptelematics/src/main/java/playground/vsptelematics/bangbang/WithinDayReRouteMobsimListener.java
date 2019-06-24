@@ -94,6 +94,10 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 			log.warn("NOT replanning"); 
 			return ;
 		}
+
+		if ( event.getSimulationTime() < 8.*3600. + 10.*60 ) {
+			return ;
+		}
 		
 		if ( init ){
 			init= false ;

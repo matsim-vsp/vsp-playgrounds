@@ -60,7 +60,8 @@ class KNTaxi {
 		OTFVisConfigGroup otfConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
 		otfConfig.setAgentSize(otfConfig.getAgentSize() * 2);
 
-		Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+//		Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+		Controler controler = null ;
 
 		if (removeNonPassengers) {
 			PopulationUtils.removePersonsNotUsingMode(TransportMode.taxi, controler.getScenario());
