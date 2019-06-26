@@ -44,10 +44,10 @@ public class OverwriteLinkLengths {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String input = "C:/Users/Work/Bachelor Arbeit/input/GridNet/grid_network_length200.xml";
-		String output = "C:/Users/Work/Bachelor Arbeit/input/GridNet/grid_network-NACHFRAGEZONEN_MARKED.xml.gz";
-//		overwriteGridNetworkLengthsAllToGivenLength(input, output, 200);
-		markZones(input, output);
+		String input = "C:/Users/Work/VSP/WiMi/TeachParking/input/grid/network.xml";
+		String output = "C:/Users/Work/VSP/WiMi/TeachParking/input/grid/network_200.xml";
+		overwriteGridNetworkLengthsAllToGivenLength(input, output, 200);
+//		markZones(input, output);
 	}
 
 	static void markZones(String inputFile, String outputFile){
@@ -121,7 +121,7 @@ public class OverwriteLinkLengths {
 			}
 		}
 		
-		log.info("---------- finished overwritung link lengths ----------- \n number of processed links: " + count);
+		log.info("---------- finished overwritung link lengths ----------- /n number of processed links: " + count);
 		
 		log.info("writing output to " + OUTPUT);
 		
@@ -144,6 +144,7 @@ public class OverwriteLinkLengths {
 		
 		for(Id<Link> ll : oldNet.getLinks().keySet()){
 			oldNet.getLinks().get(ll).setLength(wantedLinkLength);
+			oldNet.getLinks().get(ll).setCapacity(1000);
 		}
 				
 		log.info("---------- finished overwritung link lengths ----------- ");
@@ -158,7 +159,7 @@ public class OverwriteLinkLengths {
 	private static Set<Id<Link>> readLinks(String fileName) {
 		final Set<Id<Link>> links = new HashSet<>();
 		TabularFileParserConfig config = new TabularFileParserConfig();
-	    config.setDelimiterTags(new String[] {"\t"});
+	    config.setDelimiterTags(new String[] {"/t"});
 	    config.setFileName(fileName);
 	    new TabularFileParser().parse(config, new TabularFileHandler() {
 			@Override

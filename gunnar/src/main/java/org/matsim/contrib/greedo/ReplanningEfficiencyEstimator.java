@@ -19,24 +19,25 @@
  */
 package org.matsim.contrib.greedo;
 
-import org.apache.commons.math3.stat.correlation.Covariance;
-
+import floetteroed.utilities.math.Covariance;
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Regression;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
-import utils.RecursiveMovingAverage;
+import utils.MovingWindowAverage;
 
 /**
  * Estimates a model of the following form:
  * 
  * (1 / beta) * deltaX2 + (-delta / beta) = deltaU - deltaU*
  * 
+ * 
  * The regression coefficients are given by:
  * 
  * coeff0 = 1 / beta
  * 
  * coeff1 = -delta / beta
+ * 
  * 
  * One hence obtains:
  * 
@@ -52,63 +53,106 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- CONSTANTS --------------------
 
-	private final int minObservationCnt;
+	private final boolean constrainDeltaToZero;
+
+	private final boolean acceptNegativeDisappointment;
 
 	// -------------------- MEMBERS --------------------
 
-	private final Regression regression;
+	private final MovingWindowAverage anticipatedSlotUsageChanges2;
 
-	private final RecursiveMovingAverage deltaX2;
+	private final MovingWindowAverage anticipatedMinusRealizedUtilityChanges;
 
-	private final RecursiveMovingAverage anticipatedDeltaUMinusRealizedDeltaU;
+	private Double beta = null;
 
-	private Double lastPredictedTotalUtilityImprovement = null;
+	private Double delta = null;
 
-	private int observationCnt = 0;
+	private Double correlation = null;
+
+	private Double currentPredictedTotalUtilityImprovement = null;
+
+	private Double upcomingPredictedTotalUtilityImprovement = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplanningEfficiencyEstimator(final double inertia, final int minObservationCnt, final int covarianceMemoryLength) {
-		this.regression = new Regression(inertia, 2);
-		this.minObservationCnt = minObservationCnt;
-		this.deltaX2 = new RecursiveMovingAverage(covarianceMemoryLength);
-		this.anticipatedDeltaUMinusRealizedDeltaU = new RecursiveMovingAverage(covarianceMemoryLength);
+	ReplanningEfficiencyEstimator(final int minObservationCnt, final double maxRelativeMemoryLength,
+			final boolean constrainDeltaToZero, final boolean acceptNegativeDisappointment) {
+		this.anticipatedSlotUsageChanges2 = new MovingWindowAverage(minObservationCnt, Integer.MAX_VALUE,
+				maxRelativeMemoryLength);
+		this.anticipatedMinusRealizedUtilityChanges = new MovingWindowAverage(minObservationCnt, Integer.MAX_VALUE,
+				maxRelativeMemoryLength);
+		this.constrainDeltaToZero = constrainDeltaToZero;
+		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
+	}
+
+	ReplanningEfficiencyEstimator(final GreedoConfigGroup greedoConfig) {
+		this(greedoConfig.getMinAbsoluteMemoryLength(), greedoConfig.getMaxRelativeMemoryLength(),
+				greedoConfig.getConstrainDeltaToZero(), greedoConfig.getAcceptNegativeDisappointment());
+	}
+
+	// -------------------- INTERNALS --------------------
+
+	private Vector regrInput(final double deltaX2) {
+		if (this.constrainDeltaToZero) {
+			return new Vector(deltaX2);
+		} else {
+			return new Vector(deltaX2, 1.0);
+		}
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
+	void update(final LogDataWrapper logDataWrapper) {
+		this.update(logDataWrapper.getReplanningSummaryStatistics().sumOfReplannerUtilityChanges,
+				logDataWrapper.getUtilitySummaryStatistics().realizedUtilityChangeSum,
+				logDataWrapper.getReplanningSummaryStatistics().sumOfWeightedReplannerCountDifferences2);
+	}
+
+	private void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
 			final Double anticipatedSlotUsageChange2) {
+
 		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
-				&& (anticipatedSlotUsageChange2 != null) && (anticipatedUtilityChange - realizedUtilityChange >= 0)) {
-			
-			this.deltaX2.add(anticipatedSlotUsageChange2);
-			this.anticipatedDeltaUMinusRealizedDeltaU.add(anticipatedUtilityChange - realizedUtilityChange);
+				&& (anticipatedSlotUsageChange2 != null)
+				&& (this.acceptNegativeDisappointment || (anticipatedUtilityChange - realizedUtilityChange >= 0))) {
 
-			final Vector regressionInput = new Vector(anticipatedSlotUsageChange2, 1.0);
-			this.lastPredictedTotalUtilityImprovement = anticipatedUtilityChange
-					- this.regression.predict(regressionInput);
-			this.regression.update(regressionInput, anticipatedUtilityChange - realizedUtilityChange);
+			this.anticipatedSlotUsageChanges2.add(anticipatedSlotUsageChange2);
+			this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange - realizedUtilityChange);
+			final Double[] deltaX2 = this.anticipatedSlotUsageChanges2.getDataAsDoubleArray();
+			final Double[] deltaDeltaU = this.anticipatedMinusRealizedUtilityChanges.getDataAsDoubleArray();
+			final Regression regr = new Regression(1.0, this.constrainDeltaToZero ? 1 : 2);
+			final Covariance cov = new Covariance(2, 2);
+			for (int i = 0; i < deltaX2.length; i++) {
+				regr.update(this.regrInput(deltaX2[i]), deltaDeltaU[i]);
+				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
+				cov.add(covInput, covInput);
+			}
 
-			this.observationCnt++;
+			if (this.hadEnoughData()) {
+				this.beta = (1.0 / regr.getCoefficients().get(0));
+				this.delta = (this.constrainDeltaToZero ? 0.0 : (-regr.getCoefficients().get(1) * this.beta));
+				final Matrix _C = cov.getCovariance();
+				this.correlation = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+				this.currentPredictedTotalUtilityImprovement = this.upcomingPredictedTotalUtilityImprovement;
+			}
+			this.upcomingPredictedTotalUtilityImprovement = regr.predict(this.regrInput(anticipatedSlotUsageChange2));
 		}
 	}
 
-	boolean hadEnoughData() {
-		return (this.observationCnt >= this.minObservationCnt);
+	private boolean hadEnoughData() {
+		return (this.anticipatedSlotUsageChanges2.size() >= this.anticipatedSlotUsageChanges2.getMinLength());
 	}
 
 	Double getBeta() {
-		return (1.0 / this.regression.getCoefficients().get(0));
+		return this.beta;
 	}
 
 	Double getDelta() {
-		return (-this.regression.getCoefficients().get(1) / this.regression.getCoefficients().get(0));
+		return this.delta;
 	}
 
 	// --------------- IMPLEMENTATION OF Statistic FACTORIES ---------------
 
-	public Statistic<LogDataWrapper> newDeltaXvsDeltaDeltaUStatistic() {
+	public Statistic<LogDataWrapper> newDeltaX2vsDeltaDeltaUStatistic() {
 		return new Statistic<LogDataWrapper>() {
 
 			@Override
@@ -118,15 +162,7 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				final Covariance covariance = new Covariance();
-				final double[] deltaX2Data = deltaX2.getDataAsPrimitiveDoubleArray();
-				final double[] disappointmentData = anticipatedDeltaUMinusRealizedDeltaU.getDataAsPrimitiveDoubleArray();
-				
-				final double cov12 = covariance.covariance(deltaX2Data, disappointmentData);
-				final double var1 = covariance.covariance(deltaX2Data, deltaX2Data);
-				final double var2 = covariance.covariance(disappointmentData, disappointmentData);
-				
-				return Statistic.toString(cov12 / Math.sqrt(var1 * var2));
+				return Statistic.toString(correlation);
 			}
 		};
 	}
@@ -136,13 +172,14 @@ class ReplanningEfficiencyEstimator {
 
 			@Override
 			public String label() {
-				return "PredictedMeanUtilityImprovement";
+				return "PredictedAvgUtilityImprovement";
 			}
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				if (lastPredictedTotalUtilityImprovement != null) {
-					return Statistic.toString(lastPredictedTotalUtilityImprovement / arg0.getPopulationSize());
+				if (currentPredictedTotalUtilityImprovement != null) {
+					return Statistic.toString(currentPredictedTotalUtilityImprovement
+							/ arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 				} else {
 					return Statistic.toString(null);
 				}
@@ -150,4 +187,31 @@ class ReplanningEfficiencyEstimator {
 		};
 	}
 
+	public Statistic<LogDataWrapper> newBetaStatistic() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "Beta";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(beta);
+			}
+		};
+	}
+
+	public Statistic<LogDataWrapper> newDeltaStatistic() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "Delta";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(delta);
+			}
+		};
+	}
 }

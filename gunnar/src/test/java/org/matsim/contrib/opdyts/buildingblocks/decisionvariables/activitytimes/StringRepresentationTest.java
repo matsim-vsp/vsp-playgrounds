@@ -19,8 +19,6 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 /**

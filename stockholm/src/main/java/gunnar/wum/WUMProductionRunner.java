@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.greedo.Greedo;
 import org.matsim.contrib.greedo.GreedoConfigGroup;
-import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -37,6 +36,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
+import org.matsim.core.population.PersonUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
@@ -92,6 +92,21 @@ public class WUMProductionRunner {
 		}
 	}
 
+	static void fixCarAvailability(final Scenario scenario) {
+		int drivers = 0;
+		int nonDrivers = 0;
+		for (Person person : scenario.getPopulation().getPersons().values()) {
+			if ("true".equals(person.getAttributes().getAttribute("carAvail"))) {
+				PersonUtils.setCarAvail(person, "yes");
+				drivers++;
+			} else {
+				PersonUtils.setCarAvail(person, "never");
+				nonDrivers++;
+			}
+		}
+		Logger.getLogger(WUMProductionRunner.class).info(drivers + " drivers, " + nonDrivers + " non-drivers");
+	}
+
 	static void runProductionScenario(final boolean runLocally, final boolean cleanInitialPlans) {
 
 		final String configFileName;
@@ -102,7 +117,7 @@ public class WUMProductionRunner {
 		}
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup()); // , new PSimConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -169,27 +184,46 @@ public class WUMProductionRunner {
 		controler.run();
 	}
 
+	// TODO Maintaining only this!
 	static void runProductionScenarioWithSampersDynamics() {
 
-		final Greedo greedo = new Greedo();
-		
-		final String configFileName = "./config.xml";
-		// final String configFileName = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+// 		final String configFileName = "./config.xml";
+		 final String configFileName =
+		 "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+
+		final Greedo greedo;
+		if (config.getModule(GreedoConfigGroup.GROUP_NAME) != null) {
+			greedo = new Greedo();
+		} else {
+			greedo = null;
+		}
+
+		// Because this cannot be set in xml.
+		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.walk).setTeleportedModeFreespeedLimit(4000.0
+		// / 3600.0);
+		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.transit_walk).setTeleportedModeFreespeedLimit(4000.0
+		// / 3600.0);
+		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.access_walk).setTeleportedModeFreespeedLimit(4000.0
+		// / 3600.0);
+		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.egress_walk).setTeleportedModeFreespeedLimit(4000.0
+		// / 3600.0);
+
 		if (greedo != null) {
 			greedo.meet(config);
 		}
-		
+
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		removeModeInformation(scenario);
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
+		fixCarAvailability(scenario);
 		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
 		if (greedo != null) {
 			greedo.meet(scenario);
 		}
-		
+
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersDifferentiatedPTScoringFunctionModule());

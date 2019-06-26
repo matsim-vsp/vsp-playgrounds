@@ -22,6 +22,9 @@ package gunnar.wum.malin;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +38,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.EventsToActivities;
 import org.matsim.core.scoring.EventsToLegs;
+import org.matsim.vehicles.Vehicle;
 
 import cadyts.utilities.math.MathHelpers;
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
@@ -53,24 +57,32 @@ public class AnalysisRunner {
 
 		System.out.println("System.exit(0);");
 		System.exit(0);
+		
+		final String resultPath = "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b_malin/";
 
 		final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
-		final ZonalSystem zonalSystem = new ZonalSystem(zonesShapeFileName,
-				StockholmTransformationFactory.WGS84_EPSG3857);
+		final ZonalSystem zonalSystem = null;
+		// new ZonalSystem(zonesShapeFileName,
+		// StockholmTransformationFactory.WGS84_EPSG3857);
 
 		final Config config = ConfigUtils.createConfig();
-		config.network().setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_network.xml.gz");
+		config.network().setInputFile(resultPath + "output_network.xml.gz");
 		config.transit().setUseTransit(true);
-		config.transit().setTransitScheduleFile(
-				"/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b/output_transitSchedule.xml.gz");
-		// "/Users/GunnarF/OneDrive - VTI/My
-		// Data/wum/data/output/transitSchedule_reduced.xml.gz");
+		// config.transit().setTransitScheduleFile(
+		// "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/malin_transitSchedule_reduced.xml.gz");
 		config.transit().setVehiclesFile(
-				"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
+				"/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/malin_transitVehiclesDifferentiated.xml.gz");
+		config.transit().setTransitScheduleFile(resultPath + "output_transitSchedule.xml.gz");
+		// config.transit().setVehiclesFile(resultPath +
+		// "output_transitVehicles.xml.gz");
+
+		config.plans().setInputFile(resultPath + "malin-plans.xml");
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
-		zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
+		if (zonalSystem != null) {
+			zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
+		}
 
 		final EventsManager manager = EventsUtils.createEventsManager();
 
@@ -125,12 +137,50 @@ public class AnalysisRunner {
 
 		// linkStats.writeLinkData("./malin/linkStats8-9.csv");
 
-		writeInterZonalStatistics(scenario, zonalSystem, manager);
+		printLineUsages(scenario, manager, resultPath);
+		// writeInterZonalStatistics(scenario, zonalSystem, manager);
 		// writeZonalUsageStatistics(scenario, zonalSystem, manager);
 		// writeLinkDataPrivateCars(scenario, manager);
 		// writeLinkDataPublicTransport(scenario, manager);
 
 		System.out.println("... DONE");
+	}
+
+	static void printLineUsages(final Scenario scenario, final EventsManager manager, final String resultPath) {
+
+		final Set<Id<Vehicle>> vehicleIds = new LinkedHashSet<>();
+		final VehiclesPerLineIdentifier vehicleIdentifier = new VehiclesPerLineIdentifier(scenario);
+
+		// line 80
+		// vehicleIds.addAll(vehicleIdentifier.getVehicles("1275008000001"));
+		// vehicleIds.addAll(vehicleIdentifier.getVehicles("1275008000002"));
+		// line 89
+		// vehicleIds.addAll(vehicleIdentifier.getVehicles("1275008900001"));
+		// line "malin"
+		vehicleIds.addAll(vehicleIdentifier.getVehicles("malin_2b"));
+
+		System.out.println(vehicleIds.size() + " vehicles");
+
+		final LineUsageStatistics lineUsageStats = new LineUsageStatistics(vehId -> vehicleIds.contains(vehId),
+				time_s -> true, personId -> !personId.toString().startsWith("pt_"), stopId -> true,
+				scenario);
+
+		manager.addHandler(lineUsageStats);
+		EventsUtils.readEvents(manager, resultPath + "output_events.xml.gz");
+		System.out.println(lineUsageStats.getTravelers().size() + " travelers:");
+		StringBuffer allLineUsers = new StringBuffer();
+		final List<Id<Person>> lineUsersList = new ArrayList<>(lineUsageStats.getTravelers());
+		if (lineUsageStats.getTravelers().size() > 0) {
+			allLineUsers.append(lineUsersList.get(0));
+			for (int i = 1; i < lineUsageStats.getTravelers().size(); i++) {
+				allLineUsers.append(",");
+				allLineUsers.append(lineUsersList.get(i));
+			}
+		}
+		System.out.println();
+		System.out.println(allLineUsers.toString());
+		System.out.println();
+		System.out.println(lineUsageStats.getEntryExitLog());
 	}
 
 	static void writeInterZonalStatistics(final Scenario scenario, final ZonalSystem zonalSystem,

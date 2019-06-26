@@ -20,7 +20,7 @@
 package org.matsim.contrib.opdyts.microstate;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;

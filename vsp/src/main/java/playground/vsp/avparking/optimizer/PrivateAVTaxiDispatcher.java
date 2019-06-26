@@ -72,6 +72,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 		findfreeSlot, garage, cruise, randombehavior
 	}
 
+	private final String mode;
 	private final EventsManager eventsManager;
 	private final Fleet fleet;
 	private final TaxiScheduler scheduler;
@@ -104,6 +105,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 		this.eventsManager = eventsManager;
 		this.avParkings = NetworkUtils.getLinks(network, context.getAvParkings());
 
+		this.mode = taxiCfg.getMode();
 	}
 
 	@Override
@@ -171,7 +173,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 			Id<org.matsim.vehicles.Vehicle> vehicleId = Id.createVehicleId(veh.getId());
 			Id<Link> parkingLinkId = lastLink.getId();
 			while (!this.manager.reserveSpaceIfVehicleCanParkHere(vehicleId, parkingLinkId)) {
-				parkingLinkId = parkingLogic.getNextLink(parkingLinkId, vehicleId);
+				parkingLinkId = parkingLogic.getNextLink(parkingLinkId, vehicleId, mode);
 			}
 			VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink, network.getLinks().get(parkingLinkId),
 					timer.getTimeOfDay(), router, travelTime);

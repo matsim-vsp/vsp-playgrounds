@@ -37,7 +37,7 @@ public class ReplanningRecipe implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getLastExpectations().replannerIdentifierRecipeName);
+		return Statistic.toString(arg0.getReplanningSummaryStatistics().replannerIdentifierRecipeName);
 	}
 
 }

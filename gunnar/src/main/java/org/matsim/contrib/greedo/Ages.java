@@ -19,6 +19,9 @@
  */
 package org.matsim.contrib.greedo;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+
+import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
  *
@@ -46,14 +51,15 @@ public class Ages {
 
 	private double averageAge;
 
-	private double averageWeight;
-
 	private Map<Id<Person>, Double> personId2weight = null;
+
+	private double averageWeight;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	Ages(final Set<Id<Person>> populationIds, final GreedoConfigGroup greedoConfig) {
-		this.personId2age = populationIds.stream().collect(Collectors.toMap(id -> id, id -> 0));
+		this.personId2age = Collections
+				.unmodifiableMap(populationIds.stream().collect(Collectors.toMap(id -> id, id -> 0)));
 		this.greedoConfig = greedoConfig;
 		this.internalUpdate();
 	}
@@ -72,11 +78,6 @@ public class Ages {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	// TODO NEW, decide where to move this class and what to make public
-	public Map<Id<Person>, Integer> getPersonId2AgeView() {
-		return Collections.unmodifiableMap(this.personId2age);
-	}
-
 	void update(final Set<Id<Person>> replanners) {
 		this.personId2age = Collections
 				.unmodifiableMap(this.personId2age.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(),
@@ -84,23 +85,61 @@ public class Ages {
 		this.internalUpdate();
 	}
 
-	List<Integer> getSortedAges() {
-		return this.sortedAges;
-	}
-
-	Map<Id<Person>, Integer> getAges() {
+	Map<Id<Person>, Integer> getAgesView() {
 		return this.personId2age;
 	}
 
-	Map<Id<Person>, Double> getWeights() {
+	Map<Id<Person>, Double> getWeightsView() {
 		return this.personId2weight;
 	}
 
-	double getAverageAge() {
-		return this.averageAge;
+	// -------------------- STATISTICS --------------------
+
+	Statistic<LogDataWrapper> newAvgAgeStatistic() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "AvgAge";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(averageAge);
+			}
+		};
 	}
 
-	double getAverageWeight() {
-		return this.averageWeight;
+	Statistic<LogDataWrapper> newAvgAgeWeightStatistic() {
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "AvgAgeWeight";
+			}
+
+			@Override
+			public String value(LogDataWrapper arg0) {
+				return Statistic.toString(averageWeight);
+			}
+		};
+	}
+
+	Statistic<LogDataWrapper> newAgePercentile(final int percent) {
+
+		return new Statistic<LogDataWrapper>() {
+			@Override
+			public String label() {
+				return "agePercentile" + percent;
+			}
+
+			@Override
+			public String value(final LogDataWrapper logData) {
+				if (sortedAges == null) {
+					return Statistic.toString(null);
+				} else {
+					final int index = max(0, min(sortedAges.size() - 1, (int) ((percent / 100.0) * sortedAges.size())));
+					return Statistic.toString(sortedAges.get(index));
+				}
+			}
+		};
 	}
 }

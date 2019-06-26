@@ -37,7 +37,7 @@ import floetteroed.utilities.math.MathHelpers;
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
-import utils.RecursiveMovingAverage;
+import utils.MovingWindowAverage;
 
 /**
  * 
@@ -45,14 +45,14 @@ import utils.RecursiveMovingAverage;
  * 
  * replanningRate ~ expectedUtilityChange / similarity
  * 
- * given a 1 / age weighting. Translates the above into the equivalent statement
+ * given a 1/age weighting. Translates the above into the equivalent statement
  * 
  * ageAtReplanning ~ similarity / expectedUtilityChange
  * 
  * Computes the correlation coefficient (across the population in a given
- * iteration) between averageAgeAtReplanning (per individual over iterations)
- * and averageSimilarity / averageExpectedUtilityChange (both per individual
- * over iterations).
+ * iteration) between (average)AgeAtReplanning (per individual and possibly over
+ * iterations) and (average)Similarity / (average)ExpectedUtilityChange (both
+ * per individual possibly over iterations).
  *
  * @author Gunnar Flötteröd
  *
@@ -63,50 +63,50 @@ public class AsymptoticAgeLogger {
 
 	private class Entry {
 
-		private RecursiveMovingAverage expectedUtilityChangeAvg;
-		private RecursiveMovingAverage similarityAvg;
-		private RecursiveMovingAverage ageAvg;
+		private MovingWindowAverage expectedUtilityChanges;
+		private MovingWindowAverage similarities;
+		private MovingWindowAverage ages;
 
 		Entry() {
-			this.expectedUtilityChangeAvg = new RecursiveMovingAverage(memoryLength);
-			this.similarityAvg = new RecursiveMovingAverage(memoryLength);
-			this.ageAvg = new RecursiveMovingAverage(memoryLength);
+			this.expectedUtilityChanges = new MovingWindowAverage(1, Integer.MAX_VALUE, relativeMemoryLength);
+			this.similarities = new MovingWindowAverage(1, Integer.MAX_VALUE, relativeMemoryLength);
+			this.ages = new MovingWindowAverage(1, Integer.MAX_VALUE, relativeMemoryLength);
 		}
 
 		void update(final double expectedUtilityChange, final double similarity, final int age) {
-			this.expectedUtilityChangeAvg.add(expectedUtilityChange);
-			this.similarityAvg.add(similarity);
-			this.ageAvg.add(age);
+			this.expectedUtilityChanges.add(expectedUtilityChange);
+			this.similarities.add(similarity);
+			this.ages.add(age);
 		}
 
 		double getLastExpectedUtilityChange() {
-			return this.expectedUtilityChangeAvg.mostRecentValue();
+			return this.expectedUtilityChanges.mostRecentValue();
 		}
 
 		double getLastSimilarity() {
-			return this.similarityAvg.mostRecentValue();
+			return this.similarities.mostRecentValue();
 		}
 
 		int getLastAge() {
-			return MathHelpers.round(this.ageAvg.mostRecentValue());
+			return MathHelpers.round(this.ages.mostRecentValue());
 		}
 
 		double getAvgExpectedUtilityChange() {
-			return this.expectedUtilityChangeAvg.average();
+			return this.expectedUtilityChanges.average();
 		}
 
 		double getAvgSimilarity() {
-			return this.similarityAvg.average();
+			return this.similarities.average();
 		}
 
 		double getAvgAge() {
-			return this.ageAvg.average();
+			return this.ages.average();
 		}
 	}
 
 	// -------------------- CONSTANTS --------------------
 
-	private final int memoryLength;
+	private final double relativeMemoryLength;
 
 	private final File folder;
 
@@ -118,18 +118,19 @@ public class AsymptoticAgeLogger {
 
 	private final Map<Id<Person>, Entry> personId2entry = new LinkedHashMap<>();
 
-	private Double ageVsSimilarityByExpDeltaUtilityCorrelation = null;
+	private Double age_vs_SimilarityByDeltaUtility_correlation = null;
 
-	private Double avgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelation = null;
+	private Double avgAge_vs_AvgSimilarityByAvgDeltaUtility_correlation = null;
 
-	private Double ageTimesExpDeltaUtilityVsSimilarityCorrelation = null;
+	private Double ageTimesDeltaUtility_vs_Similarity_correlation = null;
 
-	private Double avgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelation = null;
+	private Double avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_correlation = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public AsymptoticAgeLogger(final int memoryLength, final File folder, final String prefix, final String postFix) {
-		this.memoryLength = memoryLength;
+	public AsymptoticAgeLogger(final double relativeMemoryLength, final File folder, final String prefix,
+			final String postFix) {
+		this.relativeMemoryLength = relativeMemoryLength;
 		this.folder = folder;
 		this.prefix = prefix;
 		this.postfix = postFix;
@@ -161,10 +162,18 @@ public class AsymptoticAgeLogger {
 		}
 		return entry;
 	}
-
+	
 	// -------------------- IMPLEMENTATION --------------------
 
-	public void dump(final Map<Id<Person>, Integer> personId2ageAtReplanning,
+	public void update(final LogDataWrapper logDataWrapper) {
+		this.dump(logDataWrapper.getReplanningSummaryStatistics().getReplannerId2ageAtReplanning(),
+				logDataWrapper.getPersonId2expectedUtilityChange(),
+				logDataWrapper.getReplanningSummaryStatistics().personId2similarity,
+				logDataWrapper.getReplanningSummaryStatistics().getReplannerId2ageAtReplanning().keySet(),
+				logDataWrapper.getIteration());
+	}
+
+	private void dump(final Map<Id<Person>, Integer> personId2ageAtReplanning,
 			final Map<Id<Person>, Double> personId2expectedUtilityChange,
 			final Map<Id<Person>, Double> personId2similarity, final Set<Id<Person>> replannerIds,
 			final int iteration) {
@@ -181,19 +190,17 @@ public class AsymptoticAgeLogger {
 			writer.print("<ageAtReplanning>*<expDeltaUtility>\t<similarity>");
 			writer.println();
 
-			final Covariance ageVsSimilarityByUtilityCovariance = new Covariance(2, 2);
-			final Covariance avgAgeVsAvgSimilarityByAvgUtilityCovariance = new Covariance(2, 2);
-			final Covariance ageTimesUtilityVsSimilarityCovariance = new Covariance(2, 2);
-			final Covariance avgAgeTimesAvgUtilityVsAvgSimilarityCovariance = new Covariance(2, 2);
+			final Covariance age_vs_SimilarityByDeltaUtility_covariance = new Covariance(2, 2);
+			final Covariance avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance = new Covariance(2, 2);
+			final Covariance ageTimesDeltaUtility_vs_Similarity_covariance = new Covariance(2, 2);
+			final Covariance avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance = new Covariance(2, 2);
 
 			for (Id<Person> replannerId : replannerIds) {
-
 				final Double expectedUtilityChange = personId2expectedUtilityChange.get(replannerId);
 				final Double similarity = personId2similarity.get(replannerId);
 				final Integer age = personId2ageAtReplanning.get(replannerId);
 
 				if ((similarity != null) && (expectedUtilityChange != null) && (age != null)) {
-
 					final Entry entry = this.getOrCreateEntry(replannerId);
 					entry.update(expectedUtilityChange, similarity, age);
 
@@ -202,7 +209,7 @@ public class AsymptoticAgeLogger {
 								/ entry.getLastExpectedUtilityChange();
 						writer.print(entry.getLastAge() + "\t" + similarityByUtility);
 						final Vector x = new Vector(entry.getLastAge(), similarityByUtility);
-						ageVsSimilarityByUtilityCovariance.add(x, x);
+						age_vs_SimilarityByDeltaUtility_covariance.add(x, x);
 					}
 					writer.print("\t");
 					{
@@ -210,14 +217,14 @@ public class AsymptoticAgeLogger {
 								/ entry.getAvgExpectedUtilityChange();
 						writer.print(entry.getAvgAge() + "\t" + avgSimilarityByAvgUtility);
 						final Vector x = new Vector(entry.getAvgAge(), avgSimilarityByAvgUtility);
-						avgAgeVsAvgSimilarityByAvgUtilityCovariance.add(x, x);
+						avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.add(x, x);
 					}
 					writer.print("\t");
 					{
 						final double ageTimesDeltaUtility = entry.getLastAge() * entry.getLastExpectedUtilityChange();
 						writer.print(ageTimesDeltaUtility + "\t" + entry.getLastSimilarity());
 						final Vector x = new Vector(ageTimesDeltaUtility, entry.getLastSimilarity());
-						ageTimesUtilityVsSimilarityCovariance.add(x, x);
+						ageTimesDeltaUtility_vs_Similarity_covariance.add(x, x);
 					}
 					writer.print("\t");
 					{
@@ -225,7 +232,7 @@ public class AsymptoticAgeLogger {
 								* entry.getAvgExpectedUtilityChange();
 						writer.print(avgAgeTimesAvgDeltaUtility + "\t" + entry.getAvgSimilarity());
 						final Vector x = new Vector(avgAgeTimesAvgDeltaUtility, entry.getAvgSimilarity());
-						avgAgeTimesAvgUtilityVsAvgSimilarityCovariance.add(x, x);
+						avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.add(x, x);
 					}
 					writer.println();
 				}
@@ -234,23 +241,23 @@ public class AsymptoticAgeLogger {
 			writer.close();
 
 			{
-				final Matrix _C = ageVsSimilarityByUtilityCovariance.getCovariance();
-				this.ageVsSimilarityByExpDeltaUtilityCorrelation = _C.get(1, 0)
+				final Matrix _C = age_vs_SimilarityByDeltaUtility_covariance.getCovariance();
+				this.age_vs_SimilarityByDeltaUtility_correlation = _C.get(1, 0)
 						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 			}
 			{
-				final Matrix _C = avgAgeVsAvgSimilarityByAvgUtilityCovariance.getCovariance();
-				this.avgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelation = _C.get(1, 0)
+				final Matrix _C = avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.getCovariance();
+				this.avgAge_vs_AvgSimilarityByAvgDeltaUtility_correlation = _C.get(1, 0)
 						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 			}
 			{
-				final Matrix _C = ageTimesUtilityVsSimilarityCovariance.getCovariance();
-				this.ageTimesExpDeltaUtilityVsSimilarityCorrelation = _C.get(1, 0)
+				final Matrix _C = ageTimesDeltaUtility_vs_Similarity_covariance.getCovariance();
+				this.ageTimesDeltaUtility_vs_Similarity_correlation = _C.get(1, 0)
 						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 			}
 			{
-				final Matrix _C = avgAgeTimesAvgUtilityVsAvgSimilarityCovariance.getCovariance();
-				this.avgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelation = _C.get(1, 0)
+				final Matrix _C = avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.getCovariance();
+				this.avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_correlation = _C.get(1, 0)
 						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 			}
 
@@ -271,7 +278,7 @@ public class AsymptoticAgeLogger {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				return Statistic.toString(ageVsSimilarityByExpDeltaUtilityCorrelation);
+				return Statistic.toString(age_vs_SimilarityByDeltaUtility_correlation);
 			}
 		};
 	}
@@ -286,7 +293,7 @@ public class AsymptoticAgeLogger {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				return Statistic.toString(avgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelation);
+				return Statistic.toString(avgAge_vs_AvgSimilarityByAvgDeltaUtility_correlation);
 			}
 		};
 	}
@@ -301,7 +308,7 @@ public class AsymptoticAgeLogger {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				return Statistic.toString(ageTimesExpDeltaUtilityVsSimilarityCorrelation);
+				return Statistic.toString(ageTimesDeltaUtility_vs_Similarity_correlation);
 			}
 		};
 	}
@@ -316,7 +323,7 @@ public class AsymptoticAgeLogger {
 
 			@Override
 			public String value(LogDataWrapper arg0) {
-				return Statistic.toString(avgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelation);
+				return Statistic.toString(avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_correlation);
 			}
 		};
 	}

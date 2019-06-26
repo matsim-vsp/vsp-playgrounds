@@ -52,22 +52,23 @@ import java.util.*;
 public class RunReLocationPlansSauber {
 
     private static final Logger log = Logger.getLogger(RunReLocationPlans.class);
-
+    private static Random random = new Random(55332654);
+    
     public static void main(String[] args) {
     	
     	String planFile;
     	String shapeFile;
     	String facilitiesFile;
     	String outputPlans;
-    	String logFile;
+    	String logFile;	
     	
     	if ( args.length==0 || args[0].equals("")) {
 
 	        planFile = "http://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5.3-10pct.plans.xml.gz";	
-	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_1000_intersect_Id.shp";
+	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_2000_intersect_Id.shp";
 	        facilitiesFile = "D:/Arbeit/Berlin/ReLocation/FirstBerlinBrandenburgFacilities/combinedFacilities.xml";
-	        outputPlans = "D:/Arbeit/Berlin/ReLocation/10/PlansWithNewLocations1000.xml";
-	        logFile = "D:/Arbeit/Berlin/ReLocation/FirstBerlinBrandenburgFacilities/log1000";
+	        outputPlans = "D:/Arbeit/Berlin/ReLocation/richtigerRun/PlansWithNewLocations2000.xml";
+	        logFile = "D:/Arbeit/Berlin/ReLocation/richtigerRun/log2000";
 	        
     	} else {
     		
@@ -103,7 +104,7 @@ public class RunReLocationPlansSauber {
         ActivityFacilities activityFacilities = scenario.getActivityFacilities();
 
         Map<String, List<Coord>> newLeisureFacilities = facilitiesToZone(activityFacilities, allZones, "leisure");
-        Map<String, List<Coord>> newShoppingFacilities = facilitiesToZone(activityFacilities, allZones, "shopping");
+        Map<String, List<Coord>> newShoppingFacilities = facilitiesToZone(activityFacilities, allZones, "shop");
 
         Population population = scenario.getPopulation();
 
@@ -113,10 +114,10 @@ public class RunReLocationPlansSauber {
         logWarnings(allZones, newLeisureFacilities, oldLeisureActivities, "leisure");
         logWarnings(allZones, newShoppingFacilities, oldShoppingActivities, "shopping");
 
-        Population outPopulation1 = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+        oldLeisureActivities.clear();
+        oldShoppingActivities.clear();       
 
-        createNewPopulation(outputPlans, allZones, newLeisureFacilities, newShoppingFacilities, population,
-				outPopulation1);
+        createNewPopulation(outputPlans, allZones, newLeisureFacilities, newShoppingFacilities, population);
       
         System.out.println("Done");
 
@@ -125,45 +126,47 @@ public class RunReLocationPlansSauber {
     /**
      * creates a new population file with new coordinates for specific activities
      * 
-     * @param outputPlans
+     * @param outputPlans - the location for the output plan file
      * @param allZones - a shape file with zones
-     * @param newLeisureFacilities
-     * @param newShoppingFacilities
-     * @param population
-     * @param outPopulation1
+     * @param newLeisureFacilities - a map with zoneId and a list of coordinates for leisure
+     * @param newShoppingFacilities - a map with zoneId and a list of coordinates for shopping
+     * @param population - the population from the plans file that you want to change
      */
     
 	private static void createNewPopulation(String outputPlans, Map<String, Geometry> allZones,
 			Map<String, List<Coord>> newLeisureFacilities, Map<String, List<Coord>> newShoppingFacilities,
-			Population population, Population outPopulation1) {
-		for (Person person : population.getPersons().values()) {
+			Population population) {
+		
+		 Population outPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+		 for (Person person : population.getPersons().values()) {
             for (Plan plan : person.getPlans()) {
                 for (PlanElement planElement : plan.getPlanElements()) {
                     if (planElement instanceof Activity) {
                         Activity activity = (Activity) planElement;
+                        String act = inDistrict(allZones, activity.getCoord());
                         if (activity.getType().contains("leisure")) {
-                            if (!(inDistrict(allZones,activity.getCoord()).equals("noZone"))) {
-                                List<Coord> coords = newLeisureFacilities.get(inDistrict(allZones, activity.getCoord()));
+                            if (!(act.equals("noZone"))) {
+                                List<Coord> coords = newLeisureFacilities.get(act);
                                 if (coords != null) {
-                                    activity.setCoord(coords.get(new Random().nextInt(coords.size())));
+                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
                                 }
                             }
                         }
                         if (activity.getType().contains("shopping")) {
-                            if (!(inDistrict(allZones,activity.getCoord()).equals("noZone"))) {
-                                List<Coord> coords = newShoppingFacilities.get(inDistrict(allZones, activity.getCoord()));
+                            if (!(act.equals("noZone"))) {
+                                List<Coord> coords = newShoppingFacilities.get(act);
                                 if (coords != null) {
-                                    activity.setCoord(coords.get(new Random().nextInt(coords.size())));
+                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
                                 }
                             }
                         }
                     }
                 }
             }
-            outPopulation1.addPerson(person);
+            outPopulation.addPerson(person);
         }
 
-        new PopulationWriter(outPopulation1).write(outputPlans);
+        new PopulationWriter(outPopulation).write(outputPlans);
 	}
 
     /**
@@ -296,6 +299,7 @@ public class RunReLocationPlansSauber {
                 warningType3.add("0 old " + matsimtype + " activities and " + newFacilities.get(zone).size() + " new facilities found");
             }
         }
+        log.warn("Total mismatch: " + (warningType2.size() + warningType3.size()) + " " + matsimtype);
         if (warningType1.size() != 0) {
             log.warn("Mismatch between " + matsimtype + " activities from Agents an tagged facilities");
         }

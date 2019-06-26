@@ -33,34 +33,34 @@ public class SelfRegulatingMSA implements ReplannerIdentifierRecipe {
 
 	// -------------------- CONSTANTS --------------------
 
-	private final double betaIncreaseSuccess;
+	private final double denominatorIncreaseSuccess;
 
-	private final double betaIncreaseFailure;
+	private final double denominatorIncreaseFailure;
 
 	// -------------------- MEMBERS --------------------
 
-	private double beta = 1.0;
+	private double denominator = 1.0;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SelfRegulatingMSA(final double betaIncreaseSuccess, final double betaIncreaseFailure) {
-		this.betaIncreaseSuccess = betaIncreaseSuccess;
-		this.betaIncreaseFailure = betaIncreaseFailure;
+	public SelfRegulatingMSA(final double denominatorIncreaseSuccess, final double denominatorIncreaseFailure) {
+		this.denominatorIncreaseSuccess = denominatorIncreaseSuccess;
+		this.denominatorIncreaseFailure = denominatorIncreaseFailure;
 	}
 
 	// --------------- IMPLEMENTATION OF ReplannerIdentifierRecipe ---------------
 
 	@Override
-	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
-		return (MatsimRandom.getRandom().nextDouble() < (1.0 / this.beta));
+	public void update(final LogDataWrapper logDataWrapper) {
+		final Double lastChange = logDataWrapper.getRealizedUtilityChangeSum();
+		if (lastChange != null) {
+			this.denominator += ((lastChange > 0) ? this.denominatorIncreaseSuccess : this.denominatorIncreaseFailure);
+		}
 	}
 
 	@Override
-	public void update(LogDataWrapper logDataWrapper) {
-		final Double lastChange = logDataWrapper.getLastRealizedUtilityChangeSum();
-		if (lastChange != null) {
-			this.beta += ((lastChange > 0) ? this.betaIncreaseSuccess : this.betaIncreaseFailure);
-		}
+	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
+		return (MatsimRandom.getRandom().nextDouble() < (1.0 / this.denominator));
 	}
 
 	@Override

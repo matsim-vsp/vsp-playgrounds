@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -35,9 +36,9 @@ import org.matsim.contrib.greedo.recipes.MSARecipe;
 import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
 import org.matsim.contrib.greedo.recipes.SelfRegulatingMSA;
 import org.matsim.core.config.ReflectiveConfigGroup;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.misc.StringUtils;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
 
 import floetteroed.utilities.TimeDiscretization;
 
@@ -52,43 +53,23 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public static final String GROUP_NAME = "greedo";
 
-	// -------------------- CONSTRUCTION --------------------
+	// -------------------- MEMBERS, set by configure(..) --------------------
+
+	private ConcurrentMap<Id<Link>, Double> concurrentLinkWeights = null;
+
+	// TODO Still needed? Currently, all of these weights are set to zero.
+	private ConcurrentMap<Id<Vehicle>, Double> concurrentTransitVehicleWeights = null;
+
+	// -------------------- CONSTRUCTION & CONFIGURATION --------------------
 
 	public GreedoConfigGroup() {
 		super(GROUP_NAME);
 	}
 
-	// -------------------- CONFIGURATION --------------------
-
-	// members that are set through configure(..)
-
-	// private Integer populationSize = null;
-
-	// private Integer firstIteration = null;
-
-	private ConcurrentMap<Id<Link>, Double> concurrentLinkWeights = null;
-
-	private ConcurrentMap<Id<Vehicle>, Double> concurrentTransitVehicleWeights = null;
-
-	// private double[] replanningRates = null;
-
-	private ReplannerIdentifierRecipe replannerIdentifierRecipe = null;
-
-	// private ReplannerIdentifierRecipe secondaryReplannerIdentifierRecipe = null;
-
-	// the (necessary) configuration
-
-	public void configure(final Scenario scenario) {
-		this.configure(scenario, scenario.getNetwork().getLinks().keySet(),
-				scenario.getTransitVehicles().getVehicles().keySet());
-	}
-
 	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
 			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
 
-		// this.populationSize = scenario.getPopulation().getPersons().size();
-		// this.firstIteration = scenario.getConfig().controler().getFirstIteration();
-
+		Logger.getLogger(this.getClass()).info("Using 1/linkCapacityPerTimeBin link weights.");
 		this.concurrentLinkWeights = new ConcurrentHashMap<>();
 		if (capacitatedLinkIds != null) {
 			for (Id<Link> linkId : capacitatedLinkIds) {
@@ -102,48 +83,33 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 			}
 		}
 
+		Logger.getLogger(this.getClass()).warn("Using flat zero transit vehicle weights.");
 		this.concurrentTransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
 				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
-				final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
-				final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
-				if (cap_persons < 1e-3) {
-					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
-							+ " < 0.001 persons.");
-				}
-				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
+				// TODO >>> REVISIT >>>
+				// final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+				// final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+				// if (cap_persons < 1e-3) {
+				// throw new RuntimeException("vehicle " + transitVehicle.getId() + " has
+				// capacity of " + cap_persons
+				// + " < 0.001 persons.");
+				// }
+				// this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 /
+				// cap_persons);
+				// TODO <<< REVISIT <<<
+				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 0.0);
 			}
 		}
-
-		// Pre-compute re-planning rates. To have consistent results when randomizing
-		// per iteration.
-		// final RandomGenerator rng = new
-		// Well19937c(MatsimRandom.getRandom().nextLong());
-		// this.replanningRates = new
-		// double[scenario.getConfig().controler().getLastIteration()
-		// - scenario.getConfig().controler().getFirstIteration() + 1];
-		// for (int it = 0; it < this.replanningRates.length; it++) {
-		// double rate = this.getInitialMeanReplanningRate()
-		// * Math.pow(1.0 + it, this.getReplanningRateIterationExponent());
-		// if (this.getBinomialNumberOfReplanners()) {
-		// final BinomialDistribution distr = new BinomialDistribution(rng,
-		// this.populationSize, rate);
-		// rate = ((double) distr.sample()) / this.populationSize;
-		// }
-		// this.replanningRates[it] = rate;
-		// }
-
-		this.replannerIdentifierRecipe = this.newReplannerIdentifierRecipe(this.getPrimaryReplannerIdentifierType());
-		// this.secondaryReplannerIdentifierRecipe = this
-		// .newReplannerIdentifierRecipe(this.getSecondaryReplannerIdentifierType());
 	}
 
-	// getters
-
-	public TimeDiscretization newTimeDiscretization() {
-		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
+	public void configure(final Scenario scenario) {
+		this.configure(scenario, scenario.getNetwork().getLinks().keySet(),
+				scenario.getTransitVehicles().getVehicles().keySet());
 	}
+
+	// -------------------- SUPPLEMENTARY (NON-XML) GETTERS --------------------
 
 	public Map<Id<Link>, Double> getConcurrentLinkWeights() {
 		return this.concurrentLinkWeights;
@@ -153,22 +119,68 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		return this.concurrentTransitVehicleWeights;
 	}
 
-	public double getExogenousReplanningRate(int iteration) {
-		return (this.getInitialMeanReplanningRate()
-				* Math.pow(1.0 + iteration, this.getReplanningRateIterationExponent()));
-	}
-
+	// TODO Check consistency with article equation (dividing by one plus age).
 	public double getAgeWeight(final double age) {
 		return Math.pow(1.0 / (1.0 + age), this.getAgeWeightExponent());
 	}
 
-	public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
-		return this.replannerIdentifierRecipe;
+	// --------------- adaptiveMSADenominatorIncreaseIfSuccess ---------------
+
+	private double adaptiveMSADenominatorIncreaseIfSuccess = 0.1;
+
+	@StringGetter("adaptiveMSADenominatorIncreaseIfSuccess")
+	public double getAdaptiveMSADenominatorIncreaseIfSuccess() {
+		return adaptiveMSADenominatorIncreaseIfSuccess;
 	}
 
-	// public ReplannerIdentifierRecipe getSecondaryReplannerIdentifierRecipe() {
-	// return this.secondaryReplannerIdentifierRecipe;
-	// }
+	@StringSetter("adaptiveMSADenominatorIncreaseIfSuccess")
+	public void setAdaptiveMSADenominatorIncreaseIfSuccess(final double adaptiveMSADenominatorIncreaseIfSuccess) {
+		this.adaptiveMSADenominatorIncreaseIfSuccess = adaptiveMSADenominatorIncreaseIfSuccess;
+	}
+
+	// --------------- adaptiveMSADenominatorIncreaseIfFailure ---------------
+
+	private double adaptiveMSADenominatorIncreaseIfFailure = 1.9;
+
+	@StringGetter("adaptiveMSADenominatorIncreaseIfFailure")
+	public double getAdaptiveMSADenominatorIncreaseIfFailure() {
+		return adaptiveMSADenominatorIncreaseIfFailure;
+	}
+
+	@StringSetter("adaptiveMSADenominatorIncreaseIfFailure")
+	public void setAdaptiveMSADenominatorIncreaseIfFailure(final double adaptiveMSADenominatorIncreaseIfFailure) {
+		this.adaptiveMSADenominatorIncreaseIfFailure = adaptiveMSADenominatorIncreaseIfFailure;
+	}
+
+	// -------------------- acceptNegativeDisappointment --------------------
+
+	// TODO Consider discarding this (and WARN instead if beta gets negative).
+	private boolean acceptNegativeDisappointment = true;
+
+	@StringGetter("acceptNegativeDisappointment")
+	public boolean getAcceptNegativeDisappointment() {
+		return this.acceptNegativeDisappointment;
+	}
+
+	@StringSetter("acceptNegativeDisappointment")
+	public void setAcceptNegativeDisappointment(final boolean acceptNegativeDisappointment) {
+		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
+	}
+
+	// -------------------- constrainDeltaToZero --------------------
+
+	// TODO Consider discarding this.
+	private boolean constrainDeltaToZero = true;
+
+	@StringGetter("constrainDeltaToZero")
+	public boolean getConstrainDeltaToZero() {
+		return this.constrainDeltaToZero;
+	}
+
+	@StringSetter("constrainDeltaToZero")
+	public void setConstrainDeltaToZero(final boolean constrainDeltaToZero) {
+		this.constrainDeltaToZero = constrainDeltaToZero;
+	}
 
 	// -------------------- replannerIdentifier --------------------
 
@@ -177,169 +189,83 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	private ReplannerIdentifierType replannerIdentifierType = ReplannerIdentifierType.accelerate;
-	// private ReplannerIdentifierType secondaryReplannerIdentifierType =
-	// ReplannerIdentifierType.MSA;
-
-	private ReplannerIdentifierRecipe newReplannerIdentifierRecipe(final ReplannerIdentifierType type) {
-		if (ReplannerIdentifierType.accelerate.equals(type)) {
-			return new AccelerationRecipe(this.newReplannerIdentifierRecipe(ReplannerIdentifierType.MSA));
-		} else if (ReplannerIdentifierType.MSA.equals(type)) {
-			return new MSARecipe(this.getInitialMeanReplanningRate(), this.getReplanningRateIterationExponent());
-		} else if (ReplannerIdentifierType.adaptiveMSA.equals(type)) {
-			return new SelfRegulatingMSA(0.1, 1.9);
-		} else {
-			throw new RuntimeException("Unknown ReplannerIdentifierType: " + type);
-		}
-	}
 
 	@StringGetter("replannerIdentifier")
-	public ReplannerIdentifierType getPrimaryReplannerIdentifierType() {
+	public ReplannerIdentifierType getReplannerIdentifierType() {
 		return this.replannerIdentifierType;
 	}
 
 	@StringSetter("replannerIdentifier")
-	public void setPrimaryReplannerIdentifierType(final ReplannerIdentifierType replannerIdentifierType) {
+	public void setReplannerIdentifierType(final ReplannerIdentifierType replannerIdentifierType) {
 		this.replannerIdentifierType = replannerIdentifierType;
 	}
 
-	// @StringGetter("secondaryReplannerIdentifier")
-	// public ReplannerIdentifierType getSecondaryReplannerIdentifierType() {
-	// return this.secondaryReplannerIdentifierType;
-	// }
-	//
-	// @StringSetter("secondaryReplannerIdentifier")
-	// public void setSecondaryReplannerIdentifierType(final ReplannerIdentifierType
-	// secondaryReplannerIdentifierType) {
-	// this.secondaryReplannerIdentifierType = secondaryReplannerIdentifierType;
-	// }
+	// Lazily initialized in getter.
+	private ReplannerIdentifierRecipe replannerIdentifierRecipe = null;
 
-	// -------------------- mode --------------------
-	//
-	// public static enum ModeType {
-	// off, accelerate, MSA, adaptiveMSA
-	// };
-	//
-	// private ModeType modeTypeField = ModeType.accelerate;
-	//
-	// @StringGetter("mode")
-	// public ModeType getModeTypeField() {
-	// return this.modeTypeField;
-	// }
-	//
-	// @StringSetter("mode")
-	// public void setModeTypeField(final ModeType modeTypeField) {
-	// this.modeTypeField = modeTypeField;
-	// }
-	//
-	// public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
-	// return this.primaryReplannerIdentifierRecipe;
-	// }
-
-	// -------------------- correlationLoggingMemory --------------------
-
-	private int correlationLoggingMemory = 100;
-
-	@StringGetter("correlationLoggingMemory")
-	public int getCorrelationLoggingMemory() {
-		return this.correlationLoggingMemory;
+	public ReplannerIdentifierRecipe getReplannerIdentifierRecipe() {
+		if (this.replannerIdentifierRecipe == null) {
+			if (ReplannerIdentifierType.accelerate.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new AccelerationRecipe();
+			} else if (ReplannerIdentifierType.MSA.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new MSARecipe(this.getInitialMeanReplanningRate(),
+						this.getReplanningRateIterationExponent());
+			} else if (ReplannerIdentifierType.adaptiveMSA.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new SelfRegulatingMSA(
+						this.getAdaptiveMSADenominatorIncreaseIfSuccess(),
+						this.getAdaptiveMSADenominatorIncreaseIfFailure());
+			} else {
+				throw new RuntimeException("Unknown ReplannerIdentifierType: " + this.getReplannerIdentifierType());
+			}
+		}
+		return this.replannerIdentifierRecipe;
 	}
 
-	@StringSetter("correlationLoggingMemory")
-	public void setCorrelationLoggingMemory(final int correlationLoggingMemory) {
-		this.correlationLoggingMemory = correlationLoggingMemory;
+	// -------------------- minAbsoluteMemoryLength --------------------
+
+	private int minAbsoluteMemoryLength = 4;
+
+	@StringGetter("minAbsoluteMemoryLength")
+	public int getMinAbsoluteMemoryLength() {
+		return this.minAbsoluteMemoryLength;
 	}
 
-	// -------------------- stepSize --------------------
-	//
-	// public static enum StepSizeType {
-	// exogenous, adaptive
-	// };
-	//
-	// private StepSizeType stepSizeField = StepSizeType.adaptive;
-	//
-	// @StringGetter("stepSize")
-	// public StepSizeType getStepSizeField() {
-	// return this.stepSizeField;
-	// }
-	//
-	// @StringSetter("stepSize")
-	// public void setStepSizeField(final StepSizeType stepSizeField) {
-	// this.stepSizeField = stepSizeField;
-	// }
-
-	// --------------- replanningEfficiencyEstimationInertia ---------------
-
-	private double replanningEfficiencyEstimationInertia = 1.0;
-
-	@StringGetter("replanningEfficiencyEstimationInertia")
-	public double getReplanningEfficiencyEstimationInertia() {
-		return this.replanningEfficiencyEstimationInertia;
+	@StringSetter("minAbsoluteMemoryLength")
+	public void setMinAbsoluteMemoryLength(final int minAbsoluteMemoryLength) {
+		this.minAbsoluteMemoryLength = minAbsoluteMemoryLength;
 	}
 
-	@StringSetter("replanningEfficiencyEstimationInertia")
-	public void setReplanningEfficiencyEstimationInertia(double replanningEfficiencyEstimationInertia) {
-		this.replanningEfficiencyEstimationInertia = replanningEfficiencyEstimationInertia;
+	// -------------------- maxAbsoluteMemoryLength --------------------
+
+	private int maxAbsoluteMemoryLength = Integer.MAX_VALUE;
+
+	@StringGetter("maxAbsoluteMemoryLength")
+	public int getMaxAbsoluteMemoryLength() {
+		return this.maxAbsoluteMemoryLength;
 	}
 
-	// --------------- warmupIterations ---------------
-
-	private int warmUpIterations = 3;
-
-	@StringGetter("warmUpIterations")
-	public int getWarmUpIterations() {
-		return this.warmUpIterations;
+	@StringSetter("maxAbsoluteMemoryLength")
+	public void setMaxAbsoluteMemoryLength(final int maxAbsoluteMemoryLength) {
+		this.maxAbsoluteMemoryLength = maxAbsoluteMemoryLength;
 	}
 
-	@StringSetter("warmUpIterations")
-	public void setWarmUpIterations(int warmUpIterations) {
-		this.warmUpIterations = warmUpIterations;
+	// -------------------- maxRelativeMemoryLength --------------------
+
+	private double maxRelativeMemoryLength = 1.0;
+
+	@StringGetter("maxRelativeMemoryLength")
+	public double getMaxRelativeMemoryLength() {
+		return this.maxRelativeMemoryLength;
 	}
 
-	// -------------------- eta --------------------
-
-	private double betaScale = 1.0;
-
-	@StringGetter("betaScale")
-	public double getBetaScale() {
-		return this.betaScale;
-	}
-
-	@StringSetter("betaScale")
-	public void setBetaScale(double betaScale) {
-		this.betaScale = betaScale;
-	}
-
-	// -------------------- minReplanningRate --------------------
-
-	private double minReplanningRate = 0.01;
-
-	@StringGetter("minReplanningRate")
-	public double getMinReplanningRate() {
-		return this.minReplanningRate;
-	}
-
-	@StringSetter("minReplanningRate")
-	public void setMinReplanningRate(double minReplanningRate) {
-		this.minReplanningRate = minReplanningRate;
-	}
-
-	// -------------------- loadingEquivalentReplanningRate --------------------
-
-	private double loadingEquivalentReplanningRate = 0.01;
-
-	@StringGetter("loadingEquivalentReplanningRate")
-	public double getLoadingEquivalentReplanningRate() {
-		return this.loadingEquivalentReplanningRate;
-	}
-
-	@StringSetter("loadingEquivalentReplanningRate")
-	public void setLoadingEquivalentReplanningRate(double loadingEquivalentReplanningRate) {
-		this.loadingEquivalentReplanningRate = loadingEquivalentReplanningRate;
+	@StringSetter("maxRelativeMemoryLength")
+	public void setMaxRelativeMemoryLength(final double maxRelativeMemoryLength) {
+		this.maxRelativeMemoryLength = maxRelativeMemoryLength;
 	}
 
 	// -------------------- meanReplanningRate --------------------
 
-	private double initialMeanReplanningRate = 0.2;
+	private double initialMeanReplanningRate = 1.0;
 
 	@StringGetter("initialMeanReplanningRate")
 	public double getInitialMeanReplanningRate() {
@@ -353,7 +279,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- replanningRateIterationExponent --------------------
 
-	private double replanningRateIterationExponent = 0.0;
+	private double replanningRateIterationExponent = -1.0;
 
 	@StringGetter("replanningRateIterationExponent")
 	public double getReplanningRateIterationExponent() {
@@ -379,7 +305,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.ageWeightExponent = ageWeightExponent;
 	}
 
-	// -------------------- startTime_s --------------------
+	// -------------------- startTime_s, binSize_s, binCnt --------------------
 
 	private int startTime_s = 0;
 
@@ -393,8 +319,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.startTime_s = startTime_s;
 	}
 
-	// -------------------- binSize_s --------------------
-
 	private int binSize_s = 3600;
 
 	@StringGetter("binSize_s")
@@ -406,8 +330,6 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	public void setBinSize_s(int binSize_s) {
 		this.binSize_s = binSize_s;
 	}
-
-	// -------------------- binCnt_s --------------------
 
 	private int binCnt = 24;
 
@@ -421,32 +343,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.binCnt = binCnt;
 	}
 
-	// -------------------- binomialNumberOfReplanners --------------------
-
-	private boolean binomialNumberOfReplanners = false;
-
-	@StringGetter("binomialNumberOfReplanners")
-	public boolean getBinomialNumberOfReplanners() {
-		return this.binomialNumberOfReplanners;
-	}
-
-	@StringSetter("binomialNumberOfReplanners")
-	public void setBinomialNumberOfReplanners(final boolean binomialNumberOfReplanners) {
-		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
-	}
-
-	// -------------------- detailedLogging --------------------
-
-	private boolean detailedLogging = true;
-
-	@StringGetter("detailedLogging")
-	public boolean getDetailedLogging() {
-		return this.detailedLogging;
-	}
-
-	@StringSetter("detailedLogging")
-	public void setDetailedLogging(final boolean detailedLogging) {
-		this.detailedLogging = detailedLogging;
+	public TimeDiscretization newTimeDiscretization() {
+		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
 	}
 
 	// -------------------- adjustStrategyWeights --------------------
@@ -488,7 +386,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// computationally cheap strategies
 
-	private List<String> cheapStrategies = Arrays.asList("TimeAllocationMutator");
+	private List<String> cheapStrategies = Arrays.asList(DefaultStrategy.TimeAllocationMutator);
 
 	@StringGetter("cheapStrategies")
 	public String getCheapStrategies() {
@@ -506,8 +404,10 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// computationally expensive strategies
 
-	private List<String> expensiveStrategies = Arrays.asList("ReRoute", "TimeAllocationMutator_ReRoute",
-			"ChangeLegMode", "ChangeTripMode", "ChangeSingleLegMode", "SubtourModeChoice");
+	private List<String> expensiveStrategies = Arrays.asList(DefaultStrategy.ReRoute,
+			DefaultStrategy.TimeAllocationMutator_ReRoute, DefaultStrategy.ChangeSingleTripMode,
+			DefaultStrategy.SubtourModeChoice, DefaultStrategy.ChangeTripMode, DefaultStrategy.ChangeLegMode,
+			DefaultStrategy.ChangeSingleLegMode, DefaultStrategy.TripSubtourModeChoice);
 
 	@StringGetter("expensiveStrategies")
 	public String getExpensiveStrategies() {

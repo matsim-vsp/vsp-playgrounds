@@ -51,14 +51,14 @@ public class MSARecipe implements ReplannerIdentifierRecipe {
 	// --------------- IMPLEMENATION OF ReplannerIdentifierRecipe ---------------
 
 	@Override
-	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo) {
-		final double proba = this.initialStepSize * Math.pow(1.0 + this.iteration, this.iterationExponent);
-		return (MatsimRandom.getRandom().nextDouble() < proba);
+	public void update(final LogDataWrapper logDataWrapper) {
+		this.iteration = logDataWrapper.getIteration();
 	}
 
 	@Override
-	public void update(LogDataWrapper logDataWrapper) {
-		this.iteration = logDataWrapper.getIteration();
+	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
+		final double proba = this.initialStepSize * Math.pow(1.0 + this.iteration, this.iterationExponent);
+		return (MatsimRandom.getRandom().nextDouble() < proba);
 	}
 
 	@Override

@@ -30,38 +30,20 @@ import org.matsim.contrib.greedo.LogDataWrapper;
  */
 public class AccelerationRecipe implements ReplannerIdentifierRecipe {
 
-	private final ReplannerIdentifierRecipe backupRecipe;
-
-	private boolean useBackupRecipe = false;
-
-	public AccelerationRecipe(final ReplannerIdentifierRecipe backupRecipe) {
-		this.backupRecipe = backupRecipe;
+	public AccelerationRecipe() {
 	}
 
 	@Override
 	public void update(final LogDataWrapper logDataWrapper) {
-		this.backupRecipe.update(logDataWrapper);
-	}
-
-	public void setUseBackupRecipe(final boolean useBackupRecipe) {
-		this.useBackupRecipe = useBackupRecipe;
 	}
 
 	@Override
 	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
-		if (this.useBackupRecipe) {
-			return this.backupRecipe.isReplanner(personId, deltaScoreIfYes, deltaScoreIfNo);
-		} else {
-			return (deltaScoreIfYes < deltaScoreIfNo);
-		}
+		return (deltaScoreIfYes < deltaScoreIfNo);
 	}
 
 	@Override
 	public String getDeployedRecipeName() {
-		if (this.useBackupRecipe) {
-			return this.backupRecipe.getClass().getSimpleName();
-		} else {
-			return this.getClass().getSimpleName();
-		}
+		return this.getClass().getSimpleName();
 	}
 }

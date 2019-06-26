@@ -94,6 +94,9 @@ public class KNAccidentScenario {
 	static final Id<Link> accidentLinkId = Id.createLinkId( "4706699_484108_484109-4706699_484109_26662372");
 	static List<Id<Link>> replanningLinkIds = new ArrayList<>() ;
 
+	enum ControlType { none, manualDetour, bangbang, withinDayRerouting } ;
+	private static final ControlType controlType = ControlType.withinDayRerouting ;
+
 	public static void main(String[] args) {
 		replanningLinkIds.add( Id.createLinkId("4068014_26836040_26836036-4068014_26836036_251045850-4068014_251045850_251045852") ) ;
 

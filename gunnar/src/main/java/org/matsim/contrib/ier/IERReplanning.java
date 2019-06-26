@@ -18,7 +18,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.ier.emulator.AgentEmulator;
 import org.matsim.contrib.ier.emulator.SimulationEmulator;
 import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
-import org.matsim.contrib.ier.replannerselection.ReplannerSelector.EventHandlerProvider;
+import org.matsim.contrib.ier.replannerselection.ReplannerSelector.IEREventHandlerProvider;
 import org.matsim.contrib.ier.run.IERConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -83,14 +83,13 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		this.scoringFunctionFactory = scoringFunctionFactory;
 	}
 
+	@Override
 	public void notifyReplanning(ReplanningEvent event) {
 		try {
 
-			// this.replannerSelector.beforeReplanning();
-
-			final EventHandlerProvider handlerForLastReplanningIterationProvider = this.replannerSelector
-					.prepareReplanningAndGetEventHandlerProvider();
-			final EventHandlerProvider handlerForOtherReplanningIterationsProvider = new EventHandlerProvider() {
+			final IEREventHandlerProvider handlerForLastReplanningIterationProvider = this.replannerSelector
+					.beforeReplanningAndGetEventHandlerProvider();
+			final IEREventHandlerProvider handlerForOtherReplanningIterationsProvider = new IEREventHandlerProvider() {
 				@Override
 				public EventHandler get(Set<Id<Person>> personIds) {
 					return new EventHandler() {
@@ -107,7 +106,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				// We run replanning on all agents (exactly as it is defined in the config)
 				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
-				final EventHandlerProvider currentEventHandlerProvider;
+				final IEREventHandlerProvider currentEventHandlerProvider;
 				if (i == this.ierConfig.getIterationsPerCycle() - 1) {
 					currentEventHandlerProvider = handlerForLastReplanningIterationProvider;
 				} else {
@@ -152,7 +151,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 	}
 
 	private void emulateInParallel(Population population, int iteration,
-			final EventHandlerProvider eventHandlerProvider) throws InterruptedException {
+			final IEREventHandlerProvider eventHandlerProvider) throws InterruptedException {
 		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
 		List<Thread> threads = new LinkedList<>();
 
@@ -169,8 +168,6 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
 
 				Map<Id<Person>, Person> batch = new LinkedHashMap<>();
-				// List<Person> batch = new LinkedList<>();
-				// Set<Id<Person>> batchIds = new LinkedHashSet<>();
 
 				do {
 					batch.clear();

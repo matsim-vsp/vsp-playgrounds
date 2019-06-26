@@ -80,23 +80,23 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 
 			if (this.tmpLegs.size() == 1) {
 
-				// The previous leg contains a single trip. Since there is no access/egress,
-				// this is interpreted as a non-PT trip.
 				final Leg leg = this.tmpLegs.getFirst();
 
-				// The transit router may produce pure (transit) walk trips. Interpret as a
-				// non-PT walking trip. (MATSim-type justification: Keep "Scoring" independent
-				// of "innovation".)
 				if (TransportMode.transit_walk.equals(leg.getMode())) {
-					leg.setMode(TransportMode.walk);
-				}
 
-				// Any other PT mode should not be possible.
-				if (TransportMode.pt.equals(leg.getMode()) || PT_SUBMODES.contains(leg.getMode())) {
-					throw new RuntimeException("Encountered single-trip leg with mode: " + leg.getMode());
-				}
+					final double generalizedTravelTime_s = super.utlFct.getGeneralizedPTTravelTime_s(0.0, 0.0, 0.0,
+							leg.getTravelTime(), 0);
+					final SampersPTSummaryLeg summaryLeg = new SampersPTSummaryLeg(generalizedTravelTime_s);
+					super.handleLeg(summaryLeg);
 
-				super.handleLeg(leg);
+				} else {
+
+					if (TransportMode.pt.equals(leg.getMode()) || PT_SUBMODES.contains(leg.getMode())) {
+						throw new RuntimeException("Encountered single-trip leg with mode: " + leg.getMode());
+					}
+					super.handleLeg(leg);
+
+				}
 
 			} else if (this.tmpLegs.size() > 1) {
 
@@ -148,6 +148,21 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 		}
 	}
 
+	@Override
+	public void finish() {
+
+		if (!this.stuck) {
+			if (this.tmpActs.size() > 0) {
+				throw new RuntimeException(this.tmpActs.size() + " unprocessed activities left!");
+			}
+			if (this.tmpLegs.size() > 0) {
+				throw new RuntimeException(this.tmpLegs.size() + " unprocessed legs left!");
+			}
+		}
+
+		super.finish();
+	}
+
 	// -------------------- INNER CLASS --------------------
 
 	class SampersPTSummaryLeg implements Leg {
@@ -168,7 +183,7 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 			return new Route() {
 				@Override
 				public double getDistance() {
-					return 0.0; // does not play a role in PT legs
+					return 0.0; // does not play a role in PT legs; will play a role in WALK legs!
 				}
 
 				@Override

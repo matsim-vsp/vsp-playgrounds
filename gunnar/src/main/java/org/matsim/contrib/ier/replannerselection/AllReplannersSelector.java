@@ -35,17 +35,17 @@ import org.matsim.core.events.handler.EventHandler;
 public class AllReplannersSelector implements ReplannerSelector {
 
 	@Override
-	public void afterReplanning() {
-	}
-
-	@Override
-	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider() {
-		return new EventHandlerProvider() {
+	public IEREventHandlerProvider beforeReplanningAndGetEventHandlerProvider() {
+		return new IEREventHandlerProvider() {
 			@Override
 			public EventHandler get(Set<Id<Person>> personIds) {
 				return new EventHandler() {
 				};
 			}
 		};
+	}
+	
+	@Override
+	public void afterReplanning() {
 	}
 }

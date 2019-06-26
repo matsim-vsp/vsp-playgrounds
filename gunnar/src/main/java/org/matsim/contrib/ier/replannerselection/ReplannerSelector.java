@@ -32,11 +32,11 @@ import org.matsim.core.events.handler.EventHandler;
  */
 public interface ReplannerSelector {
 
-	public EventHandlerProvider prepareReplanningAndGetEventHandlerProvider();
+	public IEREventHandlerProvider beforeReplanningAndGetEventHandlerProvider();
 
 	public void afterReplanning();
 
-	public interface EventHandlerProvider {
+	public interface IEREventHandlerProvider {
 		
 		public EventHandler get(Set<Id<Person>> persons);
 	

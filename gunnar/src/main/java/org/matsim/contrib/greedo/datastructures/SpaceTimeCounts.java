@@ -24,8 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.matsim.contrib.greedo.ScoreUpdater;
-
 import floetteroed.utilities.Tuple;
 
 /**
@@ -47,48 +45,27 @@ public class SpaceTimeCounts<L> {
 
 	// -------------------- MEMBERS --------------------
 
-	// all values are non-null
 	private final Map<Tuple<L, Integer>, Double> data = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final boolean weighted) {
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
 				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
-					this.add(newKey(visit.spaceObject, timeBin), weighted ? visit.weight : 1.0);
+					this.add(newKey(visit.spaceObject, timeBin), visit.weight);
 				}
 			}
 		}
 	}
 
+	// -------------------- INTERNALS --------------------
+
 	private static <L> Tuple<L, Integer> newKey(final L spaceObj, final Integer timeBin) {
 		return new Tuple<>(spaceObj, timeBin);
 	}
 
-	// private SpaceTimeCounts() {
-	// }
-
-	// public static <L> Tuple<SpaceTimeCounts<L>, SpaceTimeCounts<L>>
-	// newWeightedAndUnweighted(
-	// final SpaceTimeIndicators<L> parent) {
-	// final SpaceTimeCounts<L> weighted = new SpaceTimeCounts<>();
-	// final SpaceTimeCounts<L> unweighted = new SpaceTimeCounts<>();
-	// if (parent != null) {
-	// for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
-	// for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
-	// final Tuple<L, Integer> key = new Tuple<>(visit.spaceObject, timeBin);
-	// weighted.add(key, visit.weight);
-	// unweighted.add(key, 1.0);
-	// }
-	// }
-	// }
-	// return new Tuple<>(weighted, unweighted);
-	// }
-
-	// -------------------- INTERNALS --------------------
-
-	private Double get(final Tuple<L, Integer> key) {
+	private double get(final Tuple<L, Integer> key) {
 		if (this.data.containsKey(key)) {
 			return this.data.get(key);
 		} else {
@@ -96,18 +73,16 @@ public class SpaceTimeCounts<L> {
 		}
 	}
 
-	private void set(final Tuple<L, Integer> key, final Double value) {
-		if ((value == null) || (value.doubleValue() == 0)) {
+	private void set(final Tuple<L, Integer> key, final double value) {
+		if (value == 0.0) {
 			this.data.remove(key);
 		} else {
 			this.data.put(key, value);
 		}
 	}
 
-	private void add(final Tuple<L, Integer> key, final Double addend) {
-		if (addend != null) {
-			this.set(key, this.get(key) + addend);
-		}
+	private void add(final Tuple<L, Integer> key, final double addend) {
+		this.set(key, this.get(key) + addend);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------

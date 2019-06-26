@@ -19,7 +19,6 @@
  */
 package org.matsim.contrib.greedo;
 
-import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
@@ -32,214 +31,41 @@ import org.matsim.api.core.v01.population.Person;
  */
 public class LogDataWrapper {
 
-	// private final WireGreedoIntoMATSimControlerListener accelerator;
+	private final Utilities.SummaryStatistics utilitySummaryStatistics;
 
-	private final Ages ages;
-
-	Utilities.SummaryStatistics summaryStats;
-
-	private final ReplannerIdentifier.LastExpectations lastExpectations;
+	private final ReplannerIdentifier.SummaryStatistics replanningSummaryStatistics;
 
 	private final int iteration;
-	
-	public LogDataWrapper(// final WireGreedoIntoMATSimControlerListener accelerator,
-			final Ages ages, Utilities.SummaryStatistics summaryStats,
-			final ReplannerIdentifier.LastExpectations lastExpectations,
-			final int iteration) {
-		// this.accelerator = accelerator;
-		this.ages = ages;
-		this.summaryStats = summaryStats;
-		this.lastExpectations = lastExpectations;
+
+	public LogDataWrapper(Utilities.SummaryStatistics utilitySummaryStatistics,
+			final ReplannerIdentifier.SummaryStatistics replanningSummaryStatistics, final int iteration) {
+		this.utilitySummaryStatistics = utilitySummaryStatistics;
+		this.replanningSummaryStatistics = replanningSummaryStatistics;
 		this.iteration = iteration;
 	}
 
+	// The return type is package private.
+	Utilities.SummaryStatistics getUtilitySummaryStatistics() {
+		return this.utilitySummaryStatistics;
+	}
+
+	public Map<Id<Person>, Double> getPersonId2expectedUtilityChange() {
+		return this.utilitySummaryStatistics.personId2expectedUtilityChange;
+	}
+	
+	public Double getRealizedUtilitySum() {
+		return this.utilitySummaryStatistics.realizedUtilitySum;
+	}
+	
+	public Double getRealizedUtilityChangeSum() {
+		return this.utilitySummaryStatistics.realizedUtilityChangeSum;
+	}
+	
 	public int getIteration() {
 		return this.iteration;
 	}
 	
-	public Ages getAges() {
-		return this.ages;
+	public ReplannerIdentifier.SummaryStatistics getReplanningSummaryStatistics() {
+		return this.replanningSummaryStatistics;
 	}
-
-	public Utilities.SummaryStatistics getSummaryStats() {
-		return this.summaryStats;
-	}
-
-	public ReplannerIdentifier.LastExpectations getLastExpectations() {
-		return this.lastExpectations;
-	}
-
-	// TODO remove detailed getters further below
-
-	public Double getLambdaBar() {
-		return this.lastExpectations.lambdaBar;
-	}
-
-	public Double getBeta() {
-		return this.lastExpectations.beta;
-	}
-
-	public Double getUnconstrainedBeta() {
-		return this.lastExpectations.unconstrainedBeta;
-	}
-
-	public Double getDelta() {
-		return this.lastExpectations.delta;
-	}
-
-	// public Double getPredictedUtilityChange() {
-	// if ((this.lastExpectations.sumOfReplannerUtilityChanges != null)
-	// && (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
-	// && (this.getBeta() != null)) {
-	// return (this.lastExpectations.sumOfReplannerUtilityChanges
-	// - this.lastExpectations.sumOfWeightedReplannerCountDifferences2 /
-	// this.getBeta());
-	// } else {
-	// return null;
-	// }
-	// }
-
-	public Double getSumOfWeightedCountDifferences2() {
-		return this.lastExpectations.getSumOfWeightedCountDifferences2();
-	}
-
-	public Double getSumOfUnweightedCountDifferences2() {
-		return this.lastExpectations.getSumOfUnweightedCountDifferences2();
-	}
-
-	public Map<Id<Person>, Double> getSimilarities() {
-		return this.lastExpectations.personId2similarity;
-	}
-
-	public Double getLastRealizedUtilitySum() {
-		// return this.accelerator.getRealizedUtilitySum();
-		return this.summaryStats.realizedUtilitySum;
-	}
-
-	public Double getLastExpectedUtilityChangeSumAccelerated() {
-		return this.lastExpectations.sumOfReplannerUtilityChanges;
-	}
-
-	public Double getLastExpectedUtilityChangeSumTotal() {
-		return this.lastExpectations.getSumOfUtilityChanges();
-	}
-
-	public Double getLastExpectedUtilityChangeSumUniform() {
-		return this.lastExpectations.getSumOfUtilityChangesGivenUniformReplanning();
-	}
-
-	public Double getLastRealizedUtilityChangeSum() {
-		// return this.accelerator.getRealizedUtilityChangeSum();
-		return this.summaryStats.realizedUtilityChangeSum;
-	}
-	
-	public List<Integer> getSortedAges() {
-		// return this.accelerator.getSortedAgesView();
-		return this.ages.getSortedAges();
-	}
-
-	public Double getAverageAge() {
-		// return this.accelerator.getAveragAge();
-		return this.ages.getAverageAge();
-	}
-
-	public Double getAverageWeight() {
-		// return this.accelerator.getAverageWeight();
-		return this.ages.getAverageWeight();
-	}
-
-	public Double getSumOfUnweightedReplannerCountDifferences2() {
-		return this.lastExpectations.sumOfUnweightedReplannerCountDifferences2;
-	}
-
-	public Double getSumOfWeightedReplannerCountDifferences2() {
-		return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
-	}
-
-	// public Double getReplannerUtilityChangeSum() {
-	// return this.identifier.replannerExpectedUtilityChangeSum;
-	// }
-
-	public Double getSumOfUnweightedNonReplannerCountDifferences2() {
-		return this.lastExpectations.sumOfUnweightedNonReplannerCountDifferences2;
-	}
-
-	public Double getSumOfWeightedNonReplannerCountDifferences2() {
-		return this.lastExpectations.sumOfWeightedNonReplannerCountDifferences2;
-	}
-
-	public Double getNonReplannerUtilityChangeSum() {
-		return this.lastExpectations.sumOfReplannerUtilityChanges;
-	}
-
-	public Integer getNumberOfReplanners() {
-		return this.lastExpectations.numberOfReplanners;
-	}
-
-	public Integer getNumberOfNonReplanners() {
-		return this.lastExpectations.numberOfNonReplanners;
-	}
-
-	public Integer getPopulationSize() {
-		return this.lastExpectations.getNumberOfPersons();
-	}
-
-	public Double getReplannerSizeSum() {
-		return this.lastExpectations.replannerSizeSum;
-	}
-
-	public Double getNonReplannerSizeSum() {
-		return this.lastExpectations.nonReplannerSizeSum;
-	}
-
-	// public Double getRelativeUtilityEfficiency() {
-	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)
-	// && (this.lastExpectations.getSumOfUtilityChanges() != null)) {
-	// return Math.abs(
-	// this.accelerator.getRealizedUtilityChangeSum() -
-	// this.lastExpectations.sumOfReplannerUtilityChanges)
-	// / this.lastExpectations.getSumOfUtilityChanges();
-	// } else {
-	// return null;
-	// }
-	// }
-
-	// public Double getRelativeSlotVariability() {
-	// if ((this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)
-	// && (this.lastExpectations.getSumOfWeightedCountDifferences2() != null)) {
-	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
-	// / this.lastExpectations.getSumOfWeightedCountDifferences2();
-	// } else {
-	// return null;
-	// }
-	// }
-
-	// public Double getEstimatedBetaNumerator() {
-	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2;
-	// }
-
-	// public Double getEstimatedBetaDenominator() {
-	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)) {
-	// return Math.abs(this.accelerator.getRealizedUtilityChangeSum()
-	// - this.lastExpectations.sumOfReplannerUtilityChanges);
-	// } else {
-	// return null;
-	// }
-	//
-	// }
-
-	// public Double getEstimatedBeta() {
-	// if ((this.accelerator.getRealizedUtilityChangeSum() != null)
-	// && (this.lastExpectations.sumOfReplannerUtilityChanges != null)
-	// && (this.lastExpectations.sumOfWeightedReplannerCountDifferences2 != null)) {
-	// return this.lastExpectations.sumOfWeightedReplannerCountDifferences2
-	// / Math.abs(this.accelerator.getRealizedUtilityChangeSum()
-	// - this.lastExpectations.sumOfReplannerUtilityChanges);
-	// } else {
-	// return null;
-	// }
-	// }
-
 }

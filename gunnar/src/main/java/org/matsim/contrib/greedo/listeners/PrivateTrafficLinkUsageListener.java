@@ -50,10 +50,9 @@ class PrivateTrafficLinkUsageListener
 
 	private final TimeDiscretization timeDiscretization;
 
-	// Maps a vehicle driver on all link-time-slots used by that driver.
-	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators;
-
 	private final Map<Id<Vehicle>, Id<Person>> privateVehicleId2DriverId = new LinkedHashMap<>();
+
+	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators;
 
 	private final Map<Id<Link>, Double> linkWeights;
 
@@ -78,7 +77,7 @@ class PrivateTrafficLinkUsageListener
 
 	// -------------------- RESULT ACCESS --------------------
 
-	Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getIndicatorView() {
+	Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getDriverId2IndicatorsView() {
 		return Collections.unmodifiableMap(this.driverId2indicators);
 	}
 
@@ -97,17 +96,7 @@ class PrivateTrafficLinkUsageListener
 						indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 						this.driverId2indicators.put(driverId, indicators);
 					}
-					try {
-						indicators.visit(linkId, this.timeDiscretization.getBin(time_s), personWeight * linkWeight);
-					} catch (Exception e) {
-						System.out.println("this.linkWeights   = " + this.linkWeights);
-						System.out.println("this.personWeights = " + this.personWeights);
-						System.out.println("linkId   = " + linkId);
-						System.out.println("driverId = " + driverId);
-						System.out.println("driver has weight: " + this.personWeights.containsKey(driverId));
-						System.out.println("link has weight: " + this.linkWeights.containsKey(linkId));
-						throw e;
-					}
+					indicators.visit(linkId, this.timeDiscretization.getBin(time_s), personWeight * linkWeight);
 				}
 			}
 		}
@@ -117,8 +106,8 @@ class PrivateTrafficLinkUsageListener
 
 	@Override
 	public void reset(int iteration) {
-		this.driverId2indicators.clear();
 		this.privateVehicleId2DriverId.clear();
+		this.driverId2indicators.clear();
 	}
 
 	@Override
@@ -134,7 +123,7 @@ class PrivateTrafficLinkUsageListener
 	public void handleEvent(final LinkEnterEvent event) {
 		this.registerLinkEntry(event.getLinkId(), event.getVehicleId(), event.getTime());
 	}
-	
+
 	@Override
 	public void handleEvent(final VehicleLeavesTrafficEvent event) {
 		this.privateVehicleId2DriverId.remove(event.getVehicleId());

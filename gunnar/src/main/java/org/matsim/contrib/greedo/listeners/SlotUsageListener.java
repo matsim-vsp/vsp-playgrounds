@@ -20,7 +20,6 @@
 package org.matsim.contrib.greedo.listeners;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,8 +55,6 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// private final TransitVehicleUsageListener transitVehicleUsageListener;
 
-	private boolean hasBeenResetOnceAndForAll = false;
-
 	private Integer lastResetIteration = null;
 
 	// -------------------- CONSTRUCTION --------------------
@@ -81,32 +78,20 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// -------------------- CONTENT ACCESS --------------------
 
-	public Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getNewIndicatorView() {
-		// Need a deep copy because of subsequent (pSim) resets.
-		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
-	}
-
 	public Integer getLastResetIteration() {
 		return this.lastResetIteration;
 	}
 
-	public void resetOnceAndForAll(final int iteration) {
-		if (this.hasBeenResetOnceAndForAll) {
-			throw new RuntimeException("This listener has already been resetted once and for all.");
-		}
-		this.reset(iteration);
-		this.hasBeenResetOnceAndForAll = true;
+	public Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getIndicatorView() {
+		return Collections.unmodifiableMap(this.personId2indicators);
 	}
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
 	@Override
 	public void reset(final int iteration) {
-		if (!this.hasBeenResetOnceAndForAll) {
-			this.lastResetIteration = iteration;
-			this.privateTrafficLinkUsageListener.reset(iteration);
-			// this.transitVehicleUsageListener.reset(iteration);
-		}
+		this.lastResetIteration = iteration;
+		this.privateTrafficLinkUsageListener.reset(iteration);
 	}
 
 	@Override

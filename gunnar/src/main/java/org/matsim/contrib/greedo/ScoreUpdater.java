@@ -42,15 +42,11 @@ import floetteroed.utilities.Tuple;
  *            the space coordinate type
  *
  */
-public class ScoreUpdater<L> {
+class ScoreUpdater<L> {
 
 	// -------------------- MEMBERS --------------------
 
 	private final DynamicData<L> interactionResiduals;
-
-	private double inertiaResidual;
-
-	private final double individualUtilityChange;
 
 	private final SpaceTimeCounts<L> individualWeightedChanges;
 
@@ -60,31 +56,23 @@ public class ScoreUpdater<L> {
 
 	private boolean residualsUpdated = false;
 
-	private double sumOfInteractionResiduals2;
-
 	// -------------------- CONSTRUCTION --------------------
 
-	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
+	ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
 			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals,
-			final double inertiaResidual, final double individualUtilityChange, Double sumOfInteractionResiduals2) {
-
-		this.interactionResiduals = interactionResiduals;
-		this.inertiaResidual = inertiaResidual;
-
-		this.individualUtilityChange = individualUtilityChange;
+			final double individualUtilityChange) {
 
 		/*
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, true);
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, true));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
 
-		// Update the residuals.
-
-		this.sumOfInteractionResiduals2 = sumOfInteractionResiduals2;
-		sumOfInteractionResiduals2 = null; // Only use the (updated) member variable!
-
+		/*
+		 * Update the interaction residuals.
+		 */
+		this.interactionResiduals = interactionResiduals;
 		for (Map.Entry<Tuple<L, Integer>, Double> entry : this.individualWeightedChanges.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
@@ -92,16 +80,15 @@ public class ScoreUpdater<L> {
 			double oldResidual = this.interactionResiduals.getBinValue(spaceObj, timeBin);
 			double newResidual = oldResidual - meanLambda * weightedIndividualChange;
 			this.interactionResiduals.put(spaceObj, timeBin, newResidual);
-			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 
-		this.inertiaResidual -= (1.0 - meanLambda) * this.individualUtilityChange;
-
-		// Compute individual score terms.
-
+		/*
+		 * Compute score (approximated objective function in the solution heuristic):
+		 * 
+		 * interaction(lambda) - beta * lambda * individualUtilityChange.
+		 */
 		double sumOfWeightedIndividualChanges2 = 0.0;
 		double sumOfWeightedIndividualChangesTimesInteractionResiduals = 0.0;
-
 		for (Map.Entry<Tuple<L, Integer>, Double> entry : this.individualWeightedChanges.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
@@ -111,37 +98,28 @@ public class ScoreUpdater<L> {
 					* this.interactionResiduals.getBinValue(spaceObj, timeBin);
 		}
 
-		// Compute score components and score changes.
+		final double scoreIfOne = this.expectedInteraction(1.0, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * 1.0 * individualUtilityChange;
+		final double scoreIfMean = this.expectedInteraction(meanLambda, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * meanLambda * individualUtilityChange;
+		final double scoreIfZero = this.expectedInteraction(0.0, sumOfWeightedIndividualChanges2,
+				sumOfWeightedIndividualChangesTimesInteractionResiduals) - beta * 0.0 * individualUtilityChange;
 
-		final double interactionIfOne = this.expectedInteraction(1.0, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals, this.sumOfInteractionResiduals2);
-		final double interactionIfMean = this.expectedInteraction(meanLambda, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals, this.sumOfInteractionResiduals2);
-		final double interactionIfZero = this.expectedInteraction(0.0, sumOfWeightedIndividualChanges2,
-				sumOfWeightedIndividualChangesTimesInteractionResiduals, this.sumOfInteractionResiduals2);
-		final double inertiaIfOne = this.expectedInertia(1.0, individualUtilityChange, inertiaResidual);
-		final double inertiaIfMean = this.expectedInertia(meanLambda, individualUtilityChange, inertiaResidual);
-		final double inertiaIfZero = this.expectedInertia(0.0, individualUtilityChange, inertiaResidual);
-
-		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean);
-		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean);
+		this.scoreChangeIfOne = scoreIfOne - scoreIfMean;
+		this.scoreChangeIfZero = scoreIfZero - scoreIfMean;
 	}
+
+	// -------------------- INTERNALS --------------------
 
 	private double expectedInteraction(final double lambda, final double sumOfWeightedIndividualChanges2,
-			final double sumOfWeightedIndividualChangesTimesInteractionResiduals,
-			final double sumOfInteractionResiduals2) {
+			final double sumOfWeightedIndividualChangesTimesInteractionResiduals) {
 		return lambda * lambda * sumOfWeightedIndividualChanges2
-				+ 2.0 * lambda * sumOfWeightedIndividualChangesTimesInteractionResiduals + sumOfInteractionResiduals2;
-	}
-
-	private double expectedInertia(final double lambda, final double individualUtilityChange,
-			final double inertiaResidual) {
-		return (1.0 - lambda) * individualUtilityChange + inertiaResidual;
+				+ 2.0 * lambda * sumOfWeightedIndividualChangesTimesInteractionResiduals;
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	public void updateResiduals(final double newLambda) {
+	void updateResiduals(final double newLambda) {
 		if (this.residualsUpdated) {
 			throw new RuntimeException("Residuals have already been updated.");
 		}
@@ -153,32 +131,16 @@ public class ScoreUpdater<L> {
 			final double oldResidual = this.interactionResiduals.getBinValue(spaceObj, timeBin);
 			final double newResidual = oldResidual + newLambda * entry.getValue();
 			this.interactionResiduals.put(spaceObj, timeBin, newResidual);
-			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
-		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
 	}
 
 	// -------------------- GETTERS --------------------
 
-	public double getUpdatedInertiaResidual() {
-		if (!this.residualsUpdated) {
-			throw new RuntimeException("Residuals have not yet updated.");
-		}
-		return this.inertiaResidual;
-	}
-
-	public double getUpdatedSumOfInteractionResiduals2() {
-		if (!this.residualsUpdated) {
-			throw new RuntimeException("Residuals have not yet updated.");
-		}
-		return this.sumOfInteractionResiduals2;
-	}
-
-	public double getScoreChangeIfOne() {
+	double getScoreChangeIfOne() {
 		return this.scoreChangeIfOne;
 	}
 
-	public double getScoreChangeIfZero() {
+	double getScoreChangeIfZero() {
 		return this.scoreChangeIfZero;
 	}
 }

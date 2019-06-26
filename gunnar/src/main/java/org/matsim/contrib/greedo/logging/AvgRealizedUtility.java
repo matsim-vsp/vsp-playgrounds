@@ -30,7 +30,8 @@ public class AvgRealizedUtility extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getLastRealizedUtilitySum(), arg0.getPopulationSize());
+		return this.averageOrEmpty(arg0.getRealizedUtilitySum(),
+				arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 
 }

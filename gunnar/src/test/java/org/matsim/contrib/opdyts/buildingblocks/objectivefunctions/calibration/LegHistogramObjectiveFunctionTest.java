@@ -19,16 +19,7 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.objectivefunctions.calibration;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.junit.Assert;
 import org.junit.Test;
-import org.matsim.analysis.LegHistogram;
-import org.matsim.contrib.opdyts.microstate.MATSimState;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.PopulationUtils;
 
 
 /**

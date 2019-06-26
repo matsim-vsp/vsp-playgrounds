@@ -30,8 +30,8 @@ public class AvgNonReplannerUtilityChange extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getNonReplannerUtilityChangeSum(),
-				arg0.getNumberOfNonReplanners());
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().sumOfNonReplannerUtilityChanges,
+				arg0.getReplanningSummaryStatistics().numberOfNonReplanners);
 	}
 
 }
