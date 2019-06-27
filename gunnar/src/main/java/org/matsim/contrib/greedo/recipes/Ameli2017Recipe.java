@@ -22,29 +22,29 @@ package org.matsim.contrib.greedo.recipes;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.LogDataWrapper;
+import org.matsim.core.gbl.MatsimRandom;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AccelerationRecipe implements ReplannerIdentifierRecipe {
-
-	public AccelerationRecipe() {
-	}
-
-	@Override
-	public void update(final LogDataWrapper logDataWrapper) {
-	}
-
-	@Override
-	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo,
-			final double currentUtility, final double anticipatedUtilityChange) {
-		return (deltaScoreIfYes < deltaScoreIfNo);
-	}
+public class Ameli2017Recipe implements ReplannerIdentifierRecipe {
 
 	@Override
 	public String getDeployedRecipeName() {
 		return this.getClass().getSimpleName();
 	}
+
+	@Override
+	public void update(LogDataWrapper logDataWrapper) {
+	}
+
+	@Override
+	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo,
+			final double currentUtility, final double anticipatedUtilityChange) {
+		final double proba = Math.max(0, Math.min(1, anticipatedUtilityChange / currentUtility));
+		return (MatsimRandom.getRandom().nextDouble() < proba);
+	}
+
 }

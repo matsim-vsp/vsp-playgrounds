@@ -37,12 +37,11 @@ import org.matsim.contrib.greedo.LogDataWrapper;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class Mah2007Recipe implements ReplannerIdentifierRecipe {
+public class Sbayti2007Recipe implements ReplannerIdentifierRecipe {
 
 	// -------------------- MEMBERS --------------------
 
-	private Set<Id<Person>> replannerIds = new LinkedHashSet<>();
+	private Set<Id<Person>> replannerIds = null;
 
 	// -------------------- UTILITIES --------------------
 
@@ -55,7 +54,13 @@ public class Mah2007Recipe implements ReplannerIdentifierRecipe {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public Mah2007Recipe(final Map<Id<Person>, Double> personId2utilityGain, final double meanLambda) {
+	public Sbayti2007Recipe() {
+	}
+
+	// --------------- IMPLEMENTATION OF ReplannerIdentifierRecipe ---------------
+
+	public void initialize(final Map<Id<Person>, Double> personId2utilityGain, final double meanLambda) {
+		this.replannerIds = new LinkedHashSet<>();
 		final List<Map.Entry<Id<Person>, Double>> entryList = new ArrayList<>(personId2utilityGain.entrySet());
 		Collections.sort(entryList, new ByUtilityGainComparator());
 		for (int i = 0; i < meanLambda * personId2utilityGain.size(); i++) {
@@ -63,23 +68,19 @@ public class Mah2007Recipe implements ReplannerIdentifierRecipe {
 		}
 	}
 
-	// --------------- IMPLEMENTATION OF ReplannerIdentifierRecipe ---------------
-
 	@Override
-	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo) {
+	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo,
+			final double currentUtility, final double anticipatedUtilityChange) {
 		return this.replannerIds.contains(personId);
 	}
 
 	@Override
 	public void update(LogDataWrapper logDataWrapper) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public String getDeployedRecipeName() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.getClass().getSimpleName();
 	}
 
 }

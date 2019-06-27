@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
+import org.matsim.contrib.greedo.recipes.Ameli2017Recipe;
 import org.matsim.contrib.greedo.recipes.MSARecipe;
 import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
 import org.matsim.contrib.greedo.recipes.SelfRegulatingMSA;
@@ -185,7 +186,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// -------------------- replannerIdentifier --------------------
 
 	public static enum ReplannerIdentifierType {
-		accelerate, MSA, adaptiveMSA
+		accelerate, MSA, adaptiveMSA, Ameli2017
 	}
 
 	private ReplannerIdentifierType replannerIdentifierType = ReplannerIdentifierType.accelerate;
@@ -214,6 +215,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 				this.replannerIdentifierRecipe = new SelfRegulatingMSA(
 						this.getAdaptiveMSADenominatorIncreaseIfSuccess(),
 						this.getAdaptiveMSADenominatorIncreaseIfFailure());
+			} else if (ReplannerIdentifierType.Ameli2017.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new Ameli2017Recipe();
 			} else {
 				throw new RuntimeException("Unknown ReplannerIdentifierType: " + this.getReplannerIdentifierType());
 			}

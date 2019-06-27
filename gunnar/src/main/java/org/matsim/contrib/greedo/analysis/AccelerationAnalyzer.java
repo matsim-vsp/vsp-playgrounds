@@ -41,7 +41,7 @@ public class AccelerationAnalyzer {
 
 	static void save(final JFreeChart chart, final String fileName) {
 		try {
-			ChartUtilities.saveChartAsPNG(new File(fileName + ".png"), chart, 2000, 1200);
+			ChartUtilities.saveChartAsPNG(new File(fileName + ".png"), chart, 1000, 600);
 
 			// SVGGraphics2D g2 = new SVGGraphics2D(500, 300);
 			// Rectangle r = new Rectangle(0, 0, 500, 300);
@@ -63,15 +63,29 @@ public class AccelerationAnalyzer {
 	public static void main(String[] args) {
 		System.out.println("STARTED...");
 
+		// final AccelerationExperimentData acceptNegativeDisappointment = new
+		// AccelerationExperimentData(
+		// "/Users/GunnarF/NoBackup/data-workspace/searchacceleration/greedo_acceptNegativeDissapointment",
+		// 0, 10,
+		// 1000);
+
 		final AccelerationExperimentData acceptNegativeDisappointment = new AccelerationExperimentData(
-				"/Users/GunnarF/NoBackup/data-workspace/searchacceleration/greedo_acceptNegativeDissapointment", 0, 10,
-				1000);
+				"./greedo_acceptNegativeDisappointment", 0, 10, 1000);
+		final AccelerationExperimentData rejectNegativeDisappointment = new AccelerationExperimentData(
+				"./greedo_rejectNegativeDisappointment", 0, 10, 1000);
+		final AccelerationExperimentData adaptiveMSA = new AccelerationExperimentData("./adaptive_MSA", 0, 10, 1000);
+		final AccelerationExperimentData sqrtMSA = new AccelerationExperimentData("./sqrt_MSA", 0, 10, 1000);
+		final AccelerationExperimentData vanillaMSA = new AccelerationExperimentData("./vanilla_MSA", 0, 10, 1000);
 
 		{ // BETAS
-			final YIntervalSeries betas = acceptNegativeDisappointment.newBetaSeries("unconstrained");
+			final YIntervalSeries betasAcceptNegativeDissappointment = acceptNegativeDisappointment
+					.newBetaSeries("unconstrained");
+			final YIntervalSeries betasRejectNegativeDissappointment = rejectNegativeDisappointment
+					.newBetaSeries("constrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(betas);
+			dataset.addSeries(betasAcceptNegativeDissappointment);
+			dataset.addSeries(betasRejectNegativeDissappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("beta", // chart title
 					"iteration", // x axis label
@@ -100,12 +114,15 @@ public class AccelerationAnalyzer {
 			save(chart, "betas");
 		}
 
-		{ // REALIZED LAMBDA
-			final YIntervalSeries realizedLambdas = acceptNegativeDisappointment
+		{ // REALIZED LAMBDA (COMPARISON)
+			final YIntervalSeries realizedLambdasAcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newRealizedLambdaSeries("unconstrained");
+			final YIntervalSeries realizedLambdasRejectNegativeDisappointment = rejectNegativeDisappointment
+					.newRealizedLambdaSeries("constrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(realizedLambdas);
+			dataset.addSeries(realizedLambdasAcceptNegativeDisappointment);
+			dataset.addSeries(realizedLambdasRejectNegativeDisappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("realized lambda", // chart title
 					"iteration", // x axis label
@@ -134,46 +151,52 @@ public class AccelerationAnalyzer {
 			save(chart, "realized-lambdas");
 		}
 
-		{ // REALIZED UTILITY
-			final YIntervalSeries realizedUtilities = acceptNegativeDisappointment
-					.newRealizedUtilitiesSeries("unconstrained");
+		// { // REALIZED UTILITY
+		// final YIntervalSeries realizedUtilities = acceptNegativeDisappointment
+		// .newRealizedUtilitiesSeries("unconstrained");
+		//
+		// final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+		// dataset.addSeries(realizedUtilities);
+		//
+		// final JFreeChart chart = ChartFactory.createXYLineChart("realized utilities",
+		// // chart title
+		// "iteration", // x axis label
+		// "utility value", // y axis label
+		// dataset, // data
+		// PlotOrientation.VERTICAL, true, // include legend
+		// false, // tooltips
+		// false // urls
+		// );
+		// chart.setBackgroundPaint(null);
+		//
+		// final XYPlot plot = (XYPlot) chart.getPlot();
+		// plot.setBackgroundPaint(null);
+		//
+		// final DeviationRenderer renderer = new DeviationRenderer(true, false);
+		// renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
+		// BasicStroke.JOIN_ROUND));
+		// renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
+		// BasicStroke.JOIN_ROUND));
+		// renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
+		// renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
+		// plot.setRenderer(renderer);
+		//
+		// // final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		// // yAxis.setAutoRangeIncludesZero(false);
+		// // yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		//
+		// save(chart, "realized-utilities");
+		// }
 
-			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(realizedUtilities);
-
-			final JFreeChart chart = ChartFactory.createXYLineChart("realized utilities", // chart title
-					"iteration", // x axis label
-					"utility value", // y axis label
-					dataset, // data
-					PlotOrientation.VERTICAL, true, // include legend
-					false, // tooltips
-					false // urls
-			);
-			chart.setBackgroundPaint(null);
-
-			final XYPlot plot = (XYPlot) chart.getPlot();
-			plot.setBackgroundPaint(null);
-
-			final DeviationRenderer renderer = new DeviationRenderer(true, false);
-			renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
-			renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
-			plot.setRenderer(renderer);
-
-			// final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-			// yAxis.setAutoRangeIncludesZero(false);
-			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-
-			save(chart, "realized-utilities");
-		}
-
-		{ // EXPECTED UTILITY CHANGES
-			final YIntervalSeries expectedUtilityChanges = acceptNegativeDisappointment
+		{ // UTILITY GAP
+			final YIntervalSeries expectedUtilityChangesAcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newExpectedUtilityChangesSeries("unconstrained");
+			final YIntervalSeries expectedUtilityChangesRejectNegativeDisappointment = rejectNegativeDisappointment
+					.newExpectedUtilityChangesSeries("constrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(expectedUtilityChanges);
+			dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointment);
+			dataset.addSeries(expectedUtilityChangesRejectNegativeDisappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("expected utility changes", // chart title
 					"iteration", // x axis label
@@ -199,15 +222,18 @@ public class AccelerationAnalyzer {
 			// yAxis.setAutoRangeIncludesZero(false);
 			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-			save(chart, "expected-utility-changes");
+			save(chart, "utility gap");
 		}
 
 		{ // PERFORMANCE CORRELATIONS
-			final YIntervalSeries performanceCorrelations = acceptNegativeDisappointment
+			final YIntervalSeries performanceCorrelationsAcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newPerformanceCorrelationSeries("unconstrained");
+			final YIntervalSeries performanceCorrelationsRejectNegativeDisappointment = rejectNegativeDisappointment
+					.newPerformanceCorrelationSeries("constrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(performanceCorrelations);
+			dataset.addSeries(performanceCorrelationsAcceptNegativeDisappointment);
+			dataset.addSeries(performanceCorrelationsRejectNegativeDisappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("performance correlations", // chart title
 					"iteration", // x axis label
@@ -233,15 +259,18 @@ public class AccelerationAnalyzer {
 			// yAxis.setAutoRangeIncludesZero(false);
 			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-			save(chart, "performance-correlations");
+			save(chart, "performance correlations");
 		}
 
-		{ // PERFORMANCE CORRELATIONS
-			final YIntervalSeries ageCorrelations = acceptNegativeDisappointment
+		{ // AGE CORRELATIONS
+			final YIntervalSeries ageCorrelationsAcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newAgeCorrelationSeries("unconstrained");
+			final YIntervalSeries ageCorrelationsRejectNegativeDisappointment = rejectNegativeDisappointment
+					.newAgeCorrelationSeries("constrained");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-			dataset.addSeries(ageCorrelations);
+			dataset.addSeries(ageCorrelationsAcceptNegativeDisappointment);
+			dataset.addSeries(ageCorrelationsRejectNegativeDisappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("age correlations", // chart title
 					"iteration", // x axis label
@@ -273,16 +302,27 @@ public class AccelerationAnalyzer {
 		{ // AGE PERCENTILES
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 
-			final YIntervalSeries agePercentile10 = acceptNegativeDisappointment
+			final YIntervalSeries agePercentile10AcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newAgePercentile10Series("10% unconstrained");
-			final YIntervalSeries agePercentile50 = acceptNegativeDisappointment
+			final YIntervalSeries agePercentile50AcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newAgePercentile50Series("50% unconstrained");
-			final YIntervalSeries agePercentile90 = acceptNegativeDisappointment
+			final YIntervalSeries agePercentile90AcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newAgePercentile90Series("90% unconstrained");
 
-			dataset.addSeries(agePercentile10);
-			dataset.addSeries(agePercentile50);
-			dataset.addSeries(agePercentile90);
+			dataset.addSeries(agePercentile10AcceptNegativeDisappointment);
+			dataset.addSeries(agePercentile50AcceptNegativeDisappointment);
+			dataset.addSeries(agePercentile90AcceptNegativeDisappointment);
+
+			final YIntervalSeries agePercentile10RejectNegativeDisappointment = rejectNegativeDisappointment
+					.newAgePercentile10Series("10% constrained");
+			final YIntervalSeries agePercentile50RejectNegativeDisappointment = rejectNegativeDisappointment
+					.newAgePercentile50Series("50% constrained");
+			final YIntervalSeries agePercentile90RejectNegativeDisappointment = rejectNegativeDisappointment
+					.newAgePercentile90Series("90% constrained");
+
+			dataset.addSeries(agePercentile10RejectNegativeDisappointment);
+			dataset.addSeries(agePercentile50RejectNegativeDisappointment);
+			dataset.addSeries(agePercentile90RejectNegativeDisappointment);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("age percentiles", // chart title
 					"iteration", // x axis label
@@ -308,7 +348,93 @@ public class AccelerationAnalyzer {
 			// yAxis.setAutoRangeIncludesZero(false);
 			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-			save(chart, "age-percentiles");
+			save(chart, "age percentiles");
+		}
+
+		{ // UTILITY GAP COMPARISON
+			final YIntervalSeries expectedUtilityChangesAcceptNegativeDisappointment = acceptNegativeDisappointment
+					.newExpectedUtilityChangesSeries("proposed");
+			// final YIntervalSeries expectedUtilityChangesRejectNegativeDisappointment =
+			// rejectNegativeDisappointment
+			// .newExpectedUtilityChangesSeries("constrained");
+			final YIntervalSeries expectedUtilityChangesAdaptiveMSA = adaptiveMSA
+					.newExpectedUtilityChangesSeries("adaptive MSA");
+			final YIntervalSeries expectedUtilityChangesSqrtMSA = sqrtMSA
+					.newExpectedUtilityChangesSeries("sqrt MSA");			
+			final YIntervalSeries expectedUtilityChangesVanillaMSA = vanillaMSA
+					.newExpectedUtilityChangesSeries("vanilla MSA");			
+
+			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+			dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointment);
+			dataset.addSeries(expectedUtilityChangesAdaptiveMSA);
+			dataset.addSeries(expectedUtilityChangesSqrtMSA);
+			dataset.addSeries(expectedUtilityChangesVanillaMSA);
+
+			final JFreeChart chart = ChartFactory.createXYLineChart("expected utility changes", // chart title
+					"iteration", // x axis label
+					"utility change", // y axis label
+					dataset, // data
+					PlotOrientation.VERTICAL, true, // include legend
+					false, // tooltips
+					false // urls
+			);
+			chart.setBackgroundPaint(null);
+
+			final XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setBackgroundPaint(null);
+
+			final DeviationRenderer renderer = new DeviationRenderer(true, false);
+			renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
+			renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
+			plot.setRenderer(renderer);
+
+			// final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			// yAxis.setAutoRangeIncludesZero(false);
+			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+			save(chart, "utility gap comparison");
+		}
+
+		{ // REALIZED LAMBDA COMPARISON
+			final YIntervalSeries realizedLambdasProposed = acceptNegativeDisappointment
+					.newRealizedLambdaSeries("proposed");
+			final YIntervalSeries realizedLambdasAdaptiveMSA = adaptiveMSA.newRealizedLambdaSeries("adaptive MSA");
+			final YIntervalSeries realizedLambdasSqrtMSA = sqrtMSA.newRealizedLambdaSeries("sqrt MSA");
+			final YIntervalSeries realizedLambdasVanillaMSA = vanillaMSA.newRealizedLambdaSeries("vanilla MSA");
+
+			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+			dataset.addSeries(realizedLambdasProposed);
+			dataset.addSeries(realizedLambdasAdaptiveMSA);
+			dataset.addSeries(realizedLambdasSqrtMSA);
+			dataset.addSeries(realizedLambdasVanillaMSA);
+
+			final JFreeChart chart = ChartFactory.createXYLineChart("realized lambdas comparison", // chart title
+					"iteration", // x axis label
+					"lambda value", // y axis label
+					dataset, // data
+					PlotOrientation.VERTICAL, true, // include legend
+					false, // tooltips
+					false // urls
+			);
+			chart.setBackgroundPaint(null);
+
+			final XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setBackgroundPaint(null);
+
+			final DeviationRenderer renderer = new DeviationRenderer(true, false);
+			renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
+			renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
+			plot.setRenderer(renderer);
+
+			// final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			// yAxis.setAutoRangeIncludesZero(false);
+			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+			save(chart, "realized lambdas comparison");
 		}
 
 		System.out.println("...DONE");

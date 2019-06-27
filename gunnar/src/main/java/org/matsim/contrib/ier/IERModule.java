@@ -1,7 +1,7 @@
 package org.matsim.contrib.ier;
 
 import org.matsim.contrib.ier.emulator.AgentEmulator;
-import org.matsim.contrib.ier.emulator.FirstSimpleSimulationEmulator;
+import org.matsim.contrib.ier.emulator.SimulationEmulatorImpl;
 import org.matsim.contrib.ier.emulator.SimulationEmulator;
 import org.matsim.contrib.ier.replannerselection.AllReplannersSelector;
 import org.matsim.contrib.ier.replannerselection.ReplannerSelector;
@@ -31,7 +31,7 @@ public final class IERModule extends AbstractModule {
 		bind(AgentEmulator.class);
 
 		// We choose the simple emulator for now.
-		bind(SimulationEmulator.class).to(FirstSimpleSimulationEmulator.class);
+		bind(SimulationEmulator.class).to(SimulationEmulatorImpl.class);
 
 		bind(ReplannerSelector.class).to(this.replannerSelectorClass);
 	}

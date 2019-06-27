@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
@@ -71,6 +72,8 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 		final TransitLine line = this.transitLines.get(route.getLineId());
 		final TransitRoute transitRoute = line.getRoutes().get(route.getRouteId());
 
+		this.eventsManager.processEvent(new AgentWaitingForPtEvent(time_s, person.getId(), accessStopId, egressStopId));
+
 		final Tuple<Departure, Double> accessDepartureAndTime_s = this.fifoTransitPerformance
 				.getNextDepartureAndTime_s(line.getId(), transitRoute, accessStopId, time_s);
 		if (accessDepartureAndTime_s == null) {
@@ -78,9 +81,9 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 		} else {
 			final double accessTime_s = accessDepartureAndTime_s.getFirst().getDepartureTime()
 					+ transitRoute.getStop(this.stopFacilities.get(accessStopId)).getDepartureOffset();
+			this.eventsManager.processEvent(new PersonEntersVehicleEvent(accessTime_s, person.getId(), null));
 			final double egressTime_s = accessDepartureAndTime_s.getFirst().getDepartureTime()
 					+ transitRoute.getStop(this.stopFacilities.get(egressStopId)).getArrivalOffset();
-			this.eventsManager.processEvent(new PersonEntersVehicleEvent(accessTime_s, person.getId(), null));
 			this.eventsManager.processEvent(new PersonLeavesVehicleEvent(egressTime_s, person.getId(), null));
 			return egressTime_s;
 		}

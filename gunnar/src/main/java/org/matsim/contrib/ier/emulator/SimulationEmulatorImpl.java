@@ -21,18 +21,23 @@ import com.google.inject.Inject;
  * @author shoerl
  * @author Gunnar Flötteröd
  */
-public class FirstSimpleSimulationEmulator implements SimulationEmulator {
+public class SimulationEmulatorImpl implements SimulationEmulator {
+
+	// -------------------- MEMBERS --------------------
 
 	private final MatsimServices services;
 
 	private final FifoTransitPerformance transitPerformance;
 
+	// -------------------- CONSTRUCTION --------------------
+
 	@Inject
-	public FirstSimpleSimulationEmulator(final MatsimServices services,
-			final FifoTransitPerformance transitPerformance) {
+	public SimulationEmulatorImpl(final MatsimServices services, final FifoTransitPerformance transitPerformance) {
 		this.services = services;
 		this.transitPerformance = transitPerformance;
 	}
+
+	// --------------- IMPLEMENTATION OF SimulationEmulator ---------------
 
 	@Override
 	public void emulate(final Person person, final Plan plan, final EventsManager eventsManager) {

@@ -227,10 +227,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		}
 		this.hypotheticalSlotUsageListeners.clear();
 
+		final Utilities.SummaryStatistics utilityStats = this.utilities.newSummaryStatistics();
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(
 				this.replanningEfficiencyEstimator.getBeta(), this.greedoConfig, this.iteration(),
 				this.physicalSlotUsageListener.getIndicatorView(), hypotheticalSlotUsageIndicators,
-				this.utilities.newSummaryStatistics().personId2expectedUtilityChange);
+				utilityStats.personId2expectedUtilityChange, utilityStats.personId2experiencedUtility);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {

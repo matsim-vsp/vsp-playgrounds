@@ -113,14 +113,14 @@ public class FifoTransitPerformance
 
 	// -------------------- TEMPORARY MEMBERS --------------------
 
-	// Keeps track of what a vehicle is up to.
+	// Keeps track of what a transit vehicle is doing.
 	private final Map<Id<Vehicle>, LineRouteOtherId<Departure>> vehicle2lineRouteDeparture = new LinkedHashMap<>();
 
 	// Keeps track of who is waiting since when at which stop.
 	private Map<Id<TransitStopFacility>, Map<Id<Person>, Double>> facility2person2startWaitingTime_s = new LinkedHashMap<>();
 
 	// Keeps track of which vehicle is currently at which stop.
-	private final Map<Id<Vehicle>, Id<TransitStopFacility>> vehicle2stopfacility = new LinkedHashMap<>();
+	private final Map<Id<Vehicle>, Id<TransitStopFacility>> vehicle2stopFacility = new LinkedHashMap<>();
 
 	// Keeps track of waiting times of passengers boarding at the current stop.
 	private Map<Id<Vehicle>, List<Double>> vehicle2startWaitingTimes_s = new LinkedHashMap<>();
@@ -172,7 +172,7 @@ public class FifoTransitPerformance
 		this.resetToSchedule();
 		this.vehicle2lineRouteDeparture.clear();
 		this.facility2person2startWaitingTime_s.clear();
-		this.vehicle2stopfacility.clear();
+		this.vehicle2stopFacility.clear();
 		this.vehicle2startWaitingTimes_s.clear();
 	}
 
@@ -200,7 +200,7 @@ public class FifoTransitPerformance
 	@Override
 	public void handleEvent(VehicleArrivesAtFacilityEvent event) {
 		if (this.transitVehicles.getVehicles().containsKey(event.getVehicleId())) {
-			this.vehicle2stopfacility.put(event.getVehicleId(), event.getFacilityId());
+			this.vehicle2stopFacility.put(event.getVehicleId(), event.getFacilityId());
 		}
 	}
 
@@ -213,7 +213,7 @@ public class FifoTransitPerformance
 				allStartWaitingTimes_s = new LinkedList<>();
 				this.vehicle2startWaitingTimes_s.put(event.getVehicleId(), allStartWaitingTimes_s);
 			}
-			final Id<TransitStopFacility> facilityId = this.vehicle2stopfacility.get(event.getVehicleId());
+			final Id<TransitStopFacility> facilityId = this.vehicle2stopFacility.get(event.getVehicleId());
 			allStartWaitingTimes_s
 					.add(this.facility2person2startWaitingTime_s.get(facilityId).remove(event.getPersonId()));
 		}
@@ -234,7 +234,7 @@ public class FifoTransitPerformance
 				}
 			}
 			this.vehicle2startWaitingTimes_s.remove(event.getVehicleId());
-			this.vehicle2stopfacility.remove(event.getVehicleId());
+			this.vehicle2stopFacility.remove(event.getVehicleId());
 		}
 	}
 

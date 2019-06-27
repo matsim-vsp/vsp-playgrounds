@@ -54,6 +54,7 @@ class ReplannerIdentifier {
 	private final DynamicData<Id<?>> upcomingWeightedCounts;
 
 	private final Map<Id<Person>, Double> personId2hypotheticalUtilityChange;
+	private final Map<Id<Person>, Double> personId2currentUtility;
 
 	private final double lambdaBar;
 	private final double beta;
@@ -65,7 +66,8 @@ class ReplannerIdentifier {
 	ReplannerIdentifier(final Double unconstrainedBeta, final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
-			final Map<Id<Person>, Double> personId2hypotheticalUtilityChange) {
+			final Map<Id<Person>, Double> personId2hypotheticalUtilityChange,
+			final Map<Id<Person>, Double> personId2currentUtility) {
 
 		this.greedoConfig = greedoConfig;
 		this.personId2physicalSlotUsage = personId2physicalSlotUsage;
@@ -74,6 +76,7 @@ class ReplannerIdentifier {
 		this.personId2hypotheticalUtilityChange = personId2hypotheticalUtilityChange;
 		final double totalUtilityChange = personId2hypotheticalUtilityChange.values().stream()
 				.mapToDouble(utlChange -> utlChange).sum();
+		this.personId2currentUtility = personId2currentUtility;
 
 		this.currentWeightedCounts = newWeightedCounts(this.greedoConfig.newTimeDiscretization(),
 				this.personId2physicalSlotUsage.values());
@@ -143,7 +146,8 @@ class ReplannerIdentifier {
 					this.personId2hypotheticalUtilityChange.get(personId));
 
 			final boolean isReplanner = this.greedoConfig.getReplannerIdentifierRecipe().isReplanner(personId,
-					scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero());
+					scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero(),
+					this.personId2currentUtility.get(personId), this.personId2hypotheticalUtilityChange.get(personId));
 
 			if (isReplanner) {
 				replanners.add(personId);

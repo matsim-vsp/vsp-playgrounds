@@ -32,8 +32,9 @@ public interface ReplannerIdentifierRecipe {
 
 	public void update(LogDataWrapper logDataWrapper);
 
-	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo);
+	public boolean isReplanner(Id<Person> personId, double deltaScoreIfYes, double deltaScoreIfNo,
+			double currentUtility, double anticipatedUtilityChange);
 
 	public String getDeployedRecipeName();
-	
+
 }

@@ -47,8 +47,7 @@ public class NextAvailableDepartures {
 
 	/*
 	 * Time-ordered list of departures and corresponding latest times at which one
-	 * needs to arrive at the stop in order to catch the vehicle corresponding to
-	 * the departure.
+	 * needs to arrive at the stop in order to catch the corresponding vehicle.
 	 */
 	private final List<Id<Departure>> departureIds;
 	private final List<Double> latestStopArrivalTimes_s;
