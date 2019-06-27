@@ -74,16 +74,16 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 		this.eventsManager.processEvent(new AgentWaitingForPtEvent(time_s, person.getId(), accessStopId, egressStopId));
 
-		final Tuple<Departure, Double> accessDepartureAndTime_s = this.fifoTransitPerformance
+		final Tuple<Departure, Double> nextDepartureAndTime_s = this.fifoTransitPerformance
 				.getNextDepartureAndTime_s(line.getId(), transitRoute, accessStopId, time_s);
-		if (accessDepartureAndTime_s == null) {
+		if (nextDepartureAndTime_s == null) {
 			return Double.POSITIVE_INFINITY;
 		} else {
-			final double accessTime_s = accessDepartureAndTime_s.getFirst().getDepartureTime()
-					+ transitRoute.getStop(this.stopFacilities.get(accessStopId)).getDepartureOffset();
-			this.eventsManager.processEvent(new PersonEntersVehicleEvent(accessTime_s, person.getId(), null));
-			final double egressTime_s = accessDepartureAndTime_s.getFirst().getDepartureTime()
-					+ transitRoute.getStop(this.stopFacilities.get(egressStopId)).getArrivalOffset();
+			final double departureTime_s = nextDepartureAndTime_s.getSecond();
+			this.eventsManager.processEvent(new PersonEntersVehicleEvent(departureTime_s, person.getId(), null));
+			final double drivingTime_s = transitRoute.getStop(this.stopFacilities.get(egressStopId)).getArrivalOffset()
+					- transitRoute.getStop(this.stopFacilities.get(accessStopId)).getArrivalOffset();
+			final double egressTime_s = departureTime_s + drivingTime_s;
 			this.eventsManager.processEvent(new PersonLeavesVehicleEvent(egressTime_s, person.getId(), null));
 			return egressTime_s;
 		}

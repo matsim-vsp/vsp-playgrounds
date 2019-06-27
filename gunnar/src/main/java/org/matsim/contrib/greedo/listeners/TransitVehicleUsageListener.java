@@ -22,7 +22,6 @@ package org.matsim.contrib.greedo.listeners;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
@@ -46,8 +45,6 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler {
 
 	// Maps a person on all vehicle-time-slots used by that person.
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> passengerId2indicators;
-
-	private final boolean debug = false;
 
 	private Map<Id<Person>, Double> personWeights = null;
 
@@ -97,10 +94,6 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler {
 					if (indicators == null) {
 						indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 						this.passengerId2indicators.put(event.getPersonId(), indicators);
-						if (this.debug) {
-							Logger.getLogger(this.getClass()).info("passenger " + event.getPersonId()
-									+ " entered vehicle " + event.getVehicleId() + " at time " + time_s + "s.");
-						}
 					}
 					indicators.visit(event.getVehicleId(), this.timeDiscretization.getBin(time_s),
 							personWeight * vehicleWeight);

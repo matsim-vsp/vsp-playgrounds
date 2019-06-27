@@ -188,8 +188,9 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 					this.lastPhysicalPopulationState.getSelectedPlan(person.getId()).getScore());
 		}
 
-		final LogDataWrapper logDataWrapper = new LogDataWrapper(this.utilities.newSummaryStatistics(),
-				this.lastReplanningSummaryStatistics, this.services.getIterationNumber() - 1);
+		final LogDataWrapper logDataWrapper = new LogDataWrapper(this.greedoConfig,
+				this.utilities.newSummaryStatistics(), this.lastReplanningSummaryStatistics,
+				this.services.getIterationNumber() - 1);
 		this.statsWriter.writeToFile(logDataWrapper);
 		this.greedoConfig.getReplannerIdentifierRecipe().update(logDataWrapper);
 		this.replanningEfficiencyEstimator.update(logDataWrapper);

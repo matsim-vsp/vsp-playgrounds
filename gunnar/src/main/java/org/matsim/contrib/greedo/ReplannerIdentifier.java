@@ -90,8 +90,7 @@ class ReplannerIdentifier {
 			this.lambdaBar = 0.5 * unconstrainedBeta * totalUtilityChange
 					/ Math.max(sumOfWeightedCountDifferences2, 1e-8);
 		} else {
-			this.lambdaBar = greedoConfig.getInitialMeanReplanningRate()
-					* Math.pow(1.0 + iteration, greedoConfig.getReplanningRateIterationExponent());
+			this.lambdaBar = greedoConfig.getMSAReplanningRate(iteration);
 			this.beta = 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2 / Math.max(totalUtilityChange, 1e-8);
 		}
 	}

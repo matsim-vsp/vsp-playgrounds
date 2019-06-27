@@ -43,15 +43,6 @@ public class Sbayti2007Recipe implements ReplannerIdentifierRecipe {
 
 	private Set<Id<Person>> replannerIds = null;
 
-	// -------------------- UTILITIES --------------------
-
-	private class ByUtilityGainComparator implements Comparator<Map.Entry<?, Double>> {
-		@Override
-		public int compare(final Entry<?, Double> o1, final Entry<?, Double> o2) {
-			return o2.getValue().compareTo(o1.getValue()); // largest values first
-		}
-	}
-
 	// -------------------- CONSTRUCTION --------------------
 
 	public Sbayti2007Recipe() {
@@ -59,13 +50,22 @@ public class Sbayti2007Recipe implements ReplannerIdentifierRecipe {
 
 	// --------------- IMPLEMENTATION OF ReplannerIdentifierRecipe ---------------
 
-	public void initialize(final Map<Id<Person>, Double> personId2utilityGain, final double meanLambda) {
+	@Override
+	public void update(final LogDataWrapper logDataWrapper) {
+		final List<Map.Entry<Id<Person>, Double>> entryList = new ArrayList<>(
+				logDataWrapper.getPersonId2expectedUtilityChange().entrySet());
+		Collections.sort(entryList, new Comparator<Map.Entry<?, Double>>() {
+			@Override
+			public int compare(final Entry<?, Double> o1, final Entry<?, Double> o2) {
+				return o2.getValue().compareTo(o1.getValue()); // largest values first
+			}
+		});
+		final double meanLambda = logDataWrapper.getGreedoConfig().getMSAReplanningRate(logDataWrapper.getIteration());
 		this.replannerIds = new LinkedHashSet<>();
-		final List<Map.Entry<Id<Person>, Double>> entryList = new ArrayList<>(personId2utilityGain.entrySet());
-		Collections.sort(entryList, new ByUtilityGainComparator());
-		for (int i = 0; i < meanLambda * personId2utilityGain.size(); i++) {
+		for (int i = 0; i < meanLambda * entryList.size(); i++) {
 			this.replannerIds.add(entryList.get(i).getKey());
 		}
+
 	}
 
 	@Override
@@ -75,12 +75,7 @@ public class Sbayti2007Recipe implements ReplannerIdentifierRecipe {
 	}
 
 	@Override
-	public void update(LogDataWrapper logDataWrapper) {
-	}
-
-	@Override
 	public String getDeployedRecipeName() {
 		return this.getClass().getSimpleName();
 	}
-
 }

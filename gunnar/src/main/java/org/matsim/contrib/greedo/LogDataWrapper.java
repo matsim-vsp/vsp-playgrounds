@@ -31,17 +31,25 @@ import org.matsim.api.core.v01.population.Person;
  */
 public class LogDataWrapper {
 
+	private final GreedoConfigGroup greedoConfig;
+
 	private final Utilities.SummaryStatistics utilitySummaryStatistics;
 
 	private final ReplannerIdentifier.SummaryStatistics replanningSummaryStatistics;
 
 	private final int iteration;
 
-	public LogDataWrapper(Utilities.SummaryStatistics utilitySummaryStatistics,
+	public LogDataWrapper(final GreedoConfigGroup greedoConfig,
+			final Utilities.SummaryStatistics utilitySummaryStatistics,
 			final ReplannerIdentifier.SummaryStatistics replanningSummaryStatistics, final int iteration) {
+		this.greedoConfig = greedoConfig;
 		this.utilitySummaryStatistics = utilitySummaryStatistics;
 		this.replanningSummaryStatistics = replanningSummaryStatistics;
 		this.iteration = iteration;
+	}
+
+	public GreedoConfigGroup getGreedoConfig() {
+		return this.greedoConfig;
 	}
 
 	// The return type is package private.
@@ -52,19 +60,19 @@ public class LogDataWrapper {
 	public Map<Id<Person>, Double> getPersonId2expectedUtilityChange() {
 		return this.utilitySummaryStatistics.personId2expectedUtilityChange;
 	}
-	
+
 	public Double getRealizedUtilitySum() {
 		return this.utilitySummaryStatistics.realizedUtilitySum;
 	}
-	
+
 	public Double getRealizedUtilityChangeSum() {
 		return this.utilitySummaryStatistics.realizedUtilityChangeSum;
 	}
-	
+
 	public int getIteration() {
 		return this.iteration;
 	}
-	
+
 	public ReplannerIdentifier.SummaryStatistics getReplanningSummaryStatistics() {
 		return this.replanningSummaryStatistics;
 	}

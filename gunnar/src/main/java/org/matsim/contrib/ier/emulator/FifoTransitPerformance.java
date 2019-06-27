@@ -20,26 +20,16 @@
 package org.matsim.contrib.ier.emulator;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
-import org.matsim.core.api.experimental.events.VehicleArrivesAtFacilityEvent;
 import org.matsim.core.api.experimental.events.VehicleDepartsAtFacilityEvent;
-import org.matsim.core.api.experimental.events.handler.AgentWaitingForPtEventHandler;
-import org.matsim.core.api.experimental.events.handler.VehicleArrivesAtFacilityEventHandler;
 import org.matsim.core.api.experimental.events.handler.VehicleDepartsAtFacilityEventHandler;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt.transitSchedule.api.Departure;
@@ -60,9 +50,8 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class FifoTransitPerformance
-		implements TransitDriverStartsEventHandler, AgentWaitingForPtEventHandler, VehicleArrivesAtFacilityEventHandler,
-		VehicleDepartsAtFacilityEventHandler, PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
+public class FifoTransitPerformance implements TransitDriverStartsEventHandler, VehicleDepartsAtFacilityEventHandler,
+		VehicleLeavesTrafficEventHandler {
 
 	// -------------------- Composed identifier class --------------------
 
@@ -102,8 +91,6 @@ public class FifoTransitPerformance
 
 	// -------------------- REFERENCES --------------------
 
-	private final Population population;
-
 	private final Vehicles transitVehicles;
 
 	private final TransitSchedule transitSchedule;
@@ -113,23 +100,12 @@ public class FifoTransitPerformance
 
 	// -------------------- TEMPORARY MEMBERS --------------------
 
-	// Keeps track of what a transit vehicle is doing.
 	private final Map<Id<Vehicle>, LineRouteOtherId<Departure>> vehicle2lineRouteDeparture = new LinkedHashMap<>();
-
-	// Keeps track of who is waiting since when at which stop.
-	private Map<Id<TransitStopFacility>, Map<Id<Person>, Double>> facility2person2startWaitingTime_s = new LinkedHashMap<>();
-
-	// Keeps track of which vehicle is currently at which stop.
-	private final Map<Id<Vehicle>, Id<TransitStopFacility>> vehicle2stopFacility = new LinkedHashMap<>();
-
-	// Keeps track of waiting times of passengers boarding at the current stop.
-	private Map<Id<Vehicle>, List<Double>> vehicle2startWaitingTimes_s = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
 	@Inject
 	public FifoTransitPerformance(final Scenario scenario) {
-		this.population = scenario.getPopulation();
 		this.transitVehicles = scenario.getTransitVehicles();
 		this.transitSchedule = scenario.getTransitSchedule();
 		this.resetToSchedule();
@@ -171,9 +147,6 @@ public class FifoTransitPerformance
 	public void reset(final int iteration) {
 		this.resetToSchedule();
 		this.vehicle2lineRouteDeparture.clear();
-		this.facility2person2startWaitingTime_s.clear();
-		this.vehicle2stopFacility.clear();
-		this.vehicle2startWaitingTimes_s.clear();
 	}
 
 	@Override
@@ -185,56 +158,14 @@ public class FifoTransitPerformance
 	}
 
 	@Override
-	public void handleEvent(final AgentWaitingForPtEvent event) {
-		if (this.population.getPersons().containsKey(event.getPersonId())) {
-			Map<Id<Person>, Double> person2startWaitingTime_s = this.facility2person2startWaitingTime_s
-					.get(event.getWaitingAtStopId());
-			if (person2startWaitingTime_s == null) {
-				person2startWaitingTime_s = new LinkedHashMap<>();
-				this.facility2person2startWaitingTime_s.put(event.getWaitingAtStopId(), person2startWaitingTime_s);
-			}
-			person2startWaitingTime_s.put(event.getPersonId(), event.getTime());
-		}
-	}
-
-	@Override
-	public void handleEvent(VehicleArrivesAtFacilityEvent event) {
-		if (this.transitVehicles.getVehicles().containsKey(event.getVehicleId())) {
-			this.vehicle2stopFacility.put(event.getVehicleId(), event.getFacilityId());
-		}
-	}
-
-	@Override
-	public void handleEvent(final PersonEntersVehicleEvent event) {
-		if (this.transitVehicles.getVehicles().containsKey(event.getVehicleId())
-				&& this.population.getPersons().keySet().contains(event.getPersonId())) {
-			List<Double> allStartWaitingTimes_s = this.vehicle2startWaitingTimes_s.get(event.getVehicleId());
-			if (allStartWaitingTimes_s == null) {
-				allStartWaitingTimes_s = new LinkedList<>();
-				this.vehicle2startWaitingTimes_s.put(event.getVehicleId(), allStartWaitingTimes_s);
-			}
-			final Id<TransitStopFacility> facilityId = this.vehicle2stopFacility.get(event.getVehicleId());
-			allStartWaitingTimes_s
-					.add(this.facility2person2startWaitingTime_s.get(facilityId).remove(event.getPersonId()));
-		}
-	}
-
-	@Override
 	public void handleEvent(VehicleDepartsAtFacilityEvent event) {
 		if (this.transitVehicles.getVehicles().containsKey(event.getVehicleId())) {
-			final List<Double> allArrivalTimes_s = this.vehicle2startWaitingTimes_s.get(event.getVehicleId());
-			if (allArrivalTimes_s != null) {
-				final LineRouteOtherId<Departure> lineRouteDeparture = this.vehicle2lineRouteDeparture
-						.get(event.getVehicleId());
-				final NextAvailableDepartures nextAvailableDepartures = this.lineRouteStop2nextAvailableDepartures
-						.get(new LineRouteOtherId<TransitStopFacility>(lineRouteDeparture.lineId,
-								lineRouteDeparture.routeId, event.getFacilityId()));
-				for (Double arrivalTime_s : allArrivalTimes_s) {
-					nextAvailableDepartures.adjustToRealizedDeparture(arrivalTime_s, lineRouteDeparture.otherId);
-				}
-			}
-			this.vehicle2startWaitingTimes_s.remove(event.getVehicleId());
-			this.vehicle2stopFacility.remove(event.getVehicleId());
+			final LineRouteOtherId<Departure> lineRouteDeparture = this.vehicle2lineRouteDeparture
+					.get(event.getVehicleId());
+			final NextAvailableDepartures nextAvailableDepartures = this.lineRouteStop2nextAvailableDepartures
+					.get(new LineRouteOtherId<TransitStopFacility>(lineRouteDeparture.lineId,
+							lineRouteDeparture.routeId, event.getFacilityId()));
+			nextAvailableDepartures.adjustToRealizedDeparture(event.getTime(), lineRouteDeparture.otherId);
 		}
 	}
 

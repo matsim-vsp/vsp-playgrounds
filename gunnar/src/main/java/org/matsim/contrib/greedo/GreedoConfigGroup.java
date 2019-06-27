@@ -35,11 +35,13 @@ import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
 import org.matsim.contrib.greedo.recipes.Ameli2017Recipe;
 import org.matsim.contrib.greedo.recipes.MSARecipe;
 import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
+import org.matsim.contrib.greedo.recipes.Sbayti2007Recipe;
 import org.matsim.contrib.greedo.recipes.SelfRegulatingMSA;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.misc.StringUtils;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleCapacity;
 
 import floetteroed.utilities.TimeDiscretization;
 
@@ -89,18 +91,13 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
 				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
-				// TODO >>> REVISIT >>>
-				// final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
-				// final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
-				// if (cap_persons < 1e-3) {
-				// throw new RuntimeException("vehicle " + transitVehicle.getId() + " has
-				// capacity of " + cap_persons
-				// + " < 0.001 persons.");
-				// }
-				// this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 /
-				// cap_persons);
-				// TODO <<< REVISIT <<<
-				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 0.0);
+				final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+				final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+				if (cap_persons < 1e-3) {
+					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
+							+ " < 0.001 persons.");
+				}
+				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
 			}
 		}
 	}
@@ -186,7 +183,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// -------------------- replannerIdentifier --------------------
 
 	public static enum ReplannerIdentifierType {
-		accelerate, MSA, adaptiveMSA, Ameli2017
+		accelerate, MSA, adaptiveMSA, Ameli2017, Sbayti2007
 	}
 
 	private ReplannerIdentifierType replannerIdentifierType = ReplannerIdentifierType.accelerate;
@@ -217,6 +214,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 						this.getAdaptiveMSADenominatorIncreaseIfFailure());
 			} else if (ReplannerIdentifierType.Ameli2017.equals(this.getReplannerIdentifierType())) {
 				this.replannerIdentifierRecipe = new Ameli2017Recipe();
+			} else if (ReplannerIdentifierType.Sbayti2007.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new Sbayti2007Recipe();
 			} else {
 				throw new RuntimeException("Unknown ReplannerIdentifierType: " + this.getReplannerIdentifierType());
 			}
@@ -292,6 +291,10 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("replanningRateIterationExponent")
 	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
+	}
+
+	public double getMSAReplanningRate(final int iteration) {
+		return this.getInitialMeanReplanningRate() * Math.pow(iteration + 1, this.getReplanningRateIterationExponent());
 	}
 
 	// -------------------- ageWeightExponent --------------------

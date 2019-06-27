@@ -171,13 +171,10 @@ public class Greedo {
 		final AbstractModule greedoModule = new AbstractModule() {
 			@Override
 			public void install() {
-				// TODO Consider Sebastian's lightweight solution.
 				this.bind(FifoTransitPerformance.class);
 				if (config.transit().isUseTransit()) {
 					log.warn("Transit emulation is included. This is experimental code.");
 					this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-				} else {
-					log.info("No transit emulation.");
 				}
 				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
 				this.addEventHandlerBinding().toProvider(WireGreedoIntoMATSimControlerListener.class);
