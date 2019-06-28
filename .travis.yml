@@ -13,7 +13,7 @@ install: true
 # define the order of the stages:
 stages:
   - deploy_only_vsp
-  - package
+  #  - package
   - test
 
 script:
