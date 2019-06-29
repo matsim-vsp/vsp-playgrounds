@@ -1,10 +1,10 @@
 language: java
-jdk: oraclejdk8
-dist: trusty
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
+jdk: openjdk11
+#dist: trusty
+#addons:
+#  apt:
+#    packages:
+#      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
 
 # This skips the mvn install that is otherwise run (implausibly, the setting has to be "true")
 # https://docs.travis-ci.com/user/customizing-the-build/#Skipping-the-Installation-Step
