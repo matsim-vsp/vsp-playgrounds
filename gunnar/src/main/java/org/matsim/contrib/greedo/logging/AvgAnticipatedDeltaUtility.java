@@ -17,33 +17,21 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.recipes;
+package org.matsim.contrib.greedo.logging;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.LogDataWrapper;
-import org.matsim.core.gbl.MatsimRandom;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class Ameli2017Recipe implements ReplannerIdentifierRecipe {
+public class AvgAnticipatedDeltaUtility extends PopulationAverageStatistic {
 
 	@Override
-	public String getDeployedRecipeName() {
-		return this.getClass().getSimpleName();
+	public String value(LogDataWrapper arg0) {
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().getSumOfAnticipatedUtilityChanges(),
+				arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 
-	@Override
-	public void update(final LogDataWrapper logDataWrapper) {
-	}
-
-	@Override
-	public boolean isReplanner(final Id<Person> personId, final double deltaScoreIfYes, final double deltaScoreIfNo,
-			final double currentUtility, final double anticipatedUtilityChange) {
-		final double proba = Math.max(0, Math.min(1, anticipatedUtilityChange / currentUtility));
-		return (MatsimRandom.getRandom().nextDouble() < proba);
-	}
 }

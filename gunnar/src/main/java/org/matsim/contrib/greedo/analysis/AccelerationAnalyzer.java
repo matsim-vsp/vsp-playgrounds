@@ -69,13 +69,24 @@ public class AccelerationAnalyzer {
 		// 0, 10,
 		// 1000);
 
+		final int scenarioCnt = 5;
+		
 		final AccelerationExperimentData acceptNegativeDisappointment = new AccelerationExperimentData(
-				"./greedo_acceptNegativeDisappointment", 0, 10, 1000);
+				"./greedo_acceptNegativeDisappointment", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData rejectNegativeDisappointment = new AccelerationExperimentData(
-				"./greedo_rejectNegativeDisappointment", 0, 10, 1000);
-		final AccelerationExperimentData adaptiveMSA = new AccelerationExperimentData("./adaptive_MSA", 0, 10, 1000);
-		final AccelerationExperimentData sqrtMSA = new AccelerationExperimentData("./sqrt_MSA", 0, 10, 1000);
-		final AccelerationExperimentData vanillaMSA = new AccelerationExperimentData("./vanilla_MSA", 0, 10, 1000);
+				"./greedo_rejectNegativeDisappointment", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData adaptiveMSA = new AccelerationExperimentData("./adaptive_MSA", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData sqrtMSA = new AccelerationExperimentData("./sqrt_MSA", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData vanillaMSA = new AccelerationExperimentData("./vanilla_MSA", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData sbayti2007MSA = new AccelerationExperimentData("./Sbayti2007_MSA", 0, scenarioCnt,
+				1000);
+		final AccelerationExperimentData sbayti2007SqrtMSA = new AccelerationExperimentData("./Sbayti2007_sqrt_MSA", 0,
+				scenarioCnt, 1000);
+
+		final AccelerationExperimentData acceptNegativeDisappointmentCongested = new AccelerationExperimentData(
+				"./greedo_acceptNegativeDisappointment_congested", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData sbayti2007SqrtMSACongested = new AccelerationExperimentData("./Sbayti2007_sqrt_MSA_congested", 0,
+				scenarioCnt, 1000);
 
 		{ // BETAS
 			final YIntervalSeries betasAcceptNegativeDissappointment = acceptNegativeDisappointment
@@ -151,42 +162,58 @@ public class AccelerationAnalyzer {
 			save(chart, "realized-lambdas");
 		}
 
-		// { // REALIZED UTILITY
-		// final YIntervalSeries realizedUtilities = acceptNegativeDisappointment
-		// .newRealizedUtilitiesSeries("unconstrained");
-		//
-		// final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-		// dataset.addSeries(realizedUtilities);
-		//
-		// final JFreeChart chart = ChartFactory.createXYLineChart("realized utilities",
-		// // chart title
-		// "iteration", // x axis label
-		// "utility value", // y axis label
-		// dataset, // data
-		// PlotOrientation.VERTICAL, true, // include legend
-		// false, // tooltips
-		// false // urls
-		// );
-		// chart.setBackgroundPaint(null);
-		//
-		// final XYPlot plot = (XYPlot) chart.getPlot();
-		// plot.setBackgroundPaint(null);
-		//
-		// final DeviationRenderer renderer = new DeviationRenderer(true, false);
-		// renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
-		// BasicStroke.JOIN_ROUND));
-		// renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
-		// BasicStroke.JOIN_ROUND));
-		// renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
-		// renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
-		// plot.setRenderer(renderer);
-		//
-		// // final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-		// // yAxis.setAutoRangeIncludesZero(false);
-		// // yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-		//
-		// save(chart, "realized-utilities");
-		// }
+		{ // REALIZED UTILITY
+			final YIntervalSeries realizedUtilityAcceptNegativeDissapointment = acceptNegativeDisappointment
+					.newRealizedUtilitiesSeries("unconstrained");
+			final YIntervalSeries realizedUtilityAcceptNegativeDissapointmentCongested = acceptNegativeDisappointmentCongested
+					.newRealizedUtilitiesSeries("unconstrained, congested");
+			final YIntervalSeries realizedUtilityAdaptiveMSA = adaptiveMSA.newRealizedUtilitiesSeries("adaptive MSA");
+			final YIntervalSeries realizedUtilitySqrtMSA = sqrtMSA.newRealizedUtilitiesSeries("sqrt MSA");
+			final YIntervalSeries realizedUtilityVanillaMSA = vanillaMSA.newRealizedUtilitiesSeries("vanilla MSA");
+			final YIntervalSeries realizedUtilitySbayti2007MSA = sbayti2007MSA
+					.newRealizedUtilitiesSeries("Sbayti (2007), MSA");
+			final YIntervalSeries realizedUtilitySbayti2007SqrtMSA = sbayti2007SqrtMSA
+					.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA");
+			final YIntervalSeries realizedUtilitySbayti2007SqrtMSACongested = sbayti2007SqrtMSACongested
+					.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA, congested");
+
+			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+			dataset.addSeries(realizedUtilityAcceptNegativeDissapointment);
+			dataset.addSeries(realizedUtilityAcceptNegativeDissapointmentCongested);
+			dataset.addSeries(realizedUtilityAdaptiveMSA);
+			dataset.addSeries(realizedUtilitySqrtMSA);
+			dataset.addSeries(realizedUtilityVanillaMSA);
+			dataset.addSeries(realizedUtilitySbayti2007MSA);
+			dataset.addSeries(realizedUtilitySbayti2007SqrtMSA);
+			dataset.addSeries(realizedUtilitySbayti2007SqrtMSACongested);
+
+			final JFreeChart chart = ChartFactory.createXYLineChart("realized utilities",
+					// chart title
+					"iteration", // x axis label
+					"utility value", // y axis label
+					dataset, // data
+					PlotOrientation.VERTICAL, true, // include legend
+					false, // tooltips
+					false // urls
+			);
+			chart.setBackgroundPaint(null);
+
+			final XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setBackgroundPaint(null);
+
+			final DeviationRenderer renderer = new DeviationRenderer(true, false);
+			renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesStroke(1, new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
+			renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
+			plot.setRenderer(renderer);
+
+			// final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+			// yAxis.setAutoRangeIncludesZero(false);
+			// yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+			save(chart, "realized utilities");
+		}
 
 		{ // UTILITY GAP
 			final YIntervalSeries expectedUtilityChangesAcceptNegativeDisappointment = acceptNegativeDisappointment
@@ -354,21 +381,32 @@ public class AccelerationAnalyzer {
 		{ // UTILITY GAP COMPARISON
 			final YIntervalSeries expectedUtilityChangesAcceptNegativeDisappointment = acceptNegativeDisappointment
 					.newExpectedUtilityChangesSeries("proposed");
+			final YIntervalSeries expectedUtilityChangesAcceptNegativeDisappointmentCongested = acceptNegativeDisappointmentCongested
+					.newExpectedUtilityChangesSeries("proposed, congested");
 			// final YIntervalSeries expectedUtilityChangesRejectNegativeDisappointment =
 			// rejectNegativeDisappointment
 			// .newExpectedUtilityChangesSeries("constrained");
 			final YIntervalSeries expectedUtilityChangesAdaptiveMSA = adaptiveMSA
 					.newExpectedUtilityChangesSeries("adaptive MSA");
-			final YIntervalSeries expectedUtilityChangesSqrtMSA = sqrtMSA
-					.newExpectedUtilityChangesSeries("sqrt MSA");			
+			final YIntervalSeries expectedUtilityChangesSqrtMSA = sqrtMSA.newExpectedUtilityChangesSeries("sqrt MSA");
 			final YIntervalSeries expectedUtilityChangesVanillaMSA = vanillaMSA
-					.newExpectedUtilityChangesSeries("vanilla MSA");			
+					.newExpectedUtilityChangesSeries("vanilla MSA");
+			final YIntervalSeries expectedUtilityChangesSbayti2007MSA = sbayti2007MSA
+					.newExpectedUtilityChangesSeries("Sbayti (2007), MSA");
+			final YIntervalSeries expectedUtilityChangesSbayti2007SqrtMSA = sbayti2007SqrtMSA
+					.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA");
+			final YIntervalSeries expectedUtilityChangesSbayti2007SqrtMSACongested = sbayti2007SqrtMSACongested
+					.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, congested");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointment);
+			dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointmentCongested);
 			dataset.addSeries(expectedUtilityChangesAdaptiveMSA);
 			dataset.addSeries(expectedUtilityChangesSqrtMSA);
 			dataset.addSeries(expectedUtilityChangesVanillaMSA);
+			dataset.addSeries(expectedUtilityChangesSbayti2007MSA);
+			dataset.addSeries(expectedUtilityChangesSbayti2007SqrtMSA);
+			dataset.addSeries(expectedUtilityChangesSbayti2007SqrtMSACongested);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("expected utility changes", // chart title
 					"iteration", // x axis label
@@ -403,12 +441,18 @@ public class AccelerationAnalyzer {
 			final YIntervalSeries realizedLambdasAdaptiveMSA = adaptiveMSA.newRealizedLambdaSeries("adaptive MSA");
 			final YIntervalSeries realizedLambdasSqrtMSA = sqrtMSA.newRealizedLambdaSeries("sqrt MSA");
 			final YIntervalSeries realizedLambdasVanillaMSA = vanillaMSA.newRealizedLambdaSeries("vanilla MSA");
+			final YIntervalSeries realizedLambdasSbayti2007MSA = sbayti2007MSA
+					.newRealizedLambdaSeries("Sbayti (2007), MSA");
+			final YIntervalSeries realizedLambdasSbayti2007SqrtMSA = sbayti2007SqrtMSA
+					.newRealizedLambdaSeries("Sbayti (2007), sqrt MSA");
 
 			final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 			dataset.addSeries(realizedLambdasProposed);
 			dataset.addSeries(realizedLambdasAdaptiveMSA);
 			dataset.addSeries(realizedLambdasSqrtMSA);
 			dataset.addSeries(realizedLambdasVanillaMSA);
+			dataset.addSeries(realizedLambdasSbayti2007MSA);
+			dataset.addSeries(realizedLambdasSbayti2007SqrtMSA);
 
 			final JFreeChart chart = ChartFactory.createXYLineChart("realized lambdas comparison", // chart title
 					"iteration", // x axis label
