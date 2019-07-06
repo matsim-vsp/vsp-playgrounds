@@ -33,7 +33,7 @@
 //import org.matsim.core.scoring.EventsToScore;
 //import org.matsim.core.scoring.ScoringFunctionFactory;
 //import org.matsim.households.PersonHouseholdMapping;
-//import org.matsim.roadpricing.RoadPricingScheme;
+//import org.matsim.contrib.roadpricing.RoadPricingScheme;
 //import org.matsim.testcases.MatsimTestCase;
 //
 //import playground.benjamin.scoring.income.IncomeScoringFunctionFactory;

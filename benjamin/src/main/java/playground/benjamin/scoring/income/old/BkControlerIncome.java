@@ -20,16 +20,14 @@
 package playground.benjamin.scoring.income.old;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.config.Config;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.gbl.Gbl;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.households.PersonHouseholdMapping;
-import org.matsim.roadpricing.RoadPricingScheme;
 
 import playground.benjamin.BkPaths;
 

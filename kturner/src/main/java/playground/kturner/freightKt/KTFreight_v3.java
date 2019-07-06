@@ -28,16 +28,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.management.InvalidAttributeValueException;
 
-import com.google.inject.Inject;
-import com.graphhopper.jsprit.analysis.toolbox.Plotter;
-import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
-import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
-import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
-import com.graphhopper.jsprit.core.util.Solutions;
-import com.graphhopper.jsprit.io.algorithm.VehicleRoutingAlgorithms;
-import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
+import javax.management.InvalidAttributeValueException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -45,7 +37,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
@@ -68,6 +59,11 @@ import org.matsim.contrib.freight.jsprit.NetworkRouter;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
 import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
+import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
@@ -75,29 +71,27 @@ import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.OutputDirectoryLogging;
-import org.matsim.core.controler.events.ReplanningEvent;
-import org.matsim.core.controler.listener.ReplanningListener;
-import org.matsim.core.network.LinkFactory;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.replanning.GenericStrategyManager;
-import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.vehicles.VehicleType;
+
+import com.graphhopper.jsprit.analysis.toolbox.Plotter;
+import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
+import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
+import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
+import com.graphhopper.jsprit.core.util.Solutions;
+import com.graphhopper.jsprit.io.algorithm.VehicleRoutingAlgorithms;
+
 import playground.kturner.utils.MergeFileVisitor;
 import playground.kturner.utils.MoveDirVisitor;
 
@@ -213,7 +207,7 @@ public class KTFreight_v3 {
 	private static WriteTextToFile textInfofile; 
 
 	//da immer wieder benutzt.
-	private static RoadPricingSchemeImpl rpscheme = new RoadPricingSchemeImpl();
+	private static RoadPricingSchemeImpl rpscheme = RoadPricingUtils.createDefaultScheme();
 	private static VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 			new VehicleTypeDependentRoadPricingCalculator();
 
@@ -224,7 +218,7 @@ public class KTFreight_v3 {
 //		copyInputFilesToOutputDirectory();
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
-			rpscheme = new RoadPricingSchemeImpl();		
+			rpscheme = RoadPricingUtils.createDefaultScheme();
 			rpCalculator = new VehicleTypeDependentRoadPricingCalculator();	
 			runIndex = i;	
 			multipleRun(args);	
@@ -660,7 +654,7 @@ public class KTFreight_v3 {
 
 		ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
 
-		final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModules().get(RoadPricingConfigGroup.GROUP_NAME);

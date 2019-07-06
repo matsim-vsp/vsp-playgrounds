@@ -29,12 +29,13 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingWriterXMLv1;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.roadpricing.RoadPricingScheme;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.roadpricing.RoadPricingWriterXMLv1;
 
 import playground.santiago.counts.CreateCountingStations;
 
@@ -79,7 +80,7 @@ public class CreateRoadPricingScheme {
 	}
 
 	private static void createRPScheme(Scenario scenario) {
-		RoadPricingSchemeImpl rps = new RoadPricingSchemeImpl();
+		RoadPricingSchemeImpl rps = RoadPricingUtils.createDefaultScheme();
 		rps.setName("Santiago_Roadpricing");
 		rps.setDescription("RoadPricingScheme for the Santiago scenario. ");
 		rps.setType(RoadPricingScheme.TOLL_TYPE_DISTANCE);

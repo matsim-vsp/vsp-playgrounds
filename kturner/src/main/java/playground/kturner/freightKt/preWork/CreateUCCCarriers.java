@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
@@ -21,9 +19,12 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.vehicles.Vehicle;
+
+import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 
 class CreateUCCCarriers {
 
@@ -160,7 +161,7 @@ class CreateUCCCarriers {
 		Carriers splittedCarriers = new Carriers(); // Carrierfile, welches beide Carrier enthält: sowohl UCC, als auch non UCC
 		
 		//Read tollfile
-		final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 //			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;
