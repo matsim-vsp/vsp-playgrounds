@@ -19,11 +19,12 @@
 
 package playground.vsp.avparking;
 
-import com.google.inject.Inject;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
@@ -59,7 +60,11 @@ import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.vis.otfvis.OnTheFlyServer.NonPlanAgentQueryHelper;
 
-import java.util.*;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 public final class DvrpParkingModule extends AbstractModule {
 	public static final String DVRP_ROUTING = "dvrp_routing";// TODO ==> dvrp_optimizer???
@@ -130,12 +135,12 @@ public final class DvrpParkingModule extends AbstractModule {
 	@Singleton
 	@Named(DvrpParkingModule.DVRP_ROUTING)
 	private Network provideDvrpRoutingNetwork(Network network, DvrpConfigGroup dvrpCfg) {
-		if (dvrpCfg.getNetworkMode() == null) { // no mode filtering
+		if (dvrpCfg.getNetworkModes().isEmpty()) { // no mode filtering
 			return network;
 		}
 
 		Network dvrpNetwork = NetworkUtils.createNetwork();
-		new TransportModeNetworkFilter(network).filter(dvrpNetwork, Collections.singleton(dvrpCfg.getNetworkMode()));
+		new TransportModeNetworkFilter(network).filter(dvrpNetwork, dvrpCfg.getNetworkModes());
 		return dvrpNetwork;
 	}
 
@@ -161,7 +166,7 @@ public final class DvrpParkingModule extends AbstractModule {
 			int i = 0;
 
 			for (Class<? extends MobsimListener> l : listeners) {
-				addNamedComponent(l,"listener_" + (i++));
+				addNamedComponent(l, "listener_" + (i++));
 			}
 		}
 	}
