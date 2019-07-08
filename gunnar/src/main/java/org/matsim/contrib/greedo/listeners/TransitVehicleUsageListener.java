@@ -95,8 +95,8 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler {
 						indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 						this.passengerId2indicators.put(event.getPersonId(), indicators);
 					}
-					indicators.visit(event.getVehicleId(), this.timeDiscretization.getBin(time_s),
-							personWeight * vehicleWeight);
+					indicators.visit(event.getVehicleId(), this.timeDiscretization.getBin(time_s), personWeight,
+							vehicleWeight);
 				}
 			}
 		}

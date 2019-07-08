@@ -60,6 +60,7 @@ import com.google.inject.Provider;
 
 import floetteroed.utilities.statisticslogging.StatisticsWriter;
 import floetteroed.utilities.statisticslogging.TimeStampStatistic;
+import utils.MovingWindowAverage;
 
 /**
  * 
@@ -81,7 +82,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private final Ages ages;
 
-	private final ReplanningEfficiencyEstimator replanningEfficiencyEstimator;
+	private final ReplanningEfficiencyEstimator2 replanningEfficiencyEstimator;
 
 	private final AsymptoticAgeLogger asymptoticAgeLogger;
 
@@ -89,6 +90,12 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 	private final List<SlotUsageListener> hypotheticalSlotUsageListeners = new LinkedList<>();
 
+	// TODO 2019-07-08 EXPERIMENTAL
+	private final MovingWindowAverage realizedToTargetLambdaRatio;
+
+	// TODO 2019-07-08 EXPERIMENTAL
+	private double betaScale = 1.0;
+	
 	private Plans lastPhysicalPopulationState = null;
 
 	private ReplannerIdentifier.SummaryStatistics lastReplanningSummaryStatistics = new ReplannerIdentifier.SummaryStatistics();
@@ -105,7 +112,11 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		this.physicalSlotUsageListener = new SlotUsageListener(this.greedoConfig.newTimeDiscretization(),
 				this.ages.getWeightsView(), this.greedoConfig.getConcurrentLinkWeights(),
 				this.greedoConfig.getConcurrentTransitVehicleWeights());
-		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator(this.greedoConfig);
+		this.replanningEfficiencyEstimator = new ReplanningEfficiencyEstimator2(this.greedoConfig);
+
+		// TODO 2019-07-08 NEW
+		this.realizedToTargetLambdaRatio = new MovingWindowAverage(greedoConfig.getMinAbsoluteMemoryLength(),
+				greedoConfig.getMaxRelativeMemoryLength());
 
 		this.asymptoticAgeLogger = new AsymptoticAgeLogger(this.greedoConfig.getMaxRelativeMemoryLength(),
 				new File("./output/"), "asymptoticAges.", ".txt");
@@ -143,6 +154,10 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(this.ages.newAgePercentile(percent));
 		}
+		for (int percent = 0; percent <= 100; percent += 10) {
+			this.statsWriter.addSearchStatistic(this.replanningEfficiencyEstimator.newAgeWeightStatistic(percent));
+		}
+
 	}
 
 	// -------------------- INTERNALS --------------------
@@ -232,7 +247,8 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 		final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(
 				this.replanningEfficiencyEstimator.getBeta(), this.greedoConfig, this.iteration(),
 				this.physicalSlotUsageListener.getIndicatorView(), hypotheticalSlotUsageIndicators,
-				utilityStats.personId2expectedUtilityChange, utilityStats.personId2experiencedUtility);
+				utilityStats.personId2expectedUtilityChange, utilityStats.personId2experiencedUtility,
+				this.realizedToTargetLambdaRatio, this.betaScale);
 		final Set<Id<Person>> replannerIds = replannerIdentifier.drawReplanners();
 		for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 			if (!replannerIds.contains(person.getId())) {
@@ -244,6 +260,16 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 
 		this.ages.update(replannerIds);
 		this.physicalSlotUsageListener.updatePersonWeights(this.ages.getWeightsView());
+
+		// TODO 2019-07-08 NEW
+		{
+			final double lambdaRealized = ((double) this.lastReplanningSummaryStatistics.numberOfReplanners)
+					/ this.lastReplanningSummaryStatistics.getNumberOfReplanningCandidates();
+			final double lambdaBar = this.lastReplanningSummaryStatistics.lambdaBar;
+			this.realizedToTargetLambdaRatio.add(lambdaRealized / lambdaBar);
+			
+			this.betaScale *= (lambdaBar / lambdaRealized);
+		}
 	}
 
 	// --------------- IMPLEMENTATION OF Provider<EventHandler> ---------------

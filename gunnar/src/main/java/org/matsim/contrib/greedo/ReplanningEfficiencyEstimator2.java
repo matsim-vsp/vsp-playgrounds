@@ -21,9 +21,6 @@ package org.matsim.contrib.greedo;
 
 import static java.lang.Math.log;
 
-import floetteroed.utilities.math.Covariance;
-import floetteroed.utilities.math.Matrix;
-import floetteroed.utilities.math.Regression;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
 import utils.MovingWindowAverage;
@@ -51,7 +48,7 @@ import utils.MovingWindowAverage;
  * @author Gunnar Flötteröd
  *
  */
-class ReplanningEfficiencyEstimator {
+class ReplanningEfficiencyEstimator2 {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -77,7 +74,7 @@ class ReplanningEfficiencyEstimator {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplanningEfficiencyEstimator(final int minObservationCnt, final double maxRelativeMemoryLength,
+	ReplanningEfficiencyEstimator2(final int minObservationCnt, final double maxRelativeMemoryLength,
 			final boolean constrainDeltaToZero, final boolean acceptNegativeDisappointment) {
 		this.anticipatedSlotUsageChanges2 = new MovingWindowAverage(minObservationCnt, Integer.MAX_VALUE,
 				maxRelativeMemoryLength);
@@ -87,7 +84,7 @@ class ReplanningEfficiencyEstimator {
 		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
 	}
 
-	ReplanningEfficiencyEstimator(final GreedoConfigGroup greedoConfig) {
+	ReplanningEfficiencyEstimator2(final GreedoConfigGroup greedoConfig) {
 		this(greedoConfig.getMinAbsoluteMemoryLength(), greedoConfig.getMaxRelativeMemoryLength(),
 				greedoConfig.getConstrainDeltaToZero(), greedoConfig.getAcceptNegativeDisappointment());
 	}
@@ -105,45 +102,60 @@ class ReplanningEfficiencyEstimator {
 	// -------------------- IMPLEMENTATION --------------------
 
 	void update(final LogDataWrapper logDataWrapper) {
-		this.update(logDataWrapper.getReplanningSummaryStatistics().sumOfReplannerUtilityChanges,
-				logDataWrapper.getUtilitySummaryStatistics().realizedUtilityChangeSum,
-				// logDataWrapper.getReplanningSummaryStatistics().sumOfWeightedReplannerCountDifferences2
-				logDataWrapper.getReplanningSummaryStatistics().sumOfLocationWeightedReplannerCountDifferences2);
+		this.update(logDataWrapper.getReplanningSummaryStatistics().getSumOfAnticipatedUtilityChanges(), null,
+				logDataWrapper.getReplanningSummaryStatistics().getSumOfWeightedCountDifferences2(),
+				// logDataWrapper.getReplanningSummaryStatistics().sumOfLocationWeightedReplannerCountDifferences2,
+				logDataWrapper.getGreedoConfig().getMSAReplanningRate(logDataWrapper.getIteration()));
 	}
 
 	private void update(final Double anticipatedUtilityChange, final Double realizedUtilityChange,
-			final Double anticipatedSlotUsageChange2) {
+			final Double anticipatedSlotUsageChange2, final double lambdaBar) {
 
-		if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
-				&& (anticipatedSlotUsageChange2 != null)
-				&& (this.acceptNegativeDisappointment || (anticipatedUtilityChange - realizedUtilityChange >= 0))) {
-
-			this.anticipatedSlotUsageChanges2.add(anticipatedSlotUsageChange2);
-			this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange - realizedUtilityChange);
-			final Double[] deltaX2 = this.anticipatedSlotUsageChanges2.getDataAsDoubleArray();
-			final Double[] deltaDeltaU = this.anticipatedMinusRealizedUtilityChanges.getDataAsDoubleArray();
-			final Regression regr = new Regression(1.0, this.constrainDeltaToZero ? 1 : 2);
-			final Covariance cov = new Covariance(2, 2);
-			for (int i = 0; i < deltaX2.length; i++) {
-				regr.update(this.regrInput(deltaX2[i]), deltaDeltaU[i]);
-				final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
-				cov.add(covInput, covInput);
-			}
-
-			if (this.hadEnoughData()) {
-				this.beta = (1.0 / regr.getCoefficients().get(0));
-				this.delta = (this.constrainDeltaToZero ? 0.0 : (-regr.getCoefficients().get(1) * this.beta));
-				final Matrix _C = cov.getCovariance();
-				this.correlation = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
-				this.currentPredictedTotalUtilityImprovement = this.upcomingPredictedTotalUtilityImprovement;
-			}
-			this.upcomingPredictedTotalUtilityImprovement = regr.predict(this.regrInput(anticipatedSlotUsageChange2));
+		if (anticipatedSlotUsageChange2 != null && anticipatedUtilityChange != null) {
+			this.beta = lambdaBar * anticipatedSlotUsageChange2 / Math.max(1e-8, anticipatedUtilityChange);
+			this.delta = 0.0;
 		}
+
+		//
+		// if ((anticipatedUtilityChange != null) && (realizedUtilityChange != null)
+		// && (anticipatedSlotUsageChange2 != null)
+		// && (this.acceptNegativeDisappointment || (anticipatedUtilityChange -
+		// realizedUtilityChange >= 0))) {
+		//
+		// this.anticipatedSlotUsageChanges2.add(anticipatedSlotUsageChange2);
+		// this.anticipatedMinusRealizedUtilityChanges.add(anticipatedUtilityChange -
+		// realizedUtilityChange);
+		// final Double[] deltaX2 =
+		// this.anticipatedSlotUsageChanges2.getDataAsDoubleArray();
+		// final Double[] deltaDeltaU =
+		// this.anticipatedMinusRealizedUtilityChanges.getDataAsDoubleArray();
+		// final Regression regr = new Regression(1.0, this.constrainDeltaToZero ? 1 :
+		// 2);
+		// final Covariance cov = new Covariance(2, 2);
+		// for (int i = 0; i < deltaX2.length; i++) {
+		// regr.update(this.regrInput(deltaX2[i]), deltaDeltaU[i]);
+		// final Vector covInput = new Vector(deltaX2[i], deltaDeltaU[i]);
+		// cov.add(covInput, covInput);
+		// }
+		//
+		// if (this.hadEnoughData()) {
+		// this.beta = (1.0 / regr.getCoefficients().get(0));
+		// this.delta = (this.constrainDeltaToZero ? 0.0 :
+		// (-regr.getCoefficients().get(1) * this.beta));
+		// final Matrix _C = cov.getCovariance();
+		// this.correlation = _C.get(1, 0) / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+		// this.currentPredictedTotalUtilityImprovement =
+		// this.upcomingPredictedTotalUtilityImprovement;
+		// }
+		// this.upcomingPredictedTotalUtilityImprovement =
+		// regr.predict(this.regrInput(anticipatedSlotUsageChange2));
+		// }
 	}
 
-	private boolean hadEnoughData() {
-		return (this.anticipatedSlotUsageChanges2.size() >= this.anticipatedSlotUsageChanges2.getMinLength());
-	}
+	// private boolean hadEnoughData() {
+	// return (this.anticipatedSlotUsageChanges2.size() >=
+	// this.anticipatedSlotUsageChanges2.getMinLength());
+	// }
 
 	Double getBeta() {
 		return this.beta;

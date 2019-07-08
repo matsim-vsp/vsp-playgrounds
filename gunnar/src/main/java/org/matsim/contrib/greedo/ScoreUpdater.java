@@ -66,8 +66,8 @@ class ScoreUpdater<L> {
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, true, true);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, true, true));
 
 		/*
 		 * Update the interaction residuals.
