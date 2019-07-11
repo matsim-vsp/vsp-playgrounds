@@ -24,14 +24,15 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingScheme;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
 
 import playground.benjamin.BkPaths;
 
@@ -175,7 +176,7 @@ if ( true ) {
 }
 	
   private static RoadPricingScheme loadTollLinksFile(String tollLinksFilePath) {
-		RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+	  RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
 	  RoadPricingReaderXMLv1 reader = new RoadPricingReaderXMLv1(scheme);
 		reader.readFile(tollLinksFilePath);
 		return scheme;

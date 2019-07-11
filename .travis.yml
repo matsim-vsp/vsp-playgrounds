@@ -1,9 +1,10 @@
 language: java
-jdk: oraclejdk8
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
+jdk: openjdk11
+#dist: trusty
+#addons:
+#  apt:
+#    packages:
+#      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
 
 # This skips the mvn install that is otherwise run (implausibly, the setting has to be "true")
 # https://docs.travis-ci.com/user/customizing-the-build/#Skipping-the-Installation-Step
@@ -12,16 +13,16 @@ install: true
 # define the order of the stages:
 stages:
   - deploy_only_vsp
-  - package
+  #  - package
   - test
 
 script:
-  - mvn install --also-make --projects ${MODULE} -DskipTests && cd ${TRAVIS_BUILD_DIR}/${MODULE} && mvn failsafe:integration-test failsafe:verify -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+  - mvn install -B --also-make --projects ${MODULE} -DskipTests && cd ${TRAVIS_BUILD_DIR}/${MODULE} && mvn failsafe:integration-test failsafe:verify -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
 
 jobs:
   include:
-    - stage: package
-      script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+    #    - stage: package
+    #      script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
     - stage: deploy_only_vsp
       script: "cd vsp && mvn --settings ../.travis.settings.xml -B clean failsafe:integration-test failsafe:verify -Dmaven.test.redirectTestOutputToFile deploy"
       skip_cleanup: true
@@ -40,7 +41,6 @@ env:
     - MODULE=benjamin       # 6 min 31 sec
     - MODULE=dziemke        # 4 min 35 sec
     - MODULE=kturner        # 3 min 31 sec
-    - MODULE=jbischoff      # 3 min 22 sec
     - MODULE=santiago       # 3 min 17 sec
     - MODULE=michalm        # 3 min 16 sec
     - MODULE=vspshk         # 2 min 54 sec

@@ -13,14 +13,15 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingWriterXMLv1;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.roadpricing.RoadPricingScheme;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.roadpricing.RoadPricingWriterXMLv1;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.santiago.SantiagoScenarioConstants;
@@ -115,7 +116,7 @@ public class AddTollToTollways {
 		
 
 	public RoadPricingSchemeImpl createGantriesFile() {
-		RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
 		scheme.setName(schemeName);
 		scheme.setType(scheme.TOLL_TYPE_LINK);
 		scheme.setDescription("No description available");

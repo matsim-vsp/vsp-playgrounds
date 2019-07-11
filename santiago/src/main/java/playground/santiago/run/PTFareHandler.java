@@ -113,7 +113,7 @@ public class PTFareHandler implements ActivityStartEventHandler, PersonDeparture
 			double time = event.getTime();
 			Id<Person> pid = event.getPersonId();
 			Id<Vehicle> vid = event.getVehicleId();
-			if(vid == null || vid.equals("")){
+			if (vid == null || vid.toString().equals("")) {
 				log.warn("Vehicle is not properly defined; cannot prove if it is a PT vehicle. Hence, no fare is collected from person " + pid);
 			}
 			if(this.transitVehicles.getVehicles().get(vid) == null){

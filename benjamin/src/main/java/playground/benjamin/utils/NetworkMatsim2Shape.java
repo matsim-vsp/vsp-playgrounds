@@ -27,6 +27,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -34,8 +37,6 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 
 
@@ -93,7 +94,7 @@ public class NetworkMatsim2Shape {
 		
 		
 		Network net = NetworkUtils.createNetwork();
-		RoadPricingSchemeImpl rps = new RoadPricingSchemeImpl();
+		RoadPricingSchemeImpl rps = RoadPricingUtils.createDefaultScheme();
 		RoadPricingReaderXMLv1 rpr = new RoadPricingReaderXMLv1(rps);
 		rpr.readFile(linksToFilter);
 		Set<Id<Link>> linkList = rps.getTolledLinkIds();

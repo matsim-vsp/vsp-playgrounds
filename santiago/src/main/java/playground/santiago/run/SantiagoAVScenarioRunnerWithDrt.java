@@ -45,6 +45,8 @@ import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -69,8 +71,6 @@ import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingModule;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.santiago.SantiagoScenarioConstants;
@@ -160,7 +160,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 		// Adding randomness to the router, sigma = 3
 		config.plansCalcRoute().setRoutingRandomness(sigma);
 
-		controler.addOverridingModule(new RoadPricingModule());
+		controler.addOverridingModule(RoadPricingUtils.createModule());
 
 		if (cadyts) {
 			controler.addOverridingModule(new CadytsCarModule());

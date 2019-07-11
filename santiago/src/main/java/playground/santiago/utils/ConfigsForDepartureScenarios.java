@@ -1,6 +1,7 @@
 package playground.santiago.utils;
 
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -11,7 +12,6 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.pt.config.TransitConfigGroup;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
 //TODO: no longer needed.
 public class ConfigsForDepartureScenarios {
 

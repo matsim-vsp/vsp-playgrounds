@@ -22,6 +22,9 @@ package playground.santiago.run;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -36,6 +39,8 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -43,15 +48,14 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
@@ -62,17 +66,8 @@ import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingModule;
 
 import playground.santiago.SantiagoScenarioConstants;
-import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
-import playground.vsp.congestion.handlers.TollHandler;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * @author benjamin
@@ -150,9 +145,9 @@ public class SantiagoScenarioRunner {
 			rpcg.setTollLinksFile(gantriesFile);
 			
 			//Adding randomness to the router, sigma = 3
-			config.plansCalcRoute().setRoutingRandomness(sigma); 
+			config.plansCalcRoute().setRoutingRandomness(sigma);
 
-			controler.addOverridingModule(new RoadPricingModule());	
+		controler.addOverridingModule(RoadPricingUtils.createModule());
 			
 			
 

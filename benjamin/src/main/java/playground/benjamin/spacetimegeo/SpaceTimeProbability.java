@@ -44,6 +44,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -63,8 +65,6 @@ import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
 
 /**
  * @author benjamin

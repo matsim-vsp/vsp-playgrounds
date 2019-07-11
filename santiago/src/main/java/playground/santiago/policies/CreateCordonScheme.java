@@ -32,11 +32,12 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingWriterXMLv1;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.roadpricing.RoadPricingWriterXMLv1;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.santiago.network.AddTollToTollways;
@@ -81,7 +82,7 @@ public class CreateCordonScheme {
 		att.collectInformation();
 		this.initialScheme = att.createGantriesFile();
 		} else {
-		this.initialScheme = new RoadPricingSchemeImpl();
+			this.initialScheme = RoadPricingUtils.createDefaultScheme();
 		}
 		
 		//fares are different for each scheme (see page 5-13 for outerCordon, 5-14 for triangleCordon)

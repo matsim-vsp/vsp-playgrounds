@@ -3,17 +3,17 @@ package playground.santiago.run;
 import javax.inject.Inject;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.CountsConfigGroup;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
@@ -23,10 +23,6 @@ import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingModule;
-
-import playground.santiago.SantiagoScenarioConstants;
 
 public class RunExampleScenario {
 	
@@ -95,7 +91,7 @@ public class RunExampleScenario {
 			
 			//Adding randomness to the router, sigma = 3
 			config.plansCalcRoute().setRoutingRandomness(sigma);
-			controler.addOverridingModule(new RoadPricingModule());			
+			controler.addOverridingModule(RoadPricingUtils.createModule());
 			controler.run();
 			
 		} else {
@@ -108,7 +104,7 @@ public class RunExampleScenario {
 			
 			//Adding randomness to the router, sigma = 3
 			config.plansCalcRoute().setRoutingRandomness(sigma);
-			controler.addOverridingModule(new RoadPricingModule());
+			controler.addOverridingModule(RoadPricingUtils.createModule());
 			
 			controler.addOverridingModule(new CadytsCarModule());
 			controler.setScoringFunctionFactory(new ScoringFunctionFactory() {

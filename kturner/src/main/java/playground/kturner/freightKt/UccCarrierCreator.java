@@ -15,8 +15,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
-import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
-import org.matsim.contrib.freight.carrier.Tour.TourElement;
 import org.matsim.contrib.freight.carrier.CarrierImpl;
 import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
@@ -24,8 +22,11 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.carrier.ScheduledTour;
 import org.matsim.contrib.freight.carrier.TimeWindow;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
+import org.matsim.contrib.freight.carrier.Tour.TourElement;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
@@ -203,7 +204,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		Carriers splittedCarriers = new Carriers(); 
 
 		//Read zonefile
-		final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			rpReader.readFile(zonefile);
