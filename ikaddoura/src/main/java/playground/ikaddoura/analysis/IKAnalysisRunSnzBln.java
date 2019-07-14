@@ -100,7 +100,7 @@ public class IKAnalysisRunSnzBln {
 			homeActivityPrefix = "home";
 			scalingFactor = 4;
 			
-			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride;
+			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride + "," + TransportMode.drt;
 			
 			analyzeSubpopulation = null;
 		}
