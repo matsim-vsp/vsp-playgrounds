@@ -51,15 +51,15 @@ public class ModeSwitchAnalysisMain {
 
     public void analyze() throws IOException {
     	
-		final String subpopulation = "person_potential-sav-user";
+		final String subpopulation = null;
     	
         // 0: base case
-    	String directory0 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
-    	String runId0 = "bc-0";
+    	String directory0 = "/Users/ihab/Desktop/ils3a/kaddoura/snz-berlin/output/output_2019-06-03_snz-bc-1/";
+    	String runId0 = "snz-bc-1";
     	
 		// 1: policy case
-    	String directory1 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
-    	String runId1 = "savA-0d";
+    	String directory1 = "/Users/ihab/Desktop/ils3a/kaddoura/snz-berlin/output/output_2019-06-11_snz-drt-3/";
+    	String runId1 = "snz-drt-3";
     	
     	// ################
     	
@@ -86,14 +86,14 @@ public class ModeSwitchAnalysisMain {
 			log.info("Loading scenario0 and reading events...");
 
 			Config config = ConfigUtils.createConfig();	
-			config.network().setInputCRS("GK4");
-			config.global().setCoordinateSystem("GK4");
+			config.network().setInputCRS("EPSG:25832");
+			config.global().setCoordinateSystem("EPSG:25832");
 			config.plans().setInputFile(dir0populationFile);
 			config.network().setInputFile(dir0networkFile);
 			
 			scenario0 = ScenarioUtils.loadScenario(config);
 			
-			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
 			final String stageActivitySubString = "interaction";
 	        
 	        basicHandler0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);

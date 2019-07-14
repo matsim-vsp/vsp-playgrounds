@@ -45,7 +45,6 @@ import org.matsim.core.utils.charts.XYLineChart;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.analysis.carOwnerShip.SAVInsteadOfCarAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
@@ -102,18 +101,21 @@ public class AnalysisControlerListener implements IterationEndsListener {
 		if (event.getIteration() == this.scenario.getConfig().controler().getLastIteration()) {
 			log.info("Print trip information...");
 			analysis.printTripInformation(outputPathAnalysisIteration, TransportMode.taxi, basicHandler, noiseHandler, moneyHandler);
+			analysis.printTripInformation(outputPathAnalysisIteration, TransportMode.drt, basicHandler, noiseHandler, moneyHandler);
 			analysis.printTripInformation(outputPathAnalysisIteration, TransportMode.car, basicHandler, noiseHandler, moneyHandler);
 			analysis.printTripInformation(outputPathAnalysisIteration, null, basicHandler, noiseHandler, moneyHandler);
 			log.info("Print trip information... Done.");
 
 			log.info("Print person information...");
 			analysis.printPersonInformation(outputPathAnalysisIteration, TransportMode.taxi, personId2userBenefit, basicHandler, noiseHandler);	
+			analysis.printPersonInformation(outputPathAnalysisIteration, TransportMode.drt, personId2userBenefit, basicHandler, noiseHandler);	
 			analysis.printPersonInformation(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);	
 			analysis.printPersonInformation(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler);	
 			log.info("Print person information... Done.");
 		}
 
 		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.taxi, personId2userBenefit, basicHandler, noiseHandler);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.drt, personId2userBenefit, basicHandler, noiseHandler);
 		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
 		analysis.printAggregatedResults(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler);
 		

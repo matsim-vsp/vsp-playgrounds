@@ -52,12 +52,33 @@ public class IKAnalysisRunSnzBln {
 		String modesString = null;
 		String analyzeSubpopulation = null;
 		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk, TransportMode.non_network_walk};
 		final String stageActivitySubString = "interaction";
 		final String zoneId = "NO";
 		
 		if (args.length > 0) {
-			throw new RuntimeException();
+
+			runDirectory = args[0];
+			runId = args[1];
+			
+			runDirectoryToCompareWith = args[2];
+			runIdToCompareWith = args[3];
+			
+			visualizationScriptInputDirectory = args[4];
+			
+			scenarioCRS = args[5];
+			
+			shapeFileZones = args[6];
+			zonesCRS = args[7];
+			
+			zoneFile = args[8];
+
+			homeActivityPrefix = "home";
+			scalingFactor = 4;
+			
+			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride;
+			
+			analyzeSubpopulation = null;
 			
 		} else {
 			
