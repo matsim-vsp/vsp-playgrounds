@@ -29,12 +29,13 @@ import org.matsim.core.utils.io.IOUtils;
 class CountVehicles {
 
 	private static enum AnalysisType { v52, v53 }
-	private static final AnalysisType analysisType = AnalysisType.v53 ;
+	private static final AnalysisType analysisType = AnalysisType.v52 ;
 
 	static Logger log = Logger.getLogger(CountVehicles.class);
 
 	public static void main(String[] args) throws Exception {
 		log.setLevel(Level.INFO);
+//		Logger.getRootLogger().setLevel(Level.INFO);
 
 		final String inputFileEvents  ;
 
@@ -66,7 +67,10 @@ class CountVehicles {
 		System.out.println("Number of different vehicles (cars) in Events - without freight and transit: " + handlerCountVehicles.getNumberOfCars());
 		System.out.println("Number of different freight vehicles in Events: " + handlerCountVehicles.getNumberOfFreightVehicles());
 		System.out.println("Number of different transit vehicles in Events: " + handlerCountVehicles.getNumberOfTransitVehicles());
-
+		System.out.println("Number of personId != vehicle Id _ALL_: " + handlerCountVehicles.getNumberOfVehicleUnequalPersonAll());
+		System.out.println("Number of personId != vehicle Id _personlal vehicles (cars)_: " + handlerCountVehicles.getNumberOfVehicleUnequalPersonOther());
+		System.out.println("Print number of Agents per number of car trips: " + handlerCountVehicles.getNumberOfCarTripsPerAgent().toString());
+		
 		System.out.println("### Done");
 
 	}
