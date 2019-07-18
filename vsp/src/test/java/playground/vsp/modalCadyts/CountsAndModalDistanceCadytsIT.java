@@ -89,9 +89,9 @@ public class CountsAndModalDistanceCadytsIT {
     @Parameterized.Parameters(name = "{index}: cadytsCountsWeight == {0}; cadytsMarginalWeight == {1};")
     public static Collection<Object[]> parameterObjects () {
         return Arrays.asList(new Object[][] {
-        		{150.0, 0.0} ,
+        		//{150.0, 0.0} ,
 				{0.0, 150.0},
-				{150.0, 150.0}
+				//{150.0, 150.0}
         });
     }
     
@@ -101,7 +101,6 @@ public class CountsAndModalDistanceCadytsIT {
 
 	// TODO: Think about a better integration test. E.g. synthetic network with three routes
 	@Test
-	@Ignore
     public final void simultaneousMarginalsAndCountCalibrationTest() {
         double beelineDistanceFactorForNetworkModes = 1.0;
 

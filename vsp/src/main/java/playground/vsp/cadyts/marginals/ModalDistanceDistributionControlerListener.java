@@ -105,7 +105,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                                               this.stats.getModalBins().get(key).getMode(),
                                               value.getDistanceRange(),
                                               10000,
-                                              value.getCount() / this.iterationsUsed));
+                                              value.getValue() / this.iterationsUsed));
 
                 } else {
                     averages = this.stats;
@@ -138,8 +138,8 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                                 + entry.getKey().getDistanceRange().getUpperLimit() + "\t" +
                                 this.inputDistanceDistribution.getModalBinToDistanceBin()
                                                               .get(entry.getKey().getId())
-                                                              .getCount() + "\t" +
-                                entry.getValue().getCount() * inputDistanceDistribution.getModeToScalingFactor().get(entry.getKey().getMode()) );
+                                                              .getValue() + "\t" +
+                                entry.getValue().getValue() * inputDistanceDistribution.getModeToScalingFactor().get(entry.getKey().getMode()) );
                 writer.newLine();
             }
             writer.close();
@@ -170,12 +170,12 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         distribution.getModalBinToDistanceBin()
                     .forEach((key, value) -> this.stats.getModalBinToDistanceBin()
                                                        .get(key)
-                                                       .addToCount(value.getCount()));
+                                                       .addToCount(value.getValue()));
     }
 
     private void reset() {
         this.iterationsUsed = 0;
         this.stats.getModalBinToDistanceBin()
-                  .forEach((key, value) -> value.addToCount( - value.getCount()));
+                  .forEach((key, value) -> value.addToCount( - value.getValue()));
     }
 }

@@ -23,7 +23,7 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
         DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(
                 modalBinIdentifier.getId());
         if (bin==null) return 0.;
-        else return bin.getCount() * modalBinIdentifier.getScalingFactor();
+        else return bin.getValue() * modalBinIdentifier.getScalingFactor();
     }
 
     @Override
@@ -41,9 +41,9 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
         DistanceDistribution distanceDistribution = this.beelineDistanceCollector.getOutputDistanceDistribution();
         for (Map.Entry<Id<ModalDistanceBinIdentifier>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
-            if (entry.getValue().getCount() > 0) {
+            if (entry.getValue().getValue() > 0) {
                     stringBuffer.append(entry.getKey().toString()+TAB);
-                    stringBuffer.append( String.valueOf(entry.getValue().getCount()
+                    stringBuffer.append( String.valueOf(entry.getValue().getValue()
                             * distanceDistribution.getModalBins().get(entry.getKey()).getScalingFactor())+RETURN);
             }
         }

@@ -19,52 +19,82 @@
 
 package playground.vsp.cadyts.marginals.prep;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
+
 /**
  * Created by amit on 21.02.18.
  */
 
-public class DistanceBin implements Comparable<DistanceBin>{
+public class DistanceBin implements Identifiable<DistanceBin>, Comparable<DistanceBin>{
 
     private final DistanceRange distanceRange;
-    private double count = 0.;
+    private double value = 0.;
     private final double stdDev;
+    private final Id<DistanceBin> id;
+    private final String mode;
 
     public DistanceBin(DistanceRange distanceRange) {
-        this(distanceRange, 10000);
+        this("no-mode", distanceRange, 10000, 0);
     }
 
-    public DistanceBin(DistanceRange distanceRange, double standardDeviation) {
+    public DistanceBin(String mode, DistanceRange distanceRange, double standardDeviation, double value) {
         this.distanceRange = distanceRange;
         this.stdDev = standardDeviation;
+        this.value = value;
+        this.mode = mode;
+        this.id = Id.create(mode + "_" + String.valueOf(distanceRange.lowerLimit) + "_" + String.valueOf(distanceRange.upperLimit), DistanceBin.class);
     }
 
     public DistanceRange getDistanceRange() {
         return distanceRange;
     }
 
-    public double getCount() {
-        return count;
+    public double getValue() {
+        return value;
     }
+
+    @Override
+    public Id<DistanceBin> getId() { return id; }
 
     public double getStandardDeviation() {
         return stdDev;
     }
 
-    public void addToCount(double val){
-        this.count += val;
+    public String getMode() {
+        return mode;
+    }
+
+    public synchronized void addToCount(double val){
+        this.value += val;
     }
 
     @Override
     public String toString() {
         return "DistanceBin{" +
                 "distanceRange=" + distanceRange +
-                ", count=" + count +
+                ", value=" + value +
                 '}';
     }
 
     @Override
     public int compareTo(DistanceBin distanceBin){
         return distanceRange.compareTo(distanceBin.getDistanceRange());
+    }
+
+    public boolean equals(Object object) {
+        if (object == this) return true;
+
+        if (object instanceof DistanceBin) {
+            DistanceBin otherBin = (DistanceBin)object;
+            return this.id.equals(otherBin.id);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
     }
 
     public static class DistanceRange implements Comparable<DistanceRange>{
@@ -82,6 +112,10 @@ public class DistanceBin implements Comparable<DistanceBin>{
 
         public double getUpperLimit() {
             return upperLimit;
+        }
+
+        public boolean isWithinRange(double distance) {
+            return lowerLimit <= distance && distance <= upperLimit;
         }
 
         @Override

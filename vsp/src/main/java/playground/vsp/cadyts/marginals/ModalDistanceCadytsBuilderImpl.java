@@ -73,7 +73,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 			// '15.0' for all bins. When all bins pull with a correction of '15.0' all corrections cancel out each other.
 			// The correction factor is calculated as followed: (expectedValue - simulatedValue) / stddev^2
 			// the stddev can also be set globally for cadyts but then it would also affect the counts calibration
-			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getCount(), bin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+			matsimCalibrator.addMeasurement(item, 0, 86400, bin.getValue(), bin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 			numberOfAddedMeasurements++;
 		}
 

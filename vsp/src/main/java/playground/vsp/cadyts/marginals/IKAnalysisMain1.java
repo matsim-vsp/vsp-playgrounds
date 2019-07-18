@@ -107,8 +107,8 @@ public class IKAnalysisMain1 {
                                 + entry.getKey().getDistanceRange().getUpperLimit() + "\t" +
                                 averages.getModalBinToDistanceBin()
                                                               .get(entry.getKey().getId())
-                                                              .getCount() + "\t" +
-                                entry.getValue().getCount() * averages.getModeToScalingFactor().get(entry.getKey().getMode()) );
+                                                              .getValue() + "\t" +
+                                entry.getValue().getValue() * averages.getModeToScalingFactor().get(entry.getKey().getMode()) );
                 writer.newLine();
             }
             writer.close();

@@ -37,9 +37,11 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.StartupEvent;
+import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
@@ -52,7 +54,7 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinLoopUp;
  * {@link PlanStrategy Plan Strategy} used for replanning in MATSim which uses Cadyts to
  * select plans that better match to given occupancy counts.
  */
-public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceBinIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
+public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceBinIdentifier>, AfterMobsimListener, StartupListener, IterationEndsListener, BeforeMobsimListener {
 
 	private final static Logger log = Logger.getLogger(ModalDistanceCadytsContext.class);
 
@@ -165,5 +167,10 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceB
 
 	private static boolean isActiveInThisIteration(final int iter, final Config config) {
 		return (iter > 0 && iter % config.counts().getWriteCountsInterval() == 0);
+	}
+
+	@Override
+	public void notifyAfterMobsim(AfterMobsimEvent event) {
+		System.out.println("bla");
 	}
 }

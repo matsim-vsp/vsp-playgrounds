@@ -114,7 +114,7 @@ public class DistanceDistribution {
         }
 
         Id<ModalDistanceBinIdentifier> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
-        DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange, standardDeviation));
+        DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(mode, distanceRange, standardDeviation, 0));
         bin.addToCount(val);
         this.mode2DistanceBins.put(id, bin);
         //
