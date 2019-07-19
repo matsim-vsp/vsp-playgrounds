@@ -27,6 +27,9 @@ class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHan
 	@Inject
 	private MainModeIdentifier mainModeIdentifier;
 
+	@Inject
+	private AgentFilter agentFilter = id -> true; // by default include all agents
+
 	private final Set<Id<Person>> drivers = new HashSet<>();
 	private final Map<Id<Person>, List<BeelineTrip>> tripToPerson = new HashMap<>();
 
@@ -42,7 +45,8 @@ class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHan
 
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
-		if (stageActivityTypes.isStageActivity(event.getActType()) || drivers.contains(event.getPersonId())) return;
+		if (stageActivityTypes.isStageActivity(event.getActType()) || drivers.contains(event.getPersonId()) || !agentFilter.includeAgent(event.getPersonId()))
+			return;
 
 		// maybe handle drt? Drt drivers have their own activities
 

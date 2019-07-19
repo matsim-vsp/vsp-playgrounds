@@ -25,7 +25,7 @@ import org.matsim.api.core.v01.population.Person;
 /**
  * @author amit
  */
-
+@FunctionalInterface
 public interface AgentFilter {
 	
 	boolean includeAgent(final Id<Person> id);

@@ -27,7 +27,5 @@ public class ModalDistanceCadytsModule extends AbstractModule {
 
 		addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
 		addEventHandlerBinding().to(TripEventHandler.class);
-
-
 	}
 }
