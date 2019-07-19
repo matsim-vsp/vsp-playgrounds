@@ -19,7 +19,6 @@
 package playground.vsp.modalCadyts;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,11 +60,9 @@ import org.matsim.counts.Count;
 import org.matsim.counts.Counts;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
+import playground.vsp.cadyts.marginals.DistanceDistribution;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
-import playground.vsp.cadyts.marginals.prep.DistanceBin;
-import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 import javax.inject.Inject;
 import java.net.URL;
@@ -434,7 +431,7 @@ public class CountsAndModalDistanceCadytsIT {
                         cadytsContext);
                 scoringFunctionCounts.setWeightOfCadytsCorrection(cadytsCountsScoringWeight);
 
-                final CadytsScoring<ModalDistanceBinIdentifier> scoringFunctionMarginals = new CadytsScoring<>(person.getSelectedPlan(),
+				final CadytsScoring<Id<DistanceDistribution.DistanceBin>> scoringFunctionMarginals = new CadytsScoring<>(person.getSelectedPlan(),
                             config,
                             marginalCadytsContext);
 
@@ -640,25 +637,19 @@ public class CountsAndModalDistanceCadytsIT {
     
 
     private DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
-        DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
-                
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
-        
-        inputDistanceDistribution.setModeToScalingFactor("car",1);
-        inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
+		DistanceDistribution inputDistanceDistribution = new DistanceDistribution(beelineDistanceFactorForNetworkModes);
 
         //leg leisure to h = 10.000km 
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0, 10000.1), 10000, 200);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0, 10000.1), 10000, 800);
+		inputDistanceDistribution.add("car", 0.0, 10000.1, 10000, 200);
+		inputDistanceDistribution.add("bicycle", 0.0, 10000.1, 10000, 800);
 
         //h1 to work = 20.000km
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(10000.1, 20000.1), 10000, 500);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(10000.1, 20000.1), 10000, 500);
+		inputDistanceDistribution.add("car", 10000.1, 20000.1, 10000, 500);
+		inputDistanceDistribution.add("bicycle", 10000.1, 20000.1, 10000, 500);
 
         //work to leisure = ~ 27.000 km
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.1, 50000.0), 10000, 800);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.1, 50000.0), 10000, 200);
+		inputDistanceDistribution.add("car", 20000.1, 50000.0, 10000, 800);
+		inputDistanceDistribution.add("bicycle", 20000.1, 50000.0, 10000, 200);
 
 //        //anything above
 //        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(50000.0,90000.),80);

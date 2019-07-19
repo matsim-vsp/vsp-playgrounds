@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-
+/*
 package playground.vsp.modalCadyts;
 
 import org.junit.Assert;
@@ -28,9 +28,9 @@ import org.junit.runners.Parameterized;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
+import playground.vsp.cadyts.marginals.DistanceBin;
 import playground.vsp.cadyts.marginals.ModalDistanceDistributionControlerListener;
 import playground.vsp.cadyts.marginals.RunExample;
-import playground.vsp.cadyts.marginals.prep.DistanceBin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,7 +41,7 @@ import java.util.Collection;
 /**
  * Created by amit on 22.02.18.
  */
-
+/*
 @RunWith(Parameterized.class)
 public class ModalDistanceCadytsIT {
 
@@ -156,3 +156,5 @@ public class ModalDistanceCadytsIT {
         }
     }
 }
+
+*/

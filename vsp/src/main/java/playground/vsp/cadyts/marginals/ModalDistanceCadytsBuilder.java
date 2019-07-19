@@ -9,31 +9,27 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.Time;
-import playground.vsp.cadyts.marginals.prep.DistanceBin;
-import playground.vsp.cadyts.marginals.prep.DistanceDistribution2;
 
-import java.util.Collection;
-
-public class ModalDistanceCadytsBuilder {
+class ModalDistanceCadytsBuilder {
 
 	static final String MARGINALS = "_marginals";
 
 	private static final Logger logger = Logger.getLogger(ModalDistanceCadytsBuilder.class);
 
 	private Config config = null;
-	private DistanceDistribution2 expectedDistanceDistribution;
+	private DistanceDistribution expectedDistanceDistribution;
 
-	public ModalDistanceCadytsBuilder setConfig(Config config) {
+	ModalDistanceCadytsBuilder setConfig(Config config) {
 		this.config = config;
 		return this;
 	}
 
-	ModalDistanceCadytsBuilder setExpectedDistanceDistribution(DistanceDistribution2 distanceDistribution) {
+	ModalDistanceCadytsBuilder setExpectedDistanceDistribution(DistanceDistribution distanceDistribution) {
 		this.expectedDistanceDistribution = distanceDistribution;
 		return this;
 	}
 
-	public AnalyticalCalibrator<Id<DistanceBin>> build() {
+	AnalyticalCalibrator<Id<DistanceDistribution.DistanceBin>> build() {
 
 		if (config == null || expectedDistanceDistribution == null) {
 			throw new IllegalArgumentException("config and expectedDistanceDistribution must be set!");
@@ -42,7 +38,7 @@ public class ModalDistanceCadytsBuilder {
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		validateTimeBinSize(cadytsConfig.getTimeBinSize());
 
-		AnalyticalCalibrator<Id<DistanceBin>> calibrator = new AnalyticalCalibrator<>(
+		AnalyticalCalibrator<Id<DistanceDistribution.DistanceBin>> calibrator = new AnalyticalCalibrator<>(
 				config.controler().getOutputDirectory() + "/cadyts" + MARGINALS + ".log",
 				MatsimRandom.getLocalInstance().nextLong(),
 				cadytsConfig.getTimeBinSize()
@@ -64,7 +60,7 @@ public class ModalDistanceCadytsBuilder {
 			logger.warn("setting bruteForce==true for calibrator, but this won't do anything in the way the cadyts matsim integration is set up. kai, mar'14") ;
 		}
 
-		for (DistanceBin distanceBin : expectedDistanceDistribution.getDistanceBins()) {
+		for (DistanceDistribution.DistanceBin distanceBin : expectedDistanceDistribution.getDistanceBins()) {
 			calibrator.addMeasurement(distanceBin.getId(), 0, 86400, distanceBin.getValue(), distanceBin.getStandardDeviation(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 		}
 

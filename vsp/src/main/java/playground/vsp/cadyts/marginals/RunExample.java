@@ -37,9 +37,6 @@ import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
-import playground.vsp.cadyts.marginals.prep.DistanceBin;
-import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 import javax.inject.Inject;
 import java.net.URL;
@@ -125,7 +122,7 @@ public class RunExample {
                         sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
                         sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-                        final CadytsScoring<ModalDistanceBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
+						final CadytsScoring<Id<DistanceDistribution.DistanceBin>> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
                                 config,
                                 cContext);
                         scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight);
@@ -169,25 +166,19 @@ public class RunExample {
 	}
 
     public static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
-        DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
-                
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
-        
-        inputDistanceDistribution.setModeToScalingFactor("car",1);
-        inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
+		DistanceDistribution inputDistanceDistribution = new DistanceDistribution(beelineDistanceFactorForNetworkModes);
 
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0, 6000.), 10000, 2);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0, 6000.), 10000, 8);
+		inputDistanceDistribution.add("car", 0.0, 6000., 10000, 2);
+		inputDistanceDistribution.add("bicycle", 0.0, 6000., 10000, 8);
 
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(6000.0, 12000.), 10000, 4);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(6000.0, 12000.), 10000, 4);
+		inputDistanceDistribution.add("car", 6000.0, 12000., 10000, 4);
+		inputDistanceDistribution.add("bicycle", 6000.0, 12000., 10000, 4);
 
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(12000.0, 18000.), 10000, 5);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(12000.0, 18000.), 10000, 2);
+		inputDistanceDistribution.add("car", 12000.0, 18000., 10000, 5);
+		inputDistanceDistribution.add("bicycle", 12000.0, 18000., 10000, 2);
 
-		inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0, 86000.), 10000, 20);
-		inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0, 86000.), 10000, 0);
+		inputDistanceDistribution.add("car", 18000.0, 86000., 10000, 20);
+		inputDistanceDistribution.add("bicycle", 18000.0, 86000., 10000, 0);
 
 		return inputDistanceDistribution;
     }

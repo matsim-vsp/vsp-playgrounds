@@ -16,7 +16,7 @@ import org.matsim.facilities.ActivityFacility;
 
 import java.util.*;
 
-public class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler, TransitDriverStartsEventHandler {
+class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler, TransitDriverStartsEventHandler {
 
 	@Inject
 	private Network network;
@@ -123,11 +123,11 @@ public class TripEventHandler implements ActivityEndEventHandler, ActivityStartE
 
 		private List<Leg> legs = new ArrayList<>();
 
-		public Id<Link> getDepartureLink() {
+		Id<Link> getDepartureLink() {
 			return departureLink;
 		}
 
-		public Id<Link> getArrivalLink() {
+		Id<Link> getArrivalLink() {
 			return arrivalLink;
 		}
 
@@ -139,11 +139,11 @@ public class TripEventHandler implements ActivityEndEventHandler, ActivityStartE
 			return arrivalTime;
 		}
 
-		public Id<ActivityFacility> getDepartureFacility() {
+		Id<ActivityFacility> getDepartureFacility() {
 			return departureFacility;
 		}
 
-		public Id<ActivityFacility> getArrivalFacility() {
+		Id<ActivityFacility> getArrivalFacility() {
 			return arrivalFacility;
 		}
 

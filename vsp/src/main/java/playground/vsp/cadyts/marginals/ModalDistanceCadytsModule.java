@@ -1,51 +1,33 @@
-/* *********************************************************************** *
- * project: org.matsim.*
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
- *                   LICENSE and WARRANTY file.                            *
- * email           : info at matsim dot org                                *
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *   See also COPYING, LICENSE and WARRANTY file                           *
- *                                                                         *
- * *********************************************************************** */
-
 package playground.vsp.cadyts.marginals;
 
+import com.google.inject.Singleton;
 import org.matsim.core.controler.AbstractModule;
-import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import org.matsim.core.router.StageActivityTypes;
 
-/**
- * Created by amit on 21.02.18.
- */
+public class ModalDistanceCadytsModule extends AbstractModule {
 
-public class ModalDistanceCadytsModule extends AbstractModule{
+	private final DistanceDistribution expectedDistanceDistribution;
 
-    private final DistanceDistribution inputDistanceDistrbution;
+	public ModalDistanceCadytsModule(DistanceDistribution expectedDistanceDistribution) {
+		this.expectedDistanceDistribution = expectedDistanceDistribution;
+	}
 
-    public ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
-        this.inputDistanceDistrbution = inputDistanceDistrbution;
-    }
+	@Override
+	public void install() {
 
-    @Override
-    public void install() {
-        bind(DistanceDistribution.class).toInstance(inputDistanceDistrbution);
+		// make the expected distance distribution injectable
+		bind(DistanceDistribution.class).toInstance(this.expectedDistanceDistribution);
 
-        bind(ModalDistanceCadytsContext.class).asEagerSingleton();
-        addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
+		// register all activities of actType: '<mode> interaction' as interaction activity
+		bind(StageActivityTypes.class).toInstance(type -> type.endsWith("interaction"));
 
-        bind(EventsToBeelinDistanceRange.class).asEagerSingleton(); // this is not an event handler
+		bind(TripEventHandler.class).in(Singleton.class);
+		bind(ModalDistanceCadytsContext.class).in(Singleton.class);
+		bind(ModalDistancePlansTranslator.class).in(Singleton.class);
 
-        bind(BeelineDistanceCollector.class);
-        bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
+		addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
+		addEventHandlerBinding().to(TripEventHandler.class);
 
-        addControlerListenerBinding().to(ModalDistanceDistributionControlerListener.class);
-    }
+
+	}
 }
