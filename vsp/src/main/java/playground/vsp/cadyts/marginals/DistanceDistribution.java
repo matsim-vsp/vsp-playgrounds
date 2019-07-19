@@ -115,26 +115,9 @@ public class DistanceDistribution {
 					", value=" + value +
 					'}';
 		}
-
-		public boolean equals(Object object) {
-			if (object == this) return true;
-
-			if (object instanceof DistanceBin) {
-				DistanceBin otherBin = (DistanceBin) object;
-				return this.id.equals(otherBin.id);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return this.id.hashCode();
-		}
-
-
 	}
 
-	static class DistanceRange implements Comparable<DistanceRange> {
+	static class DistanceRange {
 		private final double lowerLimit;
 		private final double upperLimit; // allow infinity for upperLimit value
 
@@ -161,15 +144,6 @@ public class DistanceDistribution {
 					"lowerLimit=" + lowerLimit +
 					", upperLimit=" + upperLimit +
 					']';
-		}
-
-		@Override
-		public int compareTo(DistanceRange range) {
-			if (this.getLowerLimit() == range.getLowerLimit()) {
-				return Double.compare(this.getUpperLimit(), range.getUpperLimit());
-			} else {
-				return Double.compare(this.getLowerLimit(), range.getLowerLimit());
-			}
 		}
 	}
 }

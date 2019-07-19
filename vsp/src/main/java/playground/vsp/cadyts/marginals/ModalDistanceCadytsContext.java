@@ -15,11 +15,9 @@ import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.StartupEvent;
-import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
@@ -30,7 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class ModalDistanceCadytsContext implements CadytsContextI<Id<DistanceDistribution.DistanceBin>>, StartupListener, BeforeMobsimListener, AfterMobsimListener, IterationEndsListener {
+public class ModalDistanceCadytsContext implements CadytsContextI<Id<DistanceDistribution.DistanceBin>>, StartupListener, BeforeMobsimListener, IterationEndsListener {
 
 	private static final String LINKOFFSET_FILENAME = "linkCostOffsets" + ModalDistanceCadytsBuilder.MARGINALS + ".xml";
 	private static final String FLOWANALYSIS_FILENAME = "flowAnalysis" + ModalDistanceCadytsBuilder.MARGINALS + ".txt";
@@ -92,13 +90,8 @@ public class ModalDistanceCadytsContext implements CadytsContextI<Id<DistanceDis
 	}
 
 	@Override
-	public void notifyAfterMobsim(AfterMobsimEvent event) {
-
-
-	}
-
-	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
+
 		// copy the bins from expected distance distribution
 		DistanceDistribution simulatedDistanceDistribution = expectedDistanceDistribution.copyWithEmptyBins();
 
