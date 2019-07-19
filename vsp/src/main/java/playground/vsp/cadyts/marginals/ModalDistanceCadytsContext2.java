@@ -2,11 +2,13 @@ package playground.vsp.cadyts.marginals;
 
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import com.google.inject.Inject;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsContextI;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
@@ -34,6 +36,8 @@ public class ModalDistanceCadytsContext2 implements CadytsContextI<Id<DistanceBi
 
 	private static final String LINKOFFSET_FILENAME = "linkCostOffsets" + ModalDistanceCadytsBuilder.MARGINALS + ".xml";
 	private static final String FLOWANALYSIS_FILENAME = "flowAnalysis" + ModalDistanceCadytsBuilder.MARGINALS + ".txt";
+	private Logger logger = Logger.getLogger(ModalDistanceCadytsContext2.class);
+
 	@Inject
 	private Config config;
 
@@ -76,11 +80,15 @@ public class ModalDistanceCadytsContext2 implements CadytsContextI<Id<DistanceBi
 
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+		int counter = 0;
 		for (Person person : scenario.getPopulation().getPersons().values()) {
-			this.calibrator.addToDemand(plansTranslator.getCadytsPlan(person.getSelectedPlan()));
+			cadyts.demand.Plan<Id<DistanceBin>> demand = plansTranslator.getCadytsPlan(person.getSelectedPlan());
+			if (demand != null) {
+				counter++;
+			}
+			this.calibrator.addToDemand(demand);
 		}
-		// now, we don't need the plans from the last iteration anymore
-		plansTranslator.reset();
+		logger.info("Get cadyts plan returned " + counter + " plans");
 	}
 
 	@Override
@@ -104,7 +112,8 @@ public class ModalDistanceCadytsContext2 implements CadytsContextI<Id<DistanceBi
 
 				// get the distance bin we've put the count into and add a 'turn' for cadyts' plan builder
 				DistanceBin bin = simulatedDistanceDistribution.getBin(trip.getMainMode(), distance);
-				plansTranslator.addTurn(bin.getId(), entry.getKey());
+				Plan selectedPlan = scenario.getPopulation().getPersons().get(entry.getKey()).getSelectedPlan();
+				plansTranslator.addTurn(selectedPlan, bin.getId(), event.getIteration());
 			}
 		}
 
