@@ -204,7 +204,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		Carriers splittedCarriers = new Carriers(); 
 
 		//Read zonefile
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			rpReader.readFile(zonefile);

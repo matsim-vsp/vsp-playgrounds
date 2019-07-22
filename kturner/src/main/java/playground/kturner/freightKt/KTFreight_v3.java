@@ -59,7 +59,6 @@ import org.matsim.contrib.freight.jsprit.NetworkRouter;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
 import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
-import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
@@ -207,7 +206,7 @@ public class KTFreight_v3 {
 	private static WriteTextToFile textInfofile; 
 
 	//da immer wieder benutzt.
-	private static RoadPricingSchemeImpl rpscheme = RoadPricingUtils.createDefaultScheme();
+	private static RoadPricingSchemeImpl rpscheme = RoadPricingUtils.createMutableScheme();
 	private static VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 			new VehicleTypeDependentRoadPricingCalculator();
 
@@ -218,7 +217,7 @@ public class KTFreight_v3 {
 //		copyInputFilesToOutputDirectory();
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
-			rpscheme = RoadPricingUtils.createDefaultScheme();
+			rpscheme = RoadPricingUtils.createMutableScheme();
 			rpCalculator = new VehicleTypeDependentRoadPricingCalculator();	
 			runIndex = i;	
 			multipleRun(args);	
@@ -546,7 +545,7 @@ public class KTFreight_v3 {
 		final Controler controler = new Controler( scenario ) ;
 
 		if (addingToll){		 //Add roadpricingScheme to MATSIM-Controler Added, KT, 02.12.2014
-			controler.setModules(new ControlerDefaultsWithRoadPricingModule(rpscheme));
+			controler.addOverridingModule(RoadPricingUtils.createModule(rpscheme));
 		}
 
 		CarrierScoringFunctionFactory scoringFunctionFactory = createMyScoringFunction2(scenario);
@@ -654,7 +653,7 @@ public class KTFreight_v3 {
 
 		ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
 
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModules().get(RoadPricingConfigGroup.GROUP_NAME);

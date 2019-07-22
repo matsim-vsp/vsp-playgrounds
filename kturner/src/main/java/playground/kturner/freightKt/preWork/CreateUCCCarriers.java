@@ -161,7 +161,7 @@ class CreateUCCCarriers {
 		Carriers splittedCarriers = new Carriers(); // Carrierfile, welches beide Carrier enthält: sowohl UCC, als auch non UCC
 		
 		//Read tollfile
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 //			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;
