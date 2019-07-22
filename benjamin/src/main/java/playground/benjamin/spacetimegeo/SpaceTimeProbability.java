@@ -44,8 +44,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -118,7 +118,7 @@ public class SpaceTimeProbability {
 					}
 				};
 				controler.addControlerListener(startupListener);
-                controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+                controler.addOverridingModule(RoadPricingUtils.createModule());
                 controler.run();
 				
 				Double link3Score = null;

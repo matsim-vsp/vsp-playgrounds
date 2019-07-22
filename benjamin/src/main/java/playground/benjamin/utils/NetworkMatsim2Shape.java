@@ -94,7 +94,7 @@ public class NetworkMatsim2Shape {
 		
 		
 		Network net = NetworkUtils.createNetwork();
-		RoadPricingSchemeImpl rps = RoadPricingUtils.createDefaultScheme();
+		RoadPricingSchemeImpl rps = RoadPricingUtils.createMutableScheme();
 		RoadPricingReaderXMLv1 rpr = new RoadPricingReaderXMLv1(rps);
 		rpr.readFile(linksToFilter);
 		Set<Id<Link>> linkList = rps.getTolledLinkIds();
