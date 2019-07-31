@@ -25,7 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
@@ -51,7 +51,7 @@ public class DgChartWriter {
 	public static void writeToPng(String filename, JFreeChart jchart) {
 		filename += ".png";
 		try {
-			ChartUtilities.saveChartAsPNG(new File(filename), jchart, 1200, 800, null, true, 9);
+			ChartUtils.saveChartAsPNG(new File(filename), jchart, 1200, 800, null, true, 9);
 			log.info("Chart written to : " +filename);
 		} catch (IOException e) {
 			e.printStackTrace();

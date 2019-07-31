@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -234,7 +234,7 @@ public class DgGeoFilteredLegHistogram implements LinkEnterEventHandler, LinkLea
 	 */
 	public void writeGraphic(final String filename) {
 		try {
-			ChartUtilities.saveChartAsPNG(new File(filename), getGraphic(), 1024, 768);
+			ChartUtils.saveChartAsPNG(new File(filename), getGraphic(), 1024, 768);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
