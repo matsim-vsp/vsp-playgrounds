@@ -38,10 +38,13 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 
 	protected final EventsManager eventsManager;
 	protected final ActivityFacilities activityFacilities;
+	// protected final double simEndTime_s;
 
-	public OnlyDepartureArrivalLegEmulator(final EventsManager eventsManager, final ActivityFacilities activityFacilities) {
+	public OnlyDepartureArrivalLegEmulator(final EventsManager eventsManager,
+			final ActivityFacilities activityFacilities/* , final double simEndTime_s */) {
 		this.eventsManager = eventsManager;
 		this.activityFacilities = activityFacilities;
+		// this.simEndTime_s = simEndTime_s;
 	}
 
 	private Id<Link> getLinkId(final Activity activity) {
@@ -53,14 +56,26 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 	}
 
 	@Override
-	public final double emulateLegAndReturnEndTime_s(final Leg leg, final Person person, final Activity previousActivity,
-			final Activity nextActivity, double time_s) {
+	public final double emulateLegAndReturnEndTime_s(final Leg leg, final Person person,
+			final Activity previousActivity, final Activity nextActivity, double time_s) {
+
+		// time_s = Math.max(time_s, leg.getDepartureTime());
+		// if (time_s > this.simEndTime_s) {
+		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+		// return time_s;
+		// }
 
 		// Every leg starts with a departure.
 		this.eventsManager.processEvent(
 				new PersonDepartureEvent(time_s, person.getId(), getLinkId(previousActivity), leg.getMode()));
 
 		time_s = this.emulateBetweenDepartureAndArrivalAndReturnEndTime_s(leg, person, time_s);
+		// if (time_s > this.simEndTime_s) {
+		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode() + " at
+		// time " + time_s + " in class "
+		// + this.getClass().getSimpleName());
+		// return time_s;
+		// }
 
 		// Every leg ends with an arrival.
 		this.eventsManager
@@ -70,7 +85,8 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 	}
 
 	// Hook for stuff that happens between departure and arrival.
-	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person, double time_s) {
+	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person,
+			double time_s) {
 		return (time_s + leg.getTravelTime());
 	}
 }

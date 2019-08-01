@@ -26,7 +26,7 @@ import org.matsim.contrib.greedo.LogDataWrapper;
  * @author Gunnar Flötteröd
  *
  */
-public class AvgNonReplannerUtilityChange extends PopulationAverageStatistic {
+public class AvgNonReplannerUtilityChange_DEPRECATED extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {

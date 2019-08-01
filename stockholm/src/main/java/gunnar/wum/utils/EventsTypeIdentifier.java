@@ -17,41 +17,31 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo;
+package gunnar.wum.utils;
 
-import java.util.Random;
+import java.util.LinkedHashSet;
+
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.handler.EventHandler;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class TestOneOverAgeApprox {
+public class EventsTypeIdentifier implements EventHandler {
 
+	private final LinkedHashSet<Class<?>> eventClasses = new LinkedHashSet<>();
+
+	
+	
 	public static void main(String[] args) {
 		
-		final Random rnd = new Random();
-		final int[] _Deltas = new int[] {-1, 1};
-		final double[] _DeltaX2 = new double[11];
 		
-		
-		int maxOuter = 10;
-		int maxInner = 10;
-		
-		for (int outer = 0; outer < maxOuter; outer++) {
-			for (int inner = 0; inner < maxInner; inner++) {
-				
-				
-				
-			}
-		}
-		
-		final double _DeltaXni = rnd.nextInt(3) - 1;
-		final double age = rnd.nextDouble() * 10;
-		
-		
-		
-	}
-	
-}
+		EventsManager manager = EventsUtils.createEventsManager();
+		EventsUtils.readEvents(manager, "output_events.xml.gz");
 
+	}
+
+}

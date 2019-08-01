@@ -26,11 +26,11 @@ import org.matsim.contrib.greedo.LogDataWrapper;
  * @author Gunnar Flötteröd
  *
  */
-public class AvgExpectedDeltaUtilityAccelerated extends PopulationAverageStatistic {
+public class NormalizedWeightedCountDifferences2 extends PopulationAverageStatistic {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().sumOfReplannerUtilityChanges,
+		return this.averageOrEmpty(arg0.getReplanningSummaryStatistics().sumOfWeightedCountDifferences2,
 				arg0.getReplanningSummaryStatistics().getNumberOfReplanningCandidates());
 	}
 

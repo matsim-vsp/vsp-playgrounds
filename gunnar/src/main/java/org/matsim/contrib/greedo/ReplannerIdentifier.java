@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
@@ -37,7 +36,6 @@ import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.DynamicDataUtils;
 import floetteroed.utilities.TimeDiscretization;
-import utils.MovingWindowAverage;
 
 /**
  * 
@@ -58,6 +56,7 @@ class ReplannerIdentifier {
 	private final Map<Id<Person>, Double> personId2hypotheticalUtilityChange;
 	private final Map<Id<Person>, Double> personId2currentUtility;
 
+	private final double sumOfWeightedCountDifferences2;
 	private final double lambdaBar;
 	private final double beta;
 
@@ -65,12 +64,14 @@ class ReplannerIdentifier {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	ReplannerIdentifier(final Double unconstrainedBeta, final GreedoConfigGroup greedoConfig, final int iteration,
+	ReplannerIdentifier(// final Double unconstrainedBeta,
+			final GreedoConfigGroup greedoConfig, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2hypotheticalSlotUsage,
 			final Map<Id<Person>, Double> personId2hypotheticalUtilityChange,
 			final Map<Id<Person>, Double> personId2currentUtility,
-			final MovingWindowAverage realizedToTargetLambdaRatio, final double betaScale) {
+			// final MovingWindowAverage realizedToTargetLambdaRatio,
+			final double betaScale) {
 
 		this.greedoConfig = greedoConfig;
 		this.personId2physicalSlotUsage = personId2physicalSlotUsage;
@@ -85,28 +86,28 @@ class ReplannerIdentifier {
 				this.personId2physicalSlotUsage.values(), true, true);
 		this.upcomingWeightedCounts = newWeightedCounts(this.greedoConfig.newTimeDiscretization(),
 				this.personId2hypothetialSlotUsage.values(), true, true);
-		final double sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
+		this.sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
-		Logger.getLogger(this.getClass()).warn("Overriding beta!!!");
+		// Logger.getLogger(this.getClass()).warn("Overriding beta!!!");
 		// if ((unconstrainedBeta != null) && (unconstrainedBeta > 0.0)) {
 		// this.beta = unconstrainedBeta;
 		// this.lambdaBar = 0.5 * unconstrainedBeta * totalUtilityChange
 		// / Math.max(sumOfWeightedCountDifferences2, 1e-8);
 		// } else
-		{
-			final double ratio;
-			if (realizedToTargetLambdaRatio.getTotalCount() > 0) {
-				ratio = realizedToTargetLambdaRatio.average();
-			} else {
-				ratio = 1.0;
-			}
-			this.lambdaBar = greedoConfig.getMSAReplanningRate(iteration);
-			// this.beta = 2.0 * (this.lambdaBar / ratio) * sumOfWeightedCountDifferences2
-			// / Math.max(totalUtilityChange, 1e-8);
-			this.beta = betaScale * 2.0 * this.lambdaBar * sumOfWeightedCountDifferences2
-					/ Math.max(totalUtilityChange, 1e-8);
-		}
+		// {
+		// final double ratio;
+		// if (realizedToTargetLambdaRatio.getTotalCount() > 0) {
+		// ratio = realizedToTargetLambdaRatio.average();
+		// } else {
+		// ratio = 1.0;
+		// }
+		this.lambdaBar = greedoConfig.getMSAReplanningRate(iteration);
+		// this.beta = 2.0 * (this.lambdaBar / ratio) * sumOfWeightedCountDifferences2
+		// / Math.max(totalUtilityChange, 1e-8);
+		this.beta = betaScale * 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2
+				/ Math.max(totalUtilityChange, 1e-8);
+		// }
 	}
 
 	// -------------------- INTERNALS --------------------
@@ -220,8 +221,9 @@ class ReplannerIdentifier {
 			personId2similarity.put(personId, similarityNumerator / this.personId2hypotheticalUtilityChange.size());
 		}
 
-		this.lastExpectations = new SummaryStatistics(this.lambdaBar, replannerUtilityChangeSum,
-				nonReplannerUtilityChangeSum, DynamicDataUtils.sumOfEntries2(weightedReplannerCountDifferences),
+		this.lastExpectations = new SummaryStatistics(this.lambdaBar, this.beta, replannerUtilityChangeSum,
+				nonReplannerUtilityChangeSum, this.sumOfWeightedCountDifferences2,
+				DynamicDataUtils.sumOfEntries2(weightedReplannerCountDifferences),
 				DynamicDataUtils.sumOfEntries2(weightedNonReplannerCountDifferences),
 				DynamicDataUtils.sumOfEntries2(locationWeightedReplannerCountDifferences), replannerSizeSum,
 				nonReplannerSizeSum, replanners.size(),
@@ -244,8 +246,10 @@ class ReplannerIdentifier {
 	public static class SummaryStatistics {
 
 		public final Double lambdaBar;
+		public final Double beta;
 		public final Double sumOfReplannerUtilityChanges;
 		public final Double sumOfNonReplannerUtilityChanges;
+		public final Double sumOfWeightedCountDifferences2;
 		public final Double sumOfWeightedReplannerCountDifferences2;
 		public final Double sumOfWeightedNonReplannerCountDifferences2;
 		public final Double sumOfLocationWeightedReplannerCountDifferences2;
@@ -258,18 +262,21 @@ class ReplannerIdentifier {
 		private Map<Id<Person>, Integer> replannerId2ageAtReplanning;
 
 		SummaryStatistics() {
-			this(null, null, null, null, null, null, null, null, null, null, new LinkedHashMap<>(), null);
+			this(null, null, null, null, null, null, null, null, null, null, null, null, new LinkedHashMap<>(), null);
 		}
 
-		private SummaryStatistics(final Double lambdaBar, final Double sumOfReplannerUtilityChanges,
-				final Double sumOfNonReplannerUtilityChanges, final Double sumOfWeightedReplannerCountDifferences2,
+		private SummaryStatistics(final Double lambdaBar, final Double beta, final Double sumOfReplannerUtilityChanges,
+				final Double sumOfNonReplannerUtilityChanges, final Double sumOfWeightedCountDifferences2,
+				final Double sumOfWeightedReplannerCountDifferences2,
 				final Double sumOfWeightedNonReplannerCountDifferences2,
 				final Double sumOfLocationWeightedReplannerCountDifferences2, final Double replannerSizeSum,
 				final Double nonReplannerSizeSum, final Integer numberOfReplanners, final Integer numberOfNonReplanners,
 				final Map<Id<Person>, Double> personId2similarity, final String replannerIdentifierRecipeName) {
 			this.lambdaBar = lambdaBar;
+			this.beta = beta;
 			this.sumOfReplannerUtilityChanges = sumOfReplannerUtilityChanges;
 			this.sumOfNonReplannerUtilityChanges = sumOfNonReplannerUtilityChanges;
+			this.sumOfWeightedCountDifferences2 = sumOfWeightedCountDifferences2;
 			this.sumOfWeightedReplannerCountDifferences2 = sumOfWeightedReplannerCountDifferences2;
 			this.sumOfWeightedNonReplannerCountDifferences2 = sumOfWeightedNonReplannerCountDifferences2;
 			this.sumOfLocationWeightedReplannerCountDifferences2 = sumOfLocationWeightedReplannerCountDifferences2;
@@ -307,14 +314,15 @@ class ReplannerIdentifier {
 		// }
 		// }
 
-		public Double getSumOfWeightedCountDifferences2() {
-			if ((this.sumOfWeightedReplannerCountDifferences2 != null)
-					&& (this.sumOfWeightedNonReplannerCountDifferences2 != null)) {
-				return (this.sumOfWeightedReplannerCountDifferences2 + this.sumOfWeightedNonReplannerCountDifferences2);
-			} else {
-				return null;
-			}
-		}
+		// public Double getSumOfWeightedCountDifferences2() {
+		// if ((this.sumOfWeightedReplannerCountDifferences2 != null)
+		// && (this.sumOfWeightedNonReplannerCountDifferences2 != null)) {
+		// return (this.sumOfWeightedReplannerCountDifferences2 +
+		// this.sumOfWeightedNonReplannerCountDifferences2);
+		// } else {
+		// return null;
+		// }
+		// }
 
 		public Integer getNumberOfReplanningCandidates() {
 			if ((this.numberOfReplanners != null) && (this.numberOfNonReplanners != null)) {

@@ -17,13 +17,14 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.ier.emulator;
+package org.matsim.contrib.ier.emulator.deprecated;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
@@ -84,6 +85,13 @@ public class NextAvailableDepartures {
 			final Id<Departure> realizedDepartureId) {
 		if (realizedDepartureId != null) {
 			final int realizedDepartureIndex = this.departureIds.indexOf(realizedDepartureId);
+
+			final double dev_s = realizedStopArrivalTime_s - this.latestStopArrivalTimes_s.get(realizedDepartureIndex);
+			if (Math.abs(dev_s) > 60) {
+				Logger.getLogger(this.getClass())
+						.warn("Departure " + realizedDepartureId + " has deviation of " + dev_s + " sec.");
+			}
+
 			for (int i = realizedDepartureIndex; (i < this.latestStopArrivalTimes_s.size())
 					&& (realizedStopArrivalTime_s > this.latestStopArrivalTimes_s.get(i)); i++) {
 				this.latestStopArrivalTimes_s.set(i, realizedStopArrivalTime_s);
@@ -93,11 +101,13 @@ public class NextAvailableDepartures {
 				this.latestStopArrivalTimes_s.set(i, realizedStopArrivalTime_s);
 			}
 		} else {
-			for (int i = 0; i < this.departureIds.size(); i++) {
-				if (latestStopArrivalTimes_s.get(i) >= realizedStopArrivalTime_s) {
-					latestStopArrivalTimes_s.set(i, realizedStopArrivalTime_s);
-				}
-			}
+			Logger.getLogger(this.getClass()).warn("realizedDepartureId is null in " + this.getClass().getSimpleName()
+					+ ", realizedStopArrivalTime is " + realizedStopArrivalTime_s);
+			// for (int i = 0; i < this.departureIds.size(); i++) {
+			// if (latestStopArrivalTimes_s.get(i) >= realizedStopArrivalTime_s) {
+			// latestStopArrivalTimes_s.set(i, realizedStopArrivalTime_s);
+			// }
+			// }
 		}
 	}
 

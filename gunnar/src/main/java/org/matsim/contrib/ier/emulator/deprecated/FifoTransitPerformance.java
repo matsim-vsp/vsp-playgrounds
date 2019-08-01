@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.ier.emulator;
+package org.matsim.contrib.ier.emulator.deprecated;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -113,7 +113,7 @@ public class FifoTransitPerformance implements TransitDriverStartsEventHandler, 
 
 	// -------------------- INTERNALS --------------------
 
-	private void resetToSchedule() {
+	public void resetToSchedule() {
 		this.lineRouteStop2nextAvailableDepartures.clear();
 		for (TransitLine line : this.transitSchedule.getTransitLines().values()) {
 			for (TransitRoute route : line.getRoutes().values()) {
@@ -128,7 +128,7 @@ public class FifoTransitPerformance implements TransitDriverStartsEventHandler, 
 
 	// -------------------- RESULT ACCESS --------------------
 
-	public Tuple<Departure, Double> getNextDepartureAndTime_s(final Id<TransitLine> lineId, final TransitRoute route,
+	public synchronized Tuple<Departure, Double> getNextDepartureAndTime_s(final Id<TransitLine> lineId, final TransitRoute route,
 			final Id<TransitStopFacility> stopId, final double time_s) {
 		final Tuple<Id<Departure>, Double> departureIdAndTime_s = this.lineRouteStop2nextAvailableDepartures
 				.get(new LineRouteOtherId<>(lineId, route.getId(), stopId))

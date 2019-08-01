@@ -17,16 +17,18 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.ier.emulator;
+package org.matsim.contrib.ier.emulator.deprecated;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.ier.emulator.OnlyDepartureArrivalLegEmulator;
 import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.utils.collections.Tuple;
@@ -35,6 +37,8 @@ import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+
+import floetteroed.utilities.Time;
 
 /**
  *
@@ -55,7 +59,7 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	public FifoTransitLegEmulator(final EventsManager eventsManager,
 			final FifoTransitPerformance fifoTransitPerformance, final Scenario scenario) {
-		super(eventsManager, scenario.getActivityFacilities());
+		super(eventsManager, scenario.getActivityFacilities()); // , scenario.getConfig().qsim().getEndTime());
 		this.fifoTransitPerformance = fifoTransitPerformance;
 		this.transitLines = scenario.getTransitSchedule().getTransitLines();
 		this.stopFacilities = scenario.getTransitSchedule().getFacilities();
@@ -65,6 +69,12 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	@Override
 	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(Leg leg, Person person, double time_s) {
+
+		time_s = Math.max(time_s, leg.getDepartureTime());
+//		if (time_s > super.simEndTime_s) {
+//			Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+//			return time_s; // stuck
+//		}
 
 		final ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
 		final Id<TransitStopFacility> accessStopId = route.getAccessStopId();
@@ -77,15 +87,27 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 		final Tuple<Departure, Double> nextDepartureAndTime_s = this.fifoTransitPerformance
 				.getNextDepartureAndTime_s(line.getId(), transitRoute, accessStopId, time_s);
 		if (nextDepartureAndTime_s == null) {
-			return Double.POSITIVE_INFINITY;
+			Logger.getLogger(this.getClass()).warn(
+					"found no next departure at time " + time_s + "s == " + Time.strFromSec((int) Math.round(time_s)));
+			return Double.POSITIVE_INFINITY; // stuck
 		} else {
-			final double departureTime_s = nextDepartureAndTime_s.getSecond();
-			this.eventsManager.processEvent(new PersonEntersVehicleEvent(departureTime_s, person.getId(), null));
-			final double drivingTime_s = transitRoute.getStop(this.stopFacilities.get(egressStopId)).getArrivalOffset()
-					- transitRoute.getStop(this.stopFacilities.get(accessStopId)).getArrivalOffset();
-			final double egressTime_s = departureTime_s + drivingTime_s;
-			this.eventsManager.processEvent(new PersonLeavesVehicleEvent(egressTime_s, person.getId(), null));
-			return egressTime_s;
+
+			time_s = Math.max(time_s, nextDepartureAndTime_s.getSecond());
+//			if (time_s > super.simEndTime_s) {
+//				Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+//				return time_s; // stuck
+//			}
+			this.eventsManager.processEvent(new PersonEntersVehicleEvent(time_s, person.getId(), null));
+
+			time_s += (transitRoute.getStop(this.stopFacilities.get(egressStopId)).getArrivalOffset()
+					- transitRoute.getStop(this.stopFacilities.get(accessStopId)).getDepartureOffset());
+//			if (time_s > super.simEndTime_s) {
+//				Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+//				return time_s; // stuck
+//			}
+			this.eventsManager.processEvent(new PersonLeavesVehicleEvent(time_s, person.getId(), null));
+
+			return time_s;
 		}
 	}
 }

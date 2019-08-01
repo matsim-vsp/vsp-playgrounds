@@ -24,38 +24,56 @@ import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.utils.misc.Time;
+import org.matsim.core.config.groups.PlansConfigGroup;
+import org.matsim.core.mobsim.qsim.agents.ActivityDurationUtils;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class RegularActivityEmulator implements ActivityEmulator {
+public class BasicActivityEmulator implements ActivityEmulator {
 
+	private final PlansConfigGroup.ActivityDurationInterpretation activityDurationInterpretation;
 	private final EventsManager eventsManager;
+	private final double simEndTime_s;
 
-	public RegularActivityEmulator(EventsManager eventsManager) {
+	public BasicActivityEmulator(final EventsManager eventsManager, final double simEndTime_s,
+			final PlansConfigGroup.ActivityDurationInterpretation activityDurationInterpretation) {
 		this.eventsManager = eventsManager;
+		this.simEndTime_s = simEndTime_s;
+		this.activityDurationInterpretation = activityDurationInterpretation;
 	}
 
 	public double emulateActivityAndReturnEndTime_s(final Activity activity, final Person person, double time_s,
 			final boolean isFirstElement, final boolean isLastElement) {
 
+		// if (time_s > this.simEndTime_s) {
+		// Logger.getLogger(this.getClass()).warn("Stuck in " + activity.getType());
+		// return time_s; // stuck
+		// }
+
 		if (!isFirstElement) {
+			// time_s = Math.max(time_s, activity.getStartTime());
+			// if (time_s > this.simEndTime_s) {
+			// Logger.getLogger(this.getClass()).warn("Stuck in " + activity.getType());
+			// return time_s; // stuck
+			// }
 			this.eventsManager.processEvent(new ActivityStartEvent(time_s, person.getId(), activity.getLinkId(),
 					activity.getFacilityId(), activity.getType()));
 		}
 
-		if (!Time.isUndefinedTime(activity.getEndTime())) {
-			time_s = Math.max(time_s, activity.getEndTime());
+		if (isLastElement) {
+			time_s = Math.max(time_s, this.simEndTime_s);
 		} else {
-			time_s += activity.getMaximumDuration();
-		}
-
-		if (!isLastElement) {
+			time_s = ActivityDurationUtils.calculateDepartureTime(activity, time_s,
+					this.activityDurationInterpretation);
+			// if (time_s <= this.simEndTime_s) {
 			this.eventsManager.processEvent(new ActivityEndEvent(time_s, person.getId(), activity.getLinkId(),
 					activity.getFacilityId(), activity.getType()));
+			// } else {
+			// Logger.getLogger(this.getClass()).warn("Stuck in " + activity.getType());
+			// }
 		}
 
 		return time_s;

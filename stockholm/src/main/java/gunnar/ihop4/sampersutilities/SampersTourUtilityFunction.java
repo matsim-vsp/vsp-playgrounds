@@ -19,6 +19,7 @@
  */
 package gunnar.ihop4.sampersutilities;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 
@@ -110,19 +111,21 @@ class SampersTourUtilityFunction {
 		result += this.getScheduleDelayCost(tour, income_SEK_yr);
 
 		/* Time */ {
-			final double travelTime_min = tour.getRealizedTravelTime_min();
+			double travelTime_min = tour.getRealizedTravelTime_min();
 			if (travelTime_min < 0) {
-				throw new RuntimeException("tour travel time = " + travelTime_min + " min");
+				Logger.getLogger(this.getClass()).warn("tour travel time = " + travelTime_min + " min");
+				travelTime_min = 0.0;
 			}
 			result += this.utlParams.getLinTimeCoeff_1_min(purpose, mode, income_SEK_yr)
 					* tour.getRealizedTravelTime_min();
 		}
 
 		/* Monetary cost */ {
-			final double cost_SEK = tour.getEventBasedCost_SEK()
+			double cost_SEK = tour.getEventBasedCost_SEK()
 					+ this.utlParams.getMonetaryDistanceCost_SEK_km() * tour.getRealizedTravelDistance_km();
 			if (cost_SEK < 0) {
-				throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
+				Logger.getLogger(this.getClass()).warn("tour cost = " + cost_SEK + " SEK");
+				cost_SEK = 0.0;
 			}
 			result += this.utlParams.getLinCostCoeff_1_SEK(purpose, mode, income_SEK_yr) * cost_SEK
 					+ this.utlParams.getLogCostCoeff_lnArgInSEK(purpose, mode, income_SEK_yr)
@@ -130,9 +133,10 @@ class SampersTourUtilityFunction {
 		}
 
 		/* Distance */ {
-			final double dist_km = tour.getRealizedTravelDistance_km();
+			double dist_km = tour.getRealizedTravelDistance_km();
 			if (dist_km < 0) {
-				throw new RuntimeException("tour distance = " + dist_km + " km");
+				Logger.getLogger(this.getClass()).warn("tour distance = " + dist_km + " km");
+				dist_km = 0.0;
 			}
 			result += this.utlParams.getLinDistanceCoeff_1_km(purpose, mode, income_SEK_yr) * dist_km
 					+ this.utlParams.getLogDistanceCoeff_lnArgInKm(purpose, mode, income_SEK_yr) * Math.log(0.01 + dist_km);

@@ -19,7 +19,6 @@
  */
 package gunnar.wum;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -29,6 +28,8 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.greedo.Greedo;
 import org.matsim.contrib.greedo.GreedoConfigGroup;
+import org.matsim.core.api.experimental.events.BoardingDeniedEvent;
+import org.matsim.core.api.experimental.events.handler.BoardingDeniedEventHandler;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -107,89 +108,13 @@ public class WUMProductionRunner {
 		Logger.getLogger(WUMProductionRunner.class).info(drivers + " drivers, " + nonDrivers + " non-drivers");
 	}
 
-	static void runProductionScenario(final boolean runLocally, final boolean cleanInitialPlans) {
-
-		final String configFileName;
-		if (runLocally) {
-			configFileName = FileUtils.getFile(temporaryPath, "production-scenario/config.xml").toString();
-		} else {
-			configFileName = "./config.xml";
-		}
-
-		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup()); // , new PSimConfigGroup());
-
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-
-		if (runLocally) {
-			config.controler().setLastIteration(100);
-			config.plans()
-					.setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml");
-			config.controler()
-					.setOutputDirectory("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/output");
-			config.transit().setTransitScheduleFile(
-					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitSchedule_reduced.xml.gz");
-			config.transit().setVehiclesFile(
-					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
-		}
-
-		final Greedo greedo;
-		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
-			Logger.getLogger(WUMProductionRunner.class).info("Using greedo.");
-			config.addModule(new GreedoConfigGroup());
-			greedo = new Greedo();
-			greedo.meet(config);
-		} else {
-			Logger.getLogger(WUMProductionRunner.class).info("NOT using greedo.");
-			greedo = null;
-		}
-
-		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		if (cleanInitialPlans) {
-			removeModeInformation(scenario);
-		}
-		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
-
-		if (greedo != null) {
-			// Assumes all at this point existing network links to be capacitated.
-			greedo.meet(scenario);
-		}
-
-		// Now add non-capacitated transit links.
-		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
-
-		final Controler controler = new Controler(scenario);
-
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.install(new SBBTransitModule());
-				this.install(new SwissRailRaptorModule());
-			}
-
-			@Provides
-			QSimComponentsConfig provideQSimComponentsConfig() {
-				QSimComponentsConfig components = new QSimComponentsConfig();
-				new StandardQSimComponentConfigurator(config).configure(components);
-				SBBTransitEngineQSimModule.configure(components);
-				return components;
-			}
-		});
-
-		if (greedo != null) {
-			throw new RuntimeException("fixme");
-			// controler.addOverridingModule(greedo);
-		}
-
-		controler.run();
-	}
-
-	// TODO Maintaining only this!
 	static void runProductionScenarioWithSampersDynamics() {
 
-// 		final String configFileName = "./config.xml";
-		 final String configFileName =
-		 "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+		final boolean terminateUponBoardingDenied = false;
+		final boolean removeModeInformation = true;
+		// final String configFileName = "./config.xml";
+		final String configFileName = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -201,28 +126,27 @@ public class WUMProductionRunner {
 			greedo = null;
 		}
 
-		// Because this cannot be set in xml.
-		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.walk).setTeleportedModeFreespeedLimit(4000.0
-		// / 3600.0);
-		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.transit_walk).setTeleportedModeFreespeedLimit(4000.0
-		// / 3600.0);
-		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.access_walk).setTeleportedModeFreespeedLimit(4000.0
-		// / 3600.0);
-		// config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.egress_walk).setTeleportedModeFreespeedLimit(4000.0
-		// / 3600.0);
-
 		if (greedo != null) {
 			greedo.meet(config);
 		}
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		removeModeInformation(scenario);
+		if (removeModeInformation) {
+			removeModeInformation(scenario);
+		}
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 		fixCarAvailability(scenario);
 		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
 		if (greedo != null) {
 			greedo.meet(scenario);
 		}
+
+		// {
+		// ValidationResult result =
+		// TransitScheduleValidator.validateAll(scenario.getTransitSchedule(),
+		// scenario.getNetwork());
+		// TransitScheduleValidator.printResult(result);
+		// }
 
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
@@ -247,14 +171,29 @@ public class WUMProductionRunner {
 				controler.addOverridingModule(module);
 			}
 		}
+		if (terminateUponBoardingDenied) {
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addEventHandlerBinding().toInstance(new BoardingDeniedEventHandler() {
+						@Override
+						public void handleEvent(BoardingDeniedEvent e) {
+							System.out.println("BOARDING DENIED EVENT!");
+							System.out.println("time:   " + e.getTime());
+							System.out.println("person: " + e.getPersonId());
+							System.out.println("vehicle: " + e.getVehicleId());
+							System.exit(0);
+						}
+					});
+				}
+			});
+		}
+
 		controler.run();
 	}
 
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
-		// final boolean runLocally = false;
-		// final boolean cleanInitialPlans = false;
-		// runProductionScenario(runLocally, cleanInitialPlans);
 		runProductionScenarioWithSampersDynamics();
 		System.out.println("... DONE");
 	}

@@ -86,7 +86,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 			}
 		}
 
-		Logger.getLogger(this.getClass()).warn("Using flat zero transit vehicle weights.");
+		Logger.getLogger(this.getClass()).warn("Using 1/passengerCapacity transit vehicle weights.");
 		this.concurrentTransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
@@ -150,32 +150,50 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.adaptiveMSADenominatorIncreaseIfFailure = adaptiveMSADenominatorIncreaseIfFailure;
 	}
 
+	// -------------------- enforceMeanReplanningRate --------------------
+
+	private boolean enforceMeanReplanningRate = true;
+
+	@StringGetter("enforceMeanReplanningRate")
+	public boolean getEnforceMeanReplanningRate() {
+		return this.enforceMeanReplanningRate;
+	}
+
+	@StringSetter("enforceMeanReplanningRate")
+	public void setEnforceMeanReplanningRate(final boolean enforceMeanReplanningRate) {
+		this.enforceMeanReplanningRate = enforceMeanReplanningRate;
+	}
+
 	// -------------------- acceptNegativeDisappointment --------------------
 
-	// TODO Consider discarding this (and WARN instead if beta gets negative).
+	@Deprecated
 	private boolean acceptNegativeDisappointment = true;
 
 	@StringGetter("acceptNegativeDisappointment")
+	@Deprecated
 	public boolean getAcceptNegativeDisappointment() {
 		return this.acceptNegativeDisappointment;
 	}
 
 	@StringSetter("acceptNegativeDisappointment")
+	@Deprecated
 	public void setAcceptNegativeDisappointment(final boolean acceptNegativeDisappointment) {
 		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
 	}
 
 	// -------------------- constrainDeltaToZero --------------------
 
-	// TODO Consider discarding this.
+	@Deprecated
 	private boolean constrainDeltaToZero = true;
 
 	@StringGetter("constrainDeltaToZero")
+	@Deprecated
 	public boolean getConstrainDeltaToZero() {
 		return this.constrainDeltaToZero;
 	}
 
 	@StringSetter("constrainDeltaToZero")
+	@Deprecated
 	public void setConstrainDeltaToZero(final boolean constrainDeltaToZero) {
 		this.constrainDeltaToZero = constrainDeltaToZero;
 	}
@@ -225,13 +243,16 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- minAbsoluteMemoryLength --------------------
 
+	@Deprecated
 	private int minAbsoluteMemoryLength = 4;
 
+	@Deprecated
 	@StringGetter("minAbsoluteMemoryLength")
 	public int getMinAbsoluteMemoryLength() {
 		return this.minAbsoluteMemoryLength;
 	}
 
+	@Deprecated
 	@StringSetter("minAbsoluteMemoryLength")
 	public void setMinAbsoluteMemoryLength(final int minAbsoluteMemoryLength) {
 		this.minAbsoluteMemoryLength = minAbsoluteMemoryLength;
@@ -239,13 +260,16 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- maxAbsoluteMemoryLength --------------------
 
+	@Deprecated
 	private int maxAbsoluteMemoryLength = Integer.MAX_VALUE;
 
+	@Deprecated
 	@StringGetter("maxAbsoluteMemoryLength")
 	public int getMaxAbsoluteMemoryLength() {
 		return this.maxAbsoluteMemoryLength;
 	}
 
+	@Deprecated
 	@StringSetter("maxAbsoluteMemoryLength")
 	public void setMaxAbsoluteMemoryLength(final int maxAbsoluteMemoryLength) {
 		this.maxAbsoluteMemoryLength = maxAbsoluteMemoryLength;
@@ -253,6 +277,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- maxRelativeMemoryLength --------------------
 
+	// TODO only left for logging
 	private double maxRelativeMemoryLength = 1.0;
 
 	@StringGetter("maxRelativeMemoryLength")
@@ -351,6 +376,24 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public TimeDiscretization newTimeDiscretization() {
 		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
+	}
+
+	// -------------------- expensiveStrategyTreatment --------------------
+
+	public static enum ExpensiveStrategyTreatmentType {
+		allOnce, oneInTotal
+	}
+
+	private ExpensiveStrategyTreatmentType expensiveStrategyTreatment = ExpensiveStrategyTreatmentType.oneInTotal;
+
+	@StringGetter("expensiveStrategyTreatment")
+	public ExpensiveStrategyTreatmentType getExpensiveStrategyTreatment() {
+		return this.expensiveStrategyTreatment;
+	}
+
+	@StringSetter("expensiveStrategyTreatment")
+	public void setExpensiveStrategyTreatment(final ExpensiveStrategyTreatmentType expensiveStrategyTreatment) {
+		this.expensiveStrategyTreatment = expensiveStrategyTreatment;
 	}
 
 	// -------------------- adjustStrategyWeights --------------------

@@ -2,6 +2,8 @@ package org.matsim.contrib.ier.emulator;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
+import org.matsim.api.core.v01.events.PersonMoneyEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -25,6 +27,7 @@ import com.google.inject.Inject;
  * one independent thread.
  * 
  * @author shoerl
+ * @author Gunnar Flötteröd
  */
 public final class AgentEmulator {
 	private final SimulationEmulator simulationEmulator;
@@ -60,7 +63,8 @@ public final class AgentEmulator {
 
 		ScoringFunction scoringFunction = this.scoringFunctionFactory.createNewScoringFunction(person);
 		ScoringFunctionWrapper scoringFunctionWrapper = new ScoringFunctionWrapper(scoringFunction);
-
+		eventsManager.addHandler(scoringFunctionWrapper);
+		
 		eventsToActivities.addActivityHandler(scoringFunctionWrapper);
 		eventsToLegs.addLegHandler(scoringFunctionWrapper);
 
@@ -94,9 +98,13 @@ public final class AgentEmulator {
 		}
 
 		@Override
-		public void handleEvent(Event event) {
-			// TODO: ScoringFunctionsForPopulation defines more logic here, which we do not
-			// replicate right now.
+		synchronized public void handleEvent(Event event) {
+			if (event instanceof PersonStuckEvent) {
+				this.scoringFunction.agentStuck(event.getTime());
+			} else if (event instanceof PersonMoneyEvent) {
+				this.scoringFunction.addMoney(((PersonMoneyEvent) event).getAmount());
+			}
+			this.scoringFunction.handleEvent(event);
 		}
 	}
 }
