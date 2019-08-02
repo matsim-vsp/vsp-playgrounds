@@ -17,6 +17,9 @@ import org.matsim.core.scoring.PersonExperiencedActivity;
 import org.matsim.core.scoring.PersonExperiencedLeg;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
+import org.matsim.roadpricing.MyRoadPricingUtils;
+import org.matsim.roadpricing.RoadPricingConfigGroup;
+import org.matsim.roadpricing.RoadPricingScheme;
 
 import com.google.inject.Inject;
 
@@ -52,7 +55,16 @@ public final class AgentEmulator {
 	 * the scoring doesn't care about the timing of events of independent agents.
 	 */
 	public void emulate(Person person, Plan plan, EventHandler eventHandler) {
+
 		EventsManager eventsManager = EventsUtils.createEventsManager();
+
+		if (this.scenario.getConfig().getModules().containsKey(RoadPricingConfigGroup.GROUP_NAME)) {
+			// RoadPricingTollCalculator adds itself as a handler to the EventsManager.
+			// Creates then suitable PersonMoneyEvents and passes them to the manager.
+			RoadPricingScheme scheme = (RoadPricingScheme) this.scenario
+					.getScenarioElement(RoadPricingScheme.ELEMENT_NAME);
+			MyRoadPricingUtils.newInstance(this.scenario.getNetwork(), scheme, eventsManager);
+		}
 
 		EventsToActivities eventsToActivities = new EventsToActivities();
 		EventsToLegs eventsToLegs = new EventsToLegs(this.scenario);
@@ -64,7 +76,7 @@ public final class AgentEmulator {
 		ScoringFunction scoringFunction = this.scoringFunctionFactory.createNewScoringFunction(person);
 		ScoringFunctionWrapper scoringFunctionWrapper = new ScoringFunctionWrapper(scoringFunction);
 		eventsManager.addHandler(scoringFunctionWrapper);
-		
+
 		eventsToActivities.addActivityHandler(scoringFunctionWrapper);
 		eventsToLegs.addLegHandler(scoringFunctionWrapper);
 

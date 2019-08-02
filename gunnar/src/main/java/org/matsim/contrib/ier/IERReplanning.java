@@ -88,6 +88,7 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 	@Override
 	public void notifyReplanning(ReplanningEvent event) {
+
 		try {
 
 			if (this.ierConfig.getWritePerformanceOutput()) {
