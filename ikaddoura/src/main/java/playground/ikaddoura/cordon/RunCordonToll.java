@@ -118,7 +118,7 @@ public class RunCordonToll {
 		noiseContext = new NoiseContext(controler.getScenario());
 		
 		controler.addOverridingModule(new NoiseModule(scenario));
-		controler.addOverridingModule(RoadPricingUtils.createModule());
+//		controler.addOverridingModule(RoadPricingUtils.createModule()); // TODO: fix!
 		controler.run();
 		
 		// delete unnecessary iterations folder here.

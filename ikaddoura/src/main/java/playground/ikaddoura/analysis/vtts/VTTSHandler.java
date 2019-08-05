@@ -232,8 +232,8 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				
 				String subpop = null;
 
-				if (this.scenario.getPopulation().getPersonAttributes().getAttribute(personId.toString(), this.scenario.getConfig().plans().getSubpopulationAttributeName()) != null) {					
-					subpop = (String) this.scenario.getPopulation().getPersonAttributes().getAttribute(personId.toString(), this.scenario.getConfig().plans().getSubpopulationAttributeName());
+				if (this.scenario.getPopulation().getPersons().get(personId).getAttributes().getAttribute(this.scenario.getConfig().plans().getSubpopulationAttributeName()) != null) {					
+					subpop = (String) this.scenario.getPopulation().getPersons().get(personId).getAttributes().getAttribute(this.scenario.getConfig().plans().getSubpopulationAttributeName());
 				}
 								
 				final MarginalSumScoringFunction marginalSumScoringFunction =

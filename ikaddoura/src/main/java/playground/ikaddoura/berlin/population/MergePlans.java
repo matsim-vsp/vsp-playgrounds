@@ -58,18 +58,18 @@ public class MergePlans {
 						
 		for (Person person: scenario1.getPopulation().getPersons().values()) {
 			population.addPerson(person);
-			population.getPersonAttributes().putAttribute(person.getId().toString(), scenario3.getConfig().plans().getSubpopulationAttributeName(), "person");
+			population.getPersons().get(person.getId()).getAttributes().putAttribute(scenario3.getConfig().plans().getSubpopulationAttributeName(), "person");
 		}
 		for (Person person : scenario2.getPopulation().getPersons().values()) {
 			population.addPerson(person);
-			population.getPersonAttributes().putAttribute(person.getId().toString(), scenario3.getConfig().plans().getSubpopulationAttributeName(), "freight");
+			population.getPersons().get(person.getId()).getAttributes().putAttribute(scenario3.getConfig().plans().getSubpopulationAttributeName(), "freight");
 		}
 		
 		PopulationWriter writer = new PopulationWriter(population);
 		writer.write(populationOutputFileName);
 		
-		ObjectAttributesXmlWriter writer2 = new ObjectAttributesXmlWriter(population.getPersonAttributes());
-		writer2.writeFile(personAttributesOutputFileName);
+//		ObjectAttributesXmlWriter writer2 = new ObjectAttributesXmlWriter(population.getPersonAttributes());
+//		writer2.writeFile(personAttributesOutputFileName);
 	}
 
 }

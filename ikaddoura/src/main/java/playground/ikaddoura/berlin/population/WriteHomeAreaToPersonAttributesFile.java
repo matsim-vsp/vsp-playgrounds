@@ -100,16 +100,16 @@ public class WriteHomeAreaToPersonAttributesFile {
 			
 			if (personId2homeCoord.get(person.getId()) != null) {
 				if (isInsideArea(zoneFeatures, personId2homeCoord.get(person.getId()))) {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-zone", homeZoneAttributeInside);
+					scenario.getPopulation().getPersons().get(person.getId()).getAttributes().putAttribute("home-activity-zone", homeZoneAttributeInside);
 				} else {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-zone", homeZoneAttributeOutside);
+					scenario.getPopulation().getPersons().get(person.getId()).getAttributes().putAttribute("home-activity-zone", homeZoneAttributeOutside);
 				}
 			}
 			counter++;
 		}
 
-		ObjectAttributesXmlWriter writer2 = new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes());
-		writer2.writeFile(outputPersonAttributesFile);
+//		ObjectAttributesXmlWriter writer2 = new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes());
+//		writer2.writeFile(outputPersonAttributesFile);
 		
 		log.info("Done.");
 	}

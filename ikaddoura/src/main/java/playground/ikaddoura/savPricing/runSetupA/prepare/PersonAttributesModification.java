@@ -45,7 +45,7 @@ public final class PersonAttributesModification {
 		
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName()).equals("person")) {
+			if (scenario.getPopulation().getPersons().get(person.getId()).getAttributes().getAttribute(scenario.getConfig().plans().getSubpopulationAttributeName()).equals("person")) {
 				boolean personHasAtLeastOneTripWithinServiceArea = false;
 				
 				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements(), stageActivities)) {
@@ -57,9 +57,9 @@ public final class PersonAttributesModification {
 				}
 				
 				if (personHasAtLeastOneTripWithinServiceArea) {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "person_potential-sav-user");
+					scenario.getPopulation().getPersons().get(person.getId()).getAttributes().putAttribute(scenario.getConfig().plans().getSubpopulationAttributeName(), "person_potential-sav-user");
 				} else {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "person_no-potential-sav-user");
+					scenario.getPopulation().getPersons().get(person.getId()).getAttributes().putAttribute(scenario.getConfig().plans().getSubpopulationAttributeName(), "person_no-potential-sav-user");
 				}
 				
 			} else {

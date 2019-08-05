@@ -189,7 +189,7 @@ public class CreateFreightAgents {
 			pers.addPlan(plan) ;
 			population.addPerson(pers) ;
 			
-			scenario.getPopulation().getPersonAttributes().putAttribute(pers.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "freight");
+			scenario.getPopulation().getPersons().get(pers.getId()).getAttributes().putAttribute(scenario.getConfig().plans().getSubpopulationAttributeName(), "freight");
 			
 			personCounter++;
 		}
@@ -223,7 +223,7 @@ public class CreateFreightAgents {
 			pers.addPlan(plan) ;
 			population.addPerson(pers) ;
 			
-			scenario.getPopulation().getPersonAttributes().putAttribute(pers.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "freight");
+			scenario.getPopulation().getPersons().get(pers.getId()).getAttributes().putAttribute(scenario.getConfig().plans().getSubpopulationAttributeName(), "freight");
 
 			personCounter++;
 		}
