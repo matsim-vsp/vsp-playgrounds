@@ -20,6 +20,7 @@ package playground.tschlenther.generalUtils;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -33,66 +34,30 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class CutPopulation {
 			
 	public static void main(String[] args) {
-		
-		Logger logger = Logger.getLogger(CutPopulation.class);
+//		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+//		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
 
-		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.selected_plans.xml.gz";
-		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
-		
-		if(args.length != 0) {
-			inputPopulation = args[0];
+		String inputPopulation = "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/all_agents_0.1.xml";
+		String outputFile =  "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/debugPop.xml";
+
+        if(args.length != 0) {
+            inputPopulation = args[0];
 			outputFile = args[1];
 		}
-		
-		Scenario inputScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		Population outputPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
-		
-		
-		PopulationReader reader = new PopulationReader(inputScenario);
-		logger.info("reading " + inputPopulation);
-		reader.readFile(inputPopulation);
 
-		int counter = 0;
-		int exponent = 1;
-		
-		for (Person p : inputScenario.getPopulation().getPersons().values()) {
-			counter ++;
-			if(counter % Math.pow(2, exponent) == 0) {
-				logger.info("person #" + counter);
-				exponent++;
-			}
-			
-			for(Plan plan : p.getPlans()) {
-				boolean personCopied = false;
-				for(PlanElement pe : plan.getPlanElements()) {
-					if (pe instanceof Activity) {
+//		cutPopulationToBoundingBox(inputPopulation,outputFile);
 
-                        Activity activity = (Activity) pe;
-                        Coord coord = activity.getCoord();
-                        if(isCoordWithinBoundingBox(coord)) {
-                        	outputPopulation.addPerson(p);
-                        	personCopied = true;
-                        	break;
-                        }
-					}
-				}
-				if (personCopied) break;
-			}
-		}
-		
-		
-		logger.info("writing population to " + outputFile);
-		PopulationWriter writer = new PopulationWriter(outputPopulation);
-		writer.writeV6(outputFile);
-		
-		
-		logger.info("----DONE----");
-		
-		
-		
+		Set<Id<Person>> agentSubset = new HashSet<>();
+		agentSubset.add(Id.createPersonId("3_24_88604101"));
+		agentSubset.add(Id.createPersonId("3_na_115397301"));
+
+		cutPopulationToSubsetOfAgents(agentSubset,inputPopulation,outputFile);
 	}
 
 	private static boolean isCoordWithinBoundingBox(Coord c) {
@@ -104,6 +69,79 @@ public class CutPopulation {
 		if (c.getX() >= minX && c.getX() <= maxX && c.getY() >= minY && c.getY() <= maxY) return true;
 		
 		return false;
+	}
+
+	private static void cutPopulationToSubsetOfAgents(Set<Id<Person>> agentSubset, String inputPopulation, String outputFile){
+		Scenario inputScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		Population outputPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+
+		Logger logger = Logger.getLogger(CutPopulation.class);
+		PopulationReader reader = new PopulationReader(inputScenario);
+		logger.info("reading " + inputPopulation);
+		reader.readFile(inputPopulation);
+
+		inputScenario.getPopulation().getPersons().values().parallelStream()
+				.filter(p -> agentSubset.contains(((Person) p).getId()))
+				.forEach(outputPopulation::addPerson);
+
+		logger.info("writing population to " + outputFile);
+		PopulationWriter writer = new PopulationWriter(outputPopulation);
+		writer.writeV6(outputFile);
+
+
+		logger.info("----DONE----");
+
+	}
+
+	private static void cutPopulationToBoundingBox(String inputPopulation, String outputFile){
+
+		Logger logger = Logger.getLogger(CutPopulation.class);
+
+		Scenario inputScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		Population outputPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+
+
+		PopulationReader reader = new PopulationReader(inputScenario);
+		logger.info("reading " + inputPopulation);
+		reader.readFile(inputPopulation);
+
+		int counter = 0;
+		int exponent = 1;
+
+		for (Person p : inputScenario.getPopulation().getPersons().values()) {
+			counter ++;
+			if(counter % Math.pow(2, exponent) == 0) {
+				logger.info("person #" + counter);
+				exponent++;
+			}
+
+			for(Plan plan : p.getPlans()) {
+				boolean personCopied = false;
+				for(PlanElement pe : plan.getPlanElements()) {
+					if (pe instanceof Activity) {
+
+						Activity activity = (Activity) pe;
+						Coord coord = activity.getCoord();
+						if(isCoordWithinBoundingBox(coord)) {
+							outputPopulation.addPerson(p);
+							personCopied = true;
+							break;
+						}
+					}
+				}
+				if (personCopied) break;
+			}
+		}
+
+
+		logger.info("writing population to " + outputFile);
+		PopulationWriter writer = new PopulationWriter(outputPopulation);
+		writer.writeV6(outputFile);
+
+
+		logger.info("----DONE----");
+
+
 	}
 
 }
