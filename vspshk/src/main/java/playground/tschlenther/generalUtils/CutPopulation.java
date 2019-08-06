@@ -42,9 +42,8 @@ public class CutPopulation {
 	public static void main(String[] args) {
 //		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.selected_plans.xml.gz";
 //		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/uA/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
-
-		String inputPopulation = "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/all_agents_0.1.xml";
-		String outputFile =  "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/debugPop.xml";
+		String inputPopulation = "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/all_agents_0.2_newStartTimes.xml.gz";
+		String outputFile =  "C:/Users/Work/tubCloud/VSP_WiMi/VW/commercialTraffic/AP1.1/input_ap1.1/debugPop.0.2.xml";
 
         if(args.length != 0) {
             inputPopulation = args[0];
@@ -54,8 +53,7 @@ public class CutPopulation {
 //		cutPopulationToBoundingBox(inputPopulation,outputFile);
 
 		Set<Id<Person>> agentSubset = new HashSet<>();
-		agentSubset.add(Id.createPersonId("3_24_88604101"));
-		agentSubset.add(Id.createPersonId("3_na_115397301"));
+		agentSubset.add(Id.createPersonId("350_na_103804801"));
 
 		cutPopulationToSubsetOfAgents(agentSubset,inputPopulation,outputFile);
 	}
