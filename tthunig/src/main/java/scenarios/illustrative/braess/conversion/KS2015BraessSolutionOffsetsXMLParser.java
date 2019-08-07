@@ -31,9 +31,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
 
-import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
-import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
-import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010CrossingSolution;
+import optimize.cten.convert.cten2matsim.signalplans.data.FixCrossingSolution;
+import optimize.cten.data.DgCrossing;
+import optimize.cten.data.DgProgram;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class KS2015BraessSolutionOffsetsXMLParser extends MatsimXmlParser{
 	private final static String PROG = "prog";
 	private final static String NAME = "name";
 	
-	private Map<String, List<KS2010CrossingSolution>> braessOffsets = new HashMap<String, List<KS2010CrossingSolution>>();
+	private Map<String, List<FixCrossingSolution>> braessOffsets = new HashMap<>();
 	private String currentCoord;
 	
 	public KS2015BraessSolutionOffsetsXMLParser() {
@@ -65,14 +65,13 @@ public class KS2015BraessSolutionOffsetsXMLParser extends MatsimXmlParser{
 	public void startTag(String name, Attributes atts, Stack<String> context) {
 		if (name.equals(COORD)){
 			this.currentCoord = atts.getValue(NAME);
-			this.braessOffsets.put(this.currentCoord, new ArrayList<KS2010CrossingSolution>());
+			this.braessOffsets.put(this.currentCoord, new ArrayList<FixCrossingSolution>());
 		}
 		if (name.equals(CROSSING)){
 			Id<DgCrossing> crossingId = Id.create(atts.getValue(ID), DgCrossing.class);
 			int offsetSeconds = Integer.parseInt(atts.getValue(OFFSET));
 			Id<DgProgram> programId = Id.create(atts.getValue(PROG), DgProgram.class); 
-			KS2010CrossingSolution crossing = new KS2010CrossingSolution(crossingId);
-			crossing.addOffset4Program(programId, offsetSeconds);
+			FixCrossingSolution crossing = new FixCrossingSolution(crossingId, offsetSeconds, programId);
 			this.braessOffsets.get(this.currentCoord).add(crossing);
 		}
 	}
@@ -83,7 +82,7 @@ public class KS2015BraessSolutionOffsetsXMLParser extends MatsimXmlParser{
 	}
 
 
-	public Map<String, List<KS2010CrossingSolution>> getBraessOffsets() {
+	public Map<String, List<FixCrossingSolution>> getBraessOffsets() {
 		return braessOffsets;
 	}
 

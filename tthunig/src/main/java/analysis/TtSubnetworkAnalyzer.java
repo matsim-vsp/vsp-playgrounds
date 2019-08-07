@@ -47,8 +47,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.vehicles.Vehicle;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dgrether.analysis.eventsfilter.FeatureNetworkLinkCenterCoordFilter;
-
 /**
  * @author tthunig
  */
@@ -72,7 +70,7 @@ public class TtSubnetworkAnalyzer implements LinkEnterEventHandler, LinkLeaveEve
 		Collection<SimpleFeature> features = shapeReader.readFileAndInitialize(filterFeatureFilename);
 		
 		NetworkFilterManager netFilter = new NetworkFilterManager(fullNetwork);
-		FeatureNetworkLinkCenterCoordFilter filter = new FeatureNetworkLinkCenterCoordFilter(
+		DgFeatureNetworkLinkCenterCoordFilter filter = new DgFeatureNetworkLinkCenterCoordFilter(
 				MGC.getCRS(TransformationFactory.WGS84_UTM33N), features.iterator().next(), shapeReader.getCoordinateSystem());
 		netFilter.addLinkFilter(filter);
 		subNetwork = netFilter.applyFilters();
