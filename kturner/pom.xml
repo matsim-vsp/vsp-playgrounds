@@ -17,25 +17,6 @@
 			<scope>compile</scope>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/com.graphhopper/jsprit-core -->
-		<dependency>
-		    <groupId>com.graphhopper</groupId>
-		    <artifactId>jsprit-core</artifactId>
-		    <version>1.7.2</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>com.graphhopper</groupId>
-		    <artifactId>jsprit-analysis</artifactId>
-		    <version>1.7.2</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>com.graphhopper</groupId>
-		    <artifactId>jsprit-io</artifactId>
-		    <version>1.7.2</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
