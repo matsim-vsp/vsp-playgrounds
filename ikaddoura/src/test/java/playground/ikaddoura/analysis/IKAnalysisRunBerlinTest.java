@@ -124,7 +124,7 @@ public class IKAnalysisRunBerlinTest {
 		modes.add(TransportMode.pt);
 		modes.add("bicycle");
 		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
 		final String stageActivitySubString = "interaction";
 		final String zoneId = null;
 
@@ -173,8 +173,7 @@ public class IKAnalysisRunBerlinTest {
 				populationFile = runId + ".output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-//					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
-					personAttributesFile = runId + ".output_personAttributes.xml.gz";
+//					personAttributesFile = runId + ".output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
@@ -190,7 +189,7 @@ public class IKAnalysisRunBerlinTest {
 				log.info("Trying to load config file " + configFile);
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+//					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}

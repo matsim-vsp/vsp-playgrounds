@@ -13,8 +13,6 @@
 
 	<module name="plans">
 		<param name="inputPlansFile" value="plans100.xml" />
-		<param name="inputPersonAttributesFile" value="person-attributes.xml" />
-		<param name="insistingOnUsingDeprecatedPersonAttributeFile" value="true" />
 	</module>
 
 	<module name="controler">
