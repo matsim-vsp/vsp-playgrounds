@@ -14,7 +14,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.matsim-examples.ExamplesUtils;
+import org.matsim.examples.ExamplesUtils;
 
 public class RunExample {
 	static public void main(String[] args) {
