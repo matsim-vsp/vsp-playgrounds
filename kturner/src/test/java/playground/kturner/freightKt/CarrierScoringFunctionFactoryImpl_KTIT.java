@@ -284,7 +284,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		//Füge Mautschmema hinzu
 		final VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 				new VehicleTypeDependentRoadPricingCalculator();
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;
@@ -361,7 +361,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		//Füge Mautschmema hinzu
 				final VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 						new VehicleTypeDependentRoadPricingCalculator();
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 				RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 				try {
 					RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;

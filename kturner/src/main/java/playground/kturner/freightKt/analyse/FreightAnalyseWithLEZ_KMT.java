@@ -86,7 +86,7 @@ public class FreightAnalyseWithLEZ_KMT {
 			
 			//TODO: Add switch with/without LEZ 
 			//reading in lowEmissionZone
-			final RoadPricingSchemeImpl scheme = RoadPricingUtils.createMutableScheme();
+			final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 			try {
 				rpReader.readFile(lezZonefile.getAbsolutePath());
