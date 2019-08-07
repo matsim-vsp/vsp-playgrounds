@@ -19,6 +19,8 @@
  * *********************************************************************** */
 package playground.dgrether.analysis;
 
+import java.io.File;
+
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -28,9 +30,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.testcases.MatsimTestCase;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import playground.dgrether.analysis.io.DgAnalysisPopulationReader;
-
-import java.io.File;
 
 
 /**
@@ -67,9 +66,5 @@ public class DgAnalysisTest extends MatsimTestCase {
 		
 		assertTrue("no output network with default name written!", new File(outputNetworkFilename).exists());
 		assertTrue("no output population with default name written!", new File(outputPlansFilename).exists());
-		
-		
-		DgAnalysisPopulationReader reader = new DgAnalysisPopulationReader();
-//		reader.readPopulationFile();
 	}
 }
