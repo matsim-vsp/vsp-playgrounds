@@ -35,7 +35,8 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.core.utils.io.IOUtils;
-import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
+
+import playground.dgrether.analysis.links.TTInOutflowEventHandler;
 import playground.dgrether.signalsystems.analysis.DgGreenSplitWriter;
 import playground.dgrether.signalsystems.analysis.DgSignalGreenSplitHandler;
 import playground.dgrether.signalsystems.analysis.DgSignalGroupAnalysisData;

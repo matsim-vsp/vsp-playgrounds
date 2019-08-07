@@ -32,9 +32,9 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 
 import playground.dgrether.analysis.charts.utils.DgChartWriter;
+import playground.dgrether.analysis.links.DgCountPerIterationGraph;
+import playground.dgrether.analysis.links.TTInOutflowEventHandler;
 import playground.dgrether.koehlerstrehlersignal.analysis.DgMfd;
-import playground.dgrether.linkanalysis.DgCountPerIterationGraph;
-import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
 
 
 /**

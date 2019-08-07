@@ -38,9 +38,9 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.dgrether.analysis.charts.utils.DgChartWriter;
-import playground.dgrether.linkanalysis.DgCountPerIterationGraph;
-import playground.dgrether.linkanalysis.TTGraphWriter;
-import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
+import playground.dgrether.analysis.links.DgCountPerIterationGraph;
+import playground.dgrether.analysis.links.TTGraphWriter;
+import playground.dgrether.analysis.links.TTInOutflowEventHandler;
 import playground.dgrether.signalsystems.analysis.DgGreenSplitPerIterationGraph;
 import playground.dgrether.signalsystems.analysis.DgSignalGreenSplitHandler;
 

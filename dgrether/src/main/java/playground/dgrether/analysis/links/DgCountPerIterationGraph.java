@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dgrether.linkanalysis;
+package playground.dgrether.analysis.links;
 
 import java.awt.BasicStroke;
 

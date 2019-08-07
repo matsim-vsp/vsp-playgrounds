@@ -42,7 +42,7 @@ import org.matsim.core.utils.io.IOUtils;
 
 import com.google.inject.Provider;
 
-import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
+import playground.dgrether.analysis.links.TTInOutflowEventHandler;
 
 
 /**
