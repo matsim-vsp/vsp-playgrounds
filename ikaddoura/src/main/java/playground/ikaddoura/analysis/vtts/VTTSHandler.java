@@ -232,7 +232,8 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				
 				String subpop = null;
 
-				if (this.scenario.getPopulation().getPersons().get(personId).getAttributes().getAttribute(this.scenario.getConfig().plans().getSubpopulationAttributeName()) != null) {					
+				String subpopAttrName = this.scenario.getConfig().plans().getSubpopulationAttributeName();
+				if (subpopAttrName != null && this.scenario.getPopulation().getPersons().get(personId).getAttributes().getAttribute(subpopAttrName ) != null) {					
 					subpop = (String) this.scenario.getPopulation().getPersons().get(personId).getAttributes().getAttribute(this.scenario.getConfig().plans().getSubpopulationAttributeName());
 				}
 								

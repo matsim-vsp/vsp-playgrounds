@@ -104,6 +104,7 @@ public class ModeAnalysisTest {
 		Scenario scenario;
 		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
 		config.network().setInputFile(null);
+		config.plans().setInsistingOnUsingDeprecatedPersonAttributeFile(true);
 		config.plans().setInputFile(runId + ".output_plans.xml.gz");
 		if (personAttributesFile == null) {
 			config.plans().setInputPersonAttributeFile(runId + ".output_personAttributes.xml.gz");

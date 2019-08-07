@@ -209,7 +209,6 @@ public class IKAnalysisRunBerlinTest {
 			}
 
 			config.plans().setInputFile(populationFile);
-			config.plans().setInputPersonAttributeFile(personAttributesFile);
 			config.network().setInputFile(networkFile);
 			config.vehicles().setVehiclesFile(null);
 			config.transit().setTransitScheduleFile(null);
