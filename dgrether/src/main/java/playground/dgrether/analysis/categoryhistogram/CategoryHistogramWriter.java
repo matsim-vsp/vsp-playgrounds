@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -170,12 +169,12 @@ public class CategoryHistogramWriter {
 	 *
 	 * @see #getGraphic(String)
 	 */
-	public void writeGraphic(final CategoryHistogram modeData, final String filename, final String legMode) {
-		try {
-			ChartUtils.saveChartAsPNG(new File(filename), getGraphic(modeData, legMode), 1024, 768);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void writeGraphic(final CategoryHistogram modeData, final String filename, final String legMode) {
+//		try {
+//			ChartUtils.saveChartAsPNG(new File(filename), getGraphic(modeData, legMode), 1024, 768);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	
