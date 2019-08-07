@@ -17,8 +17,10 @@ import org.matsim.contrib.roadpricing.RoadPricingScheme;
 import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.contrib.roadpricing.RoadPricingWriterXMLv1;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.PolylineFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -116,14 +118,14 @@ public class AddTollToTollways {
 		
 
 	public RoadPricingSchemeImpl createGantriesFile() {
-		RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
-		scheme.setName(schemeName);
-		scheme.setType(scheme.TOLL_TYPE_LINK);
-		scheme.setDescription("No description available");
+		RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(ScenarioUtils.createScenario(ConfigUtils.createConfig()));
+		RoadPricingUtils.setName(scheme, schemeName);
+		RoadPricingUtils.setType(scheme, scheme.TOLL_TYPE_LINK);
+		RoadPricingUtils.setDescription(scheme, "No description available");
 	
 		for (Map.Entry<Id<Link>,ArrayList<String>> entry : pricedLinksInfo.entrySet()){
 			
-			scheme.addLink(entry.getKey());			
+			RoadPricingUtils.addLink(scheme, entry.getKey());			
 			ArrayList<String>faresInfo = entry.getValue();			
 			String TBFP = faresInfo.get(0); //"tarifa base fuera punta"
 			String TBP = faresInfo.get(1); //"tarifa base punta"
@@ -131,8 +133,8 @@ public class AddTollToTollways {
 
 			
 				//Only TBFP
-			if (TBP.equals("-")&&TS.equals("-")){			
-				scheme.addLinkCost(entry.getKey(), dayStartTime, dayEndTime, Double.parseDouble(TBFP));
+			if (TBP.equals("-")&&TS.equals("-")){		
+				RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(), dayStartTime, dayEndTime, Double.parseDouble(TBFP));
 				
 				//TBFP + TB	
 			} else if (!TBP.equals("-")&&TS.equals("-")){
@@ -152,21 +154,21 @@ public class AddTollToTollways {
 				}
 				
 				int size = orderedTimes.size();
-				scheme.addLinkCost(entry.getKey(), dayStartTime, orderedTimes.get(0)-1, Double.parseDouble(TBFP));
+				RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(), dayStartTime, orderedTimes.get(0)-1, Double.parseDouble(TBFP));
 				
 
 				for (int j=0; j<size; j+=2){
 					
-					scheme.addLinkCost(entry.getKey(),orderedTimes.get(j),orderedTimes.get(j+1)-1, Double.parseDouble(TBP));
+					RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(),orderedTimes.get(j),orderedTimes.get(j+1)-1, Double.parseDouble(TBP));
 					
 					//not general, only use this with the original gantries shape file.
 					//TODO: check this.						
 					if(j+1==1&&size>2){						
-						scheme.addLinkCost(entry.getKey(),orderedTimes.get(j+1),orderedTimes.get(j+2)-1, Double.parseDouble(TBFP));
+						RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(),orderedTimes.get(j+1),orderedTimes.get(j+2)-1, Double.parseDouble(TBFP));
 					}
 					
 				}
-				scheme.addLinkCost(entry.getKey(),orderedTimes.get(size-1), dayEndTime, Double.parseDouble(TBFP));
+				RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(),orderedTimes.get(size-1), dayEndTime, Double.parseDouble(TBFP));
 				
 				}else{
 					
@@ -206,16 +208,16 @@ public class AddTollToTollways {
 						
 					}
 					
-					scheme.addLinkCost(entry.getKey(), dayStartTime, keys.get(0)-1, Double.parseDouble(TBFP));
+					RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(), dayStartTime, keys.get(0)-1, Double.parseDouble(TBFP));
 
 					for (int i=0; i<keys.size(); i+=2){
-						scheme.addLinkCost(entry.getKey(),keys.get(i),keys.get(i+1), Double.parseDouble(values.get(i)));
+						RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(),keys.get(i),keys.get(i+1), Double.parseDouble(values.get(i)));
 						
 						
 						if((i+2)<keys.size()){
 							
 						if (!((keys.get(i+1)+1)==keys.get(i+2))){							
-							scheme.addLinkCost(entry.getKey(),keys.get(i+1)+1,keys.get(i+2)-1, Double.parseDouble(TBFP));
+							RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(),keys.get(i+1)+1,keys.get(i+2)-1, Double.parseDouble(TBFP));
 							
 						}					
 						
@@ -223,7 +225,7 @@ public class AddTollToTollways {
 						
 					}
 					}
-					scheme.addLinkCost(entry.getKey(), keys.get(keys.size()-1)+1 , dayEndTime, Double.parseDouble(TBFP));
+					RoadPricingUtils.addLinkSpecificCost(scheme, entry.getKey(), keys.get(keys.size()-1)+1 , dayEndTime, Double.parseDouble(TBFP));
 
 					
 					
