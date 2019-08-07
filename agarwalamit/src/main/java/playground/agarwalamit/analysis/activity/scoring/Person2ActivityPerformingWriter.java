@@ -136,7 +136,7 @@ public class Person2ActivityPerformingWriter {
 
 	private void storeUtilOfPerforming(final Scenario sc, final Person p, final Activity activity) {
 		ScoringFunctionFactory sfFactory = new ScoringFunctionFactory() {
-			final ScoringParameters params = new ScoringParameters.Builder(sc, p.getId()).build();
+			final ScoringParameters params = new ScoringParameters.Builder(sc, p).build();
 
 			@Override
 			public ScoringFunction createNewScoringFunction(Person person) {

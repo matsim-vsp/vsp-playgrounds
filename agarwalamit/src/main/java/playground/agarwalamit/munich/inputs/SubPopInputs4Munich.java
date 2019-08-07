@@ -34,7 +34,6 @@ import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
@@ -67,7 +66,7 @@ public class SubPopInputs4Munich {
 
 		for(Person p : pop.getPersons().values()){
 			String ug = pf.getUserGroupAsStringFromPersonId(p.getId());
-			pop.getPersonAttributes().putAttribute(p.getId().toString(), subPopAttributeName, ug);
+			p.getAttributes().putAttribute(subPopAttributeName, ug);
 
 			//pt of commuter and rev_commuter need to be replaced by some other mode.
 			if(pf.isPersonInnCommuter(p.getId()) || pf.isPersonOutCommuter(p.getId())){
@@ -83,9 +82,6 @@ public class SubPopInputs4Munich {
 		}
 
 		new PopulationWriter(pop).write(outPlansFile);
-
-		ObjectAttributesXmlWriter writer = new ObjectAttributesXmlWriter(pop.getPersonAttributes()) ;
-		writer.writeFile(outPopAttributeFile);
 	}
 
 	private void modifyConfig(){
@@ -97,7 +93,7 @@ public class SubPopInputs4Munich {
 		Config config =  ConfigUtils.loadConfig(existingConfig);
 
 		config.plans().setSubpopulationAttributeName(subPopAttributeName); // if this is set then, one have to set same strategy for all sub pops.
-		config.plans().setInputPersonAttributeFile(outPopAttributeFile);
+		config.plans().setInputPersonAttributeFile(outPopAttributeFile); // this should be included in the population input file. theresa, aug'19
 
 		// get the existing strategies and add others user grp to it.
 		Collection<StrategySettings> strategySettings = config.strategy().getStrategySettings();

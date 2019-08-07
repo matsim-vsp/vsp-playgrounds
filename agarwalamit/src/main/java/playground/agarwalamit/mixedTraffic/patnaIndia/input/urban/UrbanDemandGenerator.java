@@ -44,7 +44,6 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
@@ -101,7 +100,6 @@ public class UrbanDemandGenerator {
 
 	public void writePlans(final String outputDir){
 		new PopulationWriter(scenario.getPopulation()).write(outputDir+"/initial_urban_plans_"+cloningFactor+"pct.xml.gz");
-		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(outputDir+"/initial_urban_persionAttributes_"+cloningFactor+"pct.xml.gz");
 		LOG.info("Writing Plan and person attributes files are finished.");
 	}
 
@@ -195,8 +193,8 @@ public class UrbanDemandGenerator {
 						person.addPlan(plan);
 
 						// attributes
-						population.getPersonAttributes().putAttribute(person.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE, monthlyIncome);
-						population.getPersonAttributes().putAttribute(person.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE, dailyTransportCost);
+						person.getAttributes().putAttribute(PatnaUtils.INCOME_ATTRIBUTE, monthlyIncome);
+						person.getAttributes().putAttribute(PatnaUtils.TRANSPORT_COST_ATTRIBUTE, dailyTransportCost);
 					}
 				}
 				line = bufferedReader.readLine();

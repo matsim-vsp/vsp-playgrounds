@@ -248,7 +248,7 @@ public class PatnaBikeTrackConnectionControler {
 				Double ratioOfInc = 1.0;
 
 				if ( PatnaPersonFilter.isPersonBelongsToUrban(person.getId())) { // inc is not available for commuters and through traffic
-					Double monthlyInc = (Double) population.getPersonAttributes().getAttribute(person.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
+					Double monthlyInc = (Double) person.getAttributes().getAttribute(PatnaUtils.INCOME_ATTRIBUTE);
 					Double avgInc = PatnaUtils.MEADIAM_INCOME;
 					ratioOfInc = avgInc/monthlyInc;
 				}

@@ -84,7 +84,7 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 			public void insertAgentsIntoMobsim() {
 
 				for (Person person : scenario.getPopulation().getPersons().values()) {
-					String travelMode = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), PERSON_MODE_ATTRIBUTE_KEY);
+					String travelMode = (String) person.getAttributes().getAttribute(PERSON_MODE_ATTRIBUTE_KEY);
 					double randDouble = MatsimRandom.getRandom().nextDouble();
 					double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
 
