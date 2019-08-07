@@ -36,8 +36,8 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -135,7 +135,7 @@ public class SantiagoScenarioRunnerFelix {
 			
 			//Adding randomness to the router
 			config.plansCalcRoute().setRoutingRandomness(sigma); 
-			controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+			controler.addOverridingModule(new RoadPricingModule());
 	
 			//Run!
 			controler.run();

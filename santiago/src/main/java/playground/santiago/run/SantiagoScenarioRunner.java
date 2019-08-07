@@ -40,7 +40,7 @@ import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
-import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -147,7 +147,7 @@ public class SantiagoScenarioRunner {
 			//Adding randomness to the router, sigma = 3
 			config.plansCalcRoute().setRoutingRandomness(sigma);
 
-		controler.addOverridingModule(RoadPricingUtils.createModule());
+		controler.addOverridingModule(new RoadPricingModule());
 			
 			
 

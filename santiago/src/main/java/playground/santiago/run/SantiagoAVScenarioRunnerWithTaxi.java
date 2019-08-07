@@ -44,7 +44,7 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
-import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
@@ -157,7 +157,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// Adding randomness to the router, sigma = 3
 		config.plansCalcRoute().setRoutingRandomness(sigma);
 
-		controler.addOverridingModule(RoadPricingUtils.createModule());
+		controler.addOverridingModule(new RoadPricingModule());
 
 		if (cadyts) {
 			controler.addOverridingModule(new CadytsCarModule());

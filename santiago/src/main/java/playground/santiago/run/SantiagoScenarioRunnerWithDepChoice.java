@@ -37,7 +37,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
-import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -137,7 +137,7 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			//Adding randomness to the router, sigma = 3
 			baseConfig.plansCalcRoute().setRoutingRandomness(sigma);
 
-		controler.addOverridingModule(RoadPricingUtils.createModule());
+		controler.addOverridingModule(new RoadPricingModule());
 
 			if(departureTimeChoice){
 				//Using the default parameters in asasConfigGroup
