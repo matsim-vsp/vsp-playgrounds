@@ -122,7 +122,6 @@ public class Link2LinkTestRunner {
 
 	private Map<Integer, int[]> runAndGetResults (RunSettings runSettings, TSAnalyzeLink2Link handler) {
 		Config config = defineConfig(runSettings);
-		config.qsim().setUsingFastCapacityUpdate(false);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		Controler controler = new Controler(scenario);
@@ -169,8 +168,10 @@ public class Link2LinkTestRunner {
 
 		// choose between link to link and node to node routing
 		if(settings.isUseLink2Link()){
-		config.controler().setLinkToLinkRoutingEnabled( true );
-		config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(true);
+			config.controler().setLinkToLinkRoutingEnabled( true );
+			config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(true);
+			// link2link currently does not work for separate modes
+			config.travelTimeCalculator().setSeparateModes(false);
 		}
 		
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
@@ -209,6 +210,8 @@ public class Link2LinkTestRunner {
 		
 		//set StuckTime
 		config.qsim().setStuckTime(3600 * 10.);
+		
+		config.qsim().setUsingFastCapacityUpdate(false);
 		
 		ActivityParams dummyAct = new ActivityParams("dummy");
 		dummyAct.setTypicalDuration(8 * 3600);
