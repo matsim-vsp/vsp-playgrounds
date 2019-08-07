@@ -28,7 +28,6 @@ import org.matsim.contrib.util.random.WeightedRandomSelection;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -39,7 +38,6 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
 
 public class VWRCreateDemand {
@@ -958,7 +956,7 @@ public class VWRCreateDemand {
 		plan.addActivity(source2);
 		
 		person.addPlan(plan);
-		PopulationUtils.putPersonAttribute(person,  "subpopulation", "noRep");
+		person.getAttributes().putAttribute("subpopulation", "noRep");
 
 		scenario.getPopulation().addPerson(person);
 	}
@@ -987,7 +985,7 @@ public class VWRCreateDemand {
 		plan.addActivity(cargo2);
 
 		person.addPlan(plan);
-		PopulationUtils.putPersonAttribute(person, "subpopulation", "noRep");
+		person.getAttributes().putAttribute("subpopulation", "noRep");
 		scenario.getPopulation().addPerson(person);
 	}
 
@@ -1122,9 +1120,9 @@ public class VWRCreateDemand {
 			if (!t) truth=false;
 		}	
 		if (truth){
-			PopulationUtils.putPersonAttribute(p, "subpopulation", "schedulePt");
+			p.getAttributes().putAttribute("subpopulation", "schedulePt");
 		}else {
-			PopulationUtils.putPersonAttribute(p, "subpopulation", "teleportPt");
+			p.getAttributes().putAttribute("subpopulation", "teleportPt");
 			this.teleportPtUsers.add(p.getId());
 		}
 		}
