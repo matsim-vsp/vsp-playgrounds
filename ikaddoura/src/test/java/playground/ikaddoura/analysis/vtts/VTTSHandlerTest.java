@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -108,7 +109,7 @@ public class VTTSHandlerTest {
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
 		
-		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
+		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 		
 		VTTSHandler vttsHandler = new VTTSHandler(scenario);
