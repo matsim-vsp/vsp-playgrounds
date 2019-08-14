@@ -232,7 +232,11 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 		// Here we set up all the runner threads and start them
 		for (int i = 0; i < this.numberOfEmulationThreads; i++) {
 			Thread thread = new Thread(() -> {
-				AgentEmulator agentEmulator = this.agentEmulatorProvider.get();
+
+				final AgentEmulator agentEmulator;
+				synchronized (this.agentEmulatorProvider) {
+					agentEmulator = this.agentEmulatorProvider.get();
+				}
 
 				Map<Id<Person>, Person> batch = new LinkedHashMap<>();
 
@@ -247,7 +251,10 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 						}
 					}
 
-					final EventHandler eventHandler = eventHandlerProvider.get(batch.keySet());
+					final EventHandler eventHandler;
+					synchronized (eventHandlerProvider) {
+						eventHandler = eventHandlerProvider.get(batch.keySet());
+					}
 
 					// And here we send all the agents to the emulator. The score will be written to
 					// the plan directly.

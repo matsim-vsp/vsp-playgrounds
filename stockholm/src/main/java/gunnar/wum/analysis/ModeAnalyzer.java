@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.wum;
+package gunnar.wum.analysis;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

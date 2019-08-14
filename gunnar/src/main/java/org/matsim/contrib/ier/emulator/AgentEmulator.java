@@ -4,6 +4,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -33,6 +34,7 @@ import com.google.inject.Inject;
  * @author Gunnar Flötteröd
  */
 public final class AgentEmulator {
+
 	private final SimulationEmulator simulationEmulator;
 	private final int iteration;
 
@@ -57,21 +59,21 @@ public final class AgentEmulator {
 	public void emulate(Person person, Plan plan, EventHandler eventHandler) {
 
 		EventsManager eventsManager = EventsUtils.createEventsManager();
+		eventsManager.addHandler(eventHandler);
 
 		if (this.scenario.getConfig().getModules().containsKey(RoadPricingConfigGroup.GROUP_NAME)) {
-			// RoadPricingTollCalculator adds itself as a handler to the EventsManager.
+			// RoadPricingTollCalculator ADDS ITSELF as a handler to the EventsManager.
 			// Creates then suitable PersonMoneyEvents and passes them to the manager.
 			RoadPricingScheme scheme = (RoadPricingScheme) this.scenario
 					.getScenarioElement(RoadPricingScheme.ELEMENT_NAME);
-			MyRoadPricingUtils.newInstance(this.scenario.getNetwork(), scheme, eventsManager);
+			Network network = this.scenario.getNetwork();
+			MyRoadPricingUtils.newInstance(network, scheme, eventsManager);
 		}
 
 		EventsToActivities eventsToActivities = new EventsToActivities();
 		EventsToLegs eventsToLegs = new EventsToLegs(this.scenario);
-
 		eventsManager.addHandler(eventsToActivities);
 		eventsManager.addHandler(eventsToLegs);
-		eventsManager.addHandler(eventHandler);
 
 		ScoringFunction scoringFunction = this.scoringFunctionFactory.createNewScoringFunction(person);
 		ScoringFunctionWrapper scoringFunctionWrapper = new ScoringFunctionWrapper(scoringFunction);
@@ -95,7 +97,7 @@ public final class AgentEmulator {
 			implements EventsToActivities.ActivityHandler, EventsToLegs.LegHandler, BasicEventHandler {
 		private final ScoringFunction scoringFunction;
 
-		public ScoringFunctionWrapper(ScoringFunction scoringFunction) {
+		private ScoringFunctionWrapper(ScoringFunction scoringFunction) {
 			this.scoringFunction = scoringFunction;
 		}
 
