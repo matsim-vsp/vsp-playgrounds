@@ -16,7 +16,9 @@ import com.graphhopper.jsprit.core.algorithm.state.StateManager;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.constraint.ConstraintManager;
+import com.graphhopper.jsprit.core.problem.constraint.HardActivityConstraint;
 import com.graphhopper.jsprit.core.problem.constraint.ServiceDeliveriesFirstConstraint;
+import com.graphhopper.jsprit.core.problem.constraint.VehicleDependentTimeWindowConstraints;
 import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.job.Shipment;
@@ -133,7 +135,8 @@ public class JspritWithShipments {
         StateManager stateManager = new StateManager(problem);
         ConstraintManager constraintManager = new ConstraintManager(problem, stateManager);
         constraintManager.addConstraint(new ServiceDeliveriesFirstConstraint(), ConstraintManager.Priority.CRITICAL);
-
+        constraintManager.addConstraint(new VehicleDependentTimeWindowConstraints(stateManager, problem.getTransportCosts(), problem.getActivityCosts()), ConstraintManager.Priority.HIGH);
+        
         VehicleRoutingAlgorithm algorithm = Jsprit.Builder.newInstance(problem).setStateAndConstraintManager(stateManager,constraintManager).buildAlgorithm();
 
 		/*
@@ -155,11 +158,11 @@ public class JspritWithShipments {
 		 */
         Plotter problemPlotter = new Plotter(problem);
         problemPlotter.plotShipments(true);
-        problemPlotter.plot(OUTPUT_DIR + "simpleMixedEnRoutePickupAndDeliveryExample_problem.png", "en-route pd and depot bounded deliveries");
+//        problemPlotter.plot(OUTPUT_DIR + "simpleMixedEnRoutePickupAndDeliveryExample_problem.png", "en-route pd and depot bounded deliveries");
 
         Plotter solutionPlotter = new Plotter(problem, Solutions.bestOf(solutions));
         solutionPlotter.plotShipments(true);
-        solutionPlotter.plot(OUTPUT_DIR + "simpleMixedEnRoutePickupAndDeliveryExample_solution.png", "en-route pd and depot bounded deliveries");
+//        solutionPlotter.plot(OUTPUT_DIR + "simpleMixedEnRoutePickupAndDeliveryExample_solution.png", "en-route pd and depot bounded deliveries");
         
 		new GraphStreamViewer(problem).setRenderShipments(true).display();
 		new GraphStreamViewer(problem, Solutions.bestOf(solutions)).setRenderDelay(50).display();
