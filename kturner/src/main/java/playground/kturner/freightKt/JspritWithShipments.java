@@ -50,7 +50,7 @@ public class JspritWithShipments {
 		/*
 		 * some preparation - set logging level
 		 */
-		Logger.getRootLogger().setLevel(Level.DEBUG);
+		Logger.getRootLogger().setLevel(Level.INFO);
 		
 		/*
 		 * some preparation - create output folder
