@@ -24,6 +24,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 
 import floetteroed.utilities.Units;
+import gunnar.StockholmConfigGroup;
 import gunnar.ihop4.sampersutilities.SampersUtilityParameters.Purpose;
 
 /**
@@ -36,7 +37,7 @@ class SampersTourUtilityFunction {
 	// -------------------- CONSTANTS --------------------
 
 	private final SampersUtilityParameters utlParams;
-
+	
 	// -------------------- CONSTRUCTION --------------------
 
 	SampersTourUtilityFunction(final SampersUtilityParameters utlParams) {
