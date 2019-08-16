@@ -43,6 +43,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
+import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.box.SchrimpfFactory;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
@@ -89,7 +90,7 @@ public class RunJspritOnly {
 
 
 		// time dependent network (1800 = 30 min) --> (option live request)
-		netBuilder.setTimeSliceWidth(1800) ; // !!!!, otherwise it will not do anything.
+		netBuilder.setTimeSliceWidth(900) ; // !!!!, otherwise it will not do anything.
 
 		carriers.getCarriers().values().parallelStream().forEach(carrier -> {
 			//Build VRP for jsprit
@@ -98,7 +99,8 @@ public class RunJspritOnly {
 			VehicleRoutingProblem problem = vrpBuilder.build();
 
 			// get the algorithm out-of-the-box, search solution with jsprit and get the best one.
-			VehicleRoutingAlgorithm algorithm = new SchrimpfFactory().createAlgorithm(problem);
+//			VehicleRoutingAlgorithm algorithm = new SchrimpfFactory().createAlgorithm(problem);
+			VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
 			algorithm.setMaxIterations(50);
 			Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
 			VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
