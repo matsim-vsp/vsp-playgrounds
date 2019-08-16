@@ -19,6 +19,8 @@
  */
 package org.matsim.roadpricing;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
 
@@ -37,7 +39,11 @@ public class MyRoadPricingUtils {
 	 */
 	public static CalcPaidToll newInstance(final Network network, final RoadPricingScheme scheme,
 			EventsManager events) {
-		return new CalcPaidToll(network, scheme, events);
+		final Level level = Logger.getLogger("org.matsim").getLevel();
+		Logger.getLogger("org.matsim").setLevel(Level.OFF);
+		final CalcPaidToll result = new CalcPaidToll(network, scheme, events);
+		Logger.getLogger("org.matsim").setLevel(level);
+		return result;
 	}
 
 }

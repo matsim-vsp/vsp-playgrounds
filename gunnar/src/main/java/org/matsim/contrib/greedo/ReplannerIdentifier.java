@@ -162,7 +162,7 @@ class ReplannerIdentifier {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
 					this.personId2hypothetialSlotUsage.get(personId), this.lambdaBar, this.beta, interactionResiduals,
-					this.personId2hypotheticalUtilityChange.get(personId));
+					this.personId2hypotheticalUtilityChange.get(personId), this.greedoConfig.getCorrectAgentSize());
 
 			final boolean isReplanner = this.greedoConfig.getReplannerIdentifierRecipe().isReplanner(personId,
 					scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero(),

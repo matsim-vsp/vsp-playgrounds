@@ -97,4 +97,14 @@ public class SpaceTimeCounts<L> {
 			this.set(otherEntry.getKey(), this.get(otherEntry.getKey()) - otherEntry.getValue());
 		}
 	}
+
+	// NEW
+
+	public double sumOfSquareEntries() {
+		double result = 0.0;
+		for (double val : this.data.values()) {
+			result += val * val;
+		}
+		return result;
+	}
 }

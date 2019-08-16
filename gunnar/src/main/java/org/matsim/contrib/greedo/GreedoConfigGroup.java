@@ -164,6 +164,20 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.enforceMeanReplanningRate = enforceMeanReplanningRate;
 	}
 
+	// -------------------- correctAgentSize --------------------
+
+	private boolean correctAgentSize = false;
+
+	@StringGetter("correctAgentSize")
+	public boolean getCorrectAgentSize() {
+		return this.correctAgentSize;
+	}
+
+	@StringSetter("correctAgentSize")
+	public void setCorrectAgentSize(final boolean correctAgentSize) {
+		this.correctAgentSize = correctAgentSize;
+	}
+	
 	// -------------------- acceptNegativeDisappointment --------------------
 
 	@Deprecated
