@@ -109,6 +109,17 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim-examples</artifactId>
+			<version>11.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>12.0-SNAPSHOT</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- -->
 
 		<dependency>
