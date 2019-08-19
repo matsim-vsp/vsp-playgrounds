@@ -17,19 +17,18 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.matsim.analysis.od.ODAnalysis;
+import org.matsim.analysis.od.ODEventAnalysisHandler;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
-
-import playground.ikaddoura.analysis.od.ODAnalysis;
-import playground.ikaddoura.analysis.od.ODEventAnalysisHandler;
 
 /**
 * @author ikaddoura

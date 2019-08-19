@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,16 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.MatsimAnalysis;
+import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
-
-public class IKAnalysisRunSnzBln {
-	private static final Logger log = Logger.getLogger(IKAnalysisRunSnzBln.class);
+public class IKAnalysisRunOpenBerlin {
+	private static final Logger log = Logger.getLogger(IKAnalysisRunOpenBerlin.class);
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -46,98 +49,105 @@ public class IKAnalysisRunSnzBln {
 		String scenarioCRS = null;	
 		String shapeFileZones = null;
 		String zonesCRS = null;
-		String zoneFile = null;
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
 		String analyzeSubpopulation = null;
-		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk, TransportMode.non_network_walk};
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
 		final String stageActivitySubString = "interaction";
-		final String zoneId = "NO";
+		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
+		final String zoneId = "SCHLUESSEL";
 		
 		if (args.length > 0) {
+			if (!args[0].equals("null")) runDirectory = args[0];
+			log.info("Run directory: " + runDirectory);
+			
+			if (!args[1].equals("null")) runId = args[1];
+			log.info("Run Id: " + runDirectory);
+			
+			if (!args[2].equals("null")) runDirectoryToCompareWith = args[2];
+			log.info("Run directory to compare with: " + runDirectoryToCompareWith);
+			
+			if (!args[3].equals("null")) runIdToCompareWith = args[3];
+			log.info("Run Id to compare with: " + runDirectory);
+			
+			if (!args[4].equals("null")) scenarioCRS = args[4];	
+			log.info("Scenario CRS: " + scenarioCRS);
+			
+			if (!args[5].equals("null")) shapeFileZones = args[5];
+			log.info("Shape file zones: " + shapeFileZones);
 
-			runDirectory = args[0];
-			runId = args[1];
+			if (!args[6].equals("null")) zonesCRS = args[6];
+			log.info("Zones CRS: " + zonesCRS);
 			
-			runDirectoryToCompareWith = args[2];
-			runIdToCompareWith = args[3];
-			
-			visualizationScriptInputDirectory = args[4];
-			
-			scenarioCRS = args[5];
-			
-			shapeFileZones = args[6];
-			zonesCRS = args[7];
-			
-			zoneFile = args[8];
+			if (!args[7].equals("null")) homeActivityPrefix = args[7];
+			log.info("Home activity prefix: " + homeActivityPrefix);
 
-			homeActivityPrefix = "home";
-			scalingFactor = 4;
+			scalingFactor = Integer.valueOf(args[8]);
+			log.info("Scaling factor: " + scalingFactor);
+		
+			if (!args[9].equals("null")) visualizationScriptInputDirectory = args[9];
+			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
 			
-			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride + "," + TransportMode.drt;
+			if (!args[10].equals("null")) modesString = args[10];
+			log.info("modes: " + modesString);
 			
-			analyzeSubpopulation = null;
+			analyzeSubpopulation = args[11];
+			log.info("analyzeSubpopulation: " + analyzeSubpopulation);
 			
 		} else {
 			
-			runDirectory = "../../runs-svn/avoev/2019-05/output_2019-05-08_snz-bc-0/";
-			runId = "snz-bc-0";		
-			
+			runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+			runId = "berlin-v5.2-10pct";		
 			runDirectoryToCompareWith = null;
 			runIdToCompareWith = null;
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
-			scenarioCRS = "EPSG:25832";
+			scenarioCRS = TransformationFactory.DHDN_GK4;	
 			
-			shapeFileZones = "../../shared-svn/projects/avoev/data/berlkoenig-od-trips/Bezirksregionen_zone_UTM32N/Bezirksregionen_zone_UTM32N_fixed.SHP";
-			zonesCRS = "EPSG:25832";
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
+			zonesCRS = TransformationFactory.DHDN_GK4;
 			
-			zoneFile = "../../shared-svn/projects/avoev/data/berlin-area/berlin-area_EPSG25832.shp";
-
 			homeActivityPrefix = "home";
-			scalingFactor = 4;
+			scalingFactor = 10;
 			
-			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride + "," + TransportMode.drt;
+			modesString = TransportMode.car + "," + TransportMode.pt;
 			
 			analyzeSubpopulation = null;
 		}
 		
-		Scenario scenario1 = loadScenario(runDirectory, runId);
-		Scenario scenario0 = loadScenario(runDirectoryToCompareWith, runIdToCompareWith);
+		Scenario scenario1 = loadScenario(runDirectory, runId, null);
+		Scenario scenario0 = loadScenario(runDirectoryToCompareWith, runIdToCompareWith, null);
 		
 		List<AgentAnalysisFilter> filter1 = new ArrayList<>();
-		
-		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter();
+		filter1a.setSubpopulation("person");
+		filter1a.setPersonAttribute("berlin");
+		filter1a.setPersonAttributeName("home-activity-zone");
 		filter1a.preProcess(scenario1);
 		filter1.add(filter1a);
 		
-		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
-		filter1b.setZoneFile(zoneFile);
-		filter1b.setRelevantActivityType(homeActivityPrefix);
+		AgentAnalysisFilter filter1b = new AgentAnalysisFilter();
 		filter1b.preProcess(scenario1);
 		filter1.add(filter1b);
 		
-		List<AgentAnalysisFilter> filter0 = new ArrayList<>();
-				
-		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
-		filter0a.preProcess(scenario0);
-		filter0.add(filter0a);
+		AgentAnalysisFilter filter1c = new AgentAnalysisFilter();
+		filter1c.setSubpopulation("person");
+		filter1c.setPersonAttribute("brandenburg");
+		filter1c.setPersonAttributeName("home-activity-zone");
+		filter1c.preProcess(scenario1);
+		filter1.add(filter1c);
 		
-		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
-		filter0b.setZoneFile(zoneFile);
-		filter0b.setRelevantActivityType(homeActivityPrefix);
-		filter0b.preProcess(scenario0);
-		filter0.add(filter0b);
+		List<AgentAnalysisFilter> filter0 = null;
 		
 		List<String> modes = new ArrayList<>();
 		for (String mode : modesString.split(",")) {
 			modes.add(mode);
 		}
 
-		IKAnalysis analysis = new IKAnalysis(
+		MatsimAnalysis analysis = new MatsimAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -150,12 +160,11 @@ public class IKAnalysisRunSnzBln {
 				filter0,
 				modes,
 				analyzeSubpopulation,
-				zoneId, helpLegModes, stageActivitySubString
-				);
+				zoneId, helpLegModes, stageActivitySubString, stageActivities);
 		analysis.run();
 	}
 	
-	private static Scenario loadScenario(String runDirectory, String runId) {
+	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFileToReplaceOutputFile) {
 		log.info("Loading scenario...");
 		
 		if (runDirectory == null) {
@@ -174,23 +183,34 @@ public class IKAnalysisRunSnzBln {
 
 		String networkFile;
 		String populationFile;
-		String configFile;
 		String personAttributesFile;
+		String configFile;
 		
 		if (new File(runDirectory + runId + ".output_config.xml").exists()) {
 			
-			configFile = runDirectory + runId + ".output_config.xml";	
+			configFile = runDirectory + runId + ".output_config.xml";
+			
 			networkFile = runId + ".output_network.xml.gz";
 			populationFile = runId + ".output_plans.xml.gz";
-			personAttributesFile = runId + ".output_personAttributes.xml.gz";
+			
+			if (personAttributesFileToReplaceOutputFile == null) {
+				personAttributesFile = runId + ".output_personAttributes.xml.gz";
+			} else {
+				personAttributesFile = personAttributesFileToReplaceOutputFile;
+			}
 			
 		} else {
 			
-			configFile = runDirectory + "output_config.xml";	
+			configFile = runDirectory + "output_config.xml";
+			
 			networkFile = "output_network.xml.gz";
 			populationFile = "output_plans.xml.gz";
-			personAttributesFile = "output_personAttributes.xml.gz";
-
+			
+			if (personAttributesFileToReplaceOutputFile == null) {
+				personAttributesFile = "output_personAttributes.xml.gz";
+			} else {
+				personAttributesFile = personAttributesFileToReplaceOutputFile;
+			}
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile);
@@ -203,12 +223,11 @@ public class IKAnalysisRunSnzBln {
 
 		config.controler().setOutputDirectory(runDirectory);
 		config.plans().setInputFile(populationFile);
+		config.plans().setInputPersonAttributeFile(personAttributesFile);
 		config.network().setInputFile(networkFile);
 		config.vehicles().setVehiclesFile(null);
 		config.transit().setTransitScheduleFile(null);
 		config.transit().setVehiclesFile(null);
-		config.facilities().setInputFile(null);
-		config.plans().setInputPersonAttributeFile(personAttributesFile);
 		
 		return ScenarioUtils.loadScenario(config);
 	}

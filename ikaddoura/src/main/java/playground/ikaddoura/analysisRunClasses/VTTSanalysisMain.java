@@ -17,11 +17,12 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.vtts;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.File;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.vtts.VTTSHandler;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;

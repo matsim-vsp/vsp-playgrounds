@@ -18,9 +18,9 @@
 * *
 * *********************************************************************** */ 
 
-package playground.ikaddoura.analysis.dynamicLinkDemand;
+package playground.ikaddoura.analysisRunClasses;
 
-import org.apache.log4j.Logger;
+import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -29,28 +29,18 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-public class DynamicLinkDemandAnalysisRun {
+public class LinkDemandAnalysisRun {
 	
-	private static final Logger log = Logger.getLogger(DynamicLinkDemandAnalysisRun.class);
-	private static String OUTPUT_BASE_DIR;
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-03-15_networkChangeEvents-false_withinDayReplanning-false/";
 	private String outputDirectory;
 
-	public DynamicLinkDemandAnalysisRun(String outputDirectory) {
+	public LinkDemandAnalysisRun(String outputDirectory) {
 		this.outputDirectory = outputDirectory;
 	}
 
 	public static void main(String[] args) {
-		
-		if (args.length > 0) {
-			OUTPUT_BASE_DIR = args[0];
-			log.info("Output base directory: " + OUTPUT_BASE_DIR);
-			
-		} else {
-			OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4_muc_cne_DecongestionPID/";		
-		}
-
-		DynamicLinkDemandAnalysisRun analysis = new DynamicLinkDemandAnalysisRun(OUTPUT_BASE_DIR);
-		analysis.run();
+		LinkDemandAnalysisRun anaMain = new LinkDemandAnalysisRun(OUTPUT_BASE_DIR);
+		anaMain.run();
 	}
 
 	public void run() {
@@ -58,29 +48,25 @@ public class DynamicLinkDemandAnalysisRun {
 		if (!outputDirectory.endsWith("/")) {
 			outputDirectory = outputDirectory + "/";
 		}
-		
-		Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
-		config.households().setInputHouseholdAttributesFile(null);
-		config.transit().setTransitScheduleFile(null);
-		config.transit().setVehiclesFile(null);
+	
+		Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
 		config.plans().setInputFile(null);
 		config.plans().setInputPersonAttributeFile(null);
 		config.network().setChangeEventsInputFile(null);
 		config.vehicles().setVehiclesFile(null);
 		config.network().setInputFile(outputDirectory + "output_network.xml.gz");
-		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 				
-		DynamicLinkDemandEventHandler handler = new DynamicLinkDemandEventHandler(scenario.getNetwork());
+		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork());
 		events.addHandler(handler);
-				
+		
 		String eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + config.controler().getLastIteration() + ".events.xml.gz";
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
-		String analysis_output_dir = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/";
-		handler.printResults(analysis_output_dir);
+		String analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/link_dailyDemand.csv";
+		handler.printResults(analysis_output_file);
 	}
 			 
 }

@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -48,7 +49,6 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 import com.google.inject.name.Names;
 
-import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.incidents.incidentWithinDayReplanning.WithinDayReplanningDaytimeIntervals;
 
 /**

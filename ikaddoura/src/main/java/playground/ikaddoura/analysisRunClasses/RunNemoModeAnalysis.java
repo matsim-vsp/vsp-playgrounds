@@ -17,15 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.modalSplitUserType;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
+import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -33,25 +37,27 @@ import org.matsim.core.utils.collections.Tuple;
 * @author ikaddoura
 */
 
-public class RunBerlinModeAnalysis {
+public class RunNemoModeAnalysis {
 
 	public static void main(String[] args) {
 		
 //		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
-		
-		final String runId = "berlin-v5.4-10pct";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/zzz_old/output_berlin-v5.4-10pct/";
+		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
+
+		final String runId = "nemo_baseCase_030";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_030/output/";
+		final String outputBaseDirectory = "/Users/ihab/Desktop/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
 		
 		final String outputDirectory;
 		if (iteration >= 0) {
-			outputDirectory = runDirectory + "/modal-split-analysis_" + "it." + iteration + "/";
+			outputDirectory = outputBaseDirectory + "/" + runId + "_modal-split-analysis_" + "it." + iteration + "/";
 		} else {
-			outputDirectory = runDirectory + "/modal-split-analysis/";
+			outputDirectory = outputBaseDirectory + "/" + runId + "_modal-split-analysis/";
 		}
 		
 		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
@@ -60,19 +66,19 @@ public class RunBerlinModeAnalysis {
 
 		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile, iteration);
 		
-		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
+		AgentAnalysisFilter filter = new AgentAnalysisFilter();
 		
-		filter.setSubpopulation("person");
+//		filter.setSubpopulation("person");
 		
-		filter.setPersonAttribute("berlin");
-		filter.setPersonAttributeName("home-activity-zone");
+//		filter.setPersonAttribute("berlin");
+//		filter.setPersonAttributeName("home-activity-zone");
 		
-//		filter.setZoneFile("/Users/ihab/Documents/workspace/shared-svn/projects/avoev/matsim-input-files/berlin/berlin.shp");
-//		filter.setRelevantActivityType("home");
+		filter.setZoneFile("/Users/ihab/Documents/workspace/shared-svn/projects/nemo_mercator/data/original_files/shapeFiles/shapeFile_Ruhrgebiet/ruhrgebiet_boundary.shp");
+		filter.setRelevantActivityType("home");
 		
 		filter.preProcess(scenario);
 				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
+		ModeAnalysis analysis = new ModeAnalysis(scenario, filter, stageActivities);
 		analysis.run();
 		
 		File directory = new File(outputDirectory);
@@ -89,6 +95,7 @@ public class RunBerlinModeAnalysis {
 		distanceGroups.add(new Tuple<>(5000., 10000.));
 		distanceGroups.add(new Tuple<>(10000., 20000.));
 		distanceGroups.add(new Tuple<>(20000., 100000.));
+		distanceGroups.add(new Tuple<>(100000., 1000000.));
 		distanceGroups.add(new Tuple<>(100000., 999999999999.));
 		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
 		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
@@ -103,13 +110,14 @@ public class RunBerlinModeAnalysis {
 				Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
 				config.network().setInputFile(null);
 				config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
-				if (personAttributesFile != null) {
+				if (personAttributesFile == null) {
+					config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
+				} else {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				config.vehicles().setVehiclesFile(null);
 				config.transit().setTransitScheduleFile(null);
 				config.transit().setVehiclesFile(null);
-				config.facilities().setInputFile(null);
 				scenario = ScenarioUtils.loadScenario(config);
 				return scenario;
 				
@@ -117,13 +125,14 @@ public class RunBerlinModeAnalysis {
 				Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
 				config.network().setInputFile(null);
 				config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-				if (personAttributesFile != null) {
- 					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				if (personAttributesFile == null) {
+					config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
+				} else {
+					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				config.vehicles().setVehiclesFile(null);
 				config.transit().setTransitScheduleFile(null);
 				config.transit().setVehiclesFile(null);
-				config.facilities().setInputFile(null);
 				scenario = ScenarioUtils.loadScenario(config);
 				return scenario;
 			}
@@ -133,7 +142,9 @@ public class RunBerlinModeAnalysis {
 	
 			if (runId == null) {
 				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile != null) {
+				if (personAttributesFile == null) {
+					throw new RuntimeException("Person attributes file required. Aborting...");
+				} else {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				scenario = ScenarioUtils.loadScenario(config);
@@ -141,7 +152,9 @@ public class RunBerlinModeAnalysis {
 				
 			} else {
 				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile != null) {
+				if (personAttributesFile == null) {
+					throw new RuntimeException("Person attributes file required. Aborting...");
+				} else {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				scenario = ScenarioUtils.loadScenario(config);

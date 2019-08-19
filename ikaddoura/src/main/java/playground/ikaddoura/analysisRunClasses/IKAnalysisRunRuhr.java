@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,13 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.MatsimAnalysis;
+import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 public class IKAnalysisRunRuhr {
 	private static final Logger log = Logger.getLogger(IKAnalysisRunRuhr.class);
@@ -52,8 +54,9 @@ public class IKAnalysisRunRuhr {
 		String modesString = null;
 		String analyzeSubpopulation = null;
 		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
 		final String stageActivitySubString = "interaction";
+		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "ID";
 		
 		if (args.length > 0) {
@@ -89,11 +92,11 @@ public class IKAnalysisRunRuhr {
 		
 		List<AgentAnalysisFilter> filter1 = new ArrayList<>();
 		
-		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter();
 		filter1a.preProcess(scenario1);
 		filter1.add(filter1a);
 		
-		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
+		AgentAnalysisFilter filter1b = new AgentAnalysisFilter();
 		filter1b.setZoneFile(zoneFile);
 		filter1b.setRelevantActivityType(homeActivityPrefix);
 		filter1b.preProcess(scenario1);
@@ -101,11 +104,11 @@ public class IKAnalysisRunRuhr {
 		
 		List<AgentAnalysisFilter> filter0 = new ArrayList<>();
 				
-		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
+		AgentAnalysisFilter filter0a = new AgentAnalysisFilter();
 		filter0a.preProcess(scenario0);
 		filter0.add(filter0a);
 		
-		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
+		AgentAnalysisFilter filter0b = new AgentAnalysisFilter();
 		filter0b.setZoneFile(zoneFile);
 		filter0b.setRelevantActivityType(homeActivityPrefix);
 		filter0b.preProcess(scenario0);
@@ -116,7 +119,7 @@ public class IKAnalysisRunRuhr {
 			modes.add(mode);
 		}
 
-		IKAnalysis analysis = new IKAnalysis(
+		MatsimAnalysis analysis = new MatsimAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -129,7 +132,7 @@ public class IKAnalysisRunRuhr {
 				filter0,
 				modes,
 				analyzeSubpopulation,
-				zoneId, helpLegModes, stageActivitySubString);
+				zoneId, helpLegModes, stageActivitySubString, stageActivities);
 		analysis.run();
 	}
 	

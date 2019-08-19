@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,16 +17,35 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.modalSplitUserType;
+package playground.ikaddoura.analysisRunClasses;
 
-import org.matsim.api.core.v01.population.Person;
+import org.matsim.analysis.vtts.VTTSHandler;
+import org.matsim.core.controler.events.AfterMobsimEvent;
+import org.matsim.core.controler.events.StartupEvent;
+import org.matsim.core.controler.listener.AfterMobsimListener;
+import org.matsim.core.controler.listener.StartupListener;
 
 /**
 * @author ikaddoura
 */
 
-public interface AgentFilter {
-	public boolean considerAgent(Person person);
-	public String toFileName();
+public class VTTScomputation implements StartupListener, AfterMobsimListener {
+
+	private final VTTSHandler vttsHandler;
+
+	public VTTScomputation(VTTSHandler vttsHandler) {
+		this.vttsHandler = vttsHandler;
+	}
+
+	@Override
+	public void notifyStartup(StartupEvent event) {
+		event.getServices().getEvents().addHandler(vttsHandler);
+	}
+
+	@Override
+	public void notifyAfterMobsim(AfterMobsimEvent event) {
+		this.vttsHandler.computeFinalVTTS();
+	}
+	
 }
 

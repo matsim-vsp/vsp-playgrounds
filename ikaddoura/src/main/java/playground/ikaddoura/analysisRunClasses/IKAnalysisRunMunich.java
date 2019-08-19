@@ -17,118 +17,56 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis;
+package playground.ikaddoura.analysisRunClasses;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.junit.Rule;
-import org.junit.Test;
+import org.matsim.analysis.MatsimAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
-
-public class IKAnalysisRunBerlinTest {
-	private static final Logger log = Logger.getLogger(IKAnalysisRunBerlinTest.class);
-	
-	@Rule
-	public MatsimTestUtils testUtils = new MatsimTestUtils();
-
-	@Test
-	public final void test1() {
-		
-		{
-			Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "ik-analysis/config.xml");
-			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "output1");
-			config.controler().setRunId("run1");
-			config.strategy().setFractionOfIterationsToDisableInnovation(1.0);
-			config.controler().setLastIteration(1);
-			Scenario scenario = ScenarioUtils.loadScenario(config) ;
-			Controler controler = new Controler( scenario ) ;
-			controler.run();
-		}
-		
-		{
-			Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "ik-analysis/config.xml");
-			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "output0");
-			config.controler().setRunId("run0");
-			config.controler().setLastIteration(0);
-			Scenario scenario = ScenarioUtils.loadScenario(config) ;
-			Controler controler = new Controler( scenario ) ;
-			controler.run();
-		}
-		
-		final String runId;
-		final String runDirectory;
-		final String runIdBaseCase;
-		final String runDirectoryBaseCase;
-		final String shapeFileZones;
-		final String visualizationScriptInputDirectory;
-		
-		runId = "run1";
-		runDirectory = testUtils.getOutputDirectory() +  "output1/";
-		
-		runIdBaseCase = "run0";
-		runDirectoryBaseCase = testUtils.getOutputDirectory() + "output0/";
-
-		shapeFileZones = null;
-		visualizationScriptInputDirectory = "./visualization-scripts/";
+public class IKAnalysisRunMunich {
+	private static final Logger log = Logger.getLogger(IKAnalysisRunMunich.class);
 			
-		final String scenarioCRS = null;
-		final String zonesCRS = null;
-		final String homeActivityPrefix = "h";
+	public static void main(String[] args) throws IOException {
+
+		Scenario scenario1 = loadScenario("/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID/", "policyCase", null);
+
+		Scenario scenario0 = loadScenario("/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0b_muc_bc/", "baseCase", null);
+		
+		final String visualizationScriptInputDirectory = "./visualization-scripts/";
+
+		final String scenarioCRS = TransformationFactory.DHDN_GK4;
+		final String shapeFileZones = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/plz_gk4/plz.shp";
+		final String zonesCRS = TransformationFactory.DHDN_GK4;
+		final String homeActivityPrefix = "home";
 		final int scalingFactor = 100;
-		
-		final String analyzeSubpopulation = "person_no-potential-sav-user";
-		
-		// optional: person attributes file to replace the output person attributes file
-		final String personAttributesFile = null;
-
-		Scenario scenario1 = loadScenario(runDirectory, runId, personAttributesFile);
-		Scenario scenario0 = loadScenario(runDirectoryBaseCase, runIdBaseCase, personAttributesFile);
-		
-		List<AgentAnalysisFilter> filters1 = new ArrayList<>();
-		
-		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
-		filter1a.setPersonAttribute("berlin");
-		filter1a.setPersonAttributeName("home-activity-zone");
-		filter1a.preProcess(scenario1);
-		filters1.add(filter1a);
-
-		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
-		filter1b.preProcess(scenario1);
-		filters1.add(filter1b);
-		
-		List<AgentAnalysisFilter> filters0 = new ArrayList<>();
-		
-		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
-		filter0a.setPersonAttribute("berlin");
-		filter0a.setPersonAttributeName("home-activity-zone");
-		filter0a.preProcess(scenario0);
-		filters0.add(filter0a);
-		
-		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
-		filter0b.preProcess(scenario0);
-		filters0.add(filter0b);
-		
+				
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.pt);
 		modes.add("bicycle");
+		modes.add(TransportMode.bike);
+		modes.add("pt_COMMUTER_REV_COMMUTER");
+		modes.add(TransportMode.ride);
+		modes.add(TransportMode.walk);
 		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
 		final String stageActivitySubString = "interaction";
-		final String zoneId = null;
+		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
+		final String zoneId = "NO";
 
-		IKAnalysis analysis = new IKAnalysis(
+		MatsimAnalysis analysis = new MatsimAnalysis(
 				scenario1,
 				scenario0,
 				visualizationScriptInputDirectory,
@@ -137,11 +75,11 @@ public class IKAnalysisRunBerlinTest {
 				zonesCRS,
 				homeActivityPrefix,
 				scalingFactor,
-				filters1,
-				filters0,
+				new ArrayList<>(),
+				new ArrayList<>(),
 				modes,
-				analyzeSubpopulation,
-				zoneId, helpLegModes, stageActivitySubString);
+				null,
+				zoneId, helpLegModes, stageActivitySubString, stageActivities);
 		analysis.run();
 	
 		log.info("Done.");
@@ -163,17 +101,13 @@ public class IKAnalysisRunBerlinTest {
 			log.info("Setting config file to " + configFile);
 			
 			if (new File(configFile).exists()) {
-
-				configFile = runDirectory + runId + ".output_config.xml";
-
-//				networkFile = runDirectory + runId + ".output_network.xml.gz";
-//				populationFile = runDirectory + runId + ".output_plans.xml.gz";
 				
-				networkFile = runId + ".output_network.xml.gz";
-				populationFile = runId + ".output_plans.xml.gz";
+				networkFile = runDirectory + runId + ".output_network.xml.gz";
+				populationFile = runDirectory + runId + ".output_plans.xml.gz";
+				configFile = runDirectory + runId + ".output_config.xml";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-//					personAttributesFile = runId + ".output_personAttributes.xml.gz";
+					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
@@ -189,7 +123,7 @@ public class IKAnalysisRunBerlinTest {
 				log.info("Trying to load config file " + configFile);
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-//					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
@@ -208,6 +142,7 @@ public class IKAnalysisRunBerlinTest {
 			}
 
 			config.plans().setInputFile(populationFile);
+			config.plans().setInputPersonAttributeFile(personAttributesFile);
 			config.network().setInputFile(networkFile);
 			config.vehicles().setVehiclesFile(null);
 			config.transit().setTransitScheduleFile(null);

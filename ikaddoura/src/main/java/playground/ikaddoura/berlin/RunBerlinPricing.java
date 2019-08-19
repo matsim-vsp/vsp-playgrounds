@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
@@ -35,9 +36,6 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.run.RunBerlinScenario;
 
-import playground.ikaddoura.analysis.IKAnalysis;
-import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
-import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.vsp.congestion.controler.AdvancedMarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -134,13 +132,13 @@ public class RunBerlinPricing {
 		}
 		
 		// some online analysis
-		controler.addOverridingModule(new AbstractModule() {
-			
-			@Override
-			public void install() {
-				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
-			}
-		});
+//		controler.addOverridingModule(new AbstractModule() {
+//			
+//			@Override
+//			public void install() {
+//				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
+//			}
+//		});
 		
 		if (activateQueueBasedCongestionPricing) {
 			
@@ -171,59 +169,6 @@ public class RunBerlinPricing {
 		}
 
 		berlin.run();
-		
-		log.info("Running offline analysis...");
-		
-		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
-		final String shapeFileZones = null;
-		final String zonesCRS = null;
-		final String homeActivity = "home";
-		final int scalingFactor = scaleFactor;
-		
-		List<AgentAnalysisFilter> filters = new ArrayList<>();
-
-		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
-		filter1.setSubpopulation("person");
-		filter1.setPersonAttribute("berlin");
-		filter1.setPersonAttributeName("home-activity-zone");
-		filter1.preProcess(scenario);
-		filters.add(filter1);
-		
-		AgentAnalysisFilter filter2 = new AgentAnalysisFilter(scenario);
-		filter2.preProcess(scenario);
-		filters.add(filter2);
-		
-		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(scenario);
-		filter3.setSubpopulation("person");
-		filter3.setPersonAttribute("brandenburg");
-		filter3.setPersonAttributeName("home-activity-zone");
-		filter3.preProcess(scenario);
-		filters.add(filter3);
-		
-		List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.car);
-		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
-		final String zoneId = "SCHLUESSEL";
-
-		IKAnalysis analysis = new IKAnalysis(
-				scenario,
-				null,
-				visualizationScriptInputDirectory,
-				scenarioCRS,
-				shapeFileZones,
-				zonesCRS,
-				homeActivity,
-				scalingFactor,
-				filters,
-				null,
-				modes,
-				null,
-				zoneId, helpLegModes, stageActivitySubString);
-		analysis.run();
-	
-		log.info("Done.");
 	}
 
 }
