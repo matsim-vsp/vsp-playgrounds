@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.AgentAnalysisFilter;
 import org.matsim.analysis.MatsimAnalysis;
-import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
@@ -52,10 +52,8 @@ public class IKAnalysisRunSnzBln {
 		String homeActivityPrefix = null;
 		int scalingFactor;
 		String modesString = null;
-		String analyzeSubpopulation = null;
 		
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk, TransportMode.non_network_walk};
-		final String stageActivitySubString = "interaction";
 		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "NO";
 		
@@ -80,9 +78,7 @@ public class IKAnalysisRunSnzBln {
 			scalingFactor = 4;
 			
 			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride + "," + TransportMode.drt;
-			
-			analyzeSubpopulation = null;
-			
+						
 		} else {
 			
 			runDirectory = "../../runs-svn/avoev/2019-05/output_2019-05-08_snz-bc-0/";
@@ -105,7 +101,6 @@ public class IKAnalysisRunSnzBln {
 			
 			modesString = TransportMode.car + "," + TransportMode.pt + "," + TransportMode.bike + "," + TransportMode.walk + "," + TransportMode.ride + "," + TransportMode.drt;
 			
-			analyzeSubpopulation = null;
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId);
@@ -152,8 +147,7 @@ public class IKAnalysisRunSnzBln {
 				filter1,
 				filter0,
 				modes,
-				analyzeSubpopulation,
-				zoneId, helpLegModes, stageActivitySubString, stageActivities
+				zoneId, helpLegModes, stageActivities
 				);
 		analysis.run();
 	}

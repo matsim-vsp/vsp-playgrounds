@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.detailedPersonTripAnalysis.IKEventsReader;
 import org.matsim.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
-import org.matsim.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import org.matsim.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -78,9 +77,6 @@ public class ModeSwitchAnalysisMain {
 		BasicPersonTripAnalysisHandler basicHandler0;
 		BasicPersonTripAnalysisHandler basicHandler1;
 		
-		PersonMoneyLinkHandler moneyHandler0;
-		PersonMoneyLinkHandler moneyHandler1;
-		
 		Scenario scenario0;
 		{
 			log.info("Loading scenario0 and reading events...");
@@ -99,12 +95,8 @@ public class ModeSwitchAnalysisMain {
 	        basicHandler0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler0.setScenario(scenario0);
 			
-			moneyHandler0 = new PersonMoneyLinkHandler();
-			moneyHandler0.setBasicHandler(basicHandler0);
-			
 			EventsManager events = EventsUtils.createEventsManager();
 			events.addHandler(basicHandler0);
-			events.addHandler(moneyHandler0);
 			
 			IKEventsReader reader = new IKEventsReader(events);
 			reader.readFile(dir0lastIterationFile);
@@ -126,12 +118,8 @@ public class ModeSwitchAnalysisMain {
 	        basicHandler1 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler1.setScenario(scenario1);
 			
-			moneyHandler1 = new PersonMoneyLinkHandler();
-			moneyHandler1.setBasicHandler(basicHandler1);
-			
 			EventsManager events = EventsUtils.createEventsManager();
 			events.addHandler(basicHandler1);
-			events.addHandler(moneyHandler1);
 			
 			IKEventsReader reader = new IKEventsReader(events);
 			reader.readFile(dir1lastIterationFile);
@@ -142,7 +130,7 @@ public class ModeSwitchAnalysisMain {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.taxi);
-		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison(subpopulation, "home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes);
+		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes, null);
 		modeSwitchAnalysis.analyzeByMode();
     }
 }

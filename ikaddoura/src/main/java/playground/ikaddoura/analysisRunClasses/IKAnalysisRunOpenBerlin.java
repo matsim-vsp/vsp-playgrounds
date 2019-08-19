@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.AgentAnalysisFilter;
 import org.matsim.analysis.MatsimAnalysis;
-import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
@@ -159,8 +159,7 @@ public class IKAnalysisRunOpenBerlin {
 				filter1,
 				filter0,
 				modes,
-				analyzeSubpopulation,
-				zoneId, helpLegModes, stageActivitySubString, stageActivities);
+				zoneId, helpLegModes, stageActivities);
 		analysis.run();
 	}
 	

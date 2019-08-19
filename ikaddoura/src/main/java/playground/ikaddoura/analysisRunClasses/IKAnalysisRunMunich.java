@@ -62,7 +62,6 @@ public class IKAnalysisRunMunich {
 		modes.add(TransportMode.walk);
 		
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
 		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "NO";
 
@@ -78,8 +77,7 @@ public class IKAnalysisRunMunich {
 				new ArrayList<>(),
 				new ArrayList<>(),
 				modes,
-				null,
-				zoneId, helpLegModes, stageActivitySubString, stageActivities);
+				zoneId, helpLegModes, stageActivities);
 		analysis.run();
 	
 		log.info("Done.");

@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.matsim.analysis.modalSplitUserType.AgentAnalysisFilter;
+import org.matsim.analysis.AgentAnalysisFilter;
 import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
