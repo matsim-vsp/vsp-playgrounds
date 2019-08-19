@@ -41,8 +41,8 @@ public class RunBerlinModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "berlin-v5.4-10pct_bln_5";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/output-berlin-v5.4-10pct_bln_5/";
+		final String runId = "berlin-v5.4-10pct";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/berlin/output/zzz_old/output_berlin-v5.4-10pct/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
@@ -103,9 +103,7 @@ public class RunBerlinModeAnalysis {
 				Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
 				config.network().setInputFile(null);
 				config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
-				} else {
+				if (personAttributesFile != null) {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				config.vehicles().setVehiclesFile(null);
@@ -119,10 +117,8 @@ public class RunBerlinModeAnalysis {
 				Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
 				config.network().setInputFile(null);
 				config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				if (personAttributesFile != null) {
+ 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				config.vehicles().setVehiclesFile(null);
 				config.transit().setTransitScheduleFile(null);
@@ -137,9 +133,7 @@ public class RunBerlinModeAnalysis {
 	
 			if (runId == null) {
 				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
+				if (personAttributesFile != null) {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				scenario = ScenarioUtils.loadScenario(config);
@@ -147,9 +141,7 @@ public class RunBerlinModeAnalysis {
 				
 			} else {
 				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
+				if (personAttributesFile != null) {
 					config.plans().setInputPersonAttributeFile(personAttributesFile);
 				}
 				scenario = ScenarioUtils.loadScenario(config);

@@ -56,7 +56,7 @@ public class ModeAnalysis {
 	private Map<String, List<Double>> mode2TripEuclideanDistancesFiltered = new HashMap<>();		
 
 	private double totalTripsFiltered = 0.;
-	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction");
+	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 
 	public ModeAnalysis(Scenario scenario, AgentAnalysisFilter filter) {
 		this.scenario = scenario;
