@@ -27,7 +27,7 @@ class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHan
 	@Inject
 	private MainModeIdentifier mainModeIdentifier;
 
-	@Inject
+	@Inject(optional = true)
 	private AgentFilter agentFilter = id -> true; // by default include all agents
 
 	private final Set<Id<Person>> drivers = new HashSet<>();

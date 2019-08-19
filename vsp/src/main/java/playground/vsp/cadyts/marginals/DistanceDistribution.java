@@ -38,7 +38,7 @@ public class DistanceDistribution {
 				.filter(bin -> bin.getMode().equals(mode))
 				.filter(bin -> bin.getDistanceRange().isWithinRange(distance))
 				.findAny()
-				.orElseThrow(() -> new RuntimeException("Could not find distance bin for: " + distance));
+				.orElseThrow(() -> new RuntimeException("Could not find distance bin for: " + mode + "->" + distance));
 
 		distanceBin.increaseCountByOne();
 	}

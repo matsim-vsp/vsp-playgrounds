@@ -20,17 +20,7 @@
 
 package playground.vsp.andreas.bvgAna.mrieser.analysis;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -46,6 +36,10 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
 
 /**
  * Collects data to create Route-Time-Diagrams based on the actual simulation.
@@ -150,11 +144,11 @@ public class RouteTimeDiagram implements VehicleArrivesAtFacilityEventHandler, V
 			renderer.setSeriesPaint(i, Color.black);
 		}
 
-		try {
-			ChartUtilities.saveChartAsPNG(new File(filename), c, 1024, 768, null, true, 9);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//try {
+		//	ChartUtilities.saveChartAsPNG(new File(filename), c, 1024, 768, null, true, 9);
+		//} catch (IOException e) {
+		//	e.printStackTrace();
+		//}
 	}
 
 }

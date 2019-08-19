@@ -126,7 +126,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<Id<DistanceDis
 		String offsetFilename = outputDirectoryHierarchy.getIterationFilename(event.getIteration(), LINKOFFSET_FILENAME);
 		try {
 			// the writer extends some cadyts writer which may produce memory leaks.
-			new CadytOffsetWriter().write(offsetFilename, this.calibrator.getLinkCostOffsets());
+			new CadytsOffsetWriter().write(offsetFilename, this.calibrator.getLinkCostOffsets());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

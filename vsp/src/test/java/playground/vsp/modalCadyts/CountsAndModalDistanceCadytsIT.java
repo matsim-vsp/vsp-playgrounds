@@ -23,16 +23,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.network.NetworkFactory;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
+import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -60,6 +62,7 @@ import org.matsim.counts.Count;
 import org.matsim.counts.Counts;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.vehicles.VehicleType;
 import playground.vsp.cadyts.marginals.DistanceDistribution;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
@@ -94,6 +97,119 @@ public class CountsAndModalDistanceCadytsIT {
     
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
+
+	@Test
+	public void test() {
+
+		Config config = createConfig();
+		CadytsConfigGroup cadytsConfigGroup = new CadytsConfigGroup();
+		cadytsConfigGroup.setWriteAnalysisFile(true);
+		config.addModule(cadytsConfigGroup);
+
+		Scenario scenario = cretaeScenario(config);
+
+		Controler controler = new Controler(scenario);
+
+		DistanceDistribution inputDistanceDistribution = createDistanceDistribution();
+		controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+		controler.run();
+	}
+
+	private static Scenario cretaeScenario(Config config) {
+
+		Scenario scenario = ScenarioUtils.createScenario(config);
+		createNetwork(scenario.getNetwork());
+		createPopulation(scenario.getPopulation(), scenario.getNetwork());
+
+		VehicleType car = scenario.getVehicles().getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setMaximumVelocity(100 / 3.6);
+		car.setLength(7.5);
+
+		// make bike and car equally fast for now
+		VehicleType bike = scenario.getVehicles().getFactory().createVehicleType(Id.create("bike", VehicleType.class));
+		bike.setMaximumVelocity(100 / 3.6);
+		bike.setLength(7.5);
+		scenario.getVehicles().addVehicleType(car);
+		scenario.getVehicles().addVehicleType(bike);
+		return scenario;
+	}
+
+	private static void createNetwork(Network network) {
+
+		Node node1 = network.getFactory().createNode(Id.createNodeId("node-1"), new Coord(0, 0));
+		Node node2 = network.getFactory().createNode(Id.createNodeId("node-2"), new Coord(50, 0));
+		Node node3 = network.getFactory().createNode(Id.createNodeId("node-3"), new Coord(2050, 0));
+		Node node4 = network.getFactory().createNode(Id.createNodeId("node-4"), new Coord(2100, 0));
+
+		network.addNode(node1);
+		network.addNode(node2);
+		network.addNode(node3);
+		network.addNode(node4);
+
+		Link link1 = createLink(node1, node2, "start-link", 50, network.getFactory());
+		Link link2 = createLink(node2, node3, "long-link", 2500, network.getFactory());
+		Link link3 = createLink(node2, node3, "short-link", 2000, network.getFactory());
+		Link link4 = createLink(node3, node4, "end-link", 50, network.getFactory());
+
+		network.addLink(link1);
+		network.addLink(link2);
+		network.addLink(link3);
+		network.addLink(link4);
+	}
+
+	private static Link createLink(Node from, Node to, String id, double length, NetworkFactory factory) {
+		Link link = factory.createLink(Id.createLinkId(id), from, to);
+		link.setLength(length);
+		link.setCapacity(10000);
+		link.setAllowedModes(new HashSet<>(Arrays.asList(TransportMode.car, TransportMode.bike)));
+		link.setFreespeed(100 / 3.6);
+		return link;
+	}
+
+	private static DistanceDistribution createDistanceDistribution() {
+
+		DistanceDistribution result = new DistanceDistribution(1.0);
+		result.add(TransportMode.car, 2500, 2700, 100, 0);
+		result.add(TransportMode.car, 1900, 2150, 100, 500);
+		result.add(TransportMode.bike, 1900, 2150, 100, 500);
+		result.add(TransportMode.bike, 2500, 2700, 100, 0);
+		return result;
+	}
+
+	private static void createPopulation(Population population, Network network) {
+
+		for (int i = 0; i < 1000; i++) {
+			Id<Person> personId = Id.createPersonId(population.getPersons().size() + 1);
+			Person person = population.getFactory().createPerson(personId);
+
+			person.addPlan(createPlan(TransportMode.bike, network, population.getFactory()));
+			person.addPlan(createPlan(TransportMode.car, network, population.getFactory()));
+			population.addPerson(person);
+		}
+	}
+
+	private static Plan createPlan(String mode, Network network, PopulationFactory factory) {
+
+		Plan plan = factory.createPlan();
+
+		//home
+		Activity h = factory
+				.createActivityFromCoord("home",
+						network.getLinks().get(Id.createLinkId("start-link")).getFromNode().getCoord());
+		h.setEndTime(6. * 3600. /*+ MatsimRandom.getRandom().nextInt(3600)*/);
+		plan.addActivity(h);
+
+		plan.addLeg(factory.createLeg(mode));
+
+		//work
+		Activity w = factory
+				.createActivityFromLinkId("work",
+						Id.createLinkId("end-link"));
+		w.setEndTime(16. * 3600. + MatsimRandom.getRandom().nextInt(3600));
+		plan.addActivity(w);
+
+		return plan;
+	}
 
 
 	// TODO: Think about a better integration test. E.g. synthetic network with three routes
@@ -502,6 +618,73 @@ public class CountsAndModalDistanceCadytsIT {
 	            person.addPlan(plan);
 	            population.addPerson(person);
 	        }
+	}
+
+	private Config createConfig() {
+
+		Config config = ConfigUtils.createConfig();
+		String[] modes = new String[]{TransportMode.car, TransportMode.bike};
+
+		config.controler().setOutputDirectory(this.utils.getOutputDirectory());
+		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setLastIteration(20);
+
+		config.counts().setWriteCountsInterval(1);
+		config.counts().setAverageCountsOverIterations(1);
+
+		ActivityParams home = new ActivityParams("home");
+		home.setMinimalDuration(6 * 3600);
+		home.setTypicalDuration(6 * 3600);
+		home.setEarliestEndTime(6 * 3600);
+		config.planCalcScore().addActivityParams(home);
+
+		ActivityParams work = new ActivityParams("work");
+		work.setMinimalDuration(8 * 3600);
+		work.setTypicalDuration(8 * 3600);
+		work.setEarliestEndTime(14 * 3600);
+		work.setOpeningTime(6 * 3600);
+		work.setClosingTime(18 * 3600);
+		config.planCalcScore().addActivityParams(work);
+
+		// add mode choice to it
+		/*StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+		modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice);
+		modeChoice.setWeight(0.25);
+		config.strategy().addStrategySettings(modeChoice);
+		config.subtourModeChoice().setModes(modes);
+
+		 */
+
+		// add Reroute choice to it
+		/*StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+		reRoute.setWeight(0.25);
+		config.strategy().addStrategySettings(reRoute);
+		*/
+
+		StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
+		bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
+		bestScore.setWeight(1);
+		config.strategy().addStrategySettings(bestScore);
+
+		// remove teleported bike
+		config.plansCalcRoute().removeModeRoutingParams(TransportMode.bike);
+		config.plansCalcRoute().setNetworkModes(Arrays.asList(modes));
+
+		config.qsim().setMainModes(Arrays.asList(modes));
+		config.qsim().setLinkDynamics(LinkDynamics.PassingQ);
+		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
+
+		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
+
+		config.travelTimeCalculator().setAnalyzedModes(new HashSet<>((Arrays.asList(modes))));
+		config.travelTimeCalculator().setSeparateModes(true);
+		config.travelTimeCalculator().setFilterModes(true);
+		config.changeMode().setModes(modes);
+		config.changeMode().setBehavior(Behavior.fromSpecifiedModesToSpecifiedModes);
+		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+
+		return config;
 	}
 
 	/**
