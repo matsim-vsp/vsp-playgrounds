@@ -17,9 +17,20 @@
 	</repositories>
 	<dependencies>
 		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim</artifactId>
+			<version>11.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>benjamin</artifactId>
             <version>12.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>matsim</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 <!-- 		<dependency> -->
 <!-- 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
