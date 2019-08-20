@@ -54,7 +54,6 @@ public class IKAnalysisRunOpenBerlin {
 		String modesString = null;
 		String analyzeSubpopulation = null;
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
 		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "SCHLUESSEL";
 		
@@ -147,19 +146,7 @@ public class IKAnalysisRunOpenBerlin {
 			modes.add(mode);
 		}
 
-		MatsimAnalysis analysis = new MatsimAnalysis(
-				scenario1,
-				scenario0,
-				visualizationScriptInputDirectory,
-				scenarioCRS,
-				shapeFileZones,
-				zonesCRS,
-				homeActivityPrefix,
-				scalingFactor,
-				filter1,
-				filter0,
-				modes,
-				zoneId, helpLegModes, stageActivities);
+		MatsimAnalysis analysis = new MatsimAnalysis(); // TODO: Set parameters via setters.
 		analysis.run();
 	}
 	

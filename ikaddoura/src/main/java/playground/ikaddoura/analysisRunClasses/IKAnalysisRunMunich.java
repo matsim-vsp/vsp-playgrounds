@@ -65,19 +65,7 @@ public class IKAnalysisRunMunich {
 		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "NO";
 
-		MatsimAnalysis analysis = new MatsimAnalysis(
-				scenario1,
-				scenario0,
-				visualizationScriptInputDirectory,
-				scenarioCRS,
-				shapeFileZones,
-				zonesCRS,
-				homeActivityPrefix,
-				scalingFactor,
-				new ArrayList<>(),
-				new ArrayList<>(),
-				modes,
-				zoneId, helpLegModes, stageActivities);
+		MatsimAnalysis analysis = new MatsimAnalysis(); // TODO: Set parameters via setters.
 		analysis.run();
 	
 		log.info("Done.");

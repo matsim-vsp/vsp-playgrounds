@@ -119,21 +119,7 @@ public class IKAnalysisRunRuhr {
 			modes.add(mode);
 		}
 
-		MatsimAnalysis analysis = new MatsimAnalysis(
-				scenario1,
-				scenario0,
-				visualizationScriptInputDirectory,
-				scenarioCRS,
-				shapeFileZones,
-				zonesCRS,
-				homeActivityPrefix,
-				scalingFactor,
-				filter1,
-				filter0,
-				modes,
-				zoneId,
-				helpLegModes,
-				stageActivities);
+		MatsimAnalysis analysis = new MatsimAnalysis(); // TODO: Set parameters via setters.
 		analysis.run();
 	}
 	
