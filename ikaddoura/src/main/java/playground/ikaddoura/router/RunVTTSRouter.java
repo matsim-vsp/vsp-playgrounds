@@ -37,7 +37,7 @@ public class RunVTTSRouter {
 		Config config = ConfigUtils.createConfig();
 		Controler controler = new Controler(config);
 
-		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config.planCalcScore());
 		factory.setSigma(0.);
 		

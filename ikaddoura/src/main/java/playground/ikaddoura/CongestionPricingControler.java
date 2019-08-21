@@ -133,7 +133,7 @@ public class CongestionPricingControler {
 
 		if (implementation.equals("noPricing")) {
 			
-			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 
 			if (router.equals("standard")) {
 
@@ -167,7 +167,7 @@ public class CongestionPricingControler {
 		} else {
 			
 			final TollHandler tollHandler = new TollHandler(controler.getScenario());
-			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 			
 			if (router.equals("standard")) {
 
