@@ -96,7 +96,12 @@ class TripEventHandler implements ActivityEndEventHandler, ActivityStartEventHan
 		leg.setDepartureTime(event.getTime());
 		BeelineTrip trip = getCurrentTrip(event.getPersonId());
 		trip.legs.add(leg);
-		trip.mainMode = mainModeIdentifier.identifyMainMode(trip.legs); // this smells. Change it later?
+
+		// only investigate a mode if it is not the access/egress leg. If this is used in a multi-modal scenario,
+		// the last leg, will define the mainMode of the whole trip, if the current default main mode identifier is used
+		if (!leg.getMode().equals(TransportMode.non_network_walk)) {
+			trip.mainMode = mainModeIdentifier.identifyMainMode(trip.legs);
+		}
 	}
 
 	@Override

@@ -32,8 +32,6 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.cadyts.car.CadytsCarModule;
-import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
@@ -65,7 +63,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 import playground.vsp.cadyts.marginals.DistanceDistribution;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
-import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
 
 import javax.inject.Inject;
 import java.net.URL;
@@ -111,12 +108,40 @@ public class CountsAndModalDistanceCadytsIT {
 		Controler controler = new Controler(scenario);
 
 		DistanceDistribution inputDistanceDistribution = createDistanceDistribution();
-		controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+		//controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
 
-		installCadyts(config, controler, null);
+		// we need to also set the scoring function to see an effect
+		controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
 
+			@Inject
+			private ScoringParametersForPerson parameters;
 
+			@Inject
+			private ModalDistanceCadytsContext modalDistanceCadytsContext;
 
+			@Override
+			public ScoringFunction createNewScoringFunction(Person person) {
+				SumScoringFunction sumScoringFunction = new SumScoringFunction();
+
+				final ScoringParameters params = parameters.getScoringParameters(person);
+				sumScoringFunction.addScoringFunction(new CharyparNagelLegScoring(params,
+						controler.getScenario().getNetwork()));
+				sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
+				sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
+
+				final CadytsScoring<Id<DistanceDistribution.DistanceBin>> scoringFunctionMarginals = new CadytsScoring<>(person.getSelectedPlan(),
+						config,
+						modalDistanceCadytsContext);
+
+				// in this case where all the other factors are equal, a small weight is appropriate and leads to more
+				// stable results. If combined with other things impacting the agents's score. A much higher value in the
+				// range of 100 - 200 is probably appropriate
+				scoringFunctionMarginals.setWeightOfCadytsCorrection(1);
+				sumScoringFunction.addScoringFunction(scoringFunctionMarginals);
+
+				return sumScoringFunction;
+			}
+		});
 
 		controler.run();
 	}
@@ -238,7 +263,7 @@ public class CountsAndModalDistanceCadytsIT {
         DistanceDistribution inputDistanceDistribution = getInputDistanceDistribution(beelineDistanceFactorForNetworkModes);
        
         Controler controler = new Controler(scenario);
-        controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+		// controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
 
 
         Counts<Link> counts = createCounts();
@@ -670,7 +695,7 @@ public class CountsAndModalDistanceCadytsIT {
 
 		{
 			StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
-			bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
+			bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			bestScore.setWeight(0.5);
 			config.strategy().addStrategySettings(bestScore);
 		}

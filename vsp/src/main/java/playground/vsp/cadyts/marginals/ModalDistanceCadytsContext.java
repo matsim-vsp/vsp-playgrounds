@@ -78,15 +78,11 @@ public class ModalDistanceCadytsContext implements CadytsContextI<Id<DistanceDis
 
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		int counter = 0;
+
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			cadyts.demand.Plan<Id<DistanceDistribution.DistanceBin>> demand = plansTranslator.getCadytsPlan(person.getSelectedPlan());
-			if (demand != null) {
-				counter++;
-			}
 			this.calibrator.addToDemand(demand);
 		}
-		logger.info("Get cadyts plan returned " + counter + " plans");
 	}
 
 	@Override

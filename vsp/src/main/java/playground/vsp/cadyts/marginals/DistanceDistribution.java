@@ -67,7 +67,7 @@ public class DistanceDistribution {
 		return result;
 	}
 
-	public class DistanceBin implements Identifiable<DistanceBin> {
+    public static class DistanceBin implements Identifiable<DistanceBin> {
 
 		private final DistanceRange distanceRange;
 		private double value;
@@ -110,10 +110,7 @@ public class DistanceDistribution {
 
 		@Override
 		public String toString() {
-			return "DistanceBin{" +
-					"distanceRange=" + distanceRange +
-					", value=" + value +
-					'}';
+            return "Id: " + id + ", [" + distanceRange.lowerLimit + " - " + distanceRange.upperLimit + "], mode: " + mode + ", value " + value;
 		}
 	}
 
