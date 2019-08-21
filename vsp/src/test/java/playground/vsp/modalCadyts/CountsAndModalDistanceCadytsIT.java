@@ -90,7 +90,7 @@ public class CountsAndModalDistanceCadytsIT {
     public static Collection<Object[]> parameterObjects () {
         return Arrays.asList(new Object[][] {
         		//{150.0, 0.0} ,
-				{0.0, 150.0},
+				{0.0, 15000.0},
 				//{150.0, 150.0}
         });
     }
@@ -112,6 +112,12 @@ public class CountsAndModalDistanceCadytsIT {
 
 		DistanceDistribution inputDistanceDistribution = createDistanceDistribution();
 		controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+
+		installCadyts(config, controler, null);
+
+
+
+
 		controler.run();
 	}
 
@@ -520,13 +526,13 @@ public class CountsAndModalDistanceCadytsIT {
 	 * @param counts
 	 */
 	private void installCadyts(Config config, Controler controler, Counts<Link> counts) {
-		controler.addOverridingModule(new CadytsCarModule(counts));
+		//controler.addOverridingModule(new CadytsCarModule(counts));
         final double cadytsCountsScoringWeight = this.cadytsWt * config.planCalcScore().getBrainExpBeta();
 
         final double cadytsMarginalsScoringWeight = this.cadytsMgnWt * config.planCalcScore().getBrainExpBeta();
         controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
-            @Inject
-            private CadytsContext cadytsContext;
+           // @Inject
+           // private CadytsContext cadytsContext;
             @Inject
             ScoringParametersForPerson parameters;
 
@@ -542,11 +548,11 @@ public class CountsAndModalDistanceCadytsIT {
                 sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
                 sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-                final CadytsScoring<Link> scoringFunctionCounts = new CadytsScoring<Link>(person.getSelectedPlan(),
+             /*   final CadytsScoring<Link> scoringFunctionCounts = new CadytsScoring<Link>(person.getSelectedPlan(),
                         config,
                         cadytsContext);
                 scoringFunctionCounts.setWeightOfCadytsCorrection(cadytsCountsScoringWeight);
-
+*/
 				final CadytsScoring<Id<DistanceDistribution.DistanceBin>> scoringFunctionMarginals = new CadytsScoring<>(person.getSelectedPlan(),
                             config,
                             marginalCadytsContext);
@@ -554,7 +560,7 @@ public class CountsAndModalDistanceCadytsIT {
                 scoringFunctionMarginals.setWeightOfCadytsCorrection(cadytsMarginalsScoringWeight);
                 sumScoringFunction.addScoringFunction(scoringFunctionMarginals);
 
-                sumScoringFunction.addScoringFunction(scoringFunctionCounts);
+              //  sumScoringFunction.addScoringFunction(scoringFunctionCounts);
 
                 return sumScoringFunction;
             }
@@ -662,10 +668,20 @@ public class CountsAndModalDistanceCadytsIT {
 		config.strategy().addStrategySettings(reRoute);
 		*/
 
-		StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
-		bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
-		bestScore.setWeight(1);
-		config.strategy().addStrategySettings(bestScore);
+		{
+			StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
+			bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
+			bestScore.setWeight(0.5);
+			config.strategy().addStrategySettings(bestScore);
+		}
+		{
+			StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
+			bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.SelectRandom);
+			bestScore.setDisableAfter(17);
+			bestScore.setWeight(0.5);
+			config.strategy().addStrategySettings(bestScore);
+		}
+
 
 		// remove teleported bike
 		config.plansCalcRoute().removeModeRoutingParams(TransportMode.bike);
