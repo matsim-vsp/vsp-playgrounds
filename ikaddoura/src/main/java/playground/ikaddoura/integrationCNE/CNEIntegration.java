@@ -165,7 +165,7 @@ public class CNEIntegration {
 		final VTTSHandler vttsHandler;
 		if (useTripAndAgentSpecificVTTSForRouting) {
 			log.info("Using the agent- and trip-specific VTTS for routing.");
-			vttsHandler = new VTTSHandler(controler.getScenario());
+			vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 			controler.addControlerListener(new VTTScomputation(vttsHandler));
 		} else {
 			log.info("Using the approximate and uniform VTTS for routing: (-beta_traveling + beta_performing) / beta_money");
