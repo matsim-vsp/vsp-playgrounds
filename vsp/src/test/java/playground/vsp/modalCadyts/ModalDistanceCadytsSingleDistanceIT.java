@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-public class ModalDistanceCadytsIT {
+public class ModalDistanceCadytsSingleDistanceIT {
 
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
@@ -117,10 +117,8 @@ public class ModalDistanceCadytsIT {
                         config,
                         modalDistanceCadytsContext);
 
-                // in this case where all the other factors are equal, a small weight is appropriate and leads to more
-                // stable results. If combined with other things impacting the agents's score. A much higher value in the
-                // range of 100 - 200 is probably appropriate
-                scoringFunctionMarginals.setWeightOfCadytsCorrection(10);
+                // we want a rigid correction
+                scoringFunctionMarginals.setWeightOfCadytsCorrection(10000);
                 sumScoringFunction.addScoringFunction(scoringFunctionMarginals);
 
                 return sumScoringFunction;
@@ -142,8 +140,8 @@ public class ModalDistanceCadytsIT {
         final long numberOfCarLegs = result.get(TransportMode.car);
         final long numberOfOtherCarLegs = result.get(TransportMode.bike);
 
-        assertEquals(0.5, (double) numberOfCarLegs / totalLegs, 0.05);
-        assertEquals(0.5, (double) numberOfOtherCarLegs / totalLegs, 0.05);
+        assertEquals(0.4, (double) numberOfCarLegs / totalLegs, 0.05);
+        assertEquals(0.6, (double) numberOfOtherCarLegs / totalLegs, 0.05);
     }
 
     private Config createConfig() {
@@ -212,7 +210,7 @@ public class ModalDistanceCadytsIT {
         createNetwork(scenario.getNetwork());
         createPopulation(scenario.getPopulation(), scenario.getNetwork());
 
-        VehicleType car = scenario.getVehicles().getFactory().createVehicleType(Id.create("car", VehicleType.class));
+        VehicleType car = scenario.getVehicles().getFactory().createVehicleType(Id.create(TransportMode.car, VehicleType.class));
         car.setMaximumVelocity(100 / 3.6);
         car.setLength(7.5);
 
@@ -238,12 +236,10 @@ public class ModalDistanceCadytsIT {
         network.addNode(node4);
 
         Link link1 = createLink(node1, node2, "start-link", 50, network.getFactory());
-        Link link2 = createLink(node2, node3, "long-link", 2500, network.getFactory());
         Link link3 = createLink(node2, node3, "short-link", 2000, network.getFactory());
         Link link4 = createLink(node3, node4, "end-link", 50, network.getFactory());
 
         network.addLink(link1);
-        network.addLink(link2);
         network.addLink(link3);
         network.addLink(link4);
     }
@@ -297,8 +293,8 @@ public class ModalDistanceCadytsIT {
     private static DistanceDistribution createDistanceDistribution() {
 
         DistanceDistribution result = new DistanceDistribution(1.0);
-        result.add(TransportMode.car, 1900, 2150, 100, 500);
-        result.add(TransportMode.bike, 1900, 2150, 100, 500);
+        result.add(TransportMode.car, 1900, 2150, 10, 400);
+        result.add(TransportMode.bike, 1900, 2150, 10, 600);
         return result;
     }
 }
