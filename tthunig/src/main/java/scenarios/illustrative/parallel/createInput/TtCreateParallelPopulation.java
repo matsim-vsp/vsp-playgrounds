@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -38,7 +37,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.utils.objectattributes.ObjectAttributes;
 
 /**
  * Class to create a population for the parallel scenario.
@@ -56,7 +54,6 @@ public final class TtCreateParallelPopulation {
 			.getLogger(TtCreateParallelPopulation.class);
 
 	private Population population;
-	private ObjectAttributes personAtt;
 
 	private DemandType demandType = DemandType.SINGLE_OD;
 	public enum DemandType {
@@ -79,7 +76,6 @@ public final class TtCreateParallelPopulation {
 
 	public TtCreateParallelPopulation(Scenario sc) {
 		this.population = sc.getPopulation();
-		this.personAtt = sc.getPopulation().getPersonAttributes();
 	}
 
 	/**
@@ -142,8 +138,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_we"));
-//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
+			person.getAttributes().putAttribute("subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
@@ -220,8 +215,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_ew"));
-//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
+			person.getAttributes().putAttribute("subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
@@ -297,8 +291,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_ns"));
-//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
+			person.getAttributes().putAttribute("subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
@@ -374,8 +367,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_sn"));
-//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
+			person.getAttributes().putAttribute("subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
@@ -450,8 +442,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_sn"));
-//			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "crossingTraffic");
+			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
@@ -479,8 +470,7 @@ public final class TtCreateParallelPopulation {
 			// create a person
 			Person person = population.getFactory().createPerson(
 					Id.createPersonId(Integer.toString(i) + "_ns"));
-//			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
-			personAtt.putAttribute(person.getId().toString(), "subpopulation", "crossingTraffic");
+			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()

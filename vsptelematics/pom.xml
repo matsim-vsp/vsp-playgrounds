@@ -86,8 +86,8 @@
 			<version>${matsim.version}</version>
 		</dependency>
 
-
 <!--	i needed the following three dependencies to let the simulation of parking search run completely when using the GUI on my machine..-->
+<!--	(although, i was using java8...)-->
 <!--	however, this might be unnecessary when using java8. cut out if problems occur. tschlenther, june 2019-->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>

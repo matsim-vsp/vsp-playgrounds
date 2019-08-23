@@ -39,7 +39,7 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 	private final Double[] realizedLambdas;
 	private final Double[] realizedUtilities;
 	private final Double[] expectedUtilityChanges;
-	private final Double[] performanceCorrelations;
+//	private final Double[] performanceCorrelations;
 	private final Double[] ageCorrelations;
 	private final Double[] agePercentiles10;
 	private final Double[] agePercentiles20;
@@ -55,7 +55,8 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 
 	public AccelerationLogHandler(final Double[] betas, final Double[] realizedLambdas,
 			final Double[] realizedUtilities, final Double[] expectedUtilityChanges,
-			final Double[] performanceCorrelations, final Double[] ageCorrelations, final Double[] agePercentiles10,
+//			final Double[] performanceCorrelations, 
+			final Double[] ageCorrelations, final Double[] agePercentiles10,
 			final Double[] agePercentiles20, final Double[] agePercentiles30, final Double[] agePercentiles40,
 			final Double[] agePercentiles50, final Double[] agePercentiles60, final Double[] agePercentiles70,
 			final Double[] agePercentiles80, final Double[] agePercentiles90) {
@@ -63,7 +64,7 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 		this.realizedLambdas = realizedLambdas;
 		this.realizedUtilities = realizedUtilities;
 		this.expectedUtilityChanges = expectedUtilityChanges;
-		this.performanceCorrelations = performanceCorrelations;
+//		this.performanceCorrelations = performanceCorrelations;
 		this.ageCorrelations = ageCorrelations;
 		this.agePercentiles10 = agePercentiles10;
 		this.agePercentiles20 = agePercentiles20;
@@ -103,8 +104,8 @@ class AccelerationLogHandler extends AbstractTabularFileHandlerWithHeaderLine {
 			this.expectedUtilityChanges[iteration] = null;
 		}
 
-		this.performanceCorrelations[iteration] = this
-				.doubleOrNull(this.getStringValue("Corr(DeltaX2,DeltaU-DeltaU*)"));
+//		this.performanceCorrelations[iteration] = this
+//				.doubleOrNull(this.getStringValue("Corr(DeltaX2,DeltaU-DeltaU*)"));
 		this.ageCorrelations[iteration] = this
 				.doubleOrNull(this.getStringValue("Corr(Age*ExpDeltaUtility;Similarity)"));
 		

@@ -47,7 +47,6 @@ env:
     - MODULE=gleich         # 2 min 52 sec
     - MODULE=stockholm      # 2 min 27 sec
     - MODULE=gunnar         # 2 min 25 sec
-    - MODULE=dgrether       # 2 min 24 sec
     - MODULE=vsptelematics  # 2 min 15 sec
     - MODULE=kairuns        # 2 min 4 sec
     

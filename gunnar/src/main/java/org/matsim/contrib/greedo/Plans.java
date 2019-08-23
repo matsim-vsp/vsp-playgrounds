@@ -93,6 +93,14 @@ class Plans {
 		}
 		person.setSelectedPlan(getSelectedPlan(copiedPlans, this.person2selectedPlanIndex.get(person.getId())));
 	}
+	
+	// TODO 2019-07-20 NEW
+	void add(final HasPlansAndId<Plan, Person> person) {				
+		final List<? extends Plan> copiedPlans = newDeepCopy(this.personId2planList.get(person.getId()));
+		for (Plan plan : copiedPlans) {
+			person.addPlan(plan);
+		}
+	}
 
 	Plan getSelectedPlan(Id<Person> personId) {
 		return getSelectedPlan(this.personId2planList.get(personId), this.person2selectedPlanIndex.get(personId));

@@ -155,9 +155,9 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 		for (Id<Person> p : scenario.getPopulation().getPersons().keySet()) {
 			int personIdInteger = Integer.valueOf(p.toString());
 			if ( personIdInteger < totalPerson /2  ) {
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.toString(), SUBPOP_ATTRIB_NAME, SUBPOP1_NAME);
+				scenario.getPopulation().getPersons().get(p).getAttributes().putAttribute(SUBPOP_ATTRIB_NAME, SUBPOP1_NAME);
 			} else {
-				scenario.getPopulation().getPersonAttributes().putAttribute(p.toString(), SUBPOP_ATTRIB_NAME, SUBPOP2_NAME);
+				scenario.getPopulation().getPersons().get(p).getAttributes().putAttribute(SUBPOP_ATTRIB_NAME, SUBPOP2_NAME);
 			}
 		}
 	}

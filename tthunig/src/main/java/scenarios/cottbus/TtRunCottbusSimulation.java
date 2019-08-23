@@ -81,6 +81,7 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV2;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
+import org.matsim.roadpricing.RoadPricingModule;
 import org.matsim.roadpricing.RoadPricingUtils;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
@@ -1424,7 +1425,7 @@ public class TtRunCottbusSimulation {
 //			controler.addControlerListener(initializer);		
 		} else if (PRICING_TYPE.toString().startsWith("CORDON_")){
 			// (loads the road pricing scheme, uses custom travel disutility including tolls, etc.)
-			controler.addOverridingModule(RoadPricingUtils.createModule());
+			controler.addOverridingModule(new RoadPricingModule() );
 		} else if (PRICING_TYPE.equals(PricingType.INTERVAL_BASED)) {
 			
 			controler.addOverridingModule(new DecongestionModule(scenario));

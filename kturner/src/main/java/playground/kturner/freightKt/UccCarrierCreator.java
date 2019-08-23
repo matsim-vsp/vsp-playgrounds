@@ -52,7 +52,8 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 
 	private Carriers carriers ;
 	private CarrierVehicleTypes vehicleTypes  ;	
-	private String zonefile ;
+//	private String zonefile ;
+	private ArrayList<String> LEZLinkIdsString;
 	private String uccC_prefix;		//PRefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
 	private ArrayList<String> retailerNames = new ArrayList<String>();
 	private ArrayList<Id<Link>> uccDepotsLinkIds = new ArrayList<Id<Link>>();;	//Location of UCC
@@ -99,9 +100,9 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 	 * @param uccDepotsLinkIds: locations at which UCCs were created
 	 */
 	UccCarrierCreator(Carriers carriers, CarrierVehicleTypes vehicleTypes, 
-			String zonefile,  String uccC_prefix,
+			ArrayList<String> LEZLinkIdsString,  String uccC_prefix,
 			ArrayList<String> retailerNames, ArrayList<Id<Link>> uccDepotsLinkIds) {
-		this.zonefile = zonefile;
+		this.LEZLinkIdsString =  LEZLinkIdsString;
 		this.carriers = carriers;
 		this.vehicleTypes = vehicleTypes;
 		this.uccC_prefix = uccC_prefix;
@@ -123,10 +124,10 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 	 * @param uccClosingTime: ClosingTime for the UCC (= latest return for vehicles delivering from UCC)
 	 */
 	UccCarrierCreator(Carriers carriers,	CarrierVehicleTypes vehicleTypes, 
-			String zonefile,  String uccC_prefix,
+			ArrayList<String> LEZLinkIdsString,  String uccC_prefix,
 			ArrayList<String> retailernames, ArrayList<Id<Link>> uccDepotsLinkIds,
 			double uccOpeningTime, double uccClosingTime) {
-		this.zonefile = zonefile;
+		this.LEZLinkIdsString =  LEZLinkIdsString;
 		this.carriers = carriers;
 		this.vehicleTypes = vehicleTypes;
 		this.uccC_prefix = uccC_prefix;
@@ -157,7 +158,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		extractedCarriers = extractCarriers(carriers, retailerNames); 		
 		//Step3: Nachfrage auf Carrier UCC und normal aufteilen.
 		splittedCarriers = createUCCCarrier(extractedCarriers, vehicleTypes, 
-				zonefile, uccDepotsLinkIds, timeShiftUccOpeningTime, timeShiftUccClosingTime);	
+				LEZLinkIdsString, uccDepotsLinkIds, timeShiftUccOpeningTime, timeShiftUccClosingTime);	
 		//Step4: VehId je Carrier einzigartig machen, da sonst weitere Vorkommen 
 		//		ignoriert werden (und somit nicht alle Depots genutzt werden).
 		splittedCarriers = renameVehId(splittedCarriers); 				
@@ -197,22 +198,17 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 	 * die UCC beliefern muss.
 	 */
 	private Carriers createUCCCarrier(Carriers carriers, CarrierVehicleTypes vehicleTypes, 
-			String zonefile, List<Id<Link>> uccDepotsLinkIds2, double uccEarlierOpeningTime, 
+			ArrayList<String> LEZLinkIdsString, List<Id<Link>> uccDepotsLinkIds2, double uccEarlierOpeningTime, 
 			double uccLaterClosingTime) {
 
 		// Carrierfile, welches beide Carrier enthält: sowohl UCC, als auch non UCC
 		Carriers splittedCarriers = new Carriers(); 
-
-		//Read zonefile
-		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
-		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
-		try {
-			rpReader.readFile(zonefile);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		
+		Set<Id<Link>> lezLinkIds = new HashSet<Id<Link>>();  //Link-Ids der Umweltzone (LEZ)
+		for (String idString: LEZLinkIdsString) {
+			lezLinkIds.add(Id.createLinkId(idString));
 		}
-
-		Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
+		
 		//Liste der zum UCC-Carrier übertragenen Services -> wird später aus normalen Carrier entfernt
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	
 

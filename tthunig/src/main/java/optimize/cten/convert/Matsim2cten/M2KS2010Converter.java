@@ -19,34 +19,35 @@
  * *********************************************************************** */
 package optimize.cten.convert.Matsim2cten;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.lanes.Lanes;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import playground.dgrether.koehlerstrehlersignal.conversion.DgKS2010Router;
-import playground.dgrether.koehlerstrehlersignal.conversion.DgKSNet2MatsimNet;
-import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
-import playground.dgrether.koehlerstrehlersignal.conversion.TtMorningCommodityAsMatsimPopWriter;
-import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
-import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
-import playground.dgrether.koehlerstrehlersignal.data.DgCommodityUtils;
-import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
-import playground.dgrether.koehlerstrehlersignal.data.DgKSNetwork;
-import playground.dgrether.koehlerstrehlersignal.data.KS2010ModelWriter;
-import playground.dgrether.koehlerstrehlersignal.demand.M2KS2010Zones2Commodities;
-import playground.dgrether.koehlerstrehlersignal.gexf.DgKSNetwork2Gexf;
-import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
-import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
-import playground.dgrether.koehlerstrehlersignal.network.DgNetworkUtils;
-import playground.dgrether.signalsystems.utils.DgSignalsBoundingBox;
-import playground.dgrether.utils.zones.DgZones;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import optimize.cten.convert.Matsim2cten.demand.DgZones;
+import optimize.cten.convert.Matsim2cten.demand.M2KS2010Zones2Commodities;
+import optimize.cten.convert.Matsim2cten.network.DgKS2010Router;
+import optimize.cten.convert.Matsim2cten.network.DgKSNetwork2Gexf;
+import optimize.cten.convert.Matsim2cten.network.DgNetworkUtils;
+import optimize.cten.convert.Matsim2cten.network.M2KS2010NetworkConverter;
+import optimize.cten.convert.Matsim2cten.signals.DgSignalsBoundingBox;
+import optimize.cten.convert.cten2matsim.demand.TtMorningCommodityAsMatsimPopWriter;
+import optimize.cten.convert.cten2matsim.network.DgKSNet2MatsimNet;
+import optimize.cten.data.DgCommodities;
+import optimize.cten.data.DgCommodity;
+import optimize.cten.data.DgCommodityUtils;
+import optimize.cten.data.DgCrossing;
+import optimize.cten.data.DgKSNetwork;
+import optimize.cten.data.KS2010ModelWriter;
+import optimize.cten.ids.DgIdConverter;
+import optimize.cten.ids.DgIdPool;
 
 //import optimize.gurobi.OptimizeMIP;
 

@@ -18,15 +18,6 @@
  * *********************************************************************** */
 package playground.agarwalamit.analysis.activity.scoring;
 
-import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,12 +33,14 @@ import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
-
 import playground.agarwalamit.analysis.activity.ActivityType2ActDurationsAnalyzer;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
 import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+
+import java.io.BufferedWriter;
+import java.util.*;
 
 /**
  * @author amit

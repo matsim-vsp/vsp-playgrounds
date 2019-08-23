@@ -55,28 +55,27 @@ public class AnalysisRunner {
 	public static void main(String[] args) throws FileNotFoundException {
 		System.out.println("STARTED ...");
 
-		System.out.println("System.exit(0);");
-		System.exit(0);
-		
-		final String resultPath = "/Users/GunnarF/NoBackup/data-workspace/wum/2019-02-27b_malin/";
+		// System.out.println("System.exit(0);");
+		// System.exit(0);
 
-		final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
+		final String resultPath = "/Users/GunnarF/NoBackup/data-workspace/wum/2019-08-05_incl/";
+
+		// final String zonesShapeFileName = "/Users/GunnarF/OneDrive - VTI/My
+		// Data/ihop2/ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
 		final ZonalSystem zonalSystem = null;
 		// new ZonalSystem(zonesShapeFileName,
 		// StockholmTransformationFactory.WGS84_EPSG3857);
 
 		final Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(resultPath + "output_network.xml.gz");
+		// config.network().setInputFile(resultPath + "output_network.xml.gz");
 		config.transit().setUseTransit(true);
 		// config.transit().setTransitScheduleFile(
 		// "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/malin_transitSchedule_reduced.xml.gz");
-		config.transit().setVehiclesFile(
-				"/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/malin_transitVehiclesDifferentiated.xml.gz");
+		// config.transit().setVehiclesFile(resultPath + "output_transitVehicles.xml.gz");
 		config.transit().setTransitScheduleFile(resultPath + "output_transitSchedule.xml.gz");
 		// config.transit().setVehiclesFile(resultPath +
 		// "output_transitVehicles.xml.gz");
-
-		config.plans().setInputFile(resultPath + "malin-plans.xml");
+		// config.plans().setInputFile(resultPath + "malin-plans.xml");
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -162,8 +161,7 @@ public class AnalysisRunner {
 		System.out.println(vehicleIds.size() + " vehicles");
 
 		final LineUsageStatistics lineUsageStats = new LineUsageStatistics(vehId -> vehicleIds.contains(vehId),
-				time_s -> true, personId -> !personId.toString().startsWith("pt_"), stopId -> true,
-				scenario);
+				time_s -> true, personId -> !personId.toString().startsWith("pt_"), stopId -> true, scenario);
 
 		manager.addHandler(lineUsageStats);
 		EventsUtils.readEvents(manager, resultPath + "output_events.xml.gz");

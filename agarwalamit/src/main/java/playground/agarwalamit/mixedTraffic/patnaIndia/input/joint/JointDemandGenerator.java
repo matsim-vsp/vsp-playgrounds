@@ -56,7 +56,6 @@ public class JointDemandGenerator {
 		pjdg.combinedPlans();
 		pjdg.createSubpopulationAttributes();
 		new PopulationWriter(sc.getPopulation()).write(JOINT_PLANS_10PCT);
-		new ObjectAttributesXmlWriter(sc.getPopulation().getPersonAttributes()).writeFile(JOINT_PERSONS_ATTRIBUTE_10PCT);
 		pjdg.createAndWriteVehiclesFile();
 	}
 	
@@ -70,7 +69,7 @@ public class JointDemandGenerator {
 		sc.getConfig().plans().setSubpopulationAttributeName(PatnaUtils.SUBPOP_ATTRIBUTE);
 		Population pop = sc.getPopulation();
 		for(Person p : pop.getPersons().values()){
-			pop.getPersonAttributes().putAttribute(p.getId().toString(), PatnaUtils.SUBPOP_ATTRIBUTE, PatnaPersonFilter.getUserGroup(p.getId()).toString() );	
+			p.getAttributes().putAttribute(PatnaUtils.SUBPOP_ATTRIBUTE, PatnaPersonFilter.getUserGroup(p.getId()).toString() );	
 		}
 	}
 
@@ -82,11 +81,12 @@ public class JointDemandGenerator {
 
 		for(Person p : popUrban.getPersons().values()){
 			sc.getPopulation().addPerson(p);
-			// also put all person attributes to scenario.
-			sc.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE, 
-					popUrban.getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE));
-			sc.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE, 
-					popUrban.getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE));
+			// this is done automatically now because attributes are part of persons and not population. theresa, aug'19
+//			// also put all person attributes to scenario.
+//			sc.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE, 
+//					popUrban.getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE));
+//			sc.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE, 
+//					popUrban.getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE));
 		}
 
 		for(Person p : popExtDemand.getPersons().values()){

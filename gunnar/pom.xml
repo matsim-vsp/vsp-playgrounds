@@ -28,17 +28,21 @@
 
 	<dependencies>
 
+		<!--  
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreesvg</artifactId>
 			<version>3.4</version>
 		</dependency>
+		-->
 
+		<!--  
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
             <version>1.7</version>
         </dependency>
+        -->
         
 		<!-- >>>>> FIXING MATSIM VERSION NUMBER >>>>> -->
 
@@ -53,6 +57,21 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim</artifactId>
+			<version>0.11.0-2018w44</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>12.0-SNAPSHOT</artifactId>
+				</exclusion>
+			</exclusions>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
 
 		<!-- <<<<< FIXING MATSIM VERSION NUMBER <<<<< -->
 
@@ -81,9 +100,26 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>analysis</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>0.11.0-2018w44</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>12.0-SNAPSHOT</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim-examples</artifactId>
+			<version>11.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.matsim</groupId>
+					<artifactId>12.0-SNAPSHOT</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- -->
 
 		<dependency>

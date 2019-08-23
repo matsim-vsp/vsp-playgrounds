@@ -62,8 +62,8 @@ public class PatnaIntialPlansStats {
 			if (mode2counter.containsKey(mode)) mode2counter.put(mode, mode2counter.get(mode)+1);
 			else mode2counter.put(mode, 1);
 			
-			double inc = (Double) sc.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
-			double cost = (Double) sc.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.TRANSPORT_COST_ATTRIBUTE);
+			double inc = (Double) p.getAttributes().getAttribute(PatnaUtils.INCOME_ATTRIBUTE);
+			double cost = (Double) p.getAttributes().getAttribute(PatnaUtils.TRANSPORT_COST_ATTRIBUTE);
 			
 			if (income2counter.containsKey(inc)) income2counter.put(inc, income2counter.get(inc)+1);
 			else income2counter.put(inc, 1);

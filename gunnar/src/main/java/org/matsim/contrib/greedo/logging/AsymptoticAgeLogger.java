@@ -20,9 +20,7 @@
 package org.matsim.contrib.greedo.logging;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +31,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.LogDataWrapper;
 
 import floetteroed.utilities.math.Covariance;
-import floetteroed.utilities.math.MathHelpers;
 import floetteroed.utilities.math.Matrix;
 import floetteroed.utilities.math.Vector;
 import floetteroed.utilities.statisticslogging.Statistic;
@@ -63,9 +60,9 @@ public class AsymptoticAgeLogger {
 
 	private class Entry {
 
-		private MovingWindowAverage expectedUtilityChanges;
-		private MovingWindowAverage similarities;
-		private MovingWindowAverage ages;
+		private final MovingWindowAverage expectedUtilityChanges;
+		private final MovingWindowAverage similarities;
+		private final MovingWindowAverage ages;
 
 		Entry() {
 			this.expectedUtilityChanges = new MovingWindowAverage(1, Integer.MAX_VALUE, relativeMemoryLength);
@@ -87,8 +84,8 @@ public class AsymptoticAgeLogger {
 			return this.similarities.mostRecentValue();
 		}
 
-		int getLastAge() {
-			return MathHelpers.round(this.ages.mostRecentValue());
+		double getLastAge() {
+			return this.ages.mostRecentValue();
 		}
 
 		double getAvgExpectedUtilityChange() {
@@ -162,112 +159,151 @@ public class AsymptoticAgeLogger {
 		}
 		return entry;
 	}
-	
+
 	// -------------------- IMPLEMENTATION --------------------
 
 	public void update(final LogDataWrapper logDataWrapper) {
-		this.dump(logDataWrapper.getReplanningSummaryStatistics().getReplannerId2ageAtReplanning(),
+		this.update(logDataWrapper.getReplanningSummaryStatistics().getReplannerId2ageAtReplanning(),
 				logDataWrapper.getPersonId2expectedUtilityChange(),
 				logDataWrapper.getReplanningSummaryStatistics().personId2similarity,
 				logDataWrapper.getReplanningSummaryStatistics().getReplannerId2ageAtReplanning().keySet(),
 				logDataWrapper.getIteration());
 	}
 
-	private void dump(final Map<Id<Person>, Integer> personId2ageAtReplanning,
+	private void update(final Map<Id<Person>, Integer> personId2ageAtReplanning,
 			final Map<Id<Person>, Double> personId2expectedUtilityChange,
-			final Map<Id<Person>, Double> personId2similarity, final Set<Id<Person>> replannerIds,
-			final int iteration) {
-		try {
+			final Map<Id<Person>, Double> personId2similarity, final Set<Id<Person>> replannerIds, final int iteration) {
 
-			final PrintWriter writer = new PrintWriter(this.fullFileName(iteration));
+		final Covariance ageTimesDeltaUtility_vs_Similarity_covariance = new Covariance(2, 2);
 
-			writer.print("ageAtReplanning\tsimilarity/expDeltaUtility");
-			writer.print("\t");
-			writer.print("<ageAtReplanning>\t<similarity>/<expDeltaUtility>");
-			writer.print("\t");
-			writer.print("ageAtReplanning*expDeltaUtility\tsimilarity");
-			writer.print("\t");
-			writer.print("<ageAtReplanning>*<expDeltaUtility>\t<similarity>");
-			writer.println();
+		for (Id<Person> replannerId : replannerIds) {
+			final Double expectedUtilityChange = personId2expectedUtilityChange.get(replannerId);
+			final Double similarity = personId2similarity.get(replannerId);
+			final Integer age = personId2ageAtReplanning.get(replannerId);
 
-			final Covariance age_vs_SimilarityByDeltaUtility_covariance = new Covariance(2, 2);
-			final Covariance avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance = new Covariance(2, 2);
-			final Covariance ageTimesDeltaUtility_vs_Similarity_covariance = new Covariance(2, 2);
-			final Covariance avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance = new Covariance(2, 2);
+			if ((similarity != null) && (expectedUtilityChange != null) && (age != null)) {
+				final Entry entry = this.getOrCreateEntry(replannerId);
+				entry.update(expectedUtilityChange, similarity, age);
 
-			for (Id<Person> replannerId : replannerIds) {
-				final Double expectedUtilityChange = personId2expectedUtilityChange.get(replannerId);
-				final Double similarity = personId2similarity.get(replannerId);
-				final Integer age = personId2ageAtReplanning.get(replannerId);
-
-				if ((similarity != null) && (expectedUtilityChange != null) && (age != null)) {
-					final Entry entry = this.getOrCreateEntry(replannerId);
-					entry.update(expectedUtilityChange, similarity, age);
-
-					{
-						final double similarityByUtility = entry.getLastSimilarity()
-								/ entry.getLastExpectedUtilityChange();
-						writer.print(entry.getLastAge() + "\t" + similarityByUtility);
-						final Vector x = new Vector(entry.getLastAge(), similarityByUtility);
-						age_vs_SimilarityByDeltaUtility_covariance.add(x, x);
-					}
-					writer.print("\t");
-					{
-						final double avgSimilarityByAvgUtility = entry.getAvgSimilarity()
-								/ entry.getAvgExpectedUtilityChange();
-						writer.print(entry.getAvgAge() + "\t" + avgSimilarityByAvgUtility);
-						final Vector x = new Vector(entry.getAvgAge(), avgSimilarityByAvgUtility);
-						avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.add(x, x);
-					}
-					writer.print("\t");
-					{
-						final double ageTimesDeltaUtility = entry.getLastAge() * entry.getLastExpectedUtilityChange();
-						writer.print(ageTimesDeltaUtility + "\t" + entry.getLastSimilarity());
-						final Vector x = new Vector(ageTimesDeltaUtility, entry.getLastSimilarity());
-						ageTimesDeltaUtility_vs_Similarity_covariance.add(x, x);
-					}
-					writer.print("\t");
-					{
-						final double avgAgeTimesAvgDeltaUtility = entry.getAvgAge()
-								* entry.getAvgExpectedUtilityChange();
-						writer.print(avgAgeTimesAvgDeltaUtility + "\t" + entry.getAvgSimilarity());
-						final Vector x = new Vector(avgAgeTimesAvgDeltaUtility, entry.getAvgSimilarity());
-						avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.add(x, x);
-					}
-					writer.println();
-				}
+				final double ageTimesDeltaUtilityTimesBeta = entry.getLastAge() * entry.getLastExpectedUtilityChange();
+				final Vector x = new Vector(ageTimesDeltaUtilityTimesBeta, entry.getLastSimilarity());
+				ageTimesDeltaUtility_vs_Similarity_covariance.add(x, x);
 			}
-			writer.flush();
-			writer.close();
-
-			{
-				final Matrix _C = age_vs_SimilarityByDeltaUtility_covariance.getCovariance();
-				this.age_vs_SimilarityByDeltaUtility_correlation = _C.get(1, 0)
-						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
-			}
-			{
-				final Matrix _C = avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.getCovariance();
-				this.avgAge_vs_AvgSimilarityByAvgDeltaUtility_correlation = _C.get(1, 0)
-						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
-			}
-			{
-				final Matrix _C = ageTimesDeltaUtility_vs_Similarity_covariance.getCovariance();
-				this.ageTimesDeltaUtility_vs_Similarity_correlation = _C.get(1, 0)
-						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
-			}
-			{
-				final Matrix _C = avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.getCovariance();
-				this.avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_correlation = _C.get(1, 0)
-						/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
-			}
-
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
 		}
+
+		final Matrix _C = ageTimesDeltaUtility_vs_Similarity_covariance.getCovariance();
+		this.ageTimesDeltaUtility_vs_Similarity_correlation = _C.get(1, 0)
+				/ Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
 	}
+
+	// private void dump(final Map<Id<Person>, Integer> personId2ageAtReplanning,
+	// final Map<Id<Person>, Double> personId2expectedUtilityChange,
+	// final Map<Id<Person>, Double> personId2similarity, final Set<Id<Person>>
+	// replannerIds,
+	// final int iteration, final double beta) {
+	// try {
+	//
+	// final PrintWriter writer = new PrintWriter(this.fullFileName(iteration));
+	//
+	// writer.print("ageAtReplanning\tsimilarity/expDeltaUtility");
+	// writer.print("\t");
+	// writer.print("<ageAtReplanning>\t<similarity>/<expDeltaUtility>");
+	// writer.print("\t");
+	// writer.print("ageAtReplanning*expDeltaUtility\tsimilarity");
+	// writer.print("\t");
+	// writer.print("<ageAtReplanning>*<expDeltaUtility>\t<similarity>");
+	// writer.println();
+	//
+	// final Covariance age_vs_SimilarityByDeltaUtility_covariance = new
+	// Covariance(2, 2);
+	// final Covariance avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance = new
+	// Covariance(2, 2);
+	// final Covariance ageTimesDeltaUtility_vs_Similarity_covariance = new
+	// Covariance(2, 2);
+	// final Covariance avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance = new
+	// Covariance(2, 2);
+	//
+	// for (Id<Person> replannerId : replannerIds) {
+	// final Double expectedUtilityChange =
+	// personId2expectedUtilityChange.get(replannerId);
+	// final Double similarity = personId2similarity.get(replannerId);
+	// final Integer age = personId2ageAtReplanning.get(replannerId);
+	//
+	// if ((similarity != null) && (expectedUtilityChange != null) && (age != null))
+	// {
+	// final Entry entry = this.getOrCreateEntry(replannerId);
+	// entry.update(expectedUtilityChange, similarity, age, beta);
+	//
+	// {
+	// final double similarityByUtility = entry.getLastSimilarity()
+	// / entry.getLastExpectedUtilityChange();
+	// writer.print(entry.getLastAge() + "\t" + similarityByUtility);
+	// final Vector x = new Vector(entry.getLastAge(), similarityByUtility);
+	// age_vs_SimilarityByDeltaUtility_covariance.add(x, x);
+	// }
+	// writer.print("\t");
+	// {
+	// final double avgSimilarityByAvgUtility = entry.getAvgSimilarity()
+	// / entry.getAvgExpectedUtilityChange();
+	// writer.print(entry.getAvgAge() + "\t" + avgSimilarityByAvgUtility);
+	// final Vector x = new Vector(entry.getAvgAge(), avgSimilarityByAvgUtility);
+	// avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.add(x, x);
+	// }
+	// writer.print("\t");
+	// {
+	// final double ageTimesDeltaUtility = entry.getLastAge() *
+	// entry.getLastExpectedUtilityChange();
+	// writer.print(ageTimesDeltaUtility + "\t" + entry.getLastSimilarity());
+	// final Vector x = new Vector(ageTimesDeltaUtility, entry.getLastSimilarity());
+	// ageTimesDeltaUtility_vs_Similarity_covariance.add(x, x);
+	// }
+	// writer.print("\t");
+	// {
+	// final double avgAgeTimesAvgDeltaUtility = entry.getAvgAge()
+	// * entry.getAvgExpectedUtilityChange();
+	// writer.print(avgAgeTimesAvgDeltaUtility + "\t" + entry.getAvgSimilarity());
+	// final Vector x = new Vector(avgAgeTimesAvgDeltaUtility,
+	// entry.getAvgSimilarity());
+	// avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.add(x, x);
+	// }
+	// writer.println();
+	// }
+	// }
+	// writer.flush();
+	// writer.close();
+	//
+	// {
+	// final Matrix _C = age_vs_SimilarityByDeltaUtility_covariance.getCovariance();
+	// this.age_vs_SimilarityByDeltaUtility_correlation = _C.get(1, 0)
+	// / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+	// }
+	// {
+	// final Matrix _C =
+	// avgAge_vs_AvgSimilarityByAvgDeltaUtility_covariance.getCovariance();
+	// this.avgAge_vs_AvgSimilarityByAvgDeltaUtility_correlation = _C.get(1, 0)
+	// / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+	// }
+	// {
+	// final Matrix _C =
+	// ageTimesDeltaUtility_vs_Similarity_covariance.getCovariance();
+	// this.ageTimesDeltaUtility_vs_Similarity_correlation = _C.get(1, 0)
+	// / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+	// }
+	// {
+	// final Matrix _C =
+	// avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_covariance.getCovariance();
+	// this.avgAgeTimesAvgDeltaUtility_vs_AvgSimilarity_correlation = _C.get(1, 0)
+	// / Math.sqrt(_C.get(0, 0) * _C.get(1, 1));
+	// }
+	//
+	// } catch (FileNotFoundException e) {
+	// throw new RuntimeException(e);
+	// }
+	// }
 
 	// -------------------- Statistic FACTORY --------------------
 
+	@Deprecated
 	public Statistic<LogDataWrapper> newAgeVsSimilarityByExpDeltaUtilityCorrelationStatistic() {
 		return new Statistic<LogDataWrapper>() {
 
@@ -283,6 +319,7 @@ public class AsymptoticAgeLogger {
 		};
 	}
 
+	@Deprecated
 	public Statistic<LogDataWrapper> newAvgAgeVsAvgSimilarityByAvgExpDeltaUtilityCorrelationStatistic() {
 		return new Statistic<LogDataWrapper>() {
 
@@ -313,6 +350,7 @@ public class AsymptoticAgeLogger {
 		};
 	}
 
+	@Deprecated
 	public Statistic<LogDataWrapper> newAvgAgeTimesAvgExpDeltaUtilityVsAvgSimilarityCorrelationStatistic() {
 		return new Statistic<LogDataWrapper>() {
 

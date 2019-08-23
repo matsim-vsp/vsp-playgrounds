@@ -32,13 +32,16 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
+import org.matsim.contrib.greedo.recipes.Ameli2017Recipe;
 import org.matsim.contrib.greedo.recipes.MSARecipe;
 import org.matsim.contrib.greedo.recipes.ReplannerIdentifierRecipe;
+import org.matsim.contrib.greedo.recipes.Sbayti2007Recipe;
 import org.matsim.contrib.greedo.recipes.SelfRegulatingMSA;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.misc.StringUtils;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleCapacity;
 
 import floetteroed.utilities.TimeDiscretization;
 
@@ -83,23 +86,18 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 			}
 		}
 
-		Logger.getLogger(this.getClass()).warn("Using flat zero transit vehicle weights.");
+		Logger.getLogger(this.getClass()).warn("Using 1/passengerCapacity transit vehicle weights.");
 		this.concurrentTransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
 			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
 				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
-				// TODO >>> REVISIT >>>
-				// final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
-				// final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
-				// if (cap_persons < 1e-3) {
-				// throw new RuntimeException("vehicle " + transitVehicle.getId() + " has
-				// capacity of " + cap_persons
-				// + " < 0.001 persons.");
-				// }
-				// this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 /
-				// cap_persons);
-				// TODO <<< REVISIT <<<
-				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 0.0);
+				final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+				final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+				if (cap_persons < 1e-3) {
+					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
+							+ " < 0.001 persons.");
+				}
+				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
 			}
 		}
 	}
@@ -152,32 +150,64 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 		this.adaptiveMSADenominatorIncreaseIfFailure = adaptiveMSADenominatorIncreaseIfFailure;
 	}
 
+	// -------------------- enforceMeanReplanningRate --------------------
+
+	private boolean enforceMeanReplanningRate = true;
+
+	@StringGetter("enforceMeanReplanningRate")
+	public boolean getEnforceMeanReplanningRate() {
+		return this.enforceMeanReplanningRate;
+	}
+
+	@StringSetter("enforceMeanReplanningRate")
+	public void setEnforceMeanReplanningRate(final boolean enforceMeanReplanningRate) {
+		this.enforceMeanReplanningRate = enforceMeanReplanningRate;
+	}
+
+	// -------------------- correctAgentSize --------------------
+
+	private boolean correctAgentSize = false;
+
+	@StringGetter("correctAgentSize")
+	public boolean getCorrectAgentSize() {
+		return this.correctAgentSize;
+	}
+
+	@StringSetter("correctAgentSize")
+	public void setCorrectAgentSize(final boolean correctAgentSize) {
+		this.correctAgentSize = correctAgentSize;
+	}
+	
 	// -------------------- acceptNegativeDisappointment --------------------
 
-	// TODO Consider discarding this (and WARN instead if beta gets negative).
+	@Deprecated
 	private boolean acceptNegativeDisappointment = true;
 
 	@StringGetter("acceptNegativeDisappointment")
+	@Deprecated
 	public boolean getAcceptNegativeDisappointment() {
 		return this.acceptNegativeDisappointment;
 	}
 
 	@StringSetter("acceptNegativeDisappointment")
+	@Deprecated
 	public void setAcceptNegativeDisappointment(final boolean acceptNegativeDisappointment) {
 		this.acceptNegativeDisappointment = acceptNegativeDisappointment;
 	}
 
 	// -------------------- constrainDeltaToZero --------------------
 
-	// TODO Consider discarding this.
+	@Deprecated
 	private boolean constrainDeltaToZero = true;
 
 	@StringGetter("constrainDeltaToZero")
+	@Deprecated
 	public boolean getConstrainDeltaToZero() {
 		return this.constrainDeltaToZero;
 	}
 
 	@StringSetter("constrainDeltaToZero")
+	@Deprecated
 	public void setConstrainDeltaToZero(final boolean constrainDeltaToZero) {
 		this.constrainDeltaToZero = constrainDeltaToZero;
 	}
@@ -185,7 +215,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	// -------------------- replannerIdentifier --------------------
 
 	public static enum ReplannerIdentifierType {
-		accelerate, MSA, adaptiveMSA
+		accelerate, MSA, adaptiveMSA, Ameli2017, Sbayti2007
 	}
 
 	private ReplannerIdentifierType replannerIdentifierType = ReplannerIdentifierType.accelerate;
@@ -214,6 +244,10 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 				this.replannerIdentifierRecipe = new SelfRegulatingMSA(
 						this.getAdaptiveMSADenominatorIncreaseIfSuccess(),
 						this.getAdaptiveMSADenominatorIncreaseIfFailure());
+			} else if (ReplannerIdentifierType.Ameli2017.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new Ameli2017Recipe();
+			} else if (ReplannerIdentifierType.Sbayti2007.equals(this.getReplannerIdentifierType())) {
+				this.replannerIdentifierRecipe = new Sbayti2007Recipe();
 			} else {
 				throw new RuntimeException("Unknown ReplannerIdentifierType: " + this.getReplannerIdentifierType());
 			}
@@ -223,13 +257,16 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- minAbsoluteMemoryLength --------------------
 
+	@Deprecated
 	private int minAbsoluteMemoryLength = 4;
 
+	@Deprecated
 	@StringGetter("minAbsoluteMemoryLength")
 	public int getMinAbsoluteMemoryLength() {
 		return this.minAbsoluteMemoryLength;
 	}
 
+	@Deprecated
 	@StringSetter("minAbsoluteMemoryLength")
 	public void setMinAbsoluteMemoryLength(final int minAbsoluteMemoryLength) {
 		this.minAbsoluteMemoryLength = minAbsoluteMemoryLength;
@@ -237,13 +274,16 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- maxAbsoluteMemoryLength --------------------
 
+	@Deprecated
 	private int maxAbsoluteMemoryLength = Integer.MAX_VALUE;
 
+	@Deprecated
 	@StringGetter("maxAbsoluteMemoryLength")
 	public int getMaxAbsoluteMemoryLength() {
 		return this.maxAbsoluteMemoryLength;
 	}
 
+	@Deprecated
 	@StringSetter("maxAbsoluteMemoryLength")
 	public void setMaxAbsoluteMemoryLength(final int maxAbsoluteMemoryLength) {
 		this.maxAbsoluteMemoryLength = maxAbsoluteMemoryLength;
@@ -251,6 +291,7 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- maxRelativeMemoryLength --------------------
 
+	// TODO only left for logging
 	private double maxRelativeMemoryLength = 1.0;
 
 	@StringGetter("maxRelativeMemoryLength")
@@ -289,6 +330,10 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("replanningRateIterationExponent")
 	public void setReplanningRateIterationExponent(double replanningRateIterationExponent) {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
+	}
+
+	public double getMSAReplanningRate(final int iteration) {
+		return this.getInitialMeanReplanningRate() * Math.pow(iteration + 1, this.getReplanningRateIterationExponent());
 	}
 
 	// -------------------- ageWeightExponent --------------------
@@ -345,6 +390,24 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public TimeDiscretization newTimeDiscretization() {
 		return new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(), this.getBinCnt());
+	}
+
+	// -------------------- expensiveStrategyTreatment --------------------
+
+	public static enum ExpensiveStrategyTreatmentType {
+		allOnce, oneInTotal
+	}
+
+	private ExpensiveStrategyTreatmentType expensiveStrategyTreatment = ExpensiveStrategyTreatmentType.oneInTotal;
+
+	@StringGetter("expensiveStrategyTreatment")
+	public ExpensiveStrategyTreatmentType getExpensiveStrategyTreatment() {
+		return this.expensiveStrategyTreatment;
+	}
+
+	@StringSetter("expensiveStrategyTreatment")
+	public void setExpensiveStrategyTreatment(final ExpensiveStrategyTreatmentType expensiveStrategyTreatment) {
+		this.expensiveStrategyTreatment = expensiveStrategyTreatment;
 	}
 
 	// -------------------- adjustStrategyWeights --------------------

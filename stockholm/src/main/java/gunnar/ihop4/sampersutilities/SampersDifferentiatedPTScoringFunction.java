@@ -35,6 +35,8 @@ import org.matsim.api.core.v01.population.Route;
 import org.matsim.pt.PtConstants;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
+import gunnar.StockholmConfigGroup;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -47,8 +49,12 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 	public static final Set<String> PT_SUBMODES = Collections.unmodifiableSet(new LinkedHashSet<>(
 			Arrays.asList("busPassenger", "tramPassenger", "subwayPassenger", "railPassenger", "ferryPassenger")));
 
-	// -------------------- MEMBERS --------------------
-
+	// -------------------- CONSTANTS --------------------	
+	
+	private final StockholmConfigGroup sthlmConfig;
+	
+	// -------------------- MEMBERS --------------------	
+	
 	private final LinkedList<Leg> tmpLegs = new LinkedList<>();
 
 	private final LinkedList<Activity> tmpActs = new LinkedList<>();
@@ -56,8 +62,9 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 	// -------------------- CONSTRUCTION --------------------
 
 	public SampersDifferentiatedPTScoringFunction(final Person person,
-			final SampersTourUtilityFunction utilityFunction) {
+			final SampersTourUtilityFunction utilityFunction, final StockholmConfigGroup sthlmConfig) {
 		super(person, utilityFunction);
+		this.sthlmConfig = sthlmConfig;
 	}
 
 	// -------------------- IMPLEMENTATION OF ScoringFunction --------------------
@@ -125,7 +132,11 @@ public class SampersDifferentiatedPTScoringFunction extends SampersScoringFuncti
 					if (TransportMode.transit_walk.equals(leg.getMode())) {
 						transferTime_s += leg.getTravelTime();
 					} else if (PT_SUBMODES.contains(leg.getMode())) {
-						inVehicleTime_s += leg.getTravelTime();
+						if (this.sthlmConfig.isFerryPassengerMode(leg.getMode())) {
+							inVehicleTime_s += this.sthlmConfig.getBoatFactor() * leg.getTravelTime();
+						} else {						
+							inVehicleTime_s += leg.getTravelTime();
+						}
 					} else {
 						throw new RuntimeException("Unknown PT trip-chain mode: " + leg.getMode());
 					}

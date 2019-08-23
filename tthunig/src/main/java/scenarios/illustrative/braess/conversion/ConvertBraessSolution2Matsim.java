@@ -25,16 +25,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
-import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
-import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010CrossingSolution;
-import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010Solution2Matsim;
+import optimize.cten.convert.cten2matsim.signalplans.ConvertCtenOffsets2MATSim;
+import optimize.cten.convert.cten2matsim.signalplans.data.FixCrossingSolution;
+import optimize.cten.ids.DgIdPool;
 
 /**
  * Class to start the conversion of BTU solutions for the braess scenario into MATSim signal format.
@@ -50,8 +50,7 @@ public class ConvertBraessSolution2Matsim {
 		// read btu solution
 		KS2015BraessSolutionOffsetsXMLParser solutionParser = new KS2015BraessSolutionOffsetsXMLParser();
 		solutionParser.readFile(directory + inputFile);
-		Map<String, List<KS2010CrossingSolution>> crossingSolutions = 
-				solutionParser.getBraessOffsets();
+		Map<String, List<FixCrossingSolution>> crossingSolutions = solutionParser.getBraessOffsets();
 		
 		//convert and write btu solution into matsim format
 		SignalsData signalsData = loadSignalsData(directory);
@@ -60,9 +59,8 @@ public class ConvertBraessSolution2Matsim {
 
 		for (String coordination : crossingSolutions.keySet()){
 			//convert solution
-			KS2010Solution2Matsim converter = new KS2010Solution2Matsim(idPool);
-			converter.convertSolution(signalsData.getSignalControlData(),
-					crossingSolutions.get(coordination));
+			ConvertCtenOffsets2MATSim converter = new ConvertCtenOffsets2MATSim(idPool);
+			converter.convertSolution(signalsData.getSignalControlData(), crossingSolutions.get(coordination));
 			//write solution
 			writeBraessOffsetsSignalControl(directory, inputFile, signalsData, coordination);
 		}

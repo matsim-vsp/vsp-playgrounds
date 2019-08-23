@@ -46,6 +46,8 @@ public class TtAnalyzedResultsWriter {
 	private PrintStream overallItWritingStream;
 	private int numberOfRoutes;
 	private int lastIteration;
+
+	private PrintStream overallTtWritingStreamForMultipleRuns;
 	
 	@Inject
 	public TtAnalyzedResultsWriter(Scenario scenario, TtAbstractAnalysisTool handler) {
@@ -61,10 +63,8 @@ public class TtAnalyzedResultsWriter {
 
 	private void prepareOverallItWriting() {
 		// create output dir for overall iteration analysis
-		String lastItDir = this.outputDirBase + "ITERS/it." + this.lastIteration + "/";
-		new File(lastItDir).mkdir();
-		String lastItOutputDir = lastItDir + "analysis/";
-		new File(lastItOutputDir).mkdir();
+		String lastItOutputDir = this.outputDirBase + "ITERS/it." + this.lastIteration + "/analysis/";
+		new File(lastItOutputDir).mkdirs();
 		
 		// create writing stream
 		try {	
@@ -125,7 +125,7 @@ public class TtAnalyzedResultsWriter {
 		writeOnRoutes(outputDir, handler.getOnRoutePerSecond());
 		writeRouteStarts(outputDir, handler.getRouteDeparturesPerSecond());
 		writeSummedRouteStarts(outputDir, handler.calculateSummedRouteDeparturesPerSecond());
-		writeAvgRouteTTs(outputDir, "Departure", handler.calculateAvgRouteTTsByDepartureTime());
+		writeAvgRouteTTs(iteration, outputDir, "Departure", handler.calculateAvgRouteTTsByDepartureTime());
 		writeAvgRouteTolls(outputDir, handler.calculateAvgRouteTollsByDepartureTime());
 	}
 
@@ -293,7 +293,7 @@ public class TtAnalyzedResultsWriter {
 		log.info("output written to " + filename);
 	}
 
-	private void writeAvgRouteTTs(String outputDir, String eventType, Map<Double, double[]> avgTTs) {
+	private void writeAvgRouteTTs(int iteration, String outputDir, String eventType, Map<Double, double[]> avgTTs) {
 		PrintStream stream;
 		String filename = outputDir + "avgRouteTTsPer" + eventType + ".txt";
 		try {
@@ -317,11 +317,18 @@ public class TtAnalyzedResultsWriter {
 				line.append("\t" + avgRouteTTs[routeNr]);
 			}
 			stream.println(line.toString());
+			if (iteration == lastIteration && overallTtWritingStreamForMultipleRuns!=null) {
+				overallTtWritingStreamForMultipleRuns.println(line.toString());
+			}
 		}
 
 		stream.close();
 		
 		log.info("output written to " + filename);
+	}
+	
+	public void setTravelTimeWritingStreamForParametricRuns(PrintStream overallTtWritingStream) {
+		this.overallTtWritingStreamForMultipleRuns = overallTtWritingStream;
 	}
 	
 	private void writeAvgRouteTolls(String outputDir, Map<Double, double[]> avgTolls) {

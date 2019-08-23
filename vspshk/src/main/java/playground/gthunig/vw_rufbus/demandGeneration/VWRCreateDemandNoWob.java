@@ -38,7 +38,6 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
 
 public class VWRCreateDemandNoWob {
@@ -348,7 +347,7 @@ public class VWRCreateDemandNoWob {
 //		replaceSptByPtp();
 		PopulationWriter pw = new PopulationWriter(scenario.getPopulation(), scenario.getNetwork());
 		pw.write(config.getPlansOutputString());
-		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(config.getObjectAttributes());
+//		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(config.getObjectAttributes()); 	//no extra person attributes file any more tschlenther 6.8.19
 	}
 
 	
@@ -956,8 +955,7 @@ public class VWRCreateDemandNoWob {
 		plan.addActivity(source2);
 		
 		person.addPlan(plan);
-		scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "subpopulation", "noRep");
-
+		person.getAttributes().putAttribute("subpopulation", "noRep");
 		scenario.getPopulation().addPerson(person);
 	}
 
@@ -985,7 +983,7 @@ public class VWRCreateDemandNoWob {
 		plan.addActivity(cargo2);
 
 		person.addPlan(plan);
-		scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "subpopulation", "noRep");
+		person.getAttributes().putAttribute("subpopulation", "noRep");
 		scenario.getPopulation().addPerson(person);
 	}
 
@@ -1095,7 +1093,7 @@ public class VWRCreateDemandNoWob {
 	void createAgentGroupNearTransitstrops(Scenario scenario,double distance, String transitScheduleFile ){
 		new TransitScheduleReader(scenario).readFile(transitScheduleFile);
 		for(Person p : scenario.getPopulation().getPersons().values()){
-			if (scenario.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), "subpopulation")!=null){
+			if (p.getAttributes().getAttribute("subpopulation")!=null){
 				return;
 			}
 			ArrayList<Boolean> isIt = new ArrayList<>();
@@ -1120,9 +1118,9 @@ public class VWRCreateDemandNoWob {
 			if (!t) truth=false;
 		}	
 		if (truth){
-			scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "subpopulation", "schedulePt");
+			p.getAttributes().putAttribute("subpopulation", "schedulePt");
 		}else {
-			scenario.getPopulation().getPersonAttributes().putAttribute(p.getId().toString(), "subpopulation", "teleportPt");
+			p.getAttributes().putAttribute("subpopulation", "teleportPt");
 			this.teleportPtUsers.add(p.getId());
 		}
 		}

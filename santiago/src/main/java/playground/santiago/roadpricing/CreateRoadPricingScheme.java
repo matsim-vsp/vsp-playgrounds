@@ -80,14 +80,14 @@ public class CreateRoadPricingScheme {
 	}
 
 	private static void createRPScheme(Scenario scenario) {
-		RoadPricingSchemeImpl rps = RoadPricingUtils.createDefaultScheme();
-		rps.setName("Santiago_Roadpricing");
-		rps.setDescription("RoadPricingScheme for the Santiago scenario. ");
-		rps.setType(RoadPricingScheme.TOLL_TYPE_DISTANCE);
+		RoadPricingSchemeImpl rps = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
+		RoadPricingUtils.setName(rps, "Santiago_Roadpricing");
+		RoadPricingUtils.setDescription(rps, "RoadPricingScheme for the Santiago scenario. ");
+		RoadPricingUtils.setType(rps, RoadPricingScheme.TOLL_TYPE_DISTANCE);
 		
 		extractCurrentLinkIds(scenario.getNetwork()); //TODO: not implemented in creation process here
 		
-		rps.addLinkCost(Id.createLinkId(356), 3600.0, 7200., 1);
+		RoadPricingUtils.addLinkSpecificCost(rps, Id.createLinkId(356), 3600.0, 7200., 1);
 		
 		//Write final roadPricingScheme to file.	
 		RoadPricingWriterXMLv1 rpWriter = new RoadPricingWriterXMLv1(rps);

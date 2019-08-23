@@ -96,7 +96,7 @@ class PrivateTrafficLinkUsageListener
 						indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 						this.driverId2indicators.put(driverId, indicators);
 					}
-					indicators.visit(linkId, this.timeDiscretization.getBin(time_s), personWeight * linkWeight);
+					indicators.visit(linkId, this.timeDiscretization.getBin(time_s), personWeight, linkWeight);
 				}
 			}
 		}

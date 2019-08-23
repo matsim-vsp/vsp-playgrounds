@@ -10,6 +10,10 @@
   <artifactId>benjamin</artifactId>
   <name>benjamin</name>
 
+	<properties>
+        <matsim.version>11.0</matsim.version>
+	</properties>
+	
   <build>
     <plugins>
       <plugin>
@@ -32,64 +36,24 @@
   	<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>otfvis</artifactId>
-        <version>12.0-SNAPSHOT</version>
+        <version>${matsim.version}</version>
 		<scope>compile</scope>
 	</dependency>
 	<dependency>
   		<groupId>org.matsim.contrib</groupId>
   		<artifactId>roadpricing</artifactId>
-        <version>12.0-SNAPSHOT</version>
+        <version>${matsim.version}</version>
   	</dependency>
 	  	<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>emissions</artifactId>
-            <version>12.0-SNAPSHOT</version>
+            <version>${matsim.version}</version>
 	</dependency>
-<!-- 	<dependency> -->
-<!-- 		<groupId>org.matsim.contrib</groupId> -->
-<!-- 		<artifactId>signals</artifactId> -->
-<!-- 		<version>0.9.0-SNAPSHOT</version> -->
-<!-- 	</dependency> -->
-
   	<dependency>
   		  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
   		<artifactId>vsp</artifactId>
         <version>12.0-SNAPSHOT</version>
   	</dependency>
-<!--   	<dependency> -->
-<!--   		<groupId>playground</groupId> -->
-<!--   		<artifactId>dgrether</artifactId> -->
-<!--   		<version>0.9.0-SNAPSHOT</version> -->
-<!--   		<scope>compile</scope> -->
-<!--   	</dependency> -->
-<!-- 	<dependency> -->
-<!--   		<groupId>playground</groupId> -->
-<!--   		<artifactId>mzilske</artifactId> -->
-<!--   		<version>0.9.0-SNAPSHOT</version> -->
-<!--   		<scope>compile</scope> -->
-<!--   	</dependency> -->
-
-<!-- 	<dependency> -->
-<!-- 		<groupId>processing</groupId> -->
-<!-- 		<artifactId>processing</artifactId> -->
-<!-- 		<version>2.0.b6</version> -->
-<!-- 		<scope>system</scope> -->
-<!-- 		<systemPath>${basedir}/lib/processing-2.0b6/core.jar</systemPath> -->
-<!-- 	</dependency> -->
-<!-- 	<dependency> -->
-<!-- 		<groupId>geoMap</groupId> -->
-<!-- 		<artifactId>geoMap</artifactId> -->
-<!-- 		<version>1.1</version> -->
-<!-- 		<scope>system</scope> -->
-<!-- 		<systemPath>${basedir}/lib/processing-2.0b6/geoMap.jar</systemPath> -->
-<!-- 	</dependency> -->
-<!-- 	<dependency> -->
-<!-- 		<groupId>gicentreUtils</groupId> -->
-<!-- 		<artifactId>gicentreUtils</artifactId> -->
-<!-- 		<version>3.2.0</version> -->
-<!-- 		<scope>system</scope> -->
-<!-- 		<systemPath>${basedir}/lib/processing-2.0b6/gicentreUtils.jar</systemPath> -->
-<!-- 	</dependency> -->
 	
   </dependencies>
 </project>

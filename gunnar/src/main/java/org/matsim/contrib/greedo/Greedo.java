@@ -22,7 +22,6 @@ package org.matsim.contrib.greedo;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.ier.IERModule;
-import org.matsim.contrib.ier.emulator.FifoTransitPerformance;
 import org.matsim.contrib.ier.run.IERConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -98,16 +97,28 @@ public class Greedo {
 
 			// Adjust number of emulated iterations per cycle to number and type of
 			// innovation strategies.
+			final int expensiveStrategiesPerCycle;
+			if (GreedoConfigGroup.ExpensiveStrategyTreatmentType.allOnce
+					.equals(greedoConfig.getExpensiveStrategyTreatment())) {
+				expensiveStrategiesPerCycle = expensiveStrategyCnt;
+			} else if (GreedoConfigGroup.ExpensiveStrategyTreatmentType.oneInTotal
+					.equals(greedoConfig.getExpensiveStrategyTreatment())) {
+				expensiveStrategiesPerCycle = 1;
+			} else {
+				throw new RuntimeException(
+						"Unknown expensive strategy treatment: " + greedoConfig.getExpensiveStrategyTreatment());
+			}
+
 			final int originalIterationsPerCycle = ierConfig.getIterationsPerCycle();
 			if (cheapStrategyCnt > 0) {
 				// Make sure that every strategy can be used used on average at least once.
 				ierConfig.setIterationsPerCycle(
-						Math.max(expensiveStrategyCnt + cheapStrategyCnt, originalIterationsPerCycle));
+						Math.max(expensiveStrategiesPerCycle + cheapStrategyCnt, originalIterationsPerCycle));
 			} else {
 				if (expensiveStrategyCnt > 0) {
 					// Only best-response strategies: every best-response strategy is used on
 					// average exactly once.
-					ierConfig.setIterationsPerCycle(expensiveStrategyCnt);
+					ierConfig.setIterationsPerCycle(expensiveStrategiesPerCycle);
 				} else {
 					// No innovation strategies at all!
 					throw new RuntimeException("No innovation strategies recognized. "
@@ -134,7 +145,18 @@ public class Greedo {
 			 * Keep only plan innovation strategies. Re-weight for maximum emulation
 			 * efficiency.
 			 */
-			final double singleExpensiveStrategyProba = 1.0 / ierConfig.getIterationsPerCycle();
+			final double singleExpensiveStrategyProba;
+			if (GreedoConfigGroup.ExpensiveStrategyTreatmentType.allOnce
+					.equals(greedoConfig.getExpensiveStrategyTreatment())) {
+				singleExpensiveStrategyProba = 1.0 / ierConfig.getIterationsPerCycle();
+			} else if (GreedoConfigGroup.ExpensiveStrategyTreatmentType.oneInTotal
+					.equals(greedoConfig.getExpensiveStrategyTreatment())) {
+				singleExpensiveStrategyProba = (1.0 / ierConfig.getIterationsPerCycle()) / expensiveStrategyCnt;
+			} else {
+				throw new RuntimeException(
+						"Unknown expensive strategy treatment: " + greedoConfig.getExpensiveStrategyTreatment());
+			}
+
 			final double cheapStrategyProbaSum = 1.0 - singleExpensiveStrategyProba * expensiveStrategyCnt;
 			final double cheapStrategyWeightFactor = cheapStrategyProbaSum / cheapStrategyWeightSum;
 			double probaSum = 0;
@@ -171,14 +193,6 @@ public class Greedo {
 		final AbstractModule greedoModule = new AbstractModule() {
 			@Override
 			public void install() {
-				// TODO Consider Sebastian's lightweight solution.
-				this.bind(FifoTransitPerformance.class);
-				if (config.transit().isUseTransit()) {
-					log.warn("Transit emulation is included. This is experimental code.");
-					this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-				} else {
-					log.info("No transit emulation.");
-				}
 				this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
 				this.addEventHandlerBinding().toProvider(WireGreedoIntoMATSimControlerListener.class);
 			}

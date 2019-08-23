@@ -134,9 +134,7 @@ public class BeelineDistanceDistributionGenerator {
 		  .stream()
 		  .filter(p -> PatnaPersonFilter.isPersonBelongsToUrban(p.getId()))
 		  .forEach(p -> {
-			  double inc = (double) sc.getPopulation()
-									  .getPersonAttributes()
-									  .getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
+			  double inc = (double) p.getAttributes().getAttribute(PatnaUtils.INCOME_ATTRIBUTE);
 			  person2income.put(p.getId(), inc);
 		  });
 

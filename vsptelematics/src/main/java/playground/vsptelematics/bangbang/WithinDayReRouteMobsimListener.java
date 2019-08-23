@@ -173,7 +173,7 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 				log.warn("modified route");
 				cnt++ ;
 			}
-			this.scenario.getPopulation().getPersonAttributes().putAttribute( agent.getId().toString(), "marker", true ) ;
+			this.scenario.getPopulation().getPersons().get(agent.getId()).getAttributes().putAttribute("marker", true ) ;
 		}
 
 		// ---

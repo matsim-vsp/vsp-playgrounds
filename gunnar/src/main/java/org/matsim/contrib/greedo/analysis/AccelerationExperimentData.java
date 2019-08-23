@@ -44,7 +44,7 @@ public class AccelerationExperimentData {
 	private final Double[][] realizedLambdas;
 	private final Double[][] realizedUtilities;
 	private final Double[][] expectedUtilityChanges;
-	private final Double[][] performanceCorrelations;
+//	private final Double[][] performanceCorrelations;
 	private final Double[][] ageCorrelations;
 
 	private final Double[][] agePercentile10;
@@ -74,7 +74,7 @@ public class AccelerationExperimentData {
 		this.realizedLambdas = new Double[scenarioCnt][iterationCnt];
 		this.realizedUtilities = new Double[scenarioCnt][iterationCnt];
 		this.expectedUtilityChanges = new Double[scenarioCnt][iterationCnt];
-		this.performanceCorrelations = new Double[scenarioCnt][iterationCnt];
+//		this.performanceCorrelations = new Double[scenarioCnt][iterationCnt];
 		this.ageCorrelations = new Double[scenarioCnt][iterationCnt];
 		this.agePercentile10 = new Double[scenarioCnt][iterationCnt];
 		this.agePercentile20 = new Double[scenarioCnt][iterationCnt];
@@ -95,7 +95,8 @@ public class AccelerationExperimentData {
 			TabularFileParser parser = new TabularFileParser();
 			AccelerationLogHandler handler = new AccelerationLogHandler(this.betas[scenarioIndex],
 					this.realizedLambdas[scenarioIndex], this.realizedUtilities[scenarioIndex],
-					this.expectedUtilityChanges[scenarioIndex], this.performanceCorrelations[scenarioIndex],
+					this.expectedUtilityChanges[scenarioIndex], 
+//					this.performanceCorrelations[scenarioIndex],
 					this.ageCorrelations[scenarioIndex], this.agePercentile10[scenarioIndex],
 					this.agePercentile20[scenarioIndex], this.agePercentile30[scenarioIndex],
 					this.agePercentile40[scenarioIndex], this.agePercentile50[scenarioIndex],
@@ -164,9 +165,9 @@ public class AccelerationExperimentData {
 		return this.newSeries(key, this.expectedUtilityChanges);
 	}
 
-	YIntervalSeries newPerformanceCorrelationSeries(final String key) {
-		return this.newSeries(key, this.performanceCorrelations);
-	}
+//	YIntervalSeries newPerformanceCorrelationSeries(final String key) {
+//		return this.newSeries(key, this.performanceCorrelations);
+//	}
 
 	YIntervalSeries newAgeCorrelationSeries(final String key) {
 		return this.newSeries(key, this.ageCorrelations);

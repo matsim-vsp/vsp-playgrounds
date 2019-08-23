@@ -21,51 +21,12 @@
 package playground.benjamin.scenarios.munich.controller;
 
 
-import javax.inject.Provider;
 import org.apache.log4j.Logger;
-import org.matsim.analysis.CalcLegTimes;
-import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.consistency.ConfigConsistencyCheckerImpl;
-import org.matsim.core.controler.ControlerUtils;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.corelisteners.PlansScoring;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
-import org.matsim.core.population.algorithms.AbstractPersonAlgorithm;
-import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
-import org.matsim.core.population.algorithms.PersonPrepareForSim;
-import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.replanning.PlanStrategy;
-import org.matsim.core.replanning.PlanStrategyImpl;
-import org.matsim.core.replanning.StrategyManager;
-import org.matsim.core.replanning.modules.AbstractMultithreadedModule;
-import org.matsim.core.replanning.selectors.ExpBetaPlanChanger;
-import org.matsim.core.replanning.selectors.ExpBetaPlanSelector;
-import org.matsim.core.replanning.selectors.WorstPlanForRemovalSelector;
-import org.matsim.core.router.PlanRouter;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
-import org.matsim.vis.otfvis.OTFFileWriter;
-import org.matsim.vis.snapshotwriters.SnapshotWriter;
-import org.matsim.vis.snapshotwriters.SnapshotWriterManager;
-import sun.util.logging.resources.logging;
 
 /**
  * @author benjamin after nagel

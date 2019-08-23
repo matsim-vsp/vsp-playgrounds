@@ -59,17 +59,17 @@ public class FixCottbusResultsIT {
 	
 	@Test
 	public void testBC(){		
-		fixResults(NetworkType.V1, PopulationType.WoMines, SignalType.MS, 65208962.0);
+		fixResults(NetworkType.V1, PopulationType.WoMines, SignalType.MS, 65281540.0);
 	}
 
 	@Test
 	public void testBCContinuedFreeRouteChoice(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1096817.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1088907.0);
 	}
 	
 	@Test
 	public void testBCContinuedFixedRouteSet(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1073110.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1068391.0);
 	}	
 	
 	private void fixResults(NetworkType netType, PopulationType popType, SignalType signalType, double expectedTotalTt) {
@@ -81,7 +81,6 @@ public class FixCottbusResultsIT {
 		
 		Controler controler = new Controler(scenario);
 		// add missing modules
-//		controler.addOverridingModule(new SignalsModule());
 		Signals.configure( controler );
 
 		TtTotalTravelTime handler = new TtTotalTravelTime();

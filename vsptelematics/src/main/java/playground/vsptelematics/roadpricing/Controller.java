@@ -30,7 +30,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.roadpricing.ControlerDefaultsWithRoadPricingModule;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.contrib.roadpricing.RoadPricingScheme;
 import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.core.config.Config;
@@ -70,7 +70,7 @@ public class Controller {
 	
 	
 	private void addListener(Controler c) {
-        c.setModules(new ControlerDefaultsWithRoadPricingModule());
+		c.addOverridingModule(new RoadPricingModule() );
         c.addOverridingModule(new AbstractModule() {
 			  @Override
 			  public void install() {

@@ -154,7 +154,7 @@ public class IncomeDistributionGenerator {
 
 			String mode =  ((Leg) p.getSelectedPlan().getPlanElements().get(1)).getMode();
 
-			double inc = (double) sc.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
+			double inc = (double) p.getAttributes().getAttribute(PatnaUtils.INCOME_ATTRIBUTE);
 			SortedMap<String, Integer > mode2counter = this.avgInc2mode2Count.get(inc);
 
 			if(mode2counter==null) {

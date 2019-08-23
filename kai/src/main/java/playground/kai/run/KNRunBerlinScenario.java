@@ -1,31 +1,22 @@
 package playground.kai.run;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
-import org.matsim.contrib.common.diversitygeneration.planselectors.DiversityGeneratingPlansRemover;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
-import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.gbl.Gbl;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.run.RunBerlinScenario;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.matsim.core.config.groups.PlanCalcScoreConfigGroup.*;
-import static org.matsim.core.config.groups.PlansCalcRouteConfigGroup.*;
-import static org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.*;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.gbl.Gbl;
+import org.matsim.run.RunBerlinScenario;
 
 class KNRunBerlinScenario {
 	private enum MyScenario { bln1pct, bln10pct, equil } ;
@@ -86,7 +77,6 @@ class KNRunBerlinScenario {
 				config.network().setInputFile( "../../equil/network.xml" );
 //				config.plans().setInputFile( "../../equil/plans100.xml" );
 				config.plans().setInputFile( "../../equil/plans2000.xml.gz" );
-				config.plans().setInputPersonAttributeFile( null );
 				
 				config.qsim().setFlowCapFactor( 1.0 );
 				config.qsim().setStorageCapFactor( 1.0 );
@@ -139,10 +129,6 @@ class KNRunBerlinScenario {
 				}
 				for ( Person person : scenario.getPopulation().getPersons().values()  ) {
 					person.getAttributes().putAttribute( config.plans().getSubpopulationAttributeName(), "person" ) ;
-					
-					final String objectId = person.getId().toString() ;
-					final String attribute = config.plans().getSubpopulationAttributeName() ;
-					scenario.getPopulation().getPersonAttributes().putAttribute( objectId, attribute, "person" ) ;
 				}
 				break;
 		}

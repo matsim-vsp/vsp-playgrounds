@@ -30,9 +30,11 @@ import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.benjamin.BkPaths;
 
@@ -176,7 +178,7 @@ if ( true ) {
 }
 	
   private static RoadPricingScheme loadTollLinksFile(String tollLinksFilePath) {
-	  RoadPricingSchemeImpl scheme = RoadPricingUtils.createDefaultScheme();
+	  RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(ScenarioUtils.createScenario(ConfigUtils.createConfig()));
 	  RoadPricingReaderXMLv1 reader = new RoadPricingReaderXMLv1(scheme);
 		reader.readFile(tollLinksFilePath);
 		return scheme;

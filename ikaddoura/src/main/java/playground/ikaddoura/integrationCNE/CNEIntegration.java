@@ -23,6 +23,8 @@
 package playground.ikaddoura.integrationCNE;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.vtts.VTTSHandler;
+import org.matsim.analysis.vtts.VTTScomputation;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionAnalysisModule;
@@ -39,10 +41,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 
-//import playground.agarwalamit.analysis.emission.AirPollutionExposureAnalysisControlerListener;
-//import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
-import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.analysis.vtts.VTTScomputation;
 import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
@@ -167,7 +165,7 @@ public class CNEIntegration {
 		final VTTSHandler vttsHandler;
 		if (useTripAndAgentSpecificVTTSForRouting) {
 			log.info("Using the agent- and trip-specific VTTS for routing.");
-			vttsHandler = new VTTSHandler(controler.getScenario());
+			vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 			controler.addControlerListener(new VTTScomputation(vttsHandler));
 		} else {
 			log.info("Using the approximate and uniform VTTS for routing: (-beta_traveling + beta_performing) / beta_money");

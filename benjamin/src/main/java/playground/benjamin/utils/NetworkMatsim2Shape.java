@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -77,9 +78,8 @@ public class NetworkMatsim2Shape {
 			net = scenario.getNetwork();
 			new MatsimNetworkReader(scenario.getNetwork()).readFile(netFile);
 		} else {
-			Network network = scenario.getNetwork();
 			new MatsimNetworkReader(scenario.getNetwork()).readFile(netFile);
-			net = filterNetwork(network);
+			net = filterNetwork(scenario);
 		}
 //		new Links2ESRIShape(net, filePath + networkName + outFileType, TransformationFactory.WGS84).write();
 //		new Links2ESRIShape(net, filePath + networkName + outFileType, TransformationFactory.CH1903_LV03_GT).write();
@@ -88,17 +88,17 @@ public class NetworkMatsim2Shape {
 //		new Links2ESRIShape(net, filePath + networkName + outFileType, "WGS84_UTM32T").write();
 	}
 
-	private static Network filterNetwork(Network network) {
+	private static Network filterNetwork(Scenario scenario) {
 		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(TransformationFactory.CH1903_LV03_GT, TransformationFactory.DHDN_GK4);
 //		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(TransformationFactory.CH1903_LV03_GT, "WGS84_UTM32T");
 		
 		
 		Network net = NetworkUtils.createNetwork();
-		RoadPricingSchemeImpl rps = RoadPricingUtils.createDefaultScheme();
+		RoadPricingSchemeImpl rps = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 		RoadPricingReaderXMLv1 rpr = new RoadPricingReaderXMLv1(rps);
 		rpr.readFile(linksToFilter);
 		Set<Id<Link>> linkList = rps.getTolledLinkIds();
-		for(Link link : network.getLinks().values()){
+		for(Link link : scenario.getNetwork().getLinks().values()){
 			Id linkId = link.getId();
 			if(linkList.contains(linkId)){
 				Id fromId = link.getFromNode().getId();

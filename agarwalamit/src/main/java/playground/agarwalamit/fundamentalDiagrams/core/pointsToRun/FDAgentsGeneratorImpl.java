@@ -149,7 +149,6 @@ public class FDAgentsGeneratorImpl implements FDAgentsGenerator {
 
         //remove existing persons and person attributes
         population.getPersons().clear();
-        population.getPersonAttributes().clear();
 
         for (int i=0; i<travelModes.length; i++){
             for (int ii = 0; ii < pointToRun.get(i); ii++){
@@ -158,7 +157,7 @@ public class FDAgentsGeneratorImpl implements FDAgentsGenerator {
                 // a blank plan is necessary otherwise VspPlansCleaner will throw a NPE. Amit Apr'18
                 person.addPlan(population.getFactory().createPlan());
                 population.addPerson(person);
-                population.getPersonAttributes().putAttribute(personId.toString(), FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
+                person.getAttributes().putAttribute(FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
             }
             this.fdDataContainer.getTravelModesFlowData().get(travelModes[i]).setnumberOfAgents(pointToRun.get(i));
         }

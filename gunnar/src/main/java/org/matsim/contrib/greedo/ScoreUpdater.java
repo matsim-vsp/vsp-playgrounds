@@ -50,9 +50,9 @@ class ScoreUpdater<L> {
 
 	private final SpaceTimeCounts<L> individualWeightedChanges;
 
-	private final double scoreChangeIfZero;
+	private /* final */ double scoreChangeIfZero;
 
-	private final double scoreChangeIfOne;
+	private /* final */ double scoreChangeIfOne;
 
 	private boolean residualsUpdated = false;
 
@@ -60,14 +60,14 @@ class ScoreUpdater<L> {
 
 	ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
 			final double meanLambda, final double beta, final DynamicData<L> interactionResiduals,
-			final double individualUtilityChange) {
+			final double individualUtilityChange, final boolean correctAgentSize) {
 
 		/*
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, true, true);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, true, true));
 
 		/*
 		 * Update the interaction residuals.
@@ -107,6 +107,12 @@ class ScoreUpdater<L> {
 
 		this.scoreChangeIfOne = scoreIfOne - scoreIfMean;
 		this.scoreChangeIfZero = scoreIfZero - scoreIfMean;
+
+		if (correctAgentSize) {
+			final double agentSizeCorrection = (-1.0) * this.individualWeightedChanges.sumOfSquareEntries();
+			this.scoreChangeIfOne += (1.0 - meanLambda) * agentSizeCorrection;
+			this.scoreChangeIfZero += (0.0 - meanLambda) * agentSizeCorrection;
+		}
 	}
 
 	// -------------------- INTERNALS --------------------

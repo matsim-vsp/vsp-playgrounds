@@ -49,11 +49,12 @@ public class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final boolean useParticleWeight,
+			final boolean useSlotWeight) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
 				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
-					this.add(newKey(visit.spaceObject, timeBin), visit.weight);
+					this.add(newKey(visit.spaceObject, timeBin), visit.weight(useParticleWeight, useSlotWeight));
 				}
 			}
 		}
@@ -95,5 +96,15 @@ public class SpaceTimeCounts<L> {
 		for (Map.Entry<Tuple<L, Integer>, Double> otherEntry : other.data.entrySet()) {
 			this.set(otherEntry.getKey(), this.get(otherEntry.getKey()) - otherEntry.getValue());
 		}
+	}
+
+	// NEW
+
+	public double sumOfSquareEntries() {
+		double result = 0.0;
+		for (double val : this.data.values()) {
+			result += val * val;
+		}
+		return result;
 	}
 }
