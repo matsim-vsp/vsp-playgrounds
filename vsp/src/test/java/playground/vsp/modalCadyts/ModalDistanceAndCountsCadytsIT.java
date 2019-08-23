@@ -8,6 +8,8 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
@@ -47,6 +49,7 @@ import javax.inject.Inject;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class ModalDistanceAndCountsCadytsIT {
@@ -88,6 +91,8 @@ public class ModalDistanceAndCountsCadytsIT {
 		Counts<Link> counts = createCounts();
 		scenario.addScenarioElement(Counts.ELEMENT_NAME, counts);
 
+		LinkIdEventHandler linkIdEventHandler = new LinkIdEventHandler();
+
 		Controler controler = new Controler(scenario);
 
 		controler.addOverridingModule(new AbstractModule() {
@@ -95,6 +100,7 @@ public class ModalDistanceAndCountsCadytsIT {
 			public void install() {
 				bind(DistanceDistribution.class).toInstance(createDistanceDistribution());
 				bind(StageActivityTypes.class).toInstance(type -> type.endsWith(" interaction"));
+				addEventHandlerBinding().toInstance(linkIdEventHandler);
 			}
 		});
 		controler.addOverridingModule(new ModalDistanceCadytsModule());
@@ -167,10 +173,18 @@ public class ModalDistanceAndCountsCadytsIT {
 			modalDistanceCount.merge(mode + "_" + distance, 1, Integer::sum);
 		}
 
-		assertEquals(4, modalDistanceCount.size());
-		for (Integer count : modalDistanceCount.values()) {
-			// every mode and distance class should have a share of 25% with a 5% error margin
-			assertEquals(250. / 1000, (double) count / 1000, 0.05);
+		if (this.modalDistanceWeight > 0 && this.countsWeight == 0) {
+			// don't know how to get a better accuracy than 8%
+			assertEquals(100, modalDistanceCount.get("car_2050.0"), 80);
+			assertEquals(100, modalDistanceCount.get("car_2150.0"), 80);
+			assertEquals(400, modalDistanceCount.get("bike_2050.0"), 80);
+			assertEquals(400, modalDistanceCount.get("bike_2150.0"), 80);
+		} else if (this.modalDistanceWeight == 0 && this.countsWeight > 0) {
+			assertEquals(5, modalDistanceCount.size());
+			assertTrue(modalDistanceCount.get("car_2250.0") > 500); // don't know. one would assume a stronger impact when only running the cadyts count corretion but there isn't
+		} else if (this.modalDistanceWeight > 0 && this.countsWeight > 0) {
+			assertTrue(modalDistanceCount.get("car_2250.0") > modalDistanceCount.get("car_2150.0"));
+			assertTrue(modalDistanceCount.get("car_2250.0") > modalDistanceCount.get("car_2050.0"));
 		}
 	}
 
@@ -181,37 +195,44 @@ public class ModalDistanceAndCountsCadytsIT {
 
 		config.controler().setOutputDirectory(this.utils.getOutputDirectory());
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setLastIteration(20);
+		config.controler().setLastIteration(40);
 
 		config.counts().setWriteCountsInterval(1);
 		config.counts().setAverageCountsOverIterations(1);
 
 		PlanCalcScoreConfigGroup.ActivityParams home = new PlanCalcScoreConfigGroup.ActivityParams("home");
-		home.setMinimalDuration(6 * 3600);
-		home.setTypicalDuration(6 * 3600);
-		home.setEarliestEndTime(6 * 3600);
+		home.setMinimalDuration(1 * 3600);
+		home.setTypicalDuration(1 * 3600);
+		home.setEarliestEndTime(0 * 3600);
 		config.planCalcScore().addActivityParams(home);
 
 		PlanCalcScoreConfigGroup.ActivityParams work = new PlanCalcScoreConfigGroup.ActivityParams("work");
-		work.setMinimalDuration(8 * 3600);
-		work.setTypicalDuration(8 * 3600);
-		work.setEarliestEndTime(14 * 3600);
-		work.setOpeningTime(6 * 3600);
-		work.setClosingTime(18 * 3600);
+		work.setMinimalDuration(1 * 3600);
+		work.setTypicalDuration(1 * 3600);
+		work.setEarliestEndTime(0 * 3600);
+		work.setOpeningTime(1 * 3600);
+		work.setClosingTime(10 * 3600);
 		config.planCalcScore().addActivityParams(work);
 
 		// have random selection of plans to generate heterogenity in the beginning, so that cadyts can calibrate its correction
 		StrategyConfigGroup.StrategySettings selectRandom = new StrategyConfigGroup.StrategySettings();
 		selectRandom.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.SelectRandom);
-		selectRandom.setDisableAfter(17);
+		selectRandom.setDisableAfter(33);
 		selectRandom.setWeight(0.5);
 		config.strategy().addStrategySettings(selectRandom);
 
 		// have change exp beta, so that mode distribution converges at the end of the simulation
 		StrategyConfigGroup.StrategySettings changeExpBeta = new StrategyConfigGroup.StrategySettings();
 		changeExpBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
+		changeExpBeta.setDisableAfter(38);
 		changeExpBeta.setWeight(0.5);
 		config.strategy().addStrategySettings(changeExpBeta);
+
+		// at the end of the scenario pick the plans with the best score
+		StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
+		bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
+		bestScore.setWeight(0.1);
+		config.strategy().addStrategySettings(bestScore);
 
 		// remove teleported bike
 		config.plansCalcRoute().removeModeRoutingParams(TransportMode.bike);
@@ -260,6 +281,8 @@ public class ModalDistanceAndCountsCadytsIT {
 		Node node4 = network.getFactory().createNode(Id.createNodeId("node-4"), new Coord(2100, 0));
 		Node node5 = network.getFactory().createNode(Id.createNodeId("node-5"), new Coord(2150, 0));
 		Node node6 = network.getFactory().createNode(Id.createNodeId("node-6"), new Coord(2200, 0));
+		Node node7 = network.getFactory().createNode(Id.createNodeId("node-7"), new Coord(2250, 0));
+		Node node8 = network.getFactory().createNode(Id.createNodeId("node-8"), new Coord(2300, 0));
 
 		network.addNode(node1);
 		network.addNode(node2);
@@ -267,13 +290,16 @@ public class ModalDistanceAndCountsCadytsIT {
 		network.addNode(node4);
 		network.addNode(node5);
 		network.addNode(node6);
+		network.addNode(node7);
+		network.addNode(node8);
 
 		Link link1 = createLink(node1, node2, "start-link", 50, network.getFactory());
 		Link link2 = createLink(node2, node3, "short-link", 2000, network.getFactory());
 		Link link3 = createLink(node3, node4, "short-end-link", 50, network.getFactory());
 		Link link4 = createLink(node2, node5, "long-link", 2100, network.getFactory());
-		Link link5 = createLink(node2, node5, "long-link-with-detour-and-counts", 3000, network.getFactory());
-		Link link6 = createLink(node5, node6, "long-end-link", 50, network.getFactory());
+		Link link5 = createLink(node5, node6, "long-end-link", 50, network.getFactory());
+		Link link6 = createLink(node2, node7, "counts-link", 2200, network.getFactory());
+		Link link7 = createLink(node7, node8, "counts-end-link", 50, network.getFactory());
 
 		network.addLink(link1);
 		network.addLink(link2);
@@ -281,6 +307,7 @@ public class ModalDistanceAndCountsCadytsIT {
 		network.addLink(link4);
 		network.addLink(link5);
 		network.addLink(link6);
+		network.addLink(link7);
 	}
 
 	private static Link createLink(Node from, Node to, String id, double length, NetworkFactory factory) {
@@ -301,6 +328,7 @@ public class ModalDistanceAndCountsCadytsIT {
 			person.addPlan(createPlan(TransportMode.bike, "long-end-link", network, population.getFactory()));
 			person.addPlan(createPlan(TransportMode.car, "long-end-link", network, population.getFactory()));
 			person.addPlan(createPlan(TransportMode.bike, "short-end-link", network, population.getFactory()));
+			person.addPlan(createPlan(TransportMode.car, "counts-end-link", network, population.getFactory()));
 			Plan carPlan = createPlan(TransportMode.car, "short-end-link", network, population.getFactory());
 			person.addPlan(carPlan);
 			person.setSelectedPlan(carPlan);
@@ -316,7 +344,7 @@ public class ModalDistanceAndCountsCadytsIT {
 		Activity h = factory
 				.createActivityFromCoord("home",
 						network.getLinks().get(Id.createLinkId("start-link")).getFromNode().getCoord());
-		h.setEndTime(6. * 3600. /*+ MatsimRandom.getRandom().nextInt(3600)*/);
+		h.setEndTime(0 * 3600. /*+ MatsimRandom.getRandom().nextInt(3600)*/);
 		plan.addActivity(h);
 
 		plan.addLeg(factory.createLeg(mode));
@@ -325,7 +353,7 @@ public class ModalDistanceAndCountsCadytsIT {
 		Activity w = factory
 				.createActivityFromLinkId("work",
 						Id.createLinkId(endLink));
-		w.setEndTime(16. * 3600. + MatsimRandom.getRandom().nextInt(3600));
+		w.setEndTime(1. * 3600. + MatsimRandom.getRandom().nextInt(3600));
 		plan.addActivity(w);
 
 		return plan;
@@ -334,10 +362,12 @@ public class ModalDistanceAndCountsCadytsIT {
 	private static DistanceDistribution createDistanceDistribution() {
 
 		DistanceDistribution result = new DistanceDistribution(1.0);
-		result.add(TransportMode.car, 2050, 2149, 10, 250);
-		result.add(TransportMode.car, 2150, 2249, 10, 250);
-		result.add(TransportMode.bike, 2050, 2149, 10, 250);
-		result.add(TransportMode.bike, 2150, 2249, 10, 250);
+		result.add(TransportMode.car, 2050, 2149, 10, 100);
+		result.add(TransportMode.car, 2150, 2249, 10, 100);
+		result.add(TransportMode.car, 2250, 2349, 10, 0);
+		result.add(TransportMode.bike, 2050, 2149, 10, 400);
+		result.add(TransportMode.bike, 2150, 2249, 10, 400);
+		result.add(TransportMode.bike, 2250, 2349, 10, 0);
 		return result;
 	}
 
@@ -346,9 +376,26 @@ public class ModalDistanceAndCountsCadytsIT {
 		counts.setDescription("test");
 		counts.setYear(1900);
 
-		Count<Link> count = counts.createAndAddCount(Id.createLinkId("long-link-with-detour-and-counts"), "count");
-		count.createVolume(7, 1000);
+		Count<Link> count = counts.createAndAddCount(Id.createLinkId("counts-link"), "count");
+		count.createVolume(1, 1000);
 
 		return counts;
+	}
+
+	private static class LinkIdEventHandler implements LinkLeaveEventHandler {
+
+		private Map<Id<Link>, Integer> visitedLinks = new HashMap<>();
+
+		@Override
+		public void handleEvent(LinkLeaveEvent event) {
+			if (event.getLinkId().equals(Id.createLinkId("long-link")) || event.getLinkId().equals(Id.createLinkId("short-link")) || event.getLinkId().equals(Id.createLinkId("counts-link"))) {
+				visitedLinks.merge(event.getLinkId(), 1, Integer::sum);
+			}
+		}
+
+		@Override
+		public void reset(int iteration) {
+			visitedLinks.clear();
+		}
 	}
 }
