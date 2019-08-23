@@ -161,7 +161,7 @@ public class TransitRouteContainer {
 		Count count = counts.createAndAddCount(stopIndexId, stationName.toString());
 //		if(count == null){
 //			//or get the old one if there is one
-//			count = counts.getCount(stopIndexId);
+//			count = counts.getValue(stopIndexId);
 //		}
 //		Integer slice = getTimeSlice(time);
 ////		if(slice > this.maxSlice){
