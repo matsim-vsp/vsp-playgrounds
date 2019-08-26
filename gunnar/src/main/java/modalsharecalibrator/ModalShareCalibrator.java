@@ -51,25 +51,11 @@ public class ModalShareCalibrator {
 		this.inertia = inertia;
 	}
 
-	// -------------------- INTERNALS --------------------
+	// -------------------- IMPLEMENTATION --------------------
 
-	private Set<String> allModes() {
+	public Set<String> allModes() {
 		return Collections.unmodifiableSet(this.mode2realShare.keySet());
 	}
-
-	// private Map<String, Double> getMode2usage(final Id<Person> personId) {
-	// Map<String, Double> result = this.personId2mode2usage.get(personId);
-	// if (result == null) {
-	// result = new LinkedHashMap<String, Double>();
-	// // for (String mode : this.allModes()) {
-	// // result.put(mode, 0.0);
-	// // }
-	// this.personId2mode2usage.put(personId, result);
-	// }
-	// return result;
-	// }
-
-	// -------------------- IMPLEMENTATION --------------------
 
 	public void addRealData(final String mode, final double share) {
 		this.mode2realShare.put(mode, share);
@@ -98,7 +84,7 @@ public class ModalShareCalibrator {
 		}
 	}
 
-	public Map<String, Double> getSimulatedModalShares() {
+	public Map<String, Double> getSimulatedShares() {
 
 		final Map<String, Double> result = new LinkedHashMap<>();
 		for (String mode : this.allModes()) {
@@ -174,4 +160,65 @@ public class ModalShareCalibrator {
 
 		return dQ_dASC;
 	}
+
+	public class ImprovementStep {
+
+		public final Map<String, Double> deltaASC;
+//		public final Map<String, Double> deltaP;
+//		public final Map<String, Double> realDeltaP;
+		public final double stepSizeFactor;
+
+		private ImprovementStep(final Map<String, Double> deltaASC, final Map<String, Double> deltaP,
+				final Map<String, Double> realDeltaP, final double stepSizeFactor) {
+			this.deltaASC = Collections.unmodifiableMap(deltaASC);
+//			this.deltaP = Collections.unmodifiableMap(deltaP);
+//			this.realDeltaP = ((realDeltaP == null) ? null : Collections.unmodifiableMap(realDeltaP));
+			this.stepSizeFactor = stepSizeFactor;
+		}
+	}
+
+	public ImprovementStep getImprovementStep(final double stepSize, final Map<String, Double> oldSimulatedShares,
+			final Map<String, Double> simulatedShares, final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs,
+			final Map<String, Double> dQ_dASC) {
+
+		final Map<String, Double> deltaASC = new LinkedHashMap<>();
+		for (String mode : this.allModes()) {
+			deltaASC.put(mode, -stepSize * dQ_dASC.get(mode));
+		}
+
+		final Map<String, Double> deltaP = new LinkedHashMap<>();
+		for (String choiceMode : this.allModes()) {
+			deltaP.put(choiceMode, 0.0);
+			for (String ascMode : this.allModes()) {
+				deltaP.put(choiceMode, deltaP.get(choiceMode)
+						+ deltaASC.get(ascMode) * dSimulatedShares_dASCs.get(new Tuple<>(choiceMode, ascMode)));
+			}
+		}
+
+		final Map<String, Double> realDeltaP;
+		final double stepSizeFactor;
+		if (oldSimulatedShares == null) {
+			realDeltaP = null;
+			stepSizeFactor = 1.0;
+		} else {
+			realDeltaP = new LinkedHashMap<>();
+			for (String mode : this.allModes()) {
+				realDeltaP.put(mode, simulatedShares.get(mode) - oldSimulatedShares.get(mode));
+			}
+			double stepSizeFactorNumerator = 0;
+			double stepSizeFactorDenominator = 0;
+			for (String mode : this.allModes()) {
+				final double realShare = this.mode2realShare.get(mode);
+				stepSizeFactorNumerator += (oldSimulatedShares.get(mode) - realShare) * realDeltaP.get(mode) / realShare
+						/ (1.0 - realShare);
+				stepSizeFactorDenominator += realDeltaP.get(mode) * realDeltaP.get(mode) / realShare
+						/ (1.0 - realShare);
+			}
+
+			stepSizeFactor = (-1.0) * stepSizeFactorNumerator / stepSizeFactorDenominator;
+		}
+
+		return new ImprovementStep(deltaASC, deltaP, realDeltaP, stepSizeFactor);
+	}
+
 }
