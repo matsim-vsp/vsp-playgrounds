@@ -131,6 +131,6 @@ public class ModeSwitchAnalysisMain {
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.taxi);
 		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes, null);
-		modeSwitchAnalysis.analyzeByMode();
+		modeSwitchAnalysis.analyzeByMode(null);
     }
 }
