@@ -27,8 +27,6 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 
-import modalsharecalibrator.ModalShareCalibrator.ImprovementStep;
-
 /**
  *
  * @author Gunnar Flötteröd
@@ -66,21 +64,20 @@ public class ModalShareCalibratorTest {
 		}
 		final Double[] ascs = new Double[] { 0.0, 0.0, 0.0, 0.0 };
 
-		final double inertia = 0.5;
-		double stepSize = 0.01;
-		final ModalShareCalibrator calibrator = new ModalShareCalibrator(inertia);
+		final double initialTrustRegion = 1.0;
+		final double iterationExponent = 0.5;
+		final ModalShareCalibrator calibrator = new ModalShareCalibrator(initialTrustRegion, iterationExponent);
 
 		calibrator.addRealData("car", 0.5);
 		calibrator.addRealData("pt", 0.3);
 		calibrator.addRealData("walk", 0.1);
 		calibrator.addRealData("bike", 0.1);
 
-		Map<String, Double> oldSimulatedShares = null;
-		final int _R = 200;
+		final int _R = 100;
 		for (int r = 0; r < _R; r++) {
 			for (int n = 0; n < _N; n++) {
 				final String choice = modes[this.indexOfMax(utils[n], ascs)];
-				calibrator.updateModeUsage(Id.createPersonId(n), choice);
+				calibrator.updateModeUsage(Id.createPersonId(n), choice, r);
 			}
 
 			final Map<String, Double> simulatedShares = calibrator.getSimulatedShares();
@@ -88,19 +85,14 @@ public class ModalShareCalibratorTest {
 					.get_dSimulatedShares_dASCs(simulatedShares);
 			final Map<String, Double> dQ_dASC = calibrator.get_dQ_dASCs(simulatedShares, dSimulatedShares_dASCs);
 
-			final ImprovementStep imprStep = calibrator.getImprovementStep(stepSize, oldSimulatedShares, simulatedShares,
-					dSimulatedShares_dASCs, dQ_dASC);
-			stepSize = Math.max(0.5 * stepSize, Math.min(2.0 * stepSize, stepSize * imprStep.stepSizeFactor));
-			ascs[0] += imprStep.deltaASC.get("car");
-			ascs[1] += imprStep.deltaASC.get("pt");
-			ascs[2] += imprStep.deltaASC.get("walk");
-			ascs[3] += imprStep.deltaASC.get("bike");
+			final Map<String, Double> deltaASC = calibrator.getDeltaASC(dQ_dASC, r);
+			ascs[0] += deltaASC.get("car");
+			ascs[1] += deltaASC.get("pt");
+			ascs[2] += deltaASC.get("walk");
+			ascs[3] += deltaASC.get("bike");
 
 			System.out.println(r + "\t" + calibrator.getObjectiveFunctionValue(simulatedShares) + "\t" + simulatedShares
-					+ "\t" + Arrays.asList(ascs) + "\t" + stepSize);
-			// System.out.println(dSimulatedShares_dASCs);
-			
-			oldSimulatedShares = simulatedShares;
+					+ "\t" + Arrays.asList(ascs));
 		}
 
 		System.out.println("... DONE");

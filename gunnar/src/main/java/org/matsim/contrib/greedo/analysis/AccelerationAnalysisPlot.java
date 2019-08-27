@@ -20,8 +20,11 @@
 package org.matsim.contrib.greedo.analysis;
 
 import java.awt.Color;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jfree.data.xy.XYSeries;
@@ -80,14 +83,22 @@ public class AccelerationAnalysisPlot {
 		}
 	}
 
+	private String newDummy(List<String> allDummies) {
+		String result = "DUMMY" + allDummies.size();
+		allDummies.add(result);
+		return result;
+	}
+
 	public void render(String fileName) {
+
+		List<String> dummyLabels = new LinkedList<>();
 
 		final XYSeriesCollection data = new XYSeriesCollection();
 		for (int seriesIndex = 0; seriesIndex < this.allSeries.size(); seriesIndex++) {
 			YIntervalSeries intervalSeries = this.allSeries.get(seriesIndex);
-			final XYSeries lowerLine = new XYSeries("lower" + seriesIndex);
+			final XYSeries lowerLine = new XYSeries(newDummy(dummyLabels));
 			// final XYSeries meanLine = new XYSeries("mean" + seriesIndex);
-			final XYSeries upperLine = new XYSeries("upper" + seriesIndex);
+			final XYSeries upperLine = new XYSeries(newDummy(dummyLabels));
 			for (int itemIndex = 0; itemIndex < intervalSeries.getItemCount(); itemIndex++) {
 				final double yLow = intervalSeries.getYLowValue(itemIndex);
 				final double y = intervalSeries.getYValue(itemIndex);
@@ -109,7 +120,7 @@ public class AccelerationAnalysisPlot {
 		for (int seriesIndex = 0; seriesIndex < this.allSeries.size(); seriesIndex++) {
 
 			// TODO [CONTINUE HERE] TURN OFF LABELS IN INTERVAL PLOTS
-			
+
 			chart.getSeriesCollection().setColor(seriesIndex * 2 + 0, Color.BLACK);
 			chart.getSeriesCollection().setColor(seriesIndex * 2 + 1, Color.BLACK);
 
@@ -141,8 +152,24 @@ public class AccelerationAnalysisPlot {
 			chart.setAutoRange00(true, true);
 
 		}
+
 		chart.setLatexDocFlag(false);
-		chart.toLatexFile(fileName, 6, 4);
+
+		String result = chart.toLatex(6, 4);
+		for (String dummy : dummyLabels) {
+			result = result.replace("node[right] {" + dummy + "};\n", "");
+		}
+		
+		try {
+			PrintWriter writer = new PrintWriter(fileName);
+			writer.print(result);
+			writer.flush();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		
+		// chart.toLatexFile(fileName, 6, 4);
 		// chart.setLatexDocFlag(true);
 		// System.out.println(chart.toLatex(12, 8));
 	}
