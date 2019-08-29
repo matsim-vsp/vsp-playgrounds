@@ -36,7 +36,7 @@ public class RunDrt {
 		Config config = ConfigUtils.loadConfig(args[0],
 				new DrtConfigGroup(), new DvrpConfigGroup(), new VariableAccessConfigGroup());
 
-		config.controler().setOutputDirectory(IOUtils.newUrl(config.getContext(), args[1]).getFile());
+		config.controler().setOutputDirectory(IOUtils.extendUrl(config.getContext(), args[1]).getFile());
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
@@ -52,7 +52,7 @@ public class RunDrt {
 		
 		Set<Id<Link>> monitoredStartAndEndLinks = new HashSet<>();
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(IOUtils.newUrl(config.getContext(), "../network/linksInArea.csv").getFile()));
+			BufferedReader reader = new BufferedReader(new FileReader(IOUtils.extendUrl(config.getContext(), "../network/linksInArea.csv").getFile()));
 			if (reader.readLine().startsWith("id")) {
 				for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 					monitoredStartAndEndLinks.add(Id.createLinkId(line.split(",")[0]));

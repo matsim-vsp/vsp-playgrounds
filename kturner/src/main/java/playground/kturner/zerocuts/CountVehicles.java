@@ -60,7 +60,7 @@ class CountVehicles {
 		eventsManager.addHandler(handlerCountVehicles);
 
 		MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
-		eventsReader.readURL( IOUtils.newUrl( null, inputFileEvents ) );
+		eventsReader.readURL( IOUtils.extendUrl( null, inputFileEvents ) );
 
 		eventsManager.finishProcessing();
 		

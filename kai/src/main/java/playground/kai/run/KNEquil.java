@@ -19,7 +19,7 @@ class KNEquil{
 
 	public static void main( String [] args ) {
 
-		Config config = ConfigUtils.loadConfig( IOUtils.newUrl( ExamplesUtils.getTestScenarioURL( "equil" ) , "config.xml" ) ) ;
+		Config config = ConfigUtils.loadConfig( IOUtils.extendUrl( ExamplesUtils.getTestScenarioURL( "equil" ) , "config.xml" ) ) ;
 
 		config.controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists );
 		config.controler().setLastIteration( 1 );
