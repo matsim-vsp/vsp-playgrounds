@@ -95,7 +95,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -130,8 +130,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -178,8 +178,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setUpdatePriceInterval(1);
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
@@ -227,8 +227,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setUpdatePriceInterval(1);
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			controler.addOverridingModule(new TaxiFareModule());

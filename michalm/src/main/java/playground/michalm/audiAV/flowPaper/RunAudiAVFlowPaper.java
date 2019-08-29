@@ -36,7 +36,7 @@ import com.google.inject.name.Names;
 public class RunAudiAVFlowPaper {
 	public static void run(String configFile, double flowEfficiencyFactor, String inputEvents) {
 		Config config = ConfigUtils.loadConfig(configFile, new MultiModeTaxiConfigGroup(), new DvrpConfigGroup());
-		final Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, false);
+		final Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, false);
 
 		// to speed up computations
 		final TravelTime initialTT = TravelTimeUtils.createTravelTimesFromEvents(controler.getScenario(), inputEvents);

@@ -78,8 +78,8 @@ public class TaxiPricingTestIT {
 		SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		
-		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, false);
+
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config1, false);
 		// fares
 		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
@@ -116,7 +116,7 @@ public class TaxiPricingTestIT {
 		optAVParams2.setChargeTollsFromCarUsers(false);
 		optAVParams2.setChargeTollsFromSAVDriver(true);
 
-		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, false);
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config2, false);
 		// fares
 		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
@@ -153,8 +153,8 @@ public class TaxiPricingTestIT {
 		optAVParams3.setChargeSAVTollsFromPassengers(true);
 		optAVParams3.setChargeTollsFromSAVDriver(true);
 		optAVParams3.setChargeTollsFromCarUsers(false);
-		
-		Controler controler3 = TaxiControlerCreator.createControlerWithSingleModeDrt(config3, false);
+
+		Controler controler3 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config3, false);
 		// drt fares
 		controler3.addOverridingModule(new TaxiFareModule());
 		controler3.addOverridingModule(new SAVPricingModule(controler3.getScenario(), TransportMode.car));
@@ -220,7 +220,7 @@ public class TaxiPricingTestIT {
 		
 		// taxi
 
-		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, false);
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config1, false);
 		// drt fares
 		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
@@ -261,7 +261,7 @@ public class TaxiPricingTestIT {
 		decongestionSettings.setWriteLinkInfoCharts(false);
 		decongestionSettings.setRunFinalAnalysis(false);
 
-		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, false);
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config2, false);
 		// taxi fares
 		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
