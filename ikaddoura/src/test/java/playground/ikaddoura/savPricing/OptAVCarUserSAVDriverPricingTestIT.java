@@ -34,7 +34,7 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -68,8 +68,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler3;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
@@ -119,8 +118,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler1;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup(),
@@ -154,8 +152,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler2;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
@@ -204,8 +201,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler4;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());

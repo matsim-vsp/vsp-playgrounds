@@ -18,17 +18,20 @@
  * *********************************************************************** */
 
 /**
- * 
+ *
  */
 package playground.vsp.avparking;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiModule;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
+import org.matsim.contrib.taxi.run.MultiModeTaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
@@ -37,11 +40,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+
 import playground.vsp.avparking.optimizer.PrivateAVOptimizerProvider;
 import playground.vsp.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author jbischoff An example how to use parking search in MATSim.
@@ -54,38 +55,38 @@ import java.util.List;
 public class RunAvParking {
 
 	public static void main(String[] args) {
-		
-		Config config = ConfigUtils.loadConfig(args[0], new DvrpConfigGroup(), new TaxiConfigGroup());
+
+		Config config = ConfigUtils.loadConfig(args[0], new DvrpConfigGroup(), new MultiModeTaxiConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		AVParkBehavior b ;
-		switch (args[1]){
+		AVParkBehavior b;
+		switch (args[1]) {
 			case "0":
 				b = AVParkBehavior.findfreeSlot;
 				break;
 			case "1":
-				b= AVParkBehavior.garage;
+				b = AVParkBehavior.garage;
 				break;
 			case "2":
-				b= AVParkBehavior.cruise;
+				b = AVParkBehavior.cruise;
 				break;
 			case "3":
-				b= AVParkBehavior.randombehavior;
+				b = AVParkBehavior.randombehavior;
 				break;
 			default:
 				throw new RuntimeException();
-				
+
 		}
-		new RunAvParking().run(config,b);
+		new RunAvParking().run(config, b);
 
 	}
 
 	/**
 	 * @param config
 	 * 			a standard MATSim config
-     *
+	 *
 	 */
 	public void run(Config config, AVParkBehavior b) {
-		config.controler().setOutputDirectory(config.controler().getOutputDirectory()+"/"+b.toString());
+		config.controler().setOutputDirectory(config.controler().getOutputDirectory() + "/" + b.toString());
 		config.qsim().setStartTime(0);
 		config.qsim().setSimStarttimeInterpretation(StarttimeInterpretation.onlyUseStarttime);
 		config.qsim().setSnapshotStyle(SnapshotStyle.withHoles);
@@ -93,7 +94,7 @@ public class RunAvParking {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 
-		PrivateAVFleetGenerator fleet = new PrivateAVFleetGenerator(scenario);  
+		PrivateAVFleetGenerator fleet = new PrivateAVFleetGenerator(scenario);
 		List<Id<Link>> avParkings = new ArrayList<>();
 		avParkings.add(Id.createLinkId(35464));
 		AvParkingContext context = new AvParkingContext(avParkings, b);
@@ -102,11 +103,11 @@ public class RunAvParking {
 			public void install() {
 				bind(Fleet.class).toInstance(fleet);
 				bind(AvParkingContext.class).toInstance(context);
-				addControlerListenerBinding().toInstance(fleet);				
+				addControlerListenerBinding().toInstance(fleet);
 			}
 		});
 		controler.addOverridingModule(new ParkingTaxiModule(PrivateAVOptimizerProvider.class));
-		controler.addOverridingModule(new TaxiModule());
+		controler.addOverridingModule(new MultiModeTaxiModule());
 		controler.run();
 	}
 

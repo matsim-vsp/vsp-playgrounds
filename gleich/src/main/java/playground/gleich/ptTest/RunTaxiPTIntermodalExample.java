@@ -55,7 +55,7 @@
 //	public void run(boolean OTFVis) {
 //		Config config = ConfigUtils.loadConfig(
 //				"intermodal/config.xml",
-//				new TaxiConfigGroup(), new DvrpConfigGroup());
+//				new MultiModeTaxiConfigGroup(), new DvrpConfigGroup());
 //
 //		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 //
@@ -95,7 +95,7 @@
 ////		controler.addOverridingModule(new TaxiOutputModule());
 //		controler.addOverridingModule(TaxiDvrpModules.create());
 //		
-//        controler.addOverridingModule(new TaxiModule());
+//        controler.addOverridingModule(new MultiModeTaxiModule());
 //		
 //		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 //		if (OTFVis) {
