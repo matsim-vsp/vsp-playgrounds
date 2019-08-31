@@ -33,6 +33,7 @@ import org.matsim.contrib.drt.routing.DrtRouteFactory;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigs;
 import org.matsim.contrib.drt.run.DrtModule;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -232,7 +233,7 @@ public final class RunBerlinDrtScenarioA {
 		// dvrp, drt config groups
 		List<ConfigGroup> drtModules = new ArrayList<>();
 		drtModules.add(new DvrpConfigGroup());
-		drtModules.add(new DrtConfigGroup());
+		drtModules.add(new MultiModeDrtConfigGroup());
 		drtModules.add(new DrtFaresConfigGroup());
 		
 		List<ConfigGroup> modules = new ArrayList<>();		

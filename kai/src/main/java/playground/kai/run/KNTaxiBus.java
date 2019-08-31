@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -24,8 +25,9 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public final class KNTaxiBus {
 
 	public static void main(String[] args) {
-		
-		Config config = ConfigUtils.loadConfig("drt_example/drtconfig_door2door.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
+
+		Config config = ConfigUtils.loadConfig("drt_example/drtconfig_door2door.xml", new MultiModeDrtConfigGroup(),
+				new DvrpConfigGroup(), new OTFVisConfigGroup());
 		config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
 //		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());

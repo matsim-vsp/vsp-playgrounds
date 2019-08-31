@@ -22,8 +22,8 @@ package playground.michalm.drt.run;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.av.maxspeed.DvrpTravelTimeWithMaxSpeedLimitModule;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -39,7 +39,7 @@ public class RunOneSharedTaxiWithMaxSpeedExample {
 	private static final String CONFIG_FILE = "one_shared_taxi/one_shared_taxi_config.xml";
 
 	public static void run(boolean otfvis, int lastIteration) {
-		Config config = ConfigUtils.loadConfig(CONFIG_FILE, new DrtConfigGroup(), new DvrpConfigGroup(),
+		Config config = ConfigUtils.loadConfig(CONFIG_FILE, new MultiModeDrtConfigGroup(), new DvrpConfigGroup(),
 				new OTFVisConfigGroup());
 		config.controler().setLastIteration(lastIteration);
 		config.controler().setWriteEventsInterval(lastIteration);
