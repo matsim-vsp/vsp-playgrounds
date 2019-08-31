@@ -139,11 +139,12 @@ public final class RunBerlinDrtScenarioA {
 		// drt + dvrp module
 		controler.addOverridingModule(new MultiModeDrtModule());
 		controler.addOverridingModule(new DvrpModule());
-		controler.configureQSimComponents(
-				DvrpQSimComponents.activateModes(DrtConfigGroup.get(controler.getConfig()).getMode()));
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(
+				DrtConfigGroup.getSingleModeDrtConfig(controler.getConfig()).getMode()));
 
 		// reject drt requests outside the service area
-		controler.addOverridingQSimModule(new AbstractDvrpModeQSimModule(DrtConfigGroup.get(config).getMode()) {
+		controler.addOverridingQSimModule(
+				new AbstractDvrpModeQSimModule(DrtConfigGroup.getSingleModeDrtConfig(config).getMode()) {
 			@Override
 			protected void configureQSim() {
 				bindModal(PassengerRequestValidator.class).toInstance(
@@ -255,7 +256,7 @@ public final class RunBerlinDrtScenarioA {
 		ConfigGroup[] modulesArray = new ConfigGroup[modules.size()];
 		config = berlin.prepareConfig(modules.toArray(modulesArray));
 
-		DrtConfigs.adjustDrtConfig(DrtConfigGroup.get(config), config.planCalcScore());
+		DrtConfigs.adjustDrtConfig(DrtConfigGroup.getSingleModeDrtConfig(config), config.planCalcScore());
 
 		hasPreparedConfig = true;
 		return config;
