@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.Gbl;
@@ -96,7 +97,10 @@ class BuildingEnergyAnalyzerMain {
 			runs.add(args[i]);
 		}
 		//catch logEntries
-		OutputDirectoryLogging.initLogging(new OutputDirectoryHierarchy(outputPath, BuildingEnergyAnalyzer.class.getSimpleName(), OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles, false));
+		OutputDirectoryLogging.initLogging(
+				new OutputDirectoryHierarchy(outputPath, BuildingEnergyAnalyzer.class.getSimpleName(),
+						OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles,
+						ControlerConfigGroup.CompressionType.none));
 		OutputDirectoryLogging.catchLogEntries();
 		// dump input-parameters to log
 		log.info("running class: " + System.getProperty("sun.java.command"));

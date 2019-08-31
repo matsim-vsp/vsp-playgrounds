@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.events.EventsUtils;
@@ -44,9 +45,7 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.algorithms.PersonAlgorithm;
-import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.population.io.StreamingPopulationReader;
-import org.matsim.core.population.io.StreamingDeprecated;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
@@ -104,7 +103,9 @@ public final class LinkActivityCalculationFromEventsMain {
 		int tmax = Integer.parseInt(args[5]);
 		String runId = args[6];
 		//catch logEntries
-		OutputDirectoryLogging.initLogging(new OutputDirectoryHierarchy(outputPath, runId + "." + PREFIX, OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles, false));
+		OutputDirectoryLogging.initLogging(new OutputDirectoryHierarchy(outputPath, runId + "." + PREFIX,
+				OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles,
+				ControlerConfigGroup.CompressionType.none));
 		OutputDirectoryLogging.catchLogEntries();
 		Gbl.enableThreadCpuTimeMeasurement();
 		// dump input-parameters

@@ -96,7 +96,7 @@ public class DistanceAnalysis {
 		reader.addAlgorithm(algo);
 		
 //		new MatsimPopulationReader(sc).parse(IOUtils.getInputStream(plans));
-		reader.parse(IOUtils.getInputStream(plans));
+		reader.parse(IOUtils.getInputStream(IOUtils.getFileUrl(plans)));
 		
 		for(Entry<Id, LinkedList<AbstractAnalysisTrip>> e:  planFilter.getTrips().entrySet()){
 			this.eventsHandler.addPerson(new DistAnalysisAgent(e.getValue(), e.getKey()));
@@ -110,8 +110,8 @@ public class DistanceAnalysis {
 	private void readEvents(String events) {
 		EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(this.eventsHandler);
-		
-		new EventsReaderXMLv1(manager).parse(IOUtils.getInputStream(events));		
+
+		new EventsReaderXMLv1(manager).parse(IOUtils.getInputStream(IOUtils.getFileUrl(events)));
 	}
 
 	/**

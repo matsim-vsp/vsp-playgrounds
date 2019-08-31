@@ -22,30 +22,30 @@ package playground.vsp.andreas.osmBB.extended;
 
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.pt.transitSchedule.api.MinimalTransferTimes;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.FailingObjectAttributes;
 import org.matsim.utils.objectattributes.attributable.Attributes;
-
 
 /**
  * Default implementation of {@link TransitSchedule}, but with modifiable lines and facilities.
- * 
+ * <p>
  * {@inheritDoc}
- * 
+ *
  * @author aneumann
  */
 public class TransitScheduleImpl implements TransitSchedule {
 	private final Map<Id<TransitLine>, TransitLine> transitLines = new TreeMap<Id<TransitLine>, TransitLine>();
 	private final Map<Id<TransitStopFacility>, TransitStopFacility> stopFacilities = new TreeMap<Id<TransitStopFacility>, TransitStopFacility>();
 	private final TransitScheduleFactory factory;
-	private final ObjectAttributes transitLinesAttributes = new ObjectAttributes();
-	private final ObjectAttributes transitStopsAttributes = new ObjectAttributes();
-	
+	private final FailingObjectAttributes transitLinesAttributes = FailingObjectAttributes.createTransitLinesAttributes();
+	private final FailingObjectAttributes transitStopsAttributes = FailingObjectAttributes.createTransitStopsAttributes();
+
 	public TransitScheduleImpl(final TransitScheduleFactory builder) {
 		this.factory = builder;
 	}
@@ -58,12 +58,12 @@ public class TransitScheduleImpl implements TransitSchedule {
 		}
 		this.transitLines.put(id, line);
 	}
-	
+
 	@Override
 	public boolean removeTransitLine(TransitLine line) {
 		return this.transitLines.remove(line.getId()) != null;
 	}
-	
+
 	@Override
 	public void addStopFacility(final TransitStopFacility stop) {
 		final Id id = stop.getId();
@@ -77,29 +77,29 @@ public class TransitScheduleImpl implements TransitSchedule {
 	public Map<Id<TransitLine>, TransitLine> getTransitLines() {
 		return this.transitLines;
 	}
-	
+
 	@Override
 	public Map<Id<TransitStopFacility>, TransitStopFacility> getFacilities() {
 		return this.stopFacilities;
 	}
-	
+
 	@Override
 	public boolean removeStopFacility(final TransitStopFacility stop) {
 		return this.stopFacilities.remove(stop.getId()) != null;
 	}
-	
+
 	@Override
 	public TransitScheduleFactory getFactory() {
 		return this.factory;
 	}
-	
+
 	@Override
-	public ObjectAttributes getTransitLinesAttributes() {
+	public FailingObjectAttributes getTransitLinesAttributes() {
 		return this.transitLinesAttributes;
 	}
-	
+
 	@Override
-	public ObjectAttributes getTransitStopsAttributes() {
+	public FailingObjectAttributes getTransitStopsAttributes() {
 		return this.transitStopsAttributes;
 	}
 
