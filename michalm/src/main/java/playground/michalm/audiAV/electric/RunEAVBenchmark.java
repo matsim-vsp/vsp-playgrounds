@@ -45,7 +45,7 @@ public class RunEAVBenchmark {
 	}
 
 	public static Controler createControler(Config config, int runs) {
-		String mode = TaxiConfigGroup.get(config).getMode();
+		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(config).getMode();
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		Controler controler = RunETaxiBenchmark.createControler(config, runs);
 		controler.addOverridingModule(new AbstractModule() {

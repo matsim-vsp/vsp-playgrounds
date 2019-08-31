@@ -71,7 +71,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	 * 
 	 */
 	public PrivateAVFleetGenerator(Scenario scenario) {
-		mode = TaxiConfigGroup.get(scenario.getConfig()).getMode();
+		mode = TaxiConfigGroup.getSingleModeTaxiConfig(scenario.getConfig()).getMode();
 		this.population= scenario.getPopulation();
 		this.network = scenario.getNetwork();
 //		this.manager = manager;

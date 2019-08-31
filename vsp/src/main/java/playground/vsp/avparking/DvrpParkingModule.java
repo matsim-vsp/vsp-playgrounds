@@ -115,7 +115,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		routingModuleCar.setStageActivityTypes(stageActivityTypesCar);
 		addRoutingModuleBinding(TransportMode.car).toInstance(routingModuleCar);
 
-		String mode = TaxiConfigGroup.get(getConfig()).getMode();
+		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(getConfig()).getMode();
 		addRoutingModuleBinding(mode).toInstance(new DynRoutingModule(mode));
 		bind(ParkingSearchManager.class).to(FacilityBasedParkingManager.class).asEagerSingleton();
 		bind(WalkLegFactory.class).asEagerSingleton();
@@ -149,7 +149,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		Collection<AbstractQSimModule> modules = new LinkedList<>(QSimModule.getDefaultQSimModules());
 		modules.removeIf(PopulationModule.class::isInstance);
 
-		String mode = TaxiConfigGroup.get(config).getMode();
+		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(config).getMode();
 		modules.add(new ParkingSearchPopulationModule());
 		modules.add(new PassengerEngineQSimModule(mode));
 		modules.add(new VrpAgentSourceQSimModule(mode));
