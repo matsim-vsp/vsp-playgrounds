@@ -100,35 +100,38 @@
 	
 	<module name="dvrp">
 	</module>
-	
-	<module name="taxi" >
-		<!-- Used in AStarEuclidean for shortest path search for occupied drives. Default value is 1.0. Values above 1.0 (typically, 1.5 to 3.0) speed up search, but at the cost of obtaining longer paths -->
-		<param name="AStarEuclideanOverdoFactor" value="1.0" />
-		<!-- Specifies whether the simulation should interrupt if not all requests were performed when an interation ends. Otherwise, a warning is given. True by default. -->
-		<param name="breakIfNotAllRequestsServed" value="false" />
-		<!-- If true, the startLink is changed to last link in the current schedule, so the taxi starts the next day at the link where it stopped operating the day before. False by default. -->
-		<param name="changeStartLinkToLastLinkInSchedule" value="false" />
-		<!-- If false, the drop-off location remains unknown to the optimizer and scheduler until the end of pickup. False by default. -->
-		<param name="destinationKnown" value="false" />
-		<!-- If true, detailed hourly taxi stats are dumped after each iteration. False by default. -->
-		<param name="detailedStats" value="true" />
-		<!-- Typically, 60 seconds -->
-		<param name="dropoffDuration" value="60.0" />
-		<!-- Mode which will be handled by PassengerEngine and VrpOptimizer (passengers'/customers' perspective) -->
-		<param name="mode" value="taxi" />
-		<!-- If true, vehicles are (GPS-like) monitored while moving. This helps in getting more accurate estimates on the time of arrival. Online tracking is necessary for vehicle diversion. False by default. -->
-		<param name="onlineVehicleTracker" value="false" />
-		<!-- Typically, 120 seconds -->
-		<param name="pickupDuration" value="120.0" />
-		<!-- An XML file specifying the taxi fleet. The file format according to dvrp_vehicles_v1.dtd -->
-		<param name="taxisFile" value="taxis.xml" />
-		<!-- If true, writes time profiles of vehicle statuses (i.e. current task type) and the number of unplanned requests are written to a text file (taxi_status_time_profiles) and saved as plots. False by default. -->
-		<param name="timeProfiles" value="true" />
-		<!-- If true, vehicles can be diverted during empty trips. Requires online tracking. False by default. -->
-		<param name="vehicleDiversion" value="false" />
-		<parameterset type="RuleBasedTaxiOptimizer"/>
+
+	<module name="multiModeTaxi">
+		<parameterset type="taxi">
+			<!-- Used in AStarEuclidean for shortest path search for occupied drives. Default value is 1.0. Values above 1.0 (typically, 1.5 to 3.0) speed up search, but at the cost of obtaining longer paths -->
+			<param name="AStarEuclideanOverdoFactor" value="1.0"/>
+			<!-- Specifies whether the simulation should interrupt if not all requests were performed when an interation ends. Otherwise, a warning is given. True by default. -->
+			<param name="breakIfNotAllRequestsServed" value="false"/>
+			<!-- If true, the startLink is changed to last link in the current schedule, so the taxi starts the next day at the link where it stopped operating the day before. False by default. -->
+			<param name="changeStartLinkToLastLinkInSchedule" value="false"/>
+			<!-- If false, the drop-off location remains unknown to the optimizer and scheduler until the end of pickup. False by default. -->
+			<param name="destinationKnown" value="false"/>
+			<!-- If true, detailed hourly taxi stats are dumped after each iteration. False by default. -->
+			<param name="detailedStats" value="true"/>
+			<!-- Typically, 60 seconds -->
+			<param name="dropoffDuration" value="60.0"/>
+			<!-- Mode which will be handled by PassengerEngine and VrpOptimizer (passengers'/customers' perspective) -->
+			<param name="mode" value="taxi"/>
+			<!-- If true, vehicles are (GPS-like) monitored while moving. This helps in getting more accurate estimates on the time of arrival. Online tracking is necessary for vehicle diversion. False by default. -->
+			<param name="onlineVehicleTracker" value="false"/>
+			<!-- Typically, 120 seconds -->
+			<param name="pickupDuration" value="120.0"/>
+			<!-- An XML file specifying the taxi fleet. The file format according to dvrp_vehicles_v1.dtd -->
+			<param name="taxisFile" value="taxis.xml"/>
+			<!-- If true, writes time profiles of vehicle statuses (i.e. current task type) and the number of unplanned requests are written to a text file (taxi_status_time_profiles) and saved as plots. False by default. -->
+			<param name="timeProfiles" value="true"/>
+			<!-- If true, vehicles can be diverted during empty trips. Requires online tracking. False by default. -->
+			<param name="vehicleDiversion" value="false"/>
+			<parameterset type="RuleBasedTaxiOptimizer"/>
+		</parameterset>
 	</module>
-		
+
+
 	<module name="taxifare" >
 		<param name="basefare" value="0.0" />
 		<param name="dailySubscriptionFee" value="0.0" />
