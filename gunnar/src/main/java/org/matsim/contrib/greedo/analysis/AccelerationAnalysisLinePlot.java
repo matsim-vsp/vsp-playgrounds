@@ -38,7 +38,7 @@ import umontreal.ssj.charts.XYLineChart;
  * @author Gunnar Flötteröd
  *
  */
-public class AccelerationAnalysisPlot {
+public class AccelerationAnalysisLinePlot {
 
 	private Double legendLeftX = null;
 	private Double legendTopY = null;
@@ -72,7 +72,7 @@ public class AccelerationAnalysisPlot {
 
 	private final List<YIntervalSeries> allSeries = new ArrayList<>();
 
-	public AccelerationAnalysisPlot() {
+	public AccelerationAnalysisLinePlot() {
 	}
 
 	public void addSeries(final YIntervalSeries series) {
@@ -115,23 +115,18 @@ public class AccelerationAnalysisPlot {
 
 		}
 
-		XYLineChart chart = new XYLineChart(null, "X", "Y", data);
+		XYLineChart chart = new XYLineChart(null, null, null, data);
 
 		for (int seriesIndex = 0; seriesIndex < this.allSeries.size(); seriesIndex++) {
-
-			// TODO [CONTINUE HERE] TURN OFF LABELS IN INTERVAL PLOTS
 
 			chart.getSeriesCollection().setColor(seriesIndex * 2 + 0, Color.BLACK);
 			chart.getSeriesCollection().setColor(seriesIndex * 2 + 1, Color.BLACK);
 
 			chart.getSeriesCollection().setDashPattern(seriesIndex * 2 + 0, this.dashPatterns.get(seriesIndex));
 			chart.getSeriesCollection().setDashPattern(seriesIndex * 2 + 1, this.dashPatterns.get(seriesIndex));
-
-			// chart.getSeriesCollection().setName(seriesIndex * 2 + 0,
-			// this.allSeries.get(seriesIndex).getKey().toString() + " lower");
-			// chart.getSeriesCollection().setName(seriesIndex * 2 + 1,
-			// this.allSeries.get(seriesIndex).getKey().toString() + " upper");
-
+			
+			chart.getSeriesCollection().setPlotStyle(seriesIndex * 2 + 0, "sharp plot");
+			chart.getSeriesCollection().setPlotStyle(seriesIndex * 2 + 1, "sharp plot");
 		}
 
 		if (this.legendLeftX != null) {
@@ -157,9 +152,9 @@ public class AccelerationAnalysisPlot {
 
 		String result = chart.toLatex(6, 4);
 		for (String dummy : dummyLabels) {
-			result = result.replace("node[right] {" + dummy + "};\n", "");
+			result = result.replace(dummy, "");
 		}
-		
+
 		try {
 			PrintWriter writer = new PrintWriter(fileName);
 			writer.print(result);
@@ -168,7 +163,7 @@ public class AccelerationAnalysisPlot {
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		// chart.toLatexFile(fileName, 6, 4);
 		// chart.setLatexDocFlag(true);
 		// System.out.println(chart.toLatex(12, 8));
@@ -177,7 +172,7 @@ public class AccelerationAnalysisPlot {
 	public static void main(String[] args) {
 		System.out.println("STARTED");
 
-		AccelerationAnalysisPlot aap = new AccelerationAnalysisPlot();
+		AccelerationAnalysisLinePlot aap = new AccelerationAnalysisLinePlot();
 
 		{
 			YIntervalSeries series1 = new YIntervalSeries("series1");

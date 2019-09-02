@@ -62,6 +62,8 @@ public class SimulationEmulatorImpl implements SimulationEmulator {
 				throw new RuntimeException("Only supporting " + TransitConfigGroup.BoardingAcceptance.checkLineAndStop);
 			}
 			// Extract passenger modes from SwissRailRaptor.
+			// raptorConfig.getModeMappingForPassengers() returns an empty
+			// collection if mode mappings are not used.
 			final SwissRailRaptorConfigGroup raptorConfig = (SwissRailRaptorConfigGroup) this.services.getConfig()
 					.getModules().get(SwissRailRaptorConfigGroup.GROUP);
 			if (raptorConfig == null) {
@@ -115,22 +117,15 @@ public class SimulationEmulatorImpl implements SimulationEmulator {
 				final Activity followingActivity = (Activity) elements.get(i + 1);
 
 				final LegEmulator legEmulator;
-				if (TransportMode.car.equals(leg.getMode())) { // TODO Any main network mode, right?
+				if (TransportMode.car.equals(leg.getMode())) { // TODO Other network modes?
 					legEmulator = new CarLegEmulator(eventsManager, this.services.getScenario().getNetwork(),
 							this.services.getLinkTravelTimes(), this.services.getScenario().getActivityFacilities(),
 							this.simEndTime_s);
-					// } else if (TransportMode.pt.equals(leg.getMode())) {
-				} else if (this.passengerModes.contains(leg.getMode())) {
-					// legEmulator = new FifoTransitLegEmulator(eventsManager,
-					// this.transitPerformance,
-					// this.services.getScenario());
-					// legEmulator = new BasicTransitLegEmulator(eventsManager,
-					// this.services.getScenario());
+				} else if (TransportMode.pt.equals(leg.getMode()) || this.passengerModes.contains(leg.getMode())) {
 					legEmulator = new ScheduleBasedTransitLegEmulator(eventsManager, this.services.getScenario());
 				} else {
-					// System.out.println(leg.getMode());
 					legEmulator = new OnlyDepartureArrivalLegEmulator(eventsManager,
-							this.services.getScenario().getActivityFacilities()); // , this.simEndTime_s);
+							this.services.getScenario().getActivityFacilities());
 				}
 				time_s = legEmulator.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity,
 						time_s);

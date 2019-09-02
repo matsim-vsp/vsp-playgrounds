@@ -20,6 +20,8 @@
 package org.matsim.contrib.greedo.analysis;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -91,8 +93,53 @@ public class AccelerationAnalyzer {
 		final AccelerationExperimentData vanillaMSA = new AccelerationExperimentData("./vanilla_MSA", 0, scenarioCnt,
 				1000);
 
+		{
+			final PairwiseTTest tTests = new PairwiseTTest();
+			tTests.addData(greedo_noAgeing_sqrtMsa_enforceLambda.newExpectedUtilityChangesFinalPoints(),
+					"proposed, no ageing, sqrtMSA");
+			tTests.addData(greedo_withAgeing_sqrtMsa_enforceLambda.newExpectedUtilityChangesFinalPoints(),
+					"proposed, with ageing, sqrtMSA");
+
+			tTests.addData(sbayti2007MSA.newExpectedUtilityChangesFinalPoints(), "Sbayti (2007), MSA");
+			tTests.addData(sbayti2007SqrtMSA.newExpectedUtilityChangesFinalPoints(), "Sbayti (2007), sqrt MSA");
+
+			tTests.addData(adaptiveMSA.newExpectedUtilityChangesFinalPoints(), "adaptive MSA");
+			tTests.addData(sqrtMSA.newExpectedUtilityChangesFinalPoints(), "sqrt MSA");
+			tTests.addData(vanillaMSA.newExpectedUtilityChangesFinalPoints(), "vanilla MSA");
+
+			try {
+				PrintWriter writer = new PrintWriter("tTests.txt");
+				writer.print(tTests.toString());
+				writer.flush();
+				writer.close();
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		{
+			final PairwiseTTest tTestsCongested = new PairwiseTTest();
+			tTestsCongested.addData(
+					greedo_noAgeing_sqrtMsa_enforceLambda_congested.newExpectedUtilityChangesFinalPoints(),
+					"proposed, no ageing, sqrtMSA, congested");
+			tTestsCongested.addData(
+					greedo_withAgeing_sqrtMsa_enforceLambda_congested.newExpectedUtilityChangesFinalPoints(),
+					"proposed, with ageing, sqrt, congested");
+			tTestsCongested.addData(sbayti2007SqrtMSACongested.newExpectedUtilityChangesFinalPoints(),
+					"Sbayti (2007), MSA, congested");
+
+			try {
+				PrintWriter writer = new PrintWriter("tTests_congested.txt");
+				writer.print(tTestsCongested.toString());
+				writer.flush();
+				writer.close();
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		{ // REALIZED UTILITY, MSA
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(vanillaMSA.newRealizedUtilitiesSeries("vanilla MSA"));
 			plot.addSeries(sqrtMSA.newRealizedUtilitiesSeries("sqrt MSA"));
 			plot.addSeries(adaptiveMSA.newRealizedUtilitiesSeries("adaptive MSA"));
@@ -102,7 +149,7 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // REALIZED UTILITY, PROPOSED
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda
 					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA"));
 			plot.addSeries(
@@ -113,7 +160,7 @@ public class AccelerationAnalyzer {
 		}
 
 		{ // REALIZED UTILITY, SBAYTI
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(sbayti2007MSA.newRealizedUtilitiesSeries("Sbayti (2007), MSA"));
 			plot.addSeries(sbayti2007SqrtMSA.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA"));
 			plot.addLegend(500, -150, 100, 25);
@@ -121,96 +168,120 @@ public class AccelerationAnalyzer {
 			plot.render("realized_utilities_sbayti.tex");
 		}
 
-//		{ // REALIZED UTILITY, CONGESTED
-//
-//			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
-//
-//			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
-//					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA"));
-//
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
-//					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA"));
-//			plot.addSeries(sbayti2007SqrtMSACongested.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA"));
-//
-//			plot.render("realized_utilities_congested.tex");
-//		}
-//
-//		{ // REALIZED UTILITY, VERY CONGESTED
-//
-//			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
-//
-//			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
-//					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA"));
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
-//					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA"));
-//			plot.addSeries(sbayti2007SqrtMSAVeryCongested.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA"));
-//
-//			plot.render("realized_utilities_very-congested.tex");
-//		}
+		{ // REALIZED UTILITY, PROPOSED, CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
+					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA, congested"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
+					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA, congested"));
+			plot.addLegend(500, -150, 100, 25);
+			plot.setRange(0, 1000, -250, 0);
+			plot.render("realized_utilities_proposed_congested.tex");
+		}
+
+		{ // REALIZED UTILITY, SBAYTI, CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(sbayti2007SqrtMSACongested.newRealizedUtilitiesSeries("Sbayti (2007), MSA, congested"));
+			plot.addSeries(sbayti2007SqrtMSACongested.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA, congested"));
+			plot.addLegend(500, -150, 100, 25);
+			plot.setRange(0, 1000, -250, 0);
+			plot.render("realized_utilities_sbayti_congested.tex");
+		}
+
+		{ // REALIZED UTILITY, PROPOSED, VERY CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
+					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA, very congested"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
+					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA, very congested"));
+			plot.addLegend(500, -150, 100, 25);
+			plot.setRange(0, 1000, -250, 0);
+			plot.render("realized_utilities_proposed_very-congested.tex");
+		}
+
+		{ // REALIZED UTILITY, SBAYTI, VERY CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(
+					sbayti2007SqrtMSAVeryCongested.newRealizedUtilitiesSeries("Sbayti (2007), MSA, very congested"));
+			plot.addSeries(sbayti2007SqrtMSAVeryCongested
+					.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA, very congested"));
+			plot.addLegend(500, -150, 100, 25);
+			plot.setRange(0, 1000, -250, 0);
+			plot.render("realized_utilities_sbayti_very-congested.tex");
+		}
 
 		{ // REALIZED UTILITY GAPS, MSA
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(vanillaMSA.newExpectedUtilityChangesSeries("vanilla MSA"));
 			plot.addSeries(sqrtMSA.newExpectedUtilityChangesSeries("sqrt MSA"));
 			plot.addSeries(adaptiveMSA.newExpectedUtilityChangesSeries("adaptive MSA"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
 			plot.render("utility_gaps_msa.tex");
 		}
 
 		{ // REALIZED UTILITY GAPS, PROPOSED
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda
 					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA"));
 			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda
 					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
 			plot.render("utility_gaps_proposed.tex");
 		}
 
 		{ // REALIZED UTILITY GAPS, SBAYTI
-			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
 			plot.addSeries(sbayti2007MSA.newExpectedUtilityChangesSeries("Sbayti (2007), MSA"));
 			plot.addSeries(sbayti2007SqrtMSA.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
 			plot.render("utility_gaps_sbayti.tex");
 		}
 
-//		{ // REALIZED UTILITY GAPS, CONGESTED
-//
-//			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
-//
-//			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
-//					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA"));
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
-//					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA"));
-//			plot.addSeries(sbayti2007SqrtMSACongested.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA"));
-//
-//			plot.render("utility_gaps_congested.tex");
-//		}
-//
-//		{ // REALIZED UTILITY GAPS, VERY CONGESTED
-//
-//			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
-//
-//			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
-//					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA"));
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
-//					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA"));
-//			plot.addSeries(sbayti2007SqrtMSAVeryCongested.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA"));
-//
-//			plot.render("utility_gaps_very-congested.tex");
-//		}
+		{ // REALIZED UTILITY GAPS, PROPOSED, CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
+					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA, congested"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
+					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA, congested"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
+			plot.render("utility_gaps_proposed_congested.tex");
+		}
 
-//		{ // AGE CORRELATIONS
-//
-//			final AccelerationAnalysisPlot plot = new AccelerationAnalysisPlot();
-//
-//			plot.addSeries(
-//					greedo_withAgeing_sqrtMsa_enforceLambda.newAgeCorrelationSeries("proposed, with ageing, sqrt MSA"));
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
-//					.newAgeCorrelationSeries("proposed, with ageing, sqrt MSA, congested"));
-//			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
-//					.newAgeCorrelationSeries("proposed, with ageing, sqrt MSA, very congested"));
-//
-//			plot.render("age-correlations.tex");
-//		}
+		{ // REALIZED UTILITY GAPS, SBAYTI, CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(sbayti2007SqrtMSACongested.newExpectedUtilityChangesSeries("Sbayti (2007), MSA, congested"));
+			plot.addSeries(
+					sbayti2007SqrtMSACongested.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, congested"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
+			plot.render("utility_gaps_sbayti_congested.tex");
+		}
+
+		{ // REALIZED UTILITY GAPS, PROPOSED, VERY CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
+					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA, very congested"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
+					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA, very congested"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
+			plot.render("utility_gaps_proposed_very-congested.tex");
+		}
+
+		{ // REALIZED UTILITY GAPS, SBAYTI, VERY CONGESTED
+			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			plot.addSeries(sbayti2007SqrtMSAVeryCongested
+					.newExpectedUtilityChangesSeries("Sbayti (2007), MSA, very congested"));
+			plot.addSeries(sbayti2007SqrtMSAVeryCongested
+					.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, very congested"));
+			plot.addLegend(500, 150, 100, 25);
+			plot.setRange(0, 1000, 0, 200);
+			plot.render("utility_gaps_sbayti_very-congested.tex");
+		}
 
 		/*
 		 * { // AGE PERCENTILES final YIntervalSeriesCollection dataset = new
