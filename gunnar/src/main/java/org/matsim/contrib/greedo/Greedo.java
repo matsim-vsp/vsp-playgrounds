@@ -45,6 +45,8 @@ public class Greedo {
 
 	// -------------------- CONSTANTS --------------------
 
+	public static final String nullSubpopulationString = "nullSubpopulation";
+
 	private static final Logger log = Logger.getLogger(Greedo.class);
 
 	// -------------------- MEMBERS --------------------
@@ -97,7 +99,7 @@ public class Greedo {
 			// TODO also use expensive strategy weight sum?
 			for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
 				final String strategyName = strategySettings.getStrategyName();
-				final String subpop = ((strategySettings.getSubpopulation() == null) ? "null"
+				final String subpop = ((strategySettings.getSubpopulation() == null) ? nullSubpopulationString
 						: strategySettings.getSubpopulation());
 				allSubpops.add(subpop);
 				if (strategySettings.getWeight() > 0) {
@@ -194,7 +196,7 @@ public class Greedo {
 				final double cheapStrategyWeightFactor = cheapStrategyProbaSum / cheapStrategyWeightSum;
 				double probaSum = 0;
 				for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
-					if (subpop.equals((strategySettings.getSubpopulation() == null) ? "null"
+					if (subpop.equals((strategySettings.getSubpopulation() == null) ? nullSubpopulationString
 							: strategySettings.getSubpopulation())) {
 						final String strategyName = strategySettings.getStrategyName();
 						if (greedoConfig.getExpensiveStrategyList().contains(strategyName)) {
