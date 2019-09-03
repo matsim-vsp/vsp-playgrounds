@@ -28,6 +28,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.facilities.ActivityFacilities;
+import org.matsim.facilities.ActivityFacility;
 
 /**
  *
@@ -40,19 +41,35 @@ public class OnlyDepartureArrivalLegEmulator implements LegEmulator {
 	protected final ActivityFacilities activityFacilities;
 	// protected final double simEndTime_s;
 
+	private final boolean hasFacilities;
+
 	public OnlyDepartureArrivalLegEmulator(final EventsManager eventsManager,
 			final ActivityFacilities activityFacilities/* , final double simEndTime_s */) {
 		this.eventsManager = eventsManager;
 		this.activityFacilities = activityFacilities;
+		this.hasFacilities = (activityFacilities != null) && (activityFacilities.getFacilities() != null);
 		// this.simEndTime_s = simEndTime_s;
 	}
 
 	private Id<Link> getLinkId(final Activity activity) {
-		if (activity.getFacilityId() != null) {
-			return activityFacilities.getFacilities().get(activity.getFacilityId()).getLinkId();
-		} else {
+		// TODO Revisit this. The current precedence order works with WUM model. Gunnar
+		// 2019-09-03
+		if ((activity.getFacilityId() != null) && this.hasFacilities) {
+			final ActivityFacility facility = this.activityFacilities.getFacilities().get(activity.getFacilityId());
+			if ((facility != null) && (facility.getLinkId() != null)) {
+				return facility.getLinkId();
+			}
+		}
+		if (activity.getLinkId() != null) {
 			return activity.getLinkId();
 		}
+		throw new RuntimeException("Could not identify a link id for activity " + activity.toString());
+		// if (activity.getFacilityId() != null) {
+		// return
+		// activityFacilities.getFacilities().get(activity.getFacilityId()).getLinkId();
+		// } else {
+		// return activity.getLinkId();
+		// }
 	}
 
 	@Override
