@@ -32,6 +32,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 
 import com.google.inject.Singleton;
 
@@ -173,6 +174,7 @@ public class Greedo {
 				log.info("Adjusting strategies for subpopulation: " + subpop);
 
 				final int expensiveStrategyCnt = subpop2expensiveStrategyCnt.getOrDefault(subpop, 0);
+				final int cheapStrategyCnt = subpop2cheapStrategyCnt.getOrDefault(subpop, 0);
 				final double cheapStrategyWeightSum = subpop2cheapStrategyWeightSum.getOrDefault(subpop, 0.0);
 
 				final double singleExpensiveStrategyProba;
@@ -187,7 +189,8 @@ public class Greedo {
 							"Unknown expensive strategy treatment: " + greedoConfig.getExpensiveStrategyTreatment());
 				}
 
-				final double cheapStrategyProbaSum = 1.0 - singleExpensiveStrategyProba * expensiveStrategyCnt;
+				final double cheapStrategyProbaSum = 1.0
+						- ((expensiveStrategyCnt == 0) ? 0.0 : singleExpensiveStrategyProba * expensiveStrategyCnt);
 				final double cheapStrategyWeightFactor = cheapStrategyProbaSum / cheapStrategyWeightSum;
 				double probaSum = 0;
 				for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
@@ -206,8 +209,20 @@ public class Greedo {
 						probaSum += strategySettings.getWeight();
 					}
 				}
+				if (cheapStrategyCnt == 0) {
+					final StrategySettings keepSelected = new StrategySettings();
+					keepSelected.setStrategyName(DefaultSelector.KeepLastSelected);
+					keepSelected.setSubpopulation(subpop);
+					keepSelected.setWeight(1.0 - probaSum);
+					config.strategy().addStrategySettings(keepSelected);
+					log.info("* Padding with " + DefaultSelector.KeepLastSelected + " and weight="
+							+ keepSelected.getWeight()
+							+ " because there are no cheap strategies in this subpopulation");
+					probaSum += keepSelected.getWeight();
+				}
 				if (Math.abs(1.0 - probaSum) >= 1e-8) {
-					throw new RuntimeException("The sum of all strategy probabilities is " + probaSum + " but should be one.");
+					throw new RuntimeException(
+							"The sum of all strategy probabilities is " + probaSum + " but should be one.");
 				}
 			}
 
