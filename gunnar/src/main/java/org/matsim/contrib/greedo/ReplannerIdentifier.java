@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
@@ -43,6 +44,10 @@ import floetteroed.utilities.TimeDiscretization;
  *
  */
 class ReplannerIdentifier {
+
+	// -------------------- CONSTANTS --------------------
+
+	private final Logger log = Logger.getLogger(this.getClass());
 
 	// -------------------- MEMBERS --------------------
 
@@ -82,12 +87,23 @@ class ReplannerIdentifier {
 				.mapToDouble(utlChange -> utlChange).sum();
 		this.personId2currentUtility = personId2currentUtility;
 
+		log.info("number of entries (persons) in different maps:");
+		log.info("  personId2physicalSlotUsage.size() = " + personId2physicalSlotUsage.size());
+		log.info("  personId2hypothetialSlotUsage.size() = " + personId2hypotheticalSlotUsage.size());
+		log.info("  personId2currentUtility.size() = " + personId2currentUtility.size());
+		log.info("  personId2hypotheticalUtilityChange.size() = " + personId2hypotheticalUtilityChange.size());
+
 		this.currentWeightedCounts = newWeightedCounts(this.greedoConfig.newTimeDiscretization(),
 				this.personId2physicalSlotUsage.values(), true, true);
 		this.upcomingWeightedCounts = newWeightedCounts(this.greedoConfig.newTimeDiscretization(),
 				this.personId2hypothetialSlotUsage.values(), true, true);
 		this.sumOfWeightedCountDifferences2 = DynamicDataUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
+
+		log.info("sumOfWeightedCountDifference2 = " + this.sumOfWeightedCountDifferences2
+				+ " based on the following data:");
+		log.info("  currentWeightedCounts2 = " + DynamicDataUtils.sumOfEntries2(this.currentWeightedCounts));
+		log.info("  upcomingWeightedCounts2 = " + DynamicDataUtils.sumOfEntries2(this.upcomingWeightedCounts));
 
 		// Logger.getLogger(this.getClass()).warn("Overriding beta!!!");
 		// if ((unconstrainedBeta != null) && (unconstrainedBeta > 0.0)) {
@@ -107,6 +123,13 @@ class ReplannerIdentifier {
 		// / Math.max(totalUtilityChange, 1e-8);
 		this.beta = betaScale * 2.0 * this.lambdaBar * this.sumOfWeightedCountDifferences2
 				/ Math.max(totalUtilityChange, 1e-8);
+
+		log.info("beta = " + this.beta + " based on the following data:");
+		log.info("  betaScale = " + betaScale);
+		log.info("  lambdaBar = " + this.lambdaBar);
+		log.info("  sumOfWeightedCountDifferences2 = " + this.sumOfWeightedCountDifferences2);
+		log.info("  totalUtilityChange = " + totalUtilityChange);
+
 		// }
 	}
 
