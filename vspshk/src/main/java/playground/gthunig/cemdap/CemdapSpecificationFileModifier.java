@@ -1,7 +1,5 @@
 package playground.gthunig.cemdap;
 
-import com.sun.xml.bind.v2.runtime.output.SAXOutput;
-
 import java.io.*;
 
 public class CemdapSpecificationFileModifier {
