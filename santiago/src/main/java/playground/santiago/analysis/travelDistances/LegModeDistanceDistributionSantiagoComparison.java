@@ -28,8 +28,6 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.matsim.core.gbl.Gbl;
 
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
-import playground.benjamin.scenarios.munich.analysis.modular.legModeDistanceDistribution.RunLegModeDistanceDistribution;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 import playground.vsp.analysis.modules.legModeDistanceDistribution.LegModeDistanceDistribution;
 
