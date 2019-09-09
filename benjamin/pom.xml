@@ -11,7 +11,7 @@
   <name>benjamin</name>
 
 	<properties>
-        <matsim.version>11.0</matsim.version>
+        <matsim.version>12.0-SNAPSHOT</matsim.version>
 	</properties>
 	
   <build>

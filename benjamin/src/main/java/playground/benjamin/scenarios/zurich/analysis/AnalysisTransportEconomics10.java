@@ -57,21 +57,21 @@ public class AnalysisTransportEconomics10 {
 		
 		String outputPath1 = BkPaths.RUNSSVN + runid1String;
 		String outputPath2 = BkPaths.RUNSSVN + runid2String;
-		OutputDirectoryHierarchy io1 = new OutputDirectoryHierarchy(
-				outputPath1,
-				runid1String,
-						false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		OutputDirectoryHierarchy io2 = new OutputDirectoryHierarchy(
-				outputPath2,
-				runid2String,
-						false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		
+//		OutputDirectoryHierarchy io1 = new OutputDirectoryHierarchy(
+//				outputPath1,
+//				runid1String,
+//						false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+//		OutputDirectoryHierarchy io2 = new OutputDirectoryHierarchy(
+//				outputPath2,
+//				runid2String,
+//						false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+//		
 
-		netfile = io1.getOutputFilename("output_network") + ".xml.gz";
-		plans1file = io1.getOutputFilename("output_plans") + ".xml.gz";
-		plans2file = io2.getOutputFilename("output_plans") + ".xml.gz";		
-		housholdsfile = io2.getOutputFilename("output_households") + ".xml.gz";
-		outputConfig2Path = io2.getOutputFilename("output_config") + ".xml.gz";	
+//		netfile = io1.getOutputFilename("output_network") + ".xml.gz";
+//		plans1file = io1.getOutputFilename("output_plans") + ".xml.gz";
+//		plans2file = io2.getOutputFilename("output_plans") + ".xml.gz";		
+//		housholdsfile = io2.getOutputFilename("output_households") + ".xml.gz";
+//		outputConfig2Path = io2.getOutputFilename("output_config") + ".xml.gz";	
 		threshold = 100;
 
 		String mixedDeltaUtilsModeGroupChartFile = BkPaths.RUNSSVN + runid2String + "/mixedDeltaUtilsModeGroupChart"+runNumber1+"vs"+runNumber2;
@@ -141,15 +141,15 @@ public class AnalysisTransportEconomics10 {
 //        if(ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class).isUsingRoadpricing()){
 		Logger.getLogger(AnalysisTransportEconomics10.class).fatal("the above functionality does no longer exist; pls tlk to me if you need it. kai, sep'14") ;
 		System.exit(-1) ;
-if ( true ) {
-	eventsfile = io2.getIterationFilename(config.controler().getLastIteration(), "events") + ".txt.gz";
+	if ( true ) {
+//	eventsfile = io2.getIterationFilename(config.controler().getLastIteration(), "events") + ".txt.gz";
 	
 	EventsManager events = EventsUtils.createEventsManager();
 	MoneyEventHandler tollCollectHandler = new MoneyEventHandler();
 	events.addHandler(tollCollectHandler);
 	
 	MatsimEventsReader eventsReader = new MatsimEventsReader(events);
-	eventsReader.readFile(eventsfile);
+//	eventsReader.readFile(eventsfile);
 		System.out.println("Events file read!");
 			
 	Map<Id<Person>, Double> id2Toll = tollCollectHandler.getPersonId2TollMap();

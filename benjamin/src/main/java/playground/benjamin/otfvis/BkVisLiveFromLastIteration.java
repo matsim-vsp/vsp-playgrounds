@@ -93,24 +93,24 @@ public class BkVisLiveFromLastIteration {
 		ConfigReader configReader = new ConfigReader(config);
 		configReader.readFile(newConfigFile);
 		OutputDirectoryHierarchy oldConfControlerIO;
-		if (config.controler().getRunId() != null) {
-			oldConfControlerIO = new OutputDirectoryHierarchy(
-					currentDirectory,
-					config.controler().getRunId(),
-							false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		}
-		else {
-			oldConfControlerIO = new OutputDirectoryHierarchy(
-					currentDirectory,
-							true ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		}
-		config.network().setInputFile(oldConfControlerIO.getOutputFilename(Controler.FILENAME_NETWORK));
-		config.plans()
-				.setInputFile(oldConfControlerIO.getOutputFilename(Controler.FILENAME_POPULATION));
-		if ( config.network().getLaneDefinitionsFile()!=null || config.qsim().isUseLanes()) {
-			config.network().setLaneDefinitionsFile(
-					oldConfControlerIO.getOutputFilename(Controler.FILENAME_LANES));
-		}
+//		if (config.controler().getRunId() != null) {
+//			oldConfControlerIO = new OutputDirectoryHierarchy(
+//					currentDirectory,
+//					config.controler().getRunId(),
+//							false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+//		}
+//		else {
+//			oldConfControlerIO = new OutputDirectoryHierarchy(
+//					currentDirectory,
+//							true ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+//		}
+//		config.network().setInputFile(oldConfControlerIO.getOutputFilename(Controler.FILENAME_NETWORK));
+//		config.plans()
+//				.setInputFile(oldConfControlerIO.getOutputFilename(Controler.FILENAME_POPULATION));
+//		if ( config.network().getLaneDefinitionsFile()!=null || config.qsim().isUseLanes()) {
+//			config.network().setLaneDefinitionsFile(
+//					oldConfControlerIO.getOutputFilename(Controler.FILENAME_LANES));
+//		}
 
 		log.info("Complete config dump:");
 		StringWriter writer = new StringWriter();
@@ -132,9 +132,9 @@ public class BkVisLiveFromLastIteration {
 
 		Scenario sc = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
-		OutputDirectoryHierarchy controlerIO = new OutputDirectoryHierarchy(
-				sc.getConfig().controler().getOutputDirectory(),
-						true ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+//		OutputDirectoryHierarchy controlerIO = new OutputDirectoryHierarchy(
+//				sc.getConfig().controler().getOutputDirectory(),
+//						true ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
 		QSim otfVisQSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, events);
 		
 		OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(config, sc, events, otfVisQSim);
