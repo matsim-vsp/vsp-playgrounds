@@ -8,6 +8,14 @@
   <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
   <artifactId>vsp</artifactId>
   <name>vsp</name>
+  
+  <repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+  
 	<dependencies>
         <dependency>
             <groupId>org.matsim.contrib</groupId>
@@ -133,6 +141,14 @@
 			<artifactId>jsch</artifactId>
 			<version>0.1.54</version>
 		</dependency>
+		
+		<!-- for accessibility contrib -->
+		<dependency>
+			<groupId>com.github.SchweizerischeBundesbahnen</groupId>
+			<artifactId>matsim-sbb-extensions</artifactId>
+			<version>11.5</version>
+		</dependency>
+		
 	</dependencies>
 
 	<profiles>
