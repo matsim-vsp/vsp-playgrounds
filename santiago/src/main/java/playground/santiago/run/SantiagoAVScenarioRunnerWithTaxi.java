@@ -45,8 +45,8 @@ import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.contrib.roadpricing.RoadPricingModule;
+import org.matsim.contrib.taxi.run.MultiModeTaxiModule;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -201,9 +201,9 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 		// }
 		// });
-		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
+		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(controler.getConfig()).getMode();
 		controler.addOverridingModule(new DvrpModule());
-		controler.addOverridingModule(new TaxiModule());
+		controler.addOverridingModule(new MultiModeTaxiModule());
 		controler.configureQSimComponents(DvrpQSimComponents.activateModes(mode));
 
 		boolean otfvis = false;

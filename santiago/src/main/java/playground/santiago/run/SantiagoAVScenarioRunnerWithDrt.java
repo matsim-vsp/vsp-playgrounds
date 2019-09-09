@@ -41,7 +41,8 @@ import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
-import org.matsim.contrib.drt.run.DrtModule;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
+import org.matsim.contrib.drt.run.MultiModeDrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
@@ -128,10 +129,10 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		Controler controler = new Controler(scenario);
 
-		controler.addOverridingModule(new DrtModule());
+		controler.addOverridingModule(new MultiModeDrtModule());
 		controler.addOverridingModule(new DvrpModule());
 		controler.configureQSimComponents(
-				DvrpQSimComponents.activateModes(DrtConfigGroup.get(controler.getConfig()).getMode()));
+				DvrpQSimComponents.activateAllModes(MultiModeDrtConfigGroup.get(controler.getConfig())));
 
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);
