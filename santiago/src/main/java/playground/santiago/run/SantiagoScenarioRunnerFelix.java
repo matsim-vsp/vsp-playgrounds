@@ -56,8 +56,8 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.santiago.SantiagoScenarioConstants;
+import playground.santiago.analysis.modalShareFromEvents.ModalShareFromEvents;
 import playground.santiago.colectivos.PostProcessModalShare;
 import playground.santiago.colectivos.router.ColectivoModule;
 

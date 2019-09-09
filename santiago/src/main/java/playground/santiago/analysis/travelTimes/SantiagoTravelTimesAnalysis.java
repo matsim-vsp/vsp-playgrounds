@@ -29,8 +29,6 @@ import org.matsim.counts.MatsimCountsReader;
 import org.matsim.counts.algorithms.CountSimComparisonTableWriter;
 import org.matsim.counts.algorithms.CountsComparisonAlgorithm;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
-import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
 import playground.santiago.analysis.eventHandlers.others.SantiagoStuckAndAbortEventHandler;
 import playground.santiago.analysis.eventHandlers.trafficVolumes.SantiagoLinkVolumeHandler;
 import playground.santiago.analysis.eventHandlers.travelDistances.SantiagoModeTripTravelDistanceHandler;

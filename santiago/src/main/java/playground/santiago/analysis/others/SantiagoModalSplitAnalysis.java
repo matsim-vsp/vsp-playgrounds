@@ -6,7 +6,7 @@ import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
+import playground.santiago.analysis.modalShareFromEvents.ModalShareFromEvents;
 
 
 public class SantiagoModalSplitAnalysis {
