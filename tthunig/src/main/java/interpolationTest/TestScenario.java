@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.matsim.contrib.accessibility.gis.SpatialGrid;
+import org.matsim.contrib.accessibility.interpolation.Interpolation;
 
 /**
  * Class for testing the implemented interpolation methods visually.
@@ -54,7 +56,7 @@ public class TestScenario {
 		}
 		
 		log.info("Start interpolation of file " + filename_data200 + " with the different interpolation methods:");
-		testOneMethod(Interpolation.BILINEAR, Double.NaN);
+		testOneMethod( Interpolation.BILINEAR, Double.NaN );
 		testOneMethod(Interpolation.BICUBIC, Double.NaN);		
 		for (int e=1; e<=12; e++){
 			testOneMethod(Interpolation.INVERSE_DISTANCE_WEIGHTING, e);
