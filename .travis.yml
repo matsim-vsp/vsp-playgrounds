@@ -37,8 +37,8 @@ env:
     - MODULE=ikaddoura      # 28 min 51 sec
     - MODULE=tthunig        # 10 min 34 sec
     - MODULE=kai            # 8 min 39 sec
-    - MODULE=agarwalamit    # 8 min 9 sec
-    - MODULE=benjamin       # 6 min 31 sec
+    # - MODULE=agarwalamit    # 8 min 9 sec
+    # - MODULE=benjamin       # 6 min 31 sec
     - MODULE=dziemke        # 4 min 35 sec
     - MODULE=kturner        # 3 min 31 sec
     - MODULE=santiago       # 3 min 17 sec
