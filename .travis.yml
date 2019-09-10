@@ -32,7 +32,7 @@ env:
   global:
     - MAVEN_OPTS="-Xmx2g"
   matrix:
-    - MODULE=vsp            # 5 min 29 sec
+    # - MODULE=vsp            # 5 min 29 sec # moved to a contrib of matsim (sep19)
     # sorted from longest to shortest (to minimise the overall test stage duration)
     - MODULE=ikaddoura      # 28 min 51 sec
     - MODULE=tthunig        # 10 min 34 sec
