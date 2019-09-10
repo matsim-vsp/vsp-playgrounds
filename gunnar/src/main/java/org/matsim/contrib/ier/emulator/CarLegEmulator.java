@@ -47,7 +47,7 @@ public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	public CarLegEmulator(final EventsManager eventsManager, final Network network, final TravelTime travelTime,
 			ActivityFacilities activityFacilities, final double simEndTime_s) {
-		super(eventsManager, activityFacilities); // , simEndTime_s);
+		super(eventsManager, activityFacilities, simEndTime_s);
 		this.network = network;
 		this.travelTime = travelTime;
 	}

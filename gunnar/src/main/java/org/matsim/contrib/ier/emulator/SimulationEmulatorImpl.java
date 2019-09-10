@@ -125,7 +125,7 @@ public class SimulationEmulatorImpl implements SimulationEmulator {
 					legEmulator = new ScheduleBasedTransitLegEmulator(eventsManager, this.services.getScenario());
 				} else {
 					legEmulator = new OnlyDepartureArrivalLegEmulator(eventsManager,
-							this.services.getScenario().getActivityFacilities());
+							this.services.getScenario().getActivityFacilities(), this.simEndTime_s);
 				}
 				time_s = legEmulator.emulateLegAndReturnEndTime_s(leg, person, previousActivity, followingActivity,
 						time_s);

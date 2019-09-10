@@ -59,7 +59,7 @@ public class FifoTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 
 	public FifoTransitLegEmulator(final EventsManager eventsManager,
 			final FifoTransitPerformance fifoTransitPerformance, final Scenario scenario) {
-		super(eventsManager, scenario.getActivityFacilities()); // , scenario.getConfig().qsim().getEndTime());
+		super(eventsManager, scenario.getActivityFacilities(), scenario.getConfig().qsim().getEndTime());
 		this.fifoTransitPerformance = fifoTransitPerformance;
 		this.transitLines = scenario.getTransitSchedule().getTransitLines();
 		this.stopFacilities = scenario.getTransitSchedule().getFacilities();

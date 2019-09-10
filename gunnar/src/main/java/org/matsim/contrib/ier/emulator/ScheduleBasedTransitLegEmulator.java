@@ -45,7 +45,7 @@ public class ScheduleBasedTransitLegEmulator extends OnlyDepartureArrivalLegEmul
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScheduleBasedTransitLegEmulator(final EventsManager eventsManager, final Scenario scenario) {
-		super(eventsManager, scenario.getActivityFacilities()); // , scenario.getConfig().qsim().getEndTime());
+		super(eventsManager, scenario.getActivityFacilities(), scenario.getConfig().qsim().getEndTime());
 		this.transitSchedule = scenario.getTransitSchedule();
 	}
 
@@ -127,44 +127,50 @@ public class ScheduleBasedTransitLegEmulator extends OnlyDepartureArrivalLegEmul
 	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person,
 			double time_s) {
 
-		// if (time_s > super.simEndTime_s) {
-		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
-		// return time_s;
-		// }
+		if (time_s <= this.simEndTime_s) {
 
-		final ExperimentalTransitRoute legRoute = (ExperimentalTransitRoute) leg.getRoute();
-		this.eventsManager.processEvent(new AgentWaitingForPtEvent(time_s, person.getId(), legRoute.getAccessStopId(),
-				legRoute.getEgressStopId()));
-
-		final TransitLine line = this.transitSchedule.getTransitLines().get(legRoute.getLineId());
-		final TransitRoute transitRoute = line.getRoutes().get(legRoute.getRouteId());
-		final TransitRouteStop fromStop = transitRoute
-				.getStop(this.transitSchedule.getFacilities().get(legRoute.getAccessStopId()));
-		final TransitRouteStop toStop = transitRoute
-				.getStop(this.transitSchedule.getFacilities().get(legRoute.getEgressStopId()));
-		final Departure departure = this.getNextDeparture(time_s, line, fromStop, toStop);
-		if (departure == null) {
+			// if (time_s > super.simEndTime_s) {
 			// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
-			// time_s = Double.POSITIVE_INFINITY;
 			// return time_s;
-			return Double.POSITIVE_INFINITY;
+			// }
+
+			final ExperimentalTransitRoute legRoute = (ExperimentalTransitRoute) leg.getRoute();
+			this.eventsManager.processEvent(new AgentWaitingForPtEvent(time_s, person.getId(),
+					legRoute.getAccessStopId(), legRoute.getEgressStopId()));
+
+			final TransitLine line = this.transitSchedule.getTransitLines().get(legRoute.getLineId());
+			final TransitRoute transitRoute = line.getRoutes().get(legRoute.getRouteId());
+			final TransitRouteStop fromStop = transitRoute
+					.getStop(this.transitSchedule.getFacilities().get(legRoute.getAccessStopId()));
+			final TransitRouteStop toStop = transitRoute
+					.getStop(this.transitSchedule.getFacilities().get(legRoute.getEgressStopId()));
+			final Departure departure = this.getNextDeparture(time_s, line, fromStop, toStop);
+			if (departure == null) {
+				// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+				// time_s = Double.POSITIVE_INFINITY;
+				// return time_s;
+				return this.simEndTime_s + 1; // Fairly arbitrary.. Gunnar 2019-09-10.
+			}
+
+			time_s = departure.getDepartureTime()
+					+ this.guessDepartureOffset_s(fromStop.getArrivalOffset(), fromStop.getDepartureOffset());
+			// if (time_s > super.simEndTime_s) {
+			// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+			// return time_s;
+			// }
+			if (time_s <= this.simEndTime_s) {
+				this.eventsManager.processEvent(new PersonEntersVehicleEvent(time_s, person.getId(), null));
+				time_s = departure.getDepartureTime()
+						+ this.guessArrivalOffset_s(toStop.getArrivalOffset(), toStop.getDepartureOffset());
+				// if (time_s > super.simEndTime_s) {
+				// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+				// return time_s;
+				// }
+				if (time_s <= this.simEndTime_s) {
+					this.eventsManager.processEvent(new PersonLeavesVehicleEvent(time_s, person.getId(), null));
+				}
+			}
 		}
-
-		time_s = departure.getDepartureTime()
-				+ this.guessDepartureOffset_s(fromStop.getArrivalOffset(), fromStop.getDepartureOffset());
-		// if (time_s > super.simEndTime_s) {
-		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
-		// return time_s;
-		// }
-		this.eventsManager.processEvent(new PersonEntersVehicleEvent(time_s, person.getId(), null));
-
-		time_s = departure.getDepartureTime()
-				+ this.guessArrivalOffset_s(toStop.getArrivalOffset(), toStop.getDepartureOffset());
-		// if (time_s > super.simEndTime_s) {
-		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
-		// return time_s;
-		// }
-		this.eventsManager.processEvent(new PersonLeavesVehicleEvent(time_s, person.getId(), null));
 
 		return time_s;
 	}

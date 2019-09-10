@@ -39,7 +39,7 @@ public class BasicTransitLegEmulator extends OnlyDepartureArrivalLegEmulator {
 	// -------------------- CONSTRUCTION --------------------
 
 	public BasicTransitLegEmulator(final EventsManager eventsManager, final Scenario scenario) {
-		super(eventsManager, scenario.getActivityFacilities()); // , scenario.getConfig().qsim().getEndTime());
+		super(eventsManager, scenario.getActivityFacilities(), scenario.getConfig().qsim().getEndTime());
 	}
 
 	// -------------------- IMPLEMENTATION OF LegEmulator --------------------
