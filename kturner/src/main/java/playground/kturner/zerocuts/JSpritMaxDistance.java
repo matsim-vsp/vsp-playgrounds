@@ -87,11 +87,11 @@ public class JSpritMaxDistance {
 	}
 
 	private static Config createConfig() {
-		Config config = ConfigUtils.loadConfig( IOUtils.newUrl(scenarioUrl, "config.xml" ) );
+		Config config = ConfigUtils.loadConfig( IOUtils.extendUrl(scenarioUrl, "config.xml" ) );
 
 		config.controler().setOutputDirectory("./output/freight");
 		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
-		new OutputDirectoryHierarchy( config.controler().getOutputDirectory(), config.controler().getRunId(), config.controler().getOverwriteFileSetting() ) ;
+		new OutputDirectoryHierarchy( config.controler().getOutputDirectory(), config.controler().getRunId(), config.controler().getOverwriteFileSetting(), config.controler().getCompressionType()) ;
 		config.controler().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles );
 		// (the directory structure is needed for jsprit output, which is before the controler starts.  Maybe there is a better alternative ...)
 
@@ -107,11 +107,11 @@ public class JSpritMaxDistance {
 
 		//create or load carrier vehicle types
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-		new CarrierVehicleTypeReader( vehicleTypes ).readURL( IOUtils.newUrl(scenarioUrl, "vehicleTypes.xml" ) ) ;
+		new CarrierVehicleTypeReader( vehicleTypes ).readURL( IOUtils.extendUrl(scenarioUrl, "vehicleTypes.xml" ) ) ;
 
 		//create or load the carrier(s) including assignment of vehicle types to the carrier(s)
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2( carriers ).readURL( IOUtils.newUrl(scenarioUrl, "singleCarrierFiveActivitiesWithoutRoutes.xml" ) ) ;
+		new CarrierPlanXmlReaderV2( carriers ).readURL( IOUtils.extendUrl(scenarioUrl, "singleCarrierFiveActivitiesWithoutRoutes.xml" ) ) ;
 
 		// assign vehicle types to the carriers
 		new CarrierVehicleTypeLoader( carriers ).loadVehicleTypes( vehicleTypes ) ;
@@ -142,7 +142,7 @@ public class JSpritMaxDistance {
 		netBuilder.setTimeSliceWidth(1800) ; 
 		final NetworkBasedTransportCosts netBasedCosts = netBuilder.build() ;
 
-		VehicleRoutingTransportCostsMatrix vrtc = netBasedCosts.;
+//		VehicleRoutingTransportCostsMatrix vrtc = netBasedCosts.; //TODO
 		//One independent VRP for each carrier.
 		for ( Carrier carrier : carriers.getCarriers().values() ) {
 			VehicleRoutingProblem.Builder vrpBuilder = MatsimJspritFactory.createRoutingProblemBuilder( carrier, network ) ;
@@ -154,14 +154,15 @@ public class JSpritMaxDistance {
 			//Build algorithm out of the box
 			final Jsprit.Builder algoBuilder = Jsprit.Builder.newInstance( vrp );
 			algoBuilder.setProperty( Jsprit.Parameter.THREADS,"5" ) ;
-			
-			StateManager stateManager = new StateManager(vrp); //head of development - upcoming release (v1.4)
-	        StateId distanceStateId = stateManager.createStateId("distance"); //head of development - upcoming release (v1.4)
-	        stateManager.addStateUpdater(new DistanceUpdater(distanceStateId, stateManager, costMatrix));
 
-			ConstraintManager constraintManager = new ConstraintManager(vrp, stateManager);
-			constraintManager.addConstraint(new MaxDistanceConstraint(stateManager, distanceId, distanceCalculator, maxDistancePerVehicleMap));
-			algoBuilder.setStateAndConstraintManager(stateManager, constraintManager);
+			//TODO
+//			StateManager stateManager = new StateManager(vrp); //head of development - upcoming release (v1.4)
+//	        StateId distanceStateId = stateManager.createStateId("distance"); //head of development - upcoming release (v1.4)
+//	        stateManager.addStateUpdater(new DistanceUpdater(distanceStateId, stateManager, costMatrix));
+//
+//			ConstraintManager constraintManager = new ConstraintManager(vrp, stateManager);
+//			constraintManager.addConstraint(new MaxDistanceConstraint(stateManager, distanceId, distanceCalculator, maxDistancePerVehicleMap));
+//			algoBuilder.setStateAndConstraintManager(stateManager, constraintManager);
 			VehicleRoutingAlgorithm vra = algoBuilder.buildAlgorithm();
 
 			//			// or read it from file
