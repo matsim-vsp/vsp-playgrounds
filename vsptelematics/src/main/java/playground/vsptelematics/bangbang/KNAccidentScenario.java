@@ -19,15 +19,6 @@
 package playground.vsptelematics.bangbang;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -39,9 +30,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
@@ -51,21 +41,25 @@ import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.replanning.StrategyManager;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.strategies.KeepLastExecutedAsPlanStrategy;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.withinday.controller.ExecutedPlansServiceImpl;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 /**
  * @author nagel
@@ -73,7 +67,10 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
  */
 public class KNAccidentScenario {
 	private static final Logger log = Logger.getLogger(KNAccidentScenario.class) ;
-	
+
+	enum RunType {base, manualDetour, bangbang, withinDayRerouting, day2day }
+	private static final RunType runType = RunType.withinDayRerouting ;
+
 	@SuppressWarnings("unused")
 	private static final String KEEP_LAST_EXECUTED = "keepLastExecuted" ;
 
@@ -95,7 +92,10 @@ public class KNAccidentScenario {
 	}
 
 	static final Id<Link> accidentLinkId = Id.createLinkId( "4706699_484108_484109-4706699_484109_26662372");
-	static List<Id<Link>> replanningLinkIds = new ArrayList<>() ; 
+	static List<Id<Link>> replanningLinkIds = new ArrayList<>() ;
+
+	enum ControlType { none, manualDetour, bangbang, withinDayRerouting } ;
+	private static final ControlType controlType = ControlType.withinDayRerouting ;
 
 	public static void main(String[] args) {
 		replanningLinkIds.add( Id.createLinkId("4068014_26836040_26836036-4068014_26836036_251045850-4068014_251045850_251045852") ) ;
@@ -103,7 +103,7 @@ public class KNAccidentScenario {
 		// ===
 
 		final Config config = ConfigUtils.loadConfig("../../shared-svn/studies/countries/de/berlin/telematics/funkturm-example/baseconfig.xml") ;
-		
+
 		config.network().setInputFile("../../counts/iv_counts/network.xml.gz"); // note that this path is relative to path of config!
 		config.network().setTimeVariantNetwork(true);
 
@@ -116,11 +116,13 @@ public class KNAccidentScenario {
 		config.controler().setWriteEventsInterval(100);
 		config.controler().setWritePlansInterval(100);
 
+		config.controler().setRoutingAlgorithmType( ControlerConfigGroup.RoutingAlgorithmType.Dijkstra );
+
 		config.qsim().setFlowCapFactor(0.04);
 		config.qsim().setStorageCapFactor(0.06);
 		config.qsim().setStuckTime(100.);
 		config.qsim().setStartTime(6.*3600.);
-//		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
+		//		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
 		config.qsim().setTrafficDynamics(TrafficDynamics.queue);
 
 		{
@@ -145,7 +147,7 @@ public class KNAccidentScenario {
 		// ===
 
 		final Scenario scenario = ScenarioUtils.loadScenario( config ) ;
-		
+
 		for ( Link link : scenario.getNetwork().getLinks().values() ) {
 			if ( link.getAllowedModes().contains( TransportMode.walk ) ) {
 				Set<String> modes = new HashSet<>( link.getAllowedModes() ) ;
@@ -153,10 +155,10 @@ public class KNAccidentScenario {
 				link.setAllowedModes(modes);
 			}
 		}
-		
-		
+
+
 		preparePopulation(scenario);
-		scheduleAccident(scenario); 
+		scheduleAccident(scenario);
 
 		Link link = scenario.getNetwork().getLinks().get( Id.createLinkId( "-418375_-248_247919764" ) ) ;
 		link.setCapacity(2000.); // "repair" a capacity. (This is Koenigin-Elisabeth-Str., parallel to A100 near Funkturm, having visibly less capacity than links upstream and downstream.)
@@ -171,43 +173,70 @@ public class KNAccidentScenario {
 		controler.getConfig().controler().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles ) ;
 
 
-		Set<String> analyzedModes = new HashSet<>() ;
-		analyzedModes.add( TransportMode.car ) ;
-		final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
-		
+
 		controler.addOverridingModule( new OTFVisLiveModule() );
 
 		controler.addOverridingModule( new AbstractModule(){
 			@Override public void install() {
-			
+
 				bind( MobsimDataProvider.class ).in(Singleton.class) ;
 				addMobsimListenerBinding().to( MobsimDataProvider.class) ;
 				bind( ExecutedPlansServiceImpl.class ).in(Singleton.class) ;
 				addControlerListenerBinding().to( ExecutedPlansServiceImpl.class ) ;
 				// (note that this is different from EXPERIENCEDPlansService! kai, apr'18)
-//				
+				//
 				addPlanStrategyBinding(KEEP_LAST_EXECUTED).toProvider(KeepLastExecutedAsPlanStrategy.class) ;
 
 				this.bind( MyIterationCounter.class ).in(Singleton.class) ;
-				
 
-				// ===
-				
-				this.addEventHandlerBinding().toInstance( travelTime ) ;
-				this.addMobsimListenerBinding().toInstance( travelTime );
-				this.bind( TravelTime.class ).toInstance( travelTime );
-				
-				// ---
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
-//				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
-				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-				
-//				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
-//				this.addMobsimListenerBinding().toInstance( abc ) ;
-////				abc.setLastReplanningIteration(9);
-//				abc.setReplanningProba(1.0);
-				
-				
+				switch( runType ) {
+					case base:
+						break;
+					case manualDetour:
+						this.addMobsimListenerBinding().to( ManualDetour.class ) ;
+						break;
+					case bangbang: {
+						Set<String> analyzedModes = new HashSet<>() ;
+						analyzedModes.add( TransportMode.car ) ;
+						final WithinDayTravelTime travelTime = new WithinDayTravelTime(scenario, analyzedModes);
+
+						this.addEventHandlerBinding().toInstance( travelTime ) ;
+						this.addMobsimListenerBinding().toInstance( travelTime );
+						this.bind( TravelTime.class ).toInstance( travelTime );
+
+						this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+
+						break; }
+					case withinDayRerouting: {
+						Set<String> analyzedModes = new HashSet<>() ;
+						analyzedModes.add( TransportMode.car ) ;
+						final WithinDayTravelTime travelTime = new WithinDayTravelTime(scenario, analyzedModes);
+
+						this.addEventHandlerBinding().toInstance( travelTime ) ;
+						this.addMobsimListenerBinding().toInstance( travelTime );
+						this.bind( TravelTime.class ).toInstance( travelTime );
+
+						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+						this.addMobsimListenerBinding().toInstance( abc ) ;
+						//				abc.setLastReplanningIteration(9);
+						abc.setReplanningProba(1.0);
+
+						break; }
+					case day2day: {
+						// this should do within-day replanning, but based on what was good solution in iteration before.  not sure if it works.
+						// kai, jun'19
+						this.bind( TravelTime.class ).to( LastIterationCarTraveltime.class ).in( Singleton.class ) ;
+
+						WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+						this.addMobsimListenerBinding().toInstance( abc ) ;
+						abc.setLastReplanningIteration(19);
+						abc.setReplanningProba(0.1);
+						break; }
+					default:
+						throw new IllegalStateException( "Unexpected value: " + runType );
+				}
+
 			}
 		}) ;
 
@@ -256,9 +285,16 @@ public class KNAccidentScenario {
 				}
 			}
 			if ( !retain ) {
-				it.remove(); 
+				it.remove();
 			}
 		}
 	}
 
+	private static class LastIterationCarTraveltime implements TravelTime {
+		@Inject private Map<String,TravelTime> travelTimes ;
+		@Override
+		public double getLinkTravelTime( Link link, double time, Person person, Vehicle vehicle ){
+			return travelTimes.get( TransportMode.car ).getLinkTravelTime( link, time, person, vehicle ) ;
+		}
+	}
 }
