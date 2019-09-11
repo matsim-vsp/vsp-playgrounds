@@ -26,7 +26,7 @@ updateBranch: true
 # This is the equivalent of clicking the 'Delete branch' button shown on merged pull requests.
 # Note: this only works when the branch of the pull request resides in the same repository as
 #       the pull request itself.
-deleteBranchAfterMerge: true
+deleteBranchAfterMerge: false
 
 # In what way a pull request needs to be merged. This can be:
 # * merge: creates a merge commit, combining the commits from the pull request on top of
