@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.freight.carrier.Carrier;
@@ -21,6 +23,10 @@ import org.matsim.contrib.freight.controler.CarrierModule;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
 import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlansConfigGroup;
@@ -29,13 +35,8 @@ import org.matsim.core.replanning.GenericStrategyManager;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
-
-import playground.kturner.freightKt.CarrierScoringFunctionFactoryImpl_KT;
 
 public class CarrierScoringFunctionFactoryImpl_KTIT {
 	
@@ -283,7 +284,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		//Füge Mautschmema hinzu
 		final VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 				new VehicleTypeDependentRoadPricingCalculator();
-		final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
 			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;
@@ -360,7 +361,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		//Füge Mautschmema hinzu
 				final VehicleTypeDependentRoadPricingCalculator rpCalculator = 
 						new VehicleTypeDependentRoadPricingCalculator();
-				final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+		final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 				RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 				try {
 					RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;

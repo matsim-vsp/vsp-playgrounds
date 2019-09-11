@@ -34,19 +34,33 @@ public class IERConfigGroup extends ReflectiveConfigGroup {
 		super(GROUP_NAME);
 	}
 
+	// -------------------- writePerformanceOutput --------------------
+
+	private boolean writePerformanceOutput = false;
+
+	@StringGetter("writePerformanceOutput")
+	public boolean getWritePerformanceOutput() {
+		return this.writePerformanceOutput;
+	}
+
+	@StringSetter("writePerformanceOutput")
+	public void setWritePerformanceOutput(boolean writePerformanceOutput) {
+		this.writePerformanceOutput = writePerformanceOutput;
+	}
+
 	// -------------------- (experimental switch) parallel --------------------
-
-	private boolean parallel = true;
-
-	@StringGetter("parallel")
-	public boolean isParallel() {
-		return this.parallel;
-	}
-
-	@StringSetter("parallel")
-	public void setParallel(boolean parallel) {
-		this.parallel = parallel;
-	}
+	//
+	// private boolean parallel = true;
+	//
+	// @StringGetter("parallel")
+	// public boolean getParallel() {
+	// return this.parallel;
+	// }
+	//
+	// @StringSetter("parallel")
+	// public void setParallel(boolean parallel) {
+	// this.parallel = parallel;
+	// }
 
 	// -------------------- iterationsPerCycle --------------------
 

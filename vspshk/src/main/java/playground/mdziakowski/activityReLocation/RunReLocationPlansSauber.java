@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -52,7 +53,7 @@ import java.util.*;
 public class RunReLocationPlansSauber {
 
     private static final Logger log = Logger.getLogger(RunReLocationPlans.class);
-    private static Random random = new Random(55332654);
+    private static Random random = MatsimRandom.getRandom();
     
     public static void main(String[] args) {
     	
@@ -64,11 +65,11 @@ public class RunReLocationPlansSauber {
     	
     	if ( args.length==0 || args[0].equals("")) {
 
-	        planFile = "http://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5.3-10pct.plans.xml.gz";	
-	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_2000_intersect_Id.shp";
-	        facilitiesFile = "D:/Arbeit/Berlin/ReLocation/FirstBerlinBrandenburgFacilities/combinedFacilities.xml";
-	        outputPlans = "D:/Arbeit/Berlin/ReLocation/richtigerRun/PlansWithNewLocations2000.xml";
-	        logFile = "D:/Arbeit/Berlin/ReLocation/richtigerRun/log2000";
+	        planFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.4-10pct/input/berlin-v5.4-10pct.plans.xml.gz";	
+	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_10000_intersect_Id.shp";
+	        facilitiesFile = "D:/Arbeit/Berlin/ReLocation/combinedFacilities_BB_BE.xml.gz";
+	        outputPlans = "D:/Arbeit/Berlin/ReLocation/SecondBerlinBrandenburgPlans/PlansWithNewLocations10000_2.xml";
+	        logFile = "D:/Arbeit/Berlin/ReLocation/SecondBerlinBrandenburgPlans/log10000_2";
 	        
     	} else {
     		
@@ -176,7 +177,7 @@ public class RunReLocationPlansSauber {
      * @return a map with the zoneId as keys and a geometry as value
      */
     
-    private static Map<String, Geometry> readShapeFile(String shapeFile){
+    public static Map<String, Geometry> readShapeFile(String shapeFile){
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
         Map<String, Geometry> districts = new HashMap<>();
 
@@ -294,9 +295,9 @@ public class RunReLocationPlansSauber {
             if (oldActivities.containsKey(zone) && newFacilities.containsKey(zone)) {
 //                warningType1.add();
             } else if (oldActivities.containsKey(zone) && !(newFacilities.containsKey(zone))) {
-                warningType2.add(oldActivities.get(zone).size() + " old " + matsimtype + "  activities and " + "0 new facilities found");
+                warningType2.add(oldActivities.get(zone).size() + " old " + matsimtype + "  activities and " + "0 new facilities found: " + zone);
             } else if (!(oldActivities.containsKey(zone)) && newFacilities.containsKey(zone)) {
-                warningType3.add("0 old " + matsimtype + " activities and " + newFacilities.get(zone).size() + " new facilities found");
+                warningType3.add("0 old " + matsimtype + " activities and " + newFacilities.get(zone).size() + " new facilities found: " + zone);
             }
         }
         log.warn("Total mismatch: " + (warningType2.size() + warningType3.size()) + " " + matsimtype);

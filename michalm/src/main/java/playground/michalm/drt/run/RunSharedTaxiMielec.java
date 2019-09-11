@@ -22,6 +22,7 @@ package playground.michalm.drt.run;
 import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -35,10 +36,10 @@ public class RunSharedTaxiMielec {
 	}
 
 	public static void run(String configFile, boolean otfvis) {
-		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
+		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new MultiModeDrtConfigGroup(),
 				new OTFVisConfigGroup());
 
-		DrtConfigGroup drtCfg = DrtConfigGroup.get(config);
+		DrtConfigGroup drtCfg = DrtConfigGroup.getSingleModeDrtConfig(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
 
 		MinCostFlowRebalancingParams rebalancingParams = drtCfg.getMinCostFlowRebalancing().get();

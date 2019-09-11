@@ -224,7 +224,7 @@ public class IKNetworkPopulationWriter {
 				if (pe instanceof Activity){
 					
 					Activity act = (Activity) pe;
-					SimpleFeature feature = factory.createPoint(MGC.coord2Coordinate(act.getCoord()), new Object[] {act.getType(), p.getId().toString(), p.getAttributes().getAttribute(attributeFromPlansFile), scenario.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), customAttributeFromPersonAttributeFile)}, null);
+					SimpleFeature feature = factory.createPoint(MGC.coord2Coordinate(act.getCoord()), new Object[] {act.getType(), p.getId().toString(), p.getAttributes().getAttribute(attributeFromPlansFile), scenario.getPopulation().getPersons().get(p.getId()).getAttributes().getAttribute(customAttributeFromPersonAttributeFile)}, null);
 					features.add(feature);
 				}
 			}

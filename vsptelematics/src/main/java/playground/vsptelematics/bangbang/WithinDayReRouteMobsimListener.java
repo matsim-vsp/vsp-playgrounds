@@ -49,7 +49,6 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.withinday.utils.EditRoutes;
 
 import com.google.inject.Inject;
@@ -61,7 +60,7 @@ import playground.vsptelematics.bangbang.KNAccidentScenario.MyIterationCounter;
  *
  */
 class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
-
+	
 	static class Config {
 	
 	}
@@ -92,10 +91,6 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
 		if ( this.iterationCounter.getIteration() > this.lastReplanningIteration ) {
 			log.warn("NOT replanning"); 
-			return ;
-		}
-
-		if ( event.getSimulationTime() < 8.*3600. + 10.*60 ) {
 			return ;
 		}
 		
@@ -178,7 +173,7 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 				log.warn("modified route");
 				cnt++ ;
 			}
-			this.scenario.getPopulation().getPersonAttributes().putAttribute( agent.getId().toString(), AgentSnapshotInfo.marker, true ) ;
+			this.scenario.getPopulation().getPersons().get(agent.getId()).getAttributes().putAttribute("marker", true ) ;
 		}
 
 		// ---

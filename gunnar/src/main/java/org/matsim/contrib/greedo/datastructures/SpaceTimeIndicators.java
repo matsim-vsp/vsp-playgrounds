@@ -48,11 +48,18 @@ public class SpaceTimeIndicators<L> {
 
 		public final L spaceObject;
 
-		public final double weight;
+		public final double particleWeight;
 
-		private Visit(final L spaceObject, final double weight) {
+		public final double slotWeight;
+
+		private Visit(final L spaceObject, final double particleWeight, final double slotWeight) {
 			this.spaceObject = spaceObject;
-			this.weight = weight;
+			this.particleWeight = particleWeight;
+			this.slotWeight = slotWeight;
+		}
+
+		public double weight(final boolean useParticleWeight, final boolean useSlotWeight) {
+			return (useParticleWeight ? this.particleWeight : 1.0) * (useSlotWeight ? this.slotWeight : 1.0);
 		}
 	}
 
@@ -94,12 +101,12 @@ public class SpaceTimeIndicators<L> {
 		}
 	}
 
-	public void visit(final L spaceObj, final int timeBin, final double weight) {
+	public void visit(final L spaceObj, final int timeBin, final double particleWeight, final double slotWeight) {
 		List<Visit> spaceObjList = this.data.get(timeBin);
 		if (spaceObjList == null) {
 			spaceObjList = new ArrayList<Visit>(1);
 			this.data.set(timeBin, spaceObjList);
 		}
-		spaceObjList.add(new Visit(spaceObj, weight));
+		spaceObjList.add(new Visit(spaceObj, particleWeight, slotWeight));
 	}
 }

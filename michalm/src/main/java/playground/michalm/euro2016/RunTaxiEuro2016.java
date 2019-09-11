@@ -21,12 +21,13 @@ package playground.michalm.euro2016;
 
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.taxi.benchmark.RunTaxiBenchmark;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.core.config.*;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 
 public class RunTaxiEuro2016 {
 	public static void run(String configFile, int runs, String demand) {
-		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup());
+		Config config = ConfigUtils.loadConfig(configFile, new MultiModeTaxiConfigGroup(), new DvrpConfigGroup());
 
 		String baseDir = "../../../shared-svn/projects/maciejewski/Mielec/";
 		config.plans().setInputFile(baseDir + "2014_02_base_scenario/plans_taxi/plans_only_taxi_" + demand + ".xml.gz");

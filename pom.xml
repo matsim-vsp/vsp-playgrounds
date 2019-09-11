@@ -138,9 +138,6 @@
 	</build>
 
 	<modules>
-		<module>agarwalamit</module>
-		<module>benjamin</module>
-		<module>dgrether</module>
 		<module>dziemke</module>
 		<module>gleich</module>
 		<module>gunnar</module>
@@ -152,7 +149,7 @@
 		<module>santiago</module>
 		<module>stockholm</module>
 		<module>tthunig</module>
-		<module>vsp</module>
+		<!--<module>vsp</module>-->
 		<module>vspshk</module>
 		<module>vsptelematics</module>
 	</modules>

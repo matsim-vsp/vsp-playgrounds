@@ -19,7 +19,6 @@
 
 package playground.ikaddoura.incidents.incidentWithinDayReplanning;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,7 +39,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
-import playground.ikaddoura.analysis.IKAnalysis;
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
 /**
@@ -160,9 +158,6 @@ public class IncidentWithinDayReplanning {
 		}
 				
 		controler.run();		
-		
-		IKAnalysis analysis = new IKAnalysis(scenario, crs, 100);
-		analysis.run();
 	}
 	
 }

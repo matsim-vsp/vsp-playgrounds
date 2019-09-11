@@ -20,8 +20,8 @@
 package playground.michalm.drt.run;
 
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -34,7 +34,7 @@ public class RunSharedTaxiBerlin {
 	}
 
 	public static void run(String configFile, boolean otfvis) {
-		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
+		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new MultiModeDrtConfigGroup(),
 				new OTFVisConfigGroup(), new TaxiFareConfigGroup());
 		DrtControlerCreator.createControlerWithSingleModeDrt(config, otfvis).run();
 	}

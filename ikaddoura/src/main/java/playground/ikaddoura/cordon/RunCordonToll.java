@@ -32,13 +32,13 @@ import org.matsim.contrib.noise.data.NoiseAllocationApproach;
 import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingModule;
 
 /**
 * @author ikaddoura
@@ -118,7 +118,7 @@ public class RunCordonToll {
 		noiseContext = new NoiseContext(controler.getScenario());
 		
 		controler.addOverridingModule(new NoiseModule(scenario));
-		controler.addOverridingModule(new RoadPricingModule());
+//		controler.addOverridingModule(RoadPricingUtils.createModule()); // TODO: fix!
 		controler.run();
 		
 		// delete unnecessary iterations folder here.

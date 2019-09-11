@@ -19,13 +19,12 @@
 
 package playground.ikaddoura.router;
 
+import org.matsim.analysis.vtts.VTTSHandler;
+import org.matsim.analysis.vtts.VTTScomputation;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-
-import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.analysis.vtts.VTTScomputation;
 
 /**
 * @author ikaddoura
@@ -38,7 +37,7 @@ public class RunVTTSRouter {
 		Config config = ConfigUtils.createConfig();
 		Controler controler = new Controler(config);
 
-		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config.planCalcScore());
 		factory.setSigma(0.);
 		

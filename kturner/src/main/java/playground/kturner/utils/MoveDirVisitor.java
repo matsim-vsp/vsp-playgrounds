@@ -10,7 +10,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
-import org.jfree.util.Log;
 
 /**
  * @author kturner
@@ -82,7 +81,7 @@ public class MoveDirVisitor extends SimpleFileVisitor<Path> {
     		if (dir.toFile().list().length == 0) {	//directory is empty
     			Files.delete(dir);
     		} else {
-		    		Log.warn("Something goes wrong with moving files from: " + dir.getFileName());
+		    		log.warn("Something goes wrong with moving files from: " + dir.getFileName());
 		    	}
     	}
     	

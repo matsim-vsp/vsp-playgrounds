@@ -35,6 +35,7 @@ import org.matsim.facilities.ActivityFacilities;
 import org.matsim.vehicles.Vehicle;
 
 /**
+ * TODO: Include toll.
  *
  * @author Gunnar Flötteröd
  *
@@ -45,19 +46,27 @@ public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 	private final TravelTime travelTime;
 
 	public CarLegEmulator(final EventsManager eventsManager, final Network network, final TravelTime travelTime,
-			ActivityFacilities activityFacilities) {
-		super(eventsManager, activityFacilities);
+			ActivityFacilities activityFacilities, final double simEndTime_s) {
+		super(eventsManager, activityFacilities, simEndTime_s);
 		this.network = network;
 		this.travelTime = travelTime;
 	}
 
 	@Override
-	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person, double time_s) {
+	public double emulateBetweenDepartureAndArrivalAndReturnEndTime_s(final Leg leg, final Person person,
+			double time_s) {
 
-		if (!(leg.getRoute() instanceof NetworkRoute)) {
-			throw new RuntimeException(
-					"Expecting a " + NetworkRoute.class.getSimpleName() + " when emulating a car leg.");
-		}
+		// time_s = Math.max(time_s, leg.getDepartureTime());
+		// if (time_s > super.simEndTime_s) {
+		// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+		// return time_s;
+		// }
+
+		// if (!(leg.getRoute() instanceof NetworkRoute)) {
+		// throw new RuntimeException(
+		// "Expecting a " + NetworkRoute.class.getSimpleName() + " when emulating a car
+		// leg.");
+		// }
 		final NetworkRoute networkRoute = (NetworkRoute) leg.getRoute();
 		if (!networkRoute.getStartLinkId().equals(networkRoute.getEndLinkId())) {
 
@@ -68,6 +77,10 @@ public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 			this.eventsManager.processEvent(
 					new VehicleEntersTrafficEvent(time_s, person.getId(), link.getId(), vehicleId, leg.getMode(), 0.0));
 			time_s += this.travelTime.getLinkTravelTime(link, time_s, person, null);
+			// if (time_s > super.simEndTime_s) {
+			// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+			// return time_s;
+			// }
 			this.eventsManager.processEvent(new LinkLeaveEvent(time_s, vehicleId, link.getId()));
 
 			// Intermediate links of a network route.
@@ -75,6 +88,10 @@ public class CarLegEmulator extends OnlyDepartureArrivalLegEmulator {
 				link = this.network.getLinks().get(linkId);
 				this.eventsManager.processEvent(new LinkEnterEvent(time_s, vehicleId, link.getId()));
 				time_s += this.travelTime.getLinkTravelTime(link, time_s, person, null);
+				// if (time_s > super.simEndTime_s) {
+				// Logger.getLogger(this.getClass()).warn("Stuck in " + leg.getMode());
+				// return time_s;
+				// }
 				this.eventsManager.processEvent(new LinkLeaveEvent(time_s, vehicleId, link.getId()));
 			}
 

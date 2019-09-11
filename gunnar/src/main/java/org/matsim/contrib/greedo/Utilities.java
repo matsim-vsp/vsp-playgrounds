@@ -76,16 +76,19 @@ class Utilities {
 	class SummaryStatistics {
 
 		final Map<Id<Person>, Double> personId2expectedUtilityChange;
+		final Map<Id<Person>, Double> personId2experiencedUtility;
 		final public Double realizedUtilitySum;
 		final public Double realizedUtilityChangeSum;
 
 		private SummaryStatistics() {
 			final Map<Id<Person>, Double> personId2expectedUtilityChange = new LinkedHashMap<>();
+			final Map<Id<Person>, Double> personId2experiencedUtility = new LinkedHashMap<>();
 			Double realizedUtilitySum = null;
 			Double realizedUtilityChangeSum = null;
 			for (Map.Entry<Id<Person>, Entry> mapEntry : personId2entry.entrySet()) {
 				final Id<Person> personId = mapEntry.getKey();
 				final Entry entry = mapEntry.getValue();
+				personId2experiencedUtility.put(personId, entry.lastRealizedUtility);
 				if (entry.getLastExpectedUtilityChange() != null) {
 					personId2expectedUtilityChange.put(personId, entry.getLastExpectedUtilityChange());
 				}
@@ -105,6 +108,7 @@ class Utilities {
 				}
 			}
 			this.personId2expectedUtilityChange = Collections.unmodifiableMap(personId2expectedUtilityChange);
+			this.personId2experiencedUtility = Collections.unmodifiableMap(personId2experiencedUtility);
 			this.realizedUtilitySum = realizedUtilitySum;
 			this.realizedUtilityChangeSum = realizedUtilityChangeSum;
 		}

@@ -26,6 +26,7 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.etaxi.run.RunETaxiBenchmark;
 import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.contrib.ev.temperature.TemperatureService;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.core.config.Config;
@@ -38,13 +39,13 @@ public class RunEAVBenchmark {
 	private static final double TEMPERATURE = 20;// 20 oC
 
 	public static void run(String configFile, int runs) {
-		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup(),
+		Config config = ConfigUtils.loadConfig(configFile, new MultiModeTaxiConfigGroup(), new DvrpConfigGroup(),
 				new EvConfigGroup());
 		createControler(config, runs).run();
 	}
 
 	public static Controler createControler(Config config, int runs) {
-		String mode = TaxiConfigGroup.get(config).getMode();
+		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(config).getMode();
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		Controler controler = RunETaxiBenchmark.createControler(config, runs);
 		controler.addOverridingModule(new AbstractModule() {

@@ -74,24 +74,28 @@
             <version>12.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>benjamin</artifactId>
-            <version>12.0-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>agarwalamit</artifactId>
-            <version>12.0-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
+<!-- 			<artifactId>benjamin</artifactId> -->
+<!--             <version>12.0-SNAPSHOT</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
+<!-- 			<artifactId>agarwalamit</artifactId> -->
+<!--             <version>12.0-SNAPSHOT</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+		
+		<!--  TODO: Remove dependency to ikaddoura. -->
 		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>ikaddoura</artifactId>
             <version>12.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
+		
+		
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>matsim-gtfs</artifactId>

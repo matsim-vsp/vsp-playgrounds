@@ -73,7 +73,7 @@
           <version>12.0-SNAPSHOT</version>
   	  </dependency>
   	  <dependency>
-  		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+  		<groupId>org.matsim.contrib</groupId>
   		<artifactId>vsp</artifactId>
           <version>12.0-SNAPSHOT</version>
   		<scope>compile</scope>
@@ -84,13 +84,6 @@
           <version>12.0-SNAPSHOT</version>
 		<scope>compile</scope>
 	  </dependency>
-
-<!-- 	  <dependency> -->
-<!--   		<groupId>org.matsim.vsp.vsp-playgrounds</groupId> -->
-<!--   		<artifactId>agarwalamit</artifactId> -->
-      <!--   		<version>12.0-SNAPSHOT</version> -->
-<!--   		<scope>compile</scope> -->
-<!--   	</dependency> -->
 
 	  <dependency>
 		  <groupId>org.locationtech.jts</groupId>
@@ -128,16 +121,16 @@
 	    <version>0.10.0</version>
 	</dependency>
 	
-<!-- 	<dependency> -->
-<!-- 	    <groupId>com.github.matsim-vsp</groupId> -->
-<!-- 	    <artifactId>avoev</artifactId> -->
-<!-- 	    <version>master-SNAPSHOT</version> -->
-<!-- 	</dependency> -->
-	
 	<dependency>
   		<groupId>com.github.matsim-vsp</groupId>
    		<artifactId>matsim-berlin</artifactId>
    		<version>5.2</version>
+	</dependency>
+	
+	<dependency>
+  		<groupId>com.github.ikaddoura</groupId>
+   		<artifactId>matsim-analysis</artifactId>
+   		<version>76419f4ee6</version>
 	</dependency>
 	
   </dependencies>

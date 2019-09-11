@@ -22,6 +22,9 @@ package playground.santiago.run;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -33,6 +36,8 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -43,22 +48,17 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
-import org.matsim.roadpricing.RoadPricingModule;
 
-import playground.santiago.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
 import playground.santiago.SantiagoScenarioConstants;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
+import playground.santiago.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
 
 /**
  * @author benjamin
@@ -135,9 +135,9 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			rpcg.setTollLinksFile(gantriesFile);
 			
 			//Adding randomness to the router, sigma = 3
-			baseConfig.plansCalcRoute().setRoutingRandomness(sigma); 
+			baseConfig.plansCalcRoute().setRoutingRandomness(sigma);
 
-			controler.addOverridingModule(new RoadPricingModule());	
+		controler.addOverridingModule(new RoadPricingModule());
 
 			if(departureTimeChoice){
 				//Using the default parameters in asasConfigGroup

@@ -25,6 +25,7 @@ package playground.ikaddoura.savPricing;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
@@ -33,7 +34,7 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -41,7 +42,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 
 /**
  * @author ikaddoura
@@ -68,8 +68,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler3;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
@@ -96,7 +95,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -119,8 +118,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler1;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup(),
@@ -132,8 +130,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -154,8 +152,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler2;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
@@ -181,8 +178,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setUpdatePriceInterval(1);
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
@@ -204,8 +201,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler4;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new SAVPricingConfigGroup(),
-					new TaxiConfigGroup(),
+					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
@@ -231,8 +227,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setUpdatePriceInterval(1);
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
-			
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
+
+			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			controler.addOverridingModule(new TaxiFareModule());

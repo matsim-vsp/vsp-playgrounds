@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jfree.chart.ChartRenderingInfo;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.entity.StandardEntityCollection;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -69,7 +69,7 @@ public class CreateBiasErrorGraph {
 		// The following is (partially) taken from "org.matsim.counts.algorithms.graphs.helper.OutputDelegate.java"
 		ChartRenderingInfo info = new ChartRenderingInfo(new StandardEntityCollection());
 		File graphicsFile = new File(outputFile);
-		ChartUtilities.saveChartAsPNG(graphicsFile, ep.getChart(), width, height, info);
+		ChartUtils.saveChartAsPNG(graphicsFile, ep.getChart(), width, height, info);
 		LOG.info("Done creating graphics file.");
 	}
 }

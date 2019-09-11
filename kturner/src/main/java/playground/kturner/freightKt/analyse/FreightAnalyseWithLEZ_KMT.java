@@ -13,6 +13,9 @@ import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
+import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -22,8 +25,6 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.UncheckedIOException;
-import org.matsim.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
 
 public class FreightAnalyseWithLEZ_KMT {
 
@@ -85,7 +86,7 @@ public class FreightAnalyseWithLEZ_KMT {
 			
 			//TODO: Add switch with/without LEZ 
 			//reading in lowEmissionZone
-			final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+			final RoadPricingSchemeImpl scheme = RoadPricingUtils.createAndRegisterMutableScheme(scenario);
 			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 			try {
 				rpReader.readFile(lezZonefile.getAbsolutePath());

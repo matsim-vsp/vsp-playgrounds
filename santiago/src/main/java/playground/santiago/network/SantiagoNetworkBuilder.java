@@ -51,7 +51,6 @@ import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.matsim.core.utils.io.OsmNetworkReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.benjamin.utils.MergeNetworks;
 import playground.santiago.SantiagoScenarioConstants;
 
 /**

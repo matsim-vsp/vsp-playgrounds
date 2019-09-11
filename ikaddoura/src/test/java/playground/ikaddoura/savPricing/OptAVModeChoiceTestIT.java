@@ -25,6 +25,7 @@ package playground.ikaddoura.savPricing;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
@@ -32,7 +33,7 @@ import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -41,7 +42,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 
 /**
  * @author ikaddoura
@@ -67,8 +67,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new TaxiConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -82,7 +81,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 //		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
-		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, otfvis);
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config1, otfvis);
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 		
 		// taxi fares
@@ -116,8 +115,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new TaxiConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -130,8 +128,8 @@ public class OptAVModeChoiceTestIT {
 		optAVParams2.setAccountForCongestion(false);
 //		optAVParams2.setDailyFixCostAllSAVusers(-10000.);
 //		optAVParams2.setFixCostsSAVinsteadOfCar(0);
-		
-		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, otfvis);
+
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares
@@ -189,8 +187,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new TaxiConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -205,7 +202,7 @@ public class OptAVModeChoiceTestIT {
 //		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 //		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
-		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeDrt(config1, otfvis);
+		Controler controler1 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config1, otfvis);
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 
 		// taxi fares
@@ -239,8 +236,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new TaxiConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -254,8 +250,8 @@ public class OptAVModeChoiceTestIT {
 		optAVParams2.setAccountForCongestion(false);
 //		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
 //		optAVParams2.setDailyFixCostAllSAVusers(1000.);
-		
-		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeDrt(config2, otfvis);
+
+		Controler controler2 = TaxiControlerCreator.createControlerWithSingleModeTaxi(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares

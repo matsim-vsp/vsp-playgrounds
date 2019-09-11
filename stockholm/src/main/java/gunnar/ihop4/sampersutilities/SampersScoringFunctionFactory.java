@@ -20,6 +20,7 @@
 package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.Config;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 
@@ -35,7 +36,7 @@ public class SampersScoringFunctionFactory implements ScoringFunctionFactory {
 	private final SampersTourUtilityFunction utilityFunction;
 
 	@Inject
-	public SampersScoringFunctionFactory() {
+	public SampersScoringFunctionFactory(Config config) {
 		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters());
 	}
 

@@ -62,8 +62,10 @@ public class ModifyPopulation {
 		config.plans().setInputFile(INPUT_BASE_DIR + "commuter_population_wgs84_utm33n.xml.gz");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		new PopulationWriter(removeRoutesLeaveFirstPlan(scenario.getPopulation())).write(INPUT_BASE_DIR + "plans_woRoutes.xml");	
 		
-		new PopulationWriter(removeAllLinkInfos(scenario.getPopulation())).write(INPUT_BASE_DIR + "commuter_population_wgs84_utm33n_woLinks.xml.gz");		
+//		new PopulationWriter(removeAllLinkInfos(scenario.getPopulation())).write(INPUT_BASE_DIR + "commuter_population_wgs84_utm33n_woLinks.xml.gz");		
 		
 //		new PopulationWriter(onlyKeepSelectedPlanAndCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_218.output_plans_selected_carOnly.xml.gz");
 		
@@ -138,7 +140,7 @@ public class ModifyPopulation {
 		return population;
 	}
 	
-	public static void removeRoutesLeaveFirstPlan(Population population){
+	public static Population removeRoutesLeaveFirstPlan(Population population){
 		
 		for (Person person : population.getPersons().values()){
 			boolean firstPlanHandled = false;
@@ -155,7 +157,8 @@ public class ModifyPopulation {
 					}
 				}
 			}
-		}		
+		}
+		return population;
 	}
 	
 	public static void copyEachPerson(Population originalPop, int numberOfCopiesPerPerson){

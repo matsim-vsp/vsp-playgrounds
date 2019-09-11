@@ -7,17 +7,23 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.koehlerstrehlersignal.demand.PopulationToOd;
-import playground.dgrether.koehlerstrehlersignal.demand.ZoneBuilder;
-import playground.dgrether.koehlerstrehlersignal.network.NetLanesSignalsShrinker;
-import playground.dgrether.signalsystems.utils.DgScenarioUtils;
-import playground.dgrether.utils.zones.DgZones;
+import optimize.cten.convert.Matsim2cten.demand.DgZones;
+import optimize.cten.convert.Matsim2cten.demand.PopulationToOd;
+import optimize.cten.convert.Matsim2cten.demand.ZoneBuilder;
+import optimize.cten.convert.Matsim2cten.network.NetLanesSignalsShrinker;
 
 /**
  * Class to convert a MATSim scenario into KS format.
@@ -84,7 +90,7 @@ public final class TtMatsim2KS2015 {
 		// run
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(outputDirectory);
 		String shapeFileDirectory = createShapeFileDirectory(outputDirectory);
-		Scenario fullScenario = DgScenarioUtils.loadScenario(networkFilename,
+		Scenario fullScenario = loadScenario(networkFilename,
 				populationFilename, lanesFilename, signalSystemsFilename,
 				signalGroupsFilename, signalControlFilename, signalConflictsFilename);
 
@@ -135,7 +141,38 @@ public final class TtMatsim2KS2015 {
 		log.info("output ist written to " + outputDirectory);
 		OutputDirectoryLogging.closeOutputDirLogging();
 	}
-	
+
+	private static Scenario loadScenario(String networkFilename, String populationFilename, String lanesFilename,
+			String signalSystemsFilename, String signalGroupsFilename, String signalControlFilename,
+			String signalConflictsFilename) {
+
+		Config c2 = ConfigUtils.createConfig();
+		c2.qsim().setUseLanes(true);
+
+		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(c2,
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+		signalsConfigGroup.setUseSignalSystems(true);
+
+		c2.network().setInputFile(networkFilename);
+		c2.plans().setInputFile(populationFilename);
+		c2.network().setLaneDefinitionsFile(lanesFilename);
+
+		signalsConfigGroup.setSignalSystemFile(signalSystemsFilename);
+		signalsConfigGroup.setSignalGroupsFile(signalGroupsFilename);
+		signalsConfigGroup.setSignalControlFile(signalControlFilename);
+
+		if (signalConflictsFilename != null && !signalConflictsFilename.equals("")) {
+			signalsConfigGroup.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
+			signalsConfigGroup.setConflictingDirectionsFile(signalConflictsFilename);
+		}
+
+		Scenario scenario = ScenarioUtils.loadScenario(c2);
+
+		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(c2).loadSignalsData());
+
+		return scenario;
+	}
+
 	private static String createDescription(int cellsX, int cellsY,
 			double startTime, double endTime, double boundingBoxOffset,
 			double matsimPopSampleSize, double ksModelCommoditySampleSize,

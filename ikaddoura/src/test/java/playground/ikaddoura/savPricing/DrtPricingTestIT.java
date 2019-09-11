@@ -25,13 +25,14 @@ package playground.ikaddoura.savPricing;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -41,8 +42,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 
 /**
  * @author ikaddoura
@@ -68,8 +67,7 @@ public class DrtPricingTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new DrtConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -104,8 +102,7 @@ public class DrtPricingTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new DrtConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -144,8 +141,7 @@ public class DrtPricingTestIT {
 		// ##################################################################
 
 		Config config3 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new DrtConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -216,8 +212,7 @@ public class DrtPricingTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new DrtConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
@@ -250,8 +245,7 @@ public class DrtPricingTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(),
-				new DrtConfigGroup(),
+				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup());

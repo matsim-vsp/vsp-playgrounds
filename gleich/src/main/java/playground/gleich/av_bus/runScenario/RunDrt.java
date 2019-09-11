@@ -13,8 +13,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
 import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -33,10 +33,10 @@ public class RunDrt {
 		if (args.length != 2) {
 			throw new RuntimeException("Wrong number of args to main method. Should be path to config and path to outputDir");
 		}
-		Config config = ConfigUtils.loadConfig(args[0],
-				new DrtConfigGroup(), new DvrpConfigGroup(), new VariableAccessConfigGroup());
+		Config config = ConfigUtils.loadConfig(args[0], new MultiModeDrtConfigGroup(), new DvrpConfigGroup(),
+				new VariableAccessConfigGroup());
 
-		config.controler().setOutputDirectory(IOUtils.newUrl(config.getContext(), args[1]).getFile());
+		config.controler().setOutputDirectory(IOUtils.extendUrl(config.getContext(), args[1]).getFile());
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
@@ -52,7 +52,7 @@ public class RunDrt {
 		
 		Set<Id<Link>> monitoredStartAndEndLinks = new HashSet<>();
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(IOUtils.newUrl(config.getContext(), "../network/linksInArea.csv").getFile()));
+			BufferedReader reader = new BufferedReader(new FileReader(IOUtils.extendUrl(config.getContext(), "../network/linksInArea.csv").getFile()));
 			if (reader.readLine().startsWith("id")) {
 				for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 					monitoredStartAndEndLinks.add(Id.createLinkId(line.split(",")[0]));

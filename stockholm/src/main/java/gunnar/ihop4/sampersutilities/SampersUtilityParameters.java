@@ -437,7 +437,8 @@ public class SampersUtilityParameters {
 	}
 
 	public double getStuckScore(final Purpose purpose, final String mode, final Double income_money) {
-		return this.linTimeCoeff_1_min.getOrZero(purpose, mode, income_money) * 24 * 60; // TODO Revisit!
+		// like being all-day late
+		return this.getScheduleDelayCostLate_1_min(purpose, mode, income_money) * 24.0 * 60.0;
 	}
 
 	public double getModeASC(final Purpose purpose, final String mode, final Double income_money) {

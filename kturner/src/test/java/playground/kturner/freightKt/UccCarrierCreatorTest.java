@@ -144,7 +144,7 @@ public class UccCarrierCreatorTest {
 
     	final String VEHTYPES_FILE = utils.getClassInputDirectory() + "vehTypes.xml";
     	final String CARRIERS_FILE = utils.getClassInputDirectory() + "carriers.xml";
-    	final String ZONE_FILE = utils.getClassInputDirectory() + "LEZ.xml";
+    	final ArrayList<String> lezLinkIdsString = new ArrayList<String>(Arrays.asList("i(4,4)R" ,"i(5,4)R" ,"i(6,4)R" ,"i(7,4)R" ,"i(4,5)" ,"i(5,5)" ,"i(6,5)" ,"i(7,5)" ,"i(4,6)R" ,"i(5,6)R" ,"i(6,6)R" ,"i(7,6)R" ,"j(4,4)R" ,"j(4,5)R" ,"j(4,6)R" ,"j(4,7)R" ,"j(5,4)" ,"j(5,5)" ,"j(5,6)" ,"j(5,7)" ,"j(6,4)R" ,"j(6,5)R" ,"j(6,6)R" ,"j(6,7)R"));
     	final String uccPrefix = "UCC-";
     	
     	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
@@ -165,7 +165,7 @@ public class UccCarrierCreatorTest {
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
 
     	//Erstellen der UCC-Carrier. Danach alle als separierte Carrier zusammen in einem Carriers-Container. 
-    	UccCarrierCreator creator = new UccCarrierCreator(carriers, vehicleTypes, ZONE_FILE, uccPrefix, retailerNames, uccDepotsLinkIds);
+    	UccCarrierCreator creator = new UccCarrierCreator(carriers, vehicleTypes, lezLinkIdsString, uccPrefix, retailerNames, uccDepotsLinkIds);
     	creator.createSplittedUccCarrriers();
     	carriers = creator.getSplittedCarriers();
     	

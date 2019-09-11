@@ -42,7 +42,7 @@ public class PtTutorialProblem {
 	
 	@Test
 	public final void test() {
-		final URL configURL = IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("pt-tutorial"), "0.config.xml");
+		final URL configURL = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("pt-tutorial"), "0.config.xml");
 		Config config = ConfigUtils.loadConfig( configURL ) ;
 		config.controler().setOutputDirectory( utils.getOutputDirectory() );
 		

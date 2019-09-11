@@ -14,7 +14,7 @@ public class RunNullfallAsVariableAccess {
 	public static void main(String[] args) {
 		Config config = ConfigUtils.loadConfig(args[0],
 				new VariableAccessConfigGroup());
-		config.controler().setOutputDirectory(IOUtils.newUrl(config.getContext(), args[1]).getFile());
+		config.controler().setOutputDirectory(IOUtils.extendUrl(config.getContext(), args[1]).getFile());
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);

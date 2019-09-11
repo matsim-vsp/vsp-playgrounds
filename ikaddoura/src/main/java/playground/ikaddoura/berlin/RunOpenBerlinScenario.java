@@ -19,9 +19,6 @@
 
 package playground.ikaddoura.berlin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -33,15 +30,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
-import playground.ikaddoura.analysis.IKAnalysis;
-import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
-import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
 * @author ikaddoura
@@ -197,72 +188,19 @@ public class RunOpenBerlinScenario {
 		
 		// some online analysis
 		
-		controler.addOverridingModule(new AbstractModule() {
-			
-			@Override
-			public void install() {
-				this.bind(ModalShareEventHandler.class);
-				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
-				
-				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
-			}
-		});
+//		controler.addOverridingModule(new AbstractModule() {
+//			
+//			@Override
+//			public void install() {
+//				this.bind(ModalShareEventHandler.class);
+//				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+//				
+//				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
+//			}
+//		});
 		
 				
 		controler.run();
-		
-		log.info("Running offline analysis...");
-				
-		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
-		final String shapeFileZones = null;
-		final String zonesCRS = null;
-		final String homeActivity = "home";
-		final int scalingFactor = 10;
-		
-		List<AgentAnalysisFilter> filters = new ArrayList<>();
-
-		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
-		filter1.setSubpopulation("person");
-		filter1.setPersonAttribute("berlin");
-		filter1.setPersonAttributeName("home-activity-zone");
-		filter1.preProcess(scenario);
-		filters.add(filter1);
-		
-		AgentAnalysisFilter filter2 = new AgentAnalysisFilter(scenario);
-		filter2.preProcess(scenario);
-		filters.add(filter2);
-		
-		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(scenario);
-		filter3.setSubpopulation("person");
-		filter3.setPersonAttribute("brandenburg");
-		filter3.setPersonAttributeName("home-activity-zone");
-		filter3.preProcess(scenario);
-		filters.add(filter3);
-		
-		List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.car);
-		
-		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
-		final String zoneId = "SCHLUESSEL";
-
-		IKAnalysis analysis = new IKAnalysis(
-				scenario,
-				null,
-				visualizationScriptInputDirectory,
-				scenarioCRS,
-				shapeFileZones,
-				zonesCRS,
-				homeActivity,
-				scalingFactor,
-				filters,
-				null,
-				modes,
-				null,
-				zoneId, helpLegModes, stageActivitySubString);
-		analysis.run();
-	
-		log.info("Done.");
 		
 	}
 

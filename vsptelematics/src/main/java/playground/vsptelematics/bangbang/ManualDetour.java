@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import com.google.inject.Inject;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -51,7 +51,8 @@ import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
+
+import com.google.inject.Inject;
 
 /**
  * @author nagel
@@ -130,7 +131,7 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
 		double now = event.getSimulationTime() ;
-		double duration = 3*60 ; // between 0min and 10min; 10min means "always"
+		double duration = 5*60 ;
 		if (                                                              now < 8.*3600+10*60 ) return ;
 		if ( 8.*3600 + 10*60 + duration < now && now < 8.*3600+20*60 ) return ;
 		if ( 8.*3600 + 20*60 + duration < now && now < 8.*3600+30*60 ) return ;
@@ -178,7 +179,7 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 		ArrayList<Id<Link>> currentLinkIds = new ArrayList<>( ((NetworkRoute) leg.getRoute()).getLinkIds() ) ;
 		if ( !Arrays.deepEquals(oldLinkIds.toArray(), currentLinkIds.toArray()) ) {
 			log.warn("modified route");
-			this.scenario.getPopulation().getPersonAttributes().putAttribute( agent.getId().toString(), AgentSnapshotInfo.marker, true ) ;
+			this.scenario.getPopulation().getPersons().get(agent.getId()).getAttributes().putAttribute("marker", true ) ;
 		}
 
 		// ---

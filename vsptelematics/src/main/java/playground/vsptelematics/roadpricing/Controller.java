@@ -19,6 +19,10 @@
  * *********************************************************************** */
 package playground.vsptelematics.roadpricing;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -26,6 +30,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -37,16 +44,10 @@ import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingScheme;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
+
 import playground.vsptelematics.common.IncidentGenerator;
 import playground.vsptelematics.common.TelematicsConfigGroup;
 import playground.vsptelematics.ha1.RouteTTObserver;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * @author dgrether
@@ -69,7 +70,7 @@ public class Controller {
 	
 	
 	private void addListener(Controler c) {
-        c.setModules(new ControlerDefaultsWithRoadPricingModule());
+		c.addOverridingModule(new RoadPricingModule() );
         c.addOverridingModule(new AbstractModule() {
 			  @Override
 			  public void install() {

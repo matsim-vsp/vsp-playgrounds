@@ -53,7 +53,6 @@ import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 
 /**
  * @author nagel
@@ -131,10 +130,6 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
 		double now = event.getSimulationTime() ;
-
-		if ( now < 8. * 3600. + 10.*60 ) {
-			return ;
-		}
 		
 		double replanningProba = 1. ;
 		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation(), replanningProba);
@@ -210,7 +205,7 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 		ArrayList<Id<Link>> currentLinkIds = new ArrayList<>( ((NetworkRoute) leg.getRoute()).getLinkIds() ) ;
 		if ( !Arrays.deepEquals(oldLinkIds.toArray(), currentLinkIds.toArray()) ) {
 			log.warn("modified route");
-			this.scenario.getPopulation().getPersonAttributes().putAttribute( agent.getId().toString(), AgentSnapshotInfo.marker, true ) ;
+			this.scenario.getPopulation().getPersons().get(agent.getId()).getAttributes().putAttribute("marker", true ) ;
 		}
 
 		// ---

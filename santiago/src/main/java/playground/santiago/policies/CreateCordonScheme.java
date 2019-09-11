@@ -32,11 +32,14 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingWriterXMLv1;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.roadpricing.RoadPricingWriterXMLv1;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.santiago.network.AddTollToTollways;
@@ -81,7 +84,7 @@ public class CreateCordonScheme {
 		att.collectInformation();
 		this.initialScheme = att.createGantriesFile();
 		} else {
-		this.initialScheme = new RoadPricingSchemeImpl();
+			this.initialScheme = RoadPricingUtils.createAndRegisterMutableScheme(ScenarioUtils.createScenario(ConfigUtils.createConfig()));
 		}
 		
 		//fares are different for each scheme (see page 5-13 for outerCordon, 5-14 for triangleCordon)
@@ -163,15 +166,15 @@ public class CreateCordonScheme {
 	private void createLinkPricingFile(RoadPricingSchemeImpl initialScheme) {
 
 		for(Id<Link> linkId : cordonOutLinks){
-			initialScheme.addLink(linkId);
-			initialScheme.addLinkCost(linkId, morningStartTime, morningEndTime, amountOut);
-			initialScheme.addLinkCost(linkId, afternoonStartTime, afternoonEndTime, amountOut);
+			RoadPricingUtils.addLink(initialScheme, linkId);
+			RoadPricingUtils.addLinkSpecificCost(initialScheme, linkId, morningStartTime, morningEndTime, amountOut);
+			RoadPricingUtils.addLinkSpecificCost(initialScheme, linkId, afternoonStartTime, afternoonEndTime, amountOut);
 		}
 		
 		for(Id<Link> linkId : cordonInLinks){
-			initialScheme.addLink(linkId);
-			initialScheme.addLinkCost(linkId, morningStartTime, morningEndTime, amountIn);
-			initialScheme.addLinkCost(linkId, afternoonStartTime, afternoonEndTime, amountIn);
+			RoadPricingUtils.addLink(initialScheme, linkId);
+			RoadPricingUtils.addLinkSpecificCost(initialScheme, linkId, morningStartTime, morningEndTime, amountIn);
+			RoadPricingUtils.addLinkSpecificCost(initialScheme, linkId, afternoonStartTime, afternoonEndTime, amountIn);
 		}
 				
 		RoadPricingWriterXMLv1 rpw = new RoadPricingWriterXMLv1(initialScheme);

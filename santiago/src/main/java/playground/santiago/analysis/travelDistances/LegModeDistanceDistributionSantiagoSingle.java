@@ -27,8 +27,6 @@ import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
-import playground.benjamin.scenarios.munich.analysis.modular.legModeDistanceDistribution.RunLegModeDistanceDistribution;
 import playground.vsp.analysis.modules.legModeDistanceDistribution.LegModeDistanceDistribution;
 
 /**

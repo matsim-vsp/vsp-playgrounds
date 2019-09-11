@@ -20,10 +20,14 @@
 package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 
 import com.google.inject.Inject;
+
+import gunnar.StockholmConfigGroup;
 
 /**
  *
@@ -34,14 +38,22 @@ public class SampersDifferentiatedPTScoringFunctionFactory implements ScoringFun
 
 	private final SampersTourUtilityFunction utilityFunction;
 
+	private final StockholmConfigGroup sthlmConfig;
+
 	@Inject
-	public SampersDifferentiatedPTScoringFunctionFactory() {
+	public SampersDifferentiatedPTScoringFunctionFactory(final Config config) {
+
+		this.sthlmConfig = ConfigUtils.addOrGetModule(config, StockholmConfigGroup.class);
+		// System.out.println("free of charge = " + sthlmConfig.getFreeOfCharge());
+		// System.out.println("boat factor = " + sthlmConfig.getBoatFactor());
+		// System.exit(0);
+
 		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters());
 	}
 
 	@Override
 	public ScoringFunction createNewScoringFunction(final Person person) {
-		return new SampersDifferentiatedPTScoringFunction(person, this.utilityFunction);
+		return new SampersDifferentiatedPTScoringFunction(person, this.utilityFunction, this.sthlmConfig);
 	}
 
 }

@@ -29,8 +29,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.IKAnalysis;
-
 /**
 * @author ikaddoura
 */
@@ -92,11 +90,6 @@ public class RunMATSim2 {
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 		
 		controler.run();
-		
-		// some post processing
-		
-		IKAnalysis analysis = new IKAnalysis(scenario, crs, 100);
-		analysis.run();
 	}
 
 }

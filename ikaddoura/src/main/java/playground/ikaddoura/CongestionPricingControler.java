@@ -27,6 +27,8 @@ package playground.ikaddoura;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.vtts.VTTSHandler;
+import org.matsim.analysis.vtts.VTTScomputation;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionControlerListener;
@@ -38,12 +40,10 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 
-import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.analysis.vtts.VTTScomputation;
 import playground.ikaddoura.analysis.welfare.WelfareAnalysisControlerListener;
 import playground.ikaddoura.router.VTTSCongestionTollTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.router.VTTSTimeDistanceTravelDisutilityFactory;
@@ -133,7 +133,7 @@ public class CongestionPricingControler {
 
 		if (implementation.equals("noPricing")) {
 			
-			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 
 			if (router.equals("standard")) {
 
@@ -167,7 +167,7 @@ public class CongestionPricingControler {
 		} else {
 			
 			final TollHandler tollHandler = new TollHandler(controler.getScenario());
-			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+			final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 			
 			if (router.equals("standard")) {
 

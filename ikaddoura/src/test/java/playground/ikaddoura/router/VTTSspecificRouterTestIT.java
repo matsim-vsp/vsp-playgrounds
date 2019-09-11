@@ -30,9 +30,10 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.vtts.VTTSHandler;
+import org.matsim.analysis.vtts.VTTScomputation;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
@@ -46,13 +47,9 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
-
-import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.analysis.vtts.VTTScomputation;
 
 /**
  * 
@@ -87,7 +84,7 @@ public class VTTSspecificRouterTestIT {
 		// for "true" would have to locate activities such that walk access/egress is zero. kai, jun'16
 		
 		final Controler controler = new Controler( scenario );
-		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, controler.getConfig().planCalcScore()) ;
 		factory.setSigma(0.); // no randomness
 		
@@ -265,7 +262,7 @@ public class VTTSspecificRouterTestIT {
 		// for "true" would have to locate activities such that walk access/egress is zero. kai, jun'16
 		
 		final Controler controler = new Controler( scenario );
-		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario());
+		final VTTSHandler vttsHandler = new VTTSHandler(controler.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, controler.getConfig().planCalcScore()) ;
 		factory.setSigma(0.); // no randomness
 		
@@ -442,7 +439,7 @@ public class VTTSspecificRouterTestIT {
 		final String configFile1 = testUtils.getPackageInputDirectory() + "vttsSpecificRouter/configVTTS_noDistanceCost_largePopulation_1.xml";
 		final Scenario scenario1 = ScenarioUtils.loadScenario( testUtils.loadConfig( configFile1 ) );
 		final Controler controler1 = new Controler( scenario1 );
-		final VTTSHandler vttsHandler1 = new VTTSHandler(controler1.getScenario());
+		final VTTSHandler vttsHandler1 = new VTTSHandler(controler1.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory1 = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler1, controler1.getConfig().planCalcScore()) ;
 		factory1.setSigma(0.); // no randomness
 		
@@ -503,7 +500,7 @@ public class VTTSspecificRouterTestIT {
 		// for "true" would have to locate activities such that walk access/egress is zero. kai, jun'16
 		
 		final Controler controler1 = new Controler( scenario1 );
-		final VTTSHandler vttsHandler1 = new VTTSHandler(controler1.getScenario());
+		final VTTSHandler vttsHandler1 = new VTTSHandler(controler1.getScenario(), new String[] {"non_network_walk", "transit_walk", "access_walk", "egress_walk"}, "interaction");
 		final VTTSTimeDistanceTravelDisutilityFactory factory1 = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler1, controler1.getConfig().planCalcScore()) ;
 		factory1.setSigma(0.); // no randomness
 		

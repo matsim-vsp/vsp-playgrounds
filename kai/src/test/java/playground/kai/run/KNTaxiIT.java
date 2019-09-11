@@ -19,14 +19,16 @@
 
 package playground.kai.run;
 
-import org.junit.Test;
+import java.net.URL;
 
-import playground.kai.run.KNTaxi;
+import org.junit.Test;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 
 public class KNTaxiIT {
 	@Test
 	public void testRun() {
-		String configFile = "mielec_2014_02/mielec_taxi_config.xml";
-		KNTaxi.run(configFile, true, true, false);
+		URL configUrl = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("mielec"), "mielec_taxi_config.xml");
+		KNTaxi.run(configUrl, true, true, false);
 	}
 }
