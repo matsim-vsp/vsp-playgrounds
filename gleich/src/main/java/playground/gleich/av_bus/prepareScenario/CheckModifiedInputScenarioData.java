@@ -7,13 +7,11 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleReaderV1;
 import org.matsim.pt.utils.TransitScheduleValidator;
 import org.matsim.pt.utils.TransitScheduleValidator.ValidationResult.ValidationIssue;
-import org.matsim.vehicles.VehicleReaderV1;
-
+import org.matsim.vehicles.MatsimVehicleReader;
 import playground.gleich.av_bus.FilePaths;
 
 public class CheckModifiedInputScenarioData {
@@ -30,7 +28,7 @@ public class CheckModifiedInputScenarioData {
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT);
 		new TransitScheduleReaderV1(scenario).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT_WITHOUT_BUSES_IN_STUDY_AREA);
 //		new TransitScheduleReaderV1(scenario).readFile(FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT);
-		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT_45MPS);
+		new MatsimVehicleReader(scenario.getTransitVehicles()).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT_45MPS );
 		TransitScheduleValidator.ValidationResult validationResult = TransitScheduleValidator.validateAll(scenario.getTransitSchedule(), scenario.getNetwork());
 		for(String s: validationResult.getErrors()){
 			System.out.println(s);

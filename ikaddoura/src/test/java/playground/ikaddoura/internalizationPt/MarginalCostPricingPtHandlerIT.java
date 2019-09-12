@@ -22,11 +22,6 @@
  */
 package playground.ikaddoura.internalizationPt;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -39,12 +34,7 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.ControlerConfigGroup.MobsimType;
@@ -54,19 +44,14 @@ import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.pt.transitSchedule.api.Departure;
-import org.matsim.pt.transitSchedule.api.TransitLine;
-import org.matsim.pt.transitSchedule.api.TransitRoute;
-import org.matsim.pt.transitSchedule.api.TransitRouteStop;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
-import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.pt.transitSchedule.api.*;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleType.DoorOperationMode;
-import org.matsim.vehicles.Vehicles;
+import org.matsim.vehicles.*;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MarginalCostPricingPtHandlerIT {
 
@@ -2106,14 +2091,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<VehicleType> vehTypeId1 = Id.create("type_1", VehicleType.class);
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity() ;
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -2306,14 +2291,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 	
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity() ;
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -2621,14 +2606,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity() ;
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -2896,14 +2881,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity() ;
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -3171,14 +3156,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity() ;
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -3454,14 +3439,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId2 = Id.create("veh_2", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -3740,14 +3725,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId2 = Id.create("veh_2", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -4031,14 +4016,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -4319,14 +4304,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId1 = Id.create("veh_1", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -4721,14 +4706,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(50);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -5031,14 +5016,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(2);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -5341,14 +5326,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(2);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.);
 		type.setPcuEquivalents(7.5);
@@ -5677,14 +5662,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(2);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -6000,14 +5985,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(2);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
@@ -6336,14 +6321,14 @@ public class MarginalCostPricingPtHandlerIT {
 		Id<Vehicle> vehId3 = Id.create("veh_3", Vehicle.class);
 
 		VehicleType type = veh.getFactory().createVehicleType(vehTypeId1);
-		VehicleCapacity cap = veh.getFactory().createVehicleCapacity();
+		VehicleCapacity cap = type.getCapacity();
 		cap.setSeats(2);
 		cap.setStandingRoom(0);
-		type.setCapacity(cap);
+//		type.setCapacity(cap);
 		type.setLength(10);
 		type.setAccessTime(1.0);
 		type.setEgressTime(0.75);
-		type.setDoorOperationMode(DoorOperationMode.serial);
+		type.setDoorOperationMode( VehicleType.DoorOperationMode.serial );
 		
 		type.setMaximumVelocity(8.4);
 		type.setPcuEquivalents(7.5);
