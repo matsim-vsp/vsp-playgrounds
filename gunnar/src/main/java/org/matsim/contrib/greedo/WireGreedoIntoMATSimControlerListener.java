@@ -235,6 +235,7 @@ public class WireGreedoIntoMATSimControlerListener implements Provider<EventHand
 						ages.getWeightsView().entrySet().stream().filter(entry -> personIds.contains(entry.getKey()))
 								.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())),
 						greedoConfig.getConcurrentLinkWeights(), greedoConfig.getConcurrentTransitVehicleWeights());
+				listener.setReactToReset(false); // because many parallel calls per agent might occur
 				hypotheticalSlotUsageListeners.add(listener);
 				return listener;
 			}

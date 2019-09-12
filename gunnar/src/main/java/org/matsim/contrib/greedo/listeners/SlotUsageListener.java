@@ -57,6 +57,8 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	private Integer lastResetIteration = null;
 
+	private boolean reactToReset = true;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public SlotUsageListener(final TimeDiscretization timeDiscretization, final Map<Id<Person>, Double> personWeights,
@@ -69,6 +71,10 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	}
 
 	// -------------------- SETTERS --------------------
+
+	public void setReactToReset(final boolean reactToReset) {
+		this.reactToReset = reactToReset;
+	}
 
 	public void updatePersonWeights(final Map<Id<Person>, Double> personWeights) {
 		this.privateTrafficLinkUsageListener.updatePersonWeights(personWeights);
@@ -88,9 +94,12 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
 	@Override
-	public void reset(final int iteration) {
+	public synchronized void reset(final int iteration) {
 		this.lastResetIteration = iteration;
-		this.privateTrafficLinkUsageListener.reset(iteration);
+		if (this.reactToReset) {
+			this.privateTrafficLinkUsageListener.reset(iteration);
+			this.transitVehicleUsageListener.reset(iteration);
+		}
 	}
 
 	@Override

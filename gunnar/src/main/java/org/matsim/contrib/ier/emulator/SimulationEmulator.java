@@ -10,7 +10,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
  * queue-based simulation with interacting agents the idea is here to create
  * events as quickly as possible, potentially loosing some of the dynamics.
  * However, this is meant to be a fast approximation of the actual network
- * simulaton in MATSim.
+ * simulation in MATSim.
  * 
  * @author shoerl
  */
