@@ -21,21 +21,13 @@
  */
 package playground.kturner.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierImpl;
-import org.matsim.contrib.freight.carrier.CarrierShipment;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.freight.carrier.TimeWindow;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.vehicles.VehicleType;
 
 /**
@@ -58,7 +50,7 @@ class CombineTimeWindowsforCarrier {
 		}
 		
 		for (Carrier carrier : carriers.getCarriers().values()){
-			Carrier carrierComb = CarrierImpl.newInstance(carrier.getId());
+			Carrier carrierComb = CarrierUtils.createCarrier( carrier.getId() );
 			createAndSetCarrierCapabilities(carrierComb, carrier, timeWindow);
 			copyShipmentsAndResetTimeWindow(carrierComb, carrier, timeWindow);
 			if (carrier.getServices().size() > 0 ) {

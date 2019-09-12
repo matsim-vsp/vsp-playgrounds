@@ -29,42 +29,27 @@ import com.graphhopper.jsprit.core.reporting.SolutionPrinter;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierImpl;
-import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierShipment;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.freight.carrier.TimeWindow;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
 import org.matsim.contrib.freight.jsprit.MatsimJspritFactory;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
+import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.contrib.freight.jsprit.NetworkRouter;
 import org.matsim.contrib.freight.utils.FreightUtils;
-import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.vehicles.EngineInformationImpl;
-import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.EngineInformation.FuelType;
+import org.matsim.vehicles.VehicleType;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author kturner
@@ -107,8 +92,9 @@ public class FreightWithShipments {
 		//Create carrier with shipments
 		Carriers carriers = new Carriers() ;
 
-		Carrier carrier = CarrierImpl.newInstance(Id.create("Carrier", Carrier.class));
-		carrier.getShipments().add(createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1)); 
+//		Carrier carrier = CarrierImpl.newInstance(Id.create("Carrier", Carrier.class));
+		Carrier carrier = CarrierUtils.createCarrier( Id.create( "Carrier", Carrier.class ) );
+		carrier.getShipments().add(createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1));
 		carrier.getShipments().add(createMatsimShipment("shipment2", "i(3,0)", "i(3,7)", 2));
 		//		carrier.getShipments().add(createMatsimShipment("shipment3", "i(6,0)", "i(4,7)", 2));
 		//		carrier.getShipments().add(createMatsimShipment("shipment4", "i(6,0)", "i(4,5)", 2));
@@ -118,14 +104,19 @@ public class FreightWithShipments {
 		carrier.getServices().add(createMatsimService("Service3", "i(4,9)", 2));
 
 		//Create vehicle for Carrier
-		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
-				.setCapacity(3)
-				.setMaxVelocity(10)
+//		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
+		VehicleType carrierVehType = new VehicleType( Id.create( "gridType", VehicleType.class ) )
+//				.setCapacity(3)
+				.setMaximumVelocity(10)
 				.setCostPerDistanceUnit(0.0001)
 				.setCostPerTimeUnit(0.001)
 				.setFixCost(130)
-				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
-				.build();
+//				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
+//				.build();
+		;
+		carrierVehType.getCapacity().setOther( 3 );
+		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
+		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 );
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
 		vehicleTypes.getVehicleTypes().put(carrierVehType.getId(), carrierVehType);
 		

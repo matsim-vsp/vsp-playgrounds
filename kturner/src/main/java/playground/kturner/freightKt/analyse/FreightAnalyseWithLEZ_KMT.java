@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
@@ -82,7 +82,7 @@ public class FreightAnalyseWithLEZ_KMT {
 			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile.getAbsolutePath()) ;
 			
 			Carriers carriers = new Carriers() ;
-			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile.getAbsolutePath()) ;
+			new CarrierPlanXmlReader(carriers).readFile(carrierFile.getAbsolutePath() ) ;
 			
 			//TODO: Add switch with/without LEZ 
 			//reading in lowEmissionZone

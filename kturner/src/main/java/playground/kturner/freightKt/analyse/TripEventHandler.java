@@ -1,11 +1,5 @@
 package playground.kturner.freightKt.analyse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -18,9 +12,13 @@ import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.vehicles.VehicleType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 class TripEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
@@ -61,7 +59,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	}
 
 	private void readVehicleTypeCapabilities() {
-		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
+		for (VehicleType vehType : vehicleTypes.getVehicleTypes().values()){
 			//Emissionswerte nicht über Eigenschaften einlesbar :(	
 			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType nochjt definiert ist... kmt feb/18
 			switch (vehType.getId().toString()) {
@@ -87,12 +85,12 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			}
 
 			VehicleTypeSpezificCapabilities vehTypeCapabilities = 
-					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().getFix(), 
-							vehType.getVehicleCostInformation().getPerDistanceUnit(), 
-							vehType.getVehicleCostInformation().getPerTimeUnit(), 
-							vehType.getEngineInformation().getGasConsumption(),
+					new VehicleTypeSpezificCapabilities(vehType.getCostInformation().getFixedCosts() ,
+							vehType.getCostInformation().getCostsPerMeter(),
+							vehType.getCostInformation().getCostsPerSecond(),
+							vehType.getEngineInformation().getFuelConsumption(),
 							emissionsPerMeter,
-							vehType.getCarrierVehicleCapacity());
+							vehType.getCapacity().getOther().intValue());
 
 			vehTypId2Capabilities.put(vehType.getId(), vehTypeCapabilities);
 		}

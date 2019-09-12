@@ -18,46 +18,32 @@
   
 package playground.kturner.freightKt;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierImpl;
-import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierShipment;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.freight.carrier.TimeWindow;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
-import org.matsim.contrib.freight.jsprit.MatsimJspritFactory;
-import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
-import org.matsim.contrib.freight.jsprit.NetworkRouter;
-import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
-import org.matsim.contrib.freight.utils.FreightUtils;
-import org.matsim.core.controler.OutputDirectoryLogging;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.vehicles.EngineInformationImpl;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.EngineInformation.FuelType;
-
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.SchrimpfFactory;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.freight.carrier.*;
+import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
+import org.matsim.contrib.freight.jsprit.MatsimJspritFactory;
+import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
+import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
+import org.matsim.contrib.freight.jsprit.NetworkRouter;
+import org.matsim.contrib.freight.utils.FreightUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.vehicles.EngineInformation.FuelType;
+import org.matsim.vehicles.VehicleType;
+
+import java.io.IOException;
+import java.util.Collection;
 
 public class FreightUtilsITPreRunForResults {
 	private static final Logger log = Logger.getLogger(FreightUtilsITPreRunForResults.class);
@@ -90,24 +76,29 @@ public class FreightUtilsITPreRunForResults {
 		
 		//Create carrier with services and shipments
 		carriersWithServicesAndShpiments = new Carriers() ;
-		carrierWServices = CarrierImpl.newInstance(CARRIER_SERVICES_ID );
+		carrierWServices = CarrierUtils.createCarrier( CARRIER_SERVICES_ID );
 		carrierWServices.getServices().add(createMatsimService("Service1", "i(3,9)", 2));
 		carrierWServices.getServices().add(createMatsimService("Service2", "i(4,9)", 2));
 		
 		//Create carrier with shipments
-		carrierWShipments = CarrierImpl.newInstance(CARRIER_SHIPMENTS_ID);
+		carrierWShipments = CarrierUtils.createCarrier( CARRIER_SHIPMENTS_ID );
 		carrierWShipments.getShipments().add(createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1)); 
 		carrierWShipments.getShipments().add(createMatsimShipment("shipment2", "i(3,0)", "i(3,7)", 2));
 
 		//Create vehicle for Carriers
-		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
-				.setCapacity(3)
-				.setMaxVelocity(10)
+//		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
+		VehicleType carrierVehType = new VehicleType( Id.create("gridType", VehicleType.class) )
+//				.setCapacity(3)
+				.setMaximumVelocity(10)
 				.setCostPerDistanceUnit(0.0001)
 				.setCostPerTimeUnit(0.001)
 				.setFixCost(130)
-				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
-				.build();
+//				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
+//				.build();
+		;
+		carrierVehType.getCapacity().setOther( 3 );
+		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
+		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 ) ;
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
 		vehicleTypes.getVehicleTypes().put(carrierVehType.getId(), carrierVehType);
 		

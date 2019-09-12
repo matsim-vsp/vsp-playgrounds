@@ -23,10 +23,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.utils.FreightUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
@@ -73,7 +71,7 @@ public class ConvertCarriersToShipmentBasedCarriersWCombinedTW {
 		
 		//Read in carrierfile
 		Carriers carriersInput = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriersInput).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString());
+		new CarrierPlanXmlReader(carriersInput).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString() );
 		
 		//Creation of carrier with converted VRP
 		Carriers carriersOutput = new Carriers();

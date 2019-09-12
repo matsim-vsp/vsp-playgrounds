@@ -13,7 +13,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
@@ -52,7 +52,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -103,7 +103,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -155,7 +155,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -211,7 +211,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -264,7 +264,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -297,7 +297,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		Collection<Id<VehicleType>> vehTypesAddedToRPS = new ArrayList<Id<VehicleType>>();
 		for(Carrier c : carriers.getCarriers().values()){
 			for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
-				Id<VehicleType> typeId = v.getVehicleType().getId();
+				Id<VehicleType> typeId = v.getType().getId();
 				if (!vehTypesAddedToRPS.contains(typeId)) {
 					vehTypesAddedToRPS.add(typeId);
 					rpCalculator.addPricingScheme(typeId, scheme);
@@ -343,7 +343,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
     	
@@ -374,7 +374,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 				Collection<Id<VehicleType>> vehTypesAddedToRPS = new ArrayList<Id<VehicleType>>();
 				for(Carrier c : carriers.getCarriers().values()){
 					for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
-						Id<VehicleType> typeId = v.getVehicleType().getId();
+						Id<VehicleType> typeId = v.getType().getId();
 						if (!vehTypesAddedToRPS.contains(typeId)) {
 							vehTypesAddedToRPS.add(typeId);
 							rpCalculator.addPricingScheme(typeId, scheme);

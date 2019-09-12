@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.core.utils.io.UncheckedIOException;
 
@@ -48,7 +48,7 @@ class NumberOfRequestsPerCarrier {
 		
 		//Read in carrierfile
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString());
+		new CarrierPlanXmlReader(carriers).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString() );
 		
 		System.out.println("Id; # of Services; # of Shipments");
 		for (Carrier carrier : carriers.getCarriers().values()) {

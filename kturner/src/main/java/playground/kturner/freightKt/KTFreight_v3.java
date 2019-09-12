@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.management.InvalidAttributeValueException;
 
@@ -40,7 +39,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
 import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
@@ -62,7 +61,6 @@ import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
 import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.contrib.roadpricing.RoadPricingModule;
-import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.core.config.Config;
@@ -411,7 +409,7 @@ public class KTFreight_v3 {
 
 	private static Carriers createCarriers(CarrierVehicleTypes vehicleTypes) {
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERFILE) ;
+		new CarrierPlanXmlReader(carriers).readFile(CARRIERFILE ) ;
 
 		// assign vehicle types to the carriers
 		new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
@@ -677,7 +675,7 @@ public class KTFreight_v3 {
 		if (onlyTollVehTypes == null) {
 			for(Carrier c : carriers.getCarriers().values()){
 				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
-					Id<VehicleType> typeId = v.getVehicleType().getId();
+					Id<VehicleType> typeId = v.getType().getId();
 					if (!vehTypesAddedToRPS.contains(typeId)) {
 						vehTypesAddedToRPS.add(typeId);
 						rpCalculator.addPricingScheme(typeId, scheme);
@@ -687,7 +685,7 @@ public class KTFreight_v3 {
 		} else { //nur die angegebenen Fahrzeugtypene bemauten
 			for(Carrier c : carriers.getCarriers().values()){
 				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
-					Id<VehicleType> typeId = v.getVehicleType().getId();
+					Id<VehicleType> typeId = v.getType().getId();
 					if (onlyTollVehTypes.contains(typeId.toString()) & !vehTypesAddedToRPS.contains(typeId)){
 						vehTypesAddedToRPS.add(typeId);
 						rpCalculator.addPricingScheme(typeId, scheme);
