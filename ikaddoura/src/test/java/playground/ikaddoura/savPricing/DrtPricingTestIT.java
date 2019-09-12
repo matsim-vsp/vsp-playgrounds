@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
@@ -38,10 +39,12 @@ import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 /**
  * @author ikaddoura
@@ -170,6 +173,16 @@ public class DrtPricingTestIT {
 
 		LinkDemandEventHandler handler3 = new LinkDemandEventHandler(controler3.getScenario().getNetwork());
 		controler3.getEvents().addHandler(handler3);
+
+		controler3.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( playground.ikaddoura.moneyTravelDisutility.data.AgentFilter.class ).toInstance( new AgentFilter(){
+					@Override public String getAgentTypeFromId( Id<Person> id ){
+						return null ;
+					}
+				} ) ;
+			}
+		} ) ;
 		
 		controler3.getConfig().controler().setCreateGraphs(false);
 		
