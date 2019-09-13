@@ -38,10 +38,13 @@ import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
 /**
  * @author ikaddoura
@@ -142,6 +145,14 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+
+			controler.addOverridingModule( new AbstractModule(){
+				@Override public void install(){
+					bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+				}
+			} ) ;
+
 			controler.run();
 		}
 		
@@ -240,6 +251,13 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+	        
+	        controler.addOverridingModule( new AbstractModule(){
+				@Override public void install(){
+					bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+				}
+			} ) ;
+	        
 			controler.run();
 		}
 

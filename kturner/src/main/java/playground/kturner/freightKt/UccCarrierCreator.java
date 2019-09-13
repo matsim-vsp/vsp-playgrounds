@@ -12,21 +12,10 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
-import org.matsim.contrib.freight.carrier.CarrierImpl;
-import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.freight.carrier.ScheduledTour;
-import org.matsim.contrib.freight.carrier.TimeWindow;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
-import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.contrib.roadpricing.RoadPricingUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
@@ -213,7 +202,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	
 
 		for (Carrier carrier : carriers.getCarriers().values()){
-			Carrier uccCarrier = CarrierImpl.newInstance(Id.create(uccC_prefix + carrier.getId() , Carrier.class));
+			Carrier uccCarrier = CarrierUtils.createCarrier( Id.create( uccC_prefix + carrier.getId(), Carrier.class ) );
 
 			for (CarrierService service: carrier.getServices()) {
 				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
@@ -282,8 +271,8 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			//Calc max VehicleCapacity
 			int maxVehicleCapacity = -1;
 			for (CarrierVehicle vehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) {
-				if (maxVehicleCapacity < vehicle.getVehicleType().getCarrierVehicleCapacity()){
-					maxVehicleCapacity = vehicle.getVehicleType().getCarrierVehicleCapacity();
+				if (maxVehicleCapacity < vehicle.getType().getCapacity().getOther().intValue() ){
+					maxVehicleCapacity = vehicle.getType().getCapacity().getOther().intValue();
 				}
 			}
 			//			System.out.println("MaxVehicleCapacity: " + maxVehicleCapacity);
@@ -387,7 +376,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			CarrierCapabilities tempCc = CarrierCapabilities.newInstance();
 			tempCc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
 			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
-				String vehIdwLink = cv.getVehicleId().toString() + "_" + cv.getLocation().toString();
+				String vehIdwLink = cv.getId().toString() + "_" + cv.getLocation().toString();
 				String newVehId;
 				if (!nuOfVehPerId.containsKey(vehIdwLink)){
 					nuOfVehPerId.put(vehIdwLink, 1);
@@ -404,7 +393,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 
 				tempCc.getCarrierVehicles().add(CarrierVehicle.Builder
 						.newInstance(Id.create(newVehId, Vehicle.class), cv.getLocation())
-						.setType(cv.getVehicleType())
+						.setType(cv.getType() )
 						.setEarliestStart(cv.getEarliestStartTime()).setLatestEnd(cv.getLatestEndTime())
 						.build());
 			}
@@ -492,7 +481,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		// TODO Auto-generated method stub
 		int minCapacity = 1000;					//TODO: Willkürlich ganz hoch angesetzt. -> Anpassen, besserer Lösung finden
 		for(CarrierVehicle vehicle : uccC.getCarrierCapabilities().getCarrierVehicles()) {
-			int vehicleCapacity = vehicle.getVehicleType().getCarrierVehicleCapacity() ;
+			int vehicleCapacity = vehicle.getType().getCapacity().getOther().intValue();
 			if(vehicleCapacity < minCapacity) { 
 				minCapacity = vehicleCapacity;
 			}

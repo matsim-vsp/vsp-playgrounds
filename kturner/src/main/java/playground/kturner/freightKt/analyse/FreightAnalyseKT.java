@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
@@ -71,7 +70,7 @@ public class FreightAnalyseKT {
 			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile.getAbsolutePath()) ;
 			
 			Carriers carriers = new Carriers() ;
-			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile.getAbsolutePath()) ;
+			new CarrierPlanXmlReader(carriers).readFile(carrierFile.getAbsolutePath() ) ;
 
 			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
 			eventsManager.addHandler(tripHandler);

@@ -48,7 +48,7 @@ public final class MoneyTimeDistanceTravelDisutilityFactory implements TravelDis
 	@Inject
 	private Scenario scenario;
 
-	@Inject(optional = true)
+	@Inject
 	private AgentFilter vehicleFilter;
 	
 	private double sigma = 0. ;

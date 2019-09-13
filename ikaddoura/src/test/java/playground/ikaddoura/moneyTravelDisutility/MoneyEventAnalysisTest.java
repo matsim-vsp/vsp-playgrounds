@@ -22,6 +22,7 @@
  */
 package playground.ikaddoura.moneyTravelDisutility;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,8 +43,8 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
-
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
 
 /**
@@ -54,6 +55,7 @@ import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
  *
  */
 public class MoneyEventAnalysisTest {
+	private static final Logger log = Logger.getLogger( MoneyEventAnalysisTest.class ) ;
 	
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
@@ -117,10 +119,14 @@ public class MoneyEventAnalysisTest {
 		moneyAnalysis.handleEvent(new PersonEntersVehicleEvent(0., personId4, vehicleId4));
 		moneyAnalysis.handleEvent(new PersonEntersVehicleEvent(0., personId5, vehicleId5));
 
+//		for( Map.Entry<Integer, TimeBin> entry : moneyAnalysis.getLinkId2info().get( linkId1 ).getTimeBinNr2timeBin().entrySet() ){
+//			log.warn( "key=" + entry.getKey() + "; val=" + entry.getValue() ) ;
+//		}
+
 		moneyAnalysis.handleEvent(new LinkEnterEvent(60., vehicleId1, linkId1));
 		moneyAnalysis.handleEvent(new LinkEnterEvent(60., vehicleId2, linkId1));
 		moneyAnalysis.handleEvent(new LinkEnterEvent(60., vehicleId3, linkId1));
-		
+
 		moneyAnalysis.handleEvent(new LinkEnterEvent(960., vehicleId1, linkId2));
 		moneyAnalysis.handleEvent(new LinkEnterEvent(960., vehicleId2, linkId2));
 		moneyAnalysis.handleEvent(new LinkEnterEvent(960., vehicleId3, linkId2));
@@ -439,7 +445,8 @@ public class MoneyEventAnalysisTest {
 				// travel disutility
 				this.bindCarTravelDisutilityFactory().toInstance(factory);
 				this.bind(MoneyEventAnalysis.class).asEagerSingleton();
-				
+				this.bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+
 				// person money event handler + controler listener
 				this.addControlerListenerBinding().toInstance(moneyAnalysis);
 				this.addEventHandlerBinding().toInstance(moneyAnalysis);

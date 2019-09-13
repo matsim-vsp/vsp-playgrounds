@@ -33,11 +33,14 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
 
@@ -77,6 +80,11 @@ public class CNETestIT {
 		LinkDemandEventHandler handler2 = new LinkDemandEventHandler(controler2.getScenario().getNetwork());
 		controler2.getEvents().addHandler(handler2);
 		controler2.getConfig().controler().setCreateGraphs(false);
+		controler2.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
 		controler2.run();
 
 		// noise pricing
@@ -86,6 +94,12 @@ public class CNETestIT {
 		LinkDemandEventHandler handler3 = new LinkDemandEventHandler(controler3.getScenario().getNetwork());
 		controler3.getEvents().addHandler(handler3);
 		controler3.getConfig().controler().setCreateGraphs(false);
+		controler3.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+
 		controler3.run();
 						
 		// congestion + noise pricing
@@ -99,6 +113,12 @@ public class CNETestIT {
 		LinkDemandEventHandler handler4 = new LinkDemandEventHandler(controler4.getScenario().getNetwork());
 		controler4.getEvents().addHandler(handler4);
 		controler4.getConfig().controler().setCreateGraphs(false);
+		controler4.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+
 		controler4.run();
 		
 		System.out.println("----------------------------------");

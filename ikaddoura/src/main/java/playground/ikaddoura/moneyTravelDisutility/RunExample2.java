@@ -73,7 +73,7 @@ public class RunExample2 {
 				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
 		factory.setSigma(sigma);
 		
-		controler.addOverridingModule(new MoneyTravelDisutilityModule(TransportMode.car, factory, new BerlinAgentFilter()));			
+		controler.addOverridingModule(new MoneyTravelDisutilityModule(TransportMode.car, factory));			
 		
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.run();

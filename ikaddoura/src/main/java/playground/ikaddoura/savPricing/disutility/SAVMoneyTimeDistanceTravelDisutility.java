@@ -82,9 +82,6 @@ public class SAVMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		}
 		
 		this.vehicleFilter = vehicleFilter;
-		if (this.vehicleFilter == null) {
-			log.info("vehicle filter is null. Not differentiating between different vehicle types...");
-		}
 		
 		this.moneyEventAnalysis = moneyAnalysis;	
 	}

@@ -42,6 +42,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
 /**
  * @author ikaddoura
@@ -108,7 +110,14 @@ public class OptAVModeChoiceTestIT {
 		// run
 		
         controler1.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        controler1.run();
+
+		controler1.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+
+		controler1.run();
 		
 		// ##################################################################
 		// low SAV fix cost
@@ -155,6 +164,13 @@ public class OptAVModeChoiceTestIT {
 		
 		// run
         controler2.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        
+        controler2.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+        
 		controler2.run();
 		
 		// print outs
@@ -229,7 +245,14 @@ public class OptAVModeChoiceTestIT {
 		// run
 		
         controler1.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        controler1.run();
+
+		controler1.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+
+		controler1.run();
 		
 		// ##################################################################
 		// low SAV fix cost
@@ -277,6 +300,13 @@ public class OptAVModeChoiceTestIT {
 		
 		// run
         controler2.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        
+        controler2.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+        
 		controler2.run();
 		
 		// print outs

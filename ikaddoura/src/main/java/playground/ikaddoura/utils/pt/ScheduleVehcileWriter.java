@@ -22,18 +22,17 @@
  */
 package playground.ikaddoura.utils.pt;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleType.DoorOperationMode;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author ikaddoura
@@ -66,7 +65,7 @@ public class ScheduleVehcileWriter {
 	private Id vehTypeId;
 	private double egressSeconds;
 	private double accessSeconds;
-	private DoorOperationMode doorOperationMode;
+	private VehicleType.DoorOperationMode doorOperationMode;
 	private double pcu;
 	private double maxVelocity;
 	
@@ -102,7 +101,7 @@ public class ScheduleVehcileWriter {
 		svw.setVehTypeId(Id.create("bus", VehicleType.class));
 		svw.setAccessSeconds(2);
 		svw.setEgressSeconds(1.5);
-		svw.setDoorOperationMode(DoorOperationMode.parallel);
+		svw.setDoorOperationMode( VehicleType.DoorOperationMode.parallel );
 		
 		svw.run();
 	}
@@ -211,7 +210,7 @@ public class ScheduleVehcileWriter {
 		this.accessSeconds = accessSeconds;
 	}
 
-	public void setDoorOperationMode(DoorOperationMode doorOperationMode) {
+	public void setDoorOperationMode( VehicleType.DoorOperationMode doorOperationMode ) {
 		this.doorOperationMode = doorOperationMode;
 	}
 	

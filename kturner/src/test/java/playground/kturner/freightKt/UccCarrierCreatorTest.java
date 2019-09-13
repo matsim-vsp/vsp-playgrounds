@@ -1,26 +1,16 @@
 package playground.kturner.freightKt;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
-import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.vehicles.VehicleType;
 
-import playground.kturner.freightKt.UccCarrierCreator;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * 
@@ -40,7 +30,7 @@ public class UccCarrierCreatorTest {
 		final ArrayList<String> retailerNames = null ;
     		
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+		new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
 		
 		UccCarrierCreator creator = new UccCarrierCreator(carriers, null, null, null, retailerNames, null);
 		Carriers extCarriers = creator.extractCarriers(carriers, retailerNames);
@@ -60,7 +50,7 @@ public class UccCarrierCreatorTest {
 			
 		
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+		new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
 		
 		UccCarrierCreator creator = new UccCarrierCreator(carriers, null, null, null, retailerNames, null);
 		Carriers extCarriers = creator.extractCarriers(carriers, retailerNames);
@@ -86,7 +76,7 @@ public class UccCarrierCreatorTest {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
 
     	UccCarrierCreator creator = new UccCarrierCreator(carriers, null);
@@ -97,14 +87,14 @@ public class UccCarrierCreatorTest {
     	//Erstelle CarrierVehicles für die Prüfung.
 		CarrierVehicle gridVehicle3_i6_0 = CarrierVehicle.Builder
 				.newInstance(Id.create("gridVehicle3_i(6,0)", org.matsim.vehicles.Vehicle.class), Id.createLinkId("i(6,0)"))
-				.setType(vehicleTypes.getVehicleTypes().get(Id.create("gridType03", CarrierVehicleType.class)))
+				.setType(vehicleTypes.getVehicleTypes().get(Id.create("gridType03", VehicleType.class)))
 				.setEarliestStart(0.0)
 				.setLatestEnd(86399)
 				.build();
 		
 		CarrierVehicle gridVehicle3_i6_0b = CarrierVehicle.Builder
 				.newInstance(Id.create("gridVehicle3_i(6,0)b", org.matsim.vehicles.Vehicle.class), Id.createLinkId("i(6,0)"))
-				.setType(vehicleTypes.getVehicleTypes().get(Id.create("gridType03", CarrierVehicleType.class)))
+				.setType(vehicleTypes.getVehicleTypes().get(Id.create("gridType03", VehicleType.class ) ) )
 				.setEarliestStart(0.0)
 				.setLatestEnd(86399)
 				.build();
@@ -113,24 +103,24 @@ public class UccCarrierCreatorTest {
 		
 		//Read all CarrierVehicleIds of gridCarrier
 		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles()) {
-			vehicleIds.add(cv.getVehicleId());
+			vehicleIds.add(cv.getId() );
 		}
 		
 		//Test, if Capabilities are correct.
 		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles()) {
-			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0.getVehicleId().toString(), vehicleIds.contains(gridVehicle3_i6_0.getVehicleId()));
-			if (cv.getVehicleId() == gridVehicle3_i6_0.getVehicleId()){
+			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0.getId() ) );
+			if (cv.getId() == gridVehicle3_i6_0.getId()){
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different earliest StartTime", cv.getEarliestStartTime() == gridVehicle3_i6_0.getEarliestStartTime());
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different latest EndTime", cv.getLatestEndTime() == gridVehicle3_i6_0.getLatestEndTime());
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different location", cv.getLocation() == gridVehicle3_i6_0.getLocation());
-				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different latest EndTime", cv.getVehicleType() == gridVehicle3_i6_0.getVehicleType());
+				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different latest EndTime", cv.getType() == gridVehicle3_i6_0.getType() );
 			}
-			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0b.getVehicleId().toString(), vehicleIds.contains(gridVehicle3_i6_0b.getVehicleId()));
-			if (cv.getVehicleId() == gridVehicle3_i6_0b.getVehicleId()){
+			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0b.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0b.getId() ) );
+			if (cv.getId() == gridVehicle3_i6_0b.getId()){
 				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different earliest StartTime", cv.getEarliestStartTime() == gridVehicle3_i6_0b.getEarliestStartTime());
 				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getLatestEndTime() == gridVehicle3_i6_0b.getLatestEndTime());
 				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different location", cv.getLocation() == gridVehicle3_i6_0b.getLocation());
-				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getVehicleType() == gridVehicle3_i6_0b.getVehicleType());
+				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getType() == gridVehicle3_i6_0b.getType() );
 			
 			}
 		}
@@ -160,7 +150,7 @@ public class UccCarrierCreatorTest {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPES_FILE) ;
 
     	Carriers carriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(carriers).readFile(CARRIERS_FILE ) ;
     	// assign vehicle types to the carriers
     	new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
 
@@ -220,11 +210,11 @@ public class UccCarrierCreatorTest {
     	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHICLE_TYPES_FILE);
     	
     	Carriers uccCarriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(uccCarriers).readFile(UCC_CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(uccCarriers).readFile(UCC_CARRIERS_FILE ) ;
     	new CarrierVehicleTypeLoader(uccCarriers).loadVehicleTypes(vehicleTypes) ;
     	
     	Carriers nonUccCarriers = new Carriers() ;
-    	new CarrierPlanXmlReaderV2(nonUccCarriers).readFile(NON_UCC_CARRIERS_FILE) ;
+    	new CarrierPlanXmlReader(nonUccCarriers).readFile(NON_UCC_CARRIERS_FILE ) ;
     	new CarrierVehicleTypeLoader(nonUccCarriers).loadVehicleTypes(vehicleTypes) ;
 
     	UccCarrierCreator creator = new UccCarrierCreator(null, null, null, "UCC-", null, null);

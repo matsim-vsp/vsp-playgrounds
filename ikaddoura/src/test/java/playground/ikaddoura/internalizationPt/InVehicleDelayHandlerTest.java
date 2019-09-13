@@ -22,9 +22,6 @@
  */
 package playground.ikaddoura.internalizationPt;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -42,8 +39,11 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestCase;
 import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.vehicles.MatsimVehicleReader;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleReaderV1;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author ikaddoura
@@ -73,7 +73,7 @@ public class InVehicleDelayHandlerTest extends MatsimTestCase {
 		MutableScenario scenario = (MutableScenario)(ScenarioUtils.createScenario(config));
 		EventsManager events = EventsUtils.createEventsManager();
 		config.transit().setUseTransit(true);
-		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(this.getClassInputDirectory() + "vehicles.xml");
+		new MatsimVehicleReader(scenario.getTransitVehicles()).readFile(this.getClassInputDirectory() + "vehicles.xml");
 			
 		events.addHandler(new TransferDelayInVehicleEventHandler() {
 
@@ -219,7 +219,7 @@ public class InVehicleDelayHandlerTest extends MatsimTestCase {
 			MutableScenario scenario = (MutableScenario)(ScenarioUtils.createScenario(config));
 			EventsManager events = EventsUtils.createEventsManager();
 			config.transit().setUseTransit(true);
-			new VehicleReaderV1(scenario.getTransitVehicles()).readFile(this.getClassInputDirectory() + "vehicles.xml");
+			new MatsimVehicleReader(scenario.getTransitVehicles()).readFile(this.getClassInputDirectory() + "vehicles.xml" );
 				
 			events.addHandler(new TransferDelayInVehicleEventHandler() {
 

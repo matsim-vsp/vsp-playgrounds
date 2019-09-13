@@ -14,7 +14,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
@@ -96,7 +96,7 @@ class AddElectroVehiclesToCarriers {
 	public static void main(String[] args) {
 		createDir(new File(OUTPUT_DIR));
 
-		new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERFILE) ;
+		new CarrierPlanXmlReader(carriers).readFile(CARRIERFILE ) ;
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
 		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
 
@@ -223,7 +223,7 @@ class AddElectroVehiclesToCarriers {
 			CarrierCapabilities tempCc = CarrierCapabilities.newInstance();
 			tempCc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
 			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
-				String vehIdwLink = cv.getVehicleId().toString() + "_" + cv.getLocation().toString();
+				String vehIdwLink = cv.getId().toString() + "_" + cv.getLocation().toString();
 				String newVehId;
 				if (!nuOfVehPerId.containsKey(vehIdwLink)){
 					nuOfVehPerId.put(vehIdwLink, 1);
@@ -240,7 +240,7 @@ class AddElectroVehiclesToCarriers {
 
 				tempCc.getCarrierVehicles().add(CarrierVehicle.Builder
 						.newInstance(Id.create(newVehId, Vehicle.class), cv.getLocation())
-						.setType(cv.getVehicleType())
+						.setType(cv.getType() )
 						.setEarliestStart(cv.getEarliestStartTime()).setLatestEnd(cv.getLatestEndTime())
 						.build());
 			}

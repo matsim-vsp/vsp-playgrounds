@@ -46,6 +46,7 @@ import org.matsim.vehicles.Vehicle;
 import com.google.inject.Inject;
 
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 import playground.ikaddoura.moneyTravelDisutility.data.LinkInfo;
 import playground.ikaddoura.moneyTravelDisutility.data.TimeBin;
 
@@ -62,8 +63,9 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 	
 	@Inject
 	private Scenario scenario;
-	
-	@Inject(optional=true)
+
+//	@Inject(optional=true) // no longer possible.  kai, sep'19
+	@Inject
 	private AgentFilter agentFilter;
 	
 	private final Map<Id<Vehicle>, Id<Person>> vehicleId2driverIdToBeCharged = new HashMap<>();
@@ -118,8 +120,8 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 				
 				double newAmountSum = timeBin.getAmountSum() + event.getAmount();
 				timeBin.setAmountSum(newAmountSum);
-				
-				if (this.agentFilter != null) {
+
+				if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 					List<Double> amounts = timeBin.getPersonId2amounts().get(personId);
 					
 					if (amounts != null) {
@@ -136,7 +138,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 				timeBin = new TimeBin(timeBinNr);
 				timeBin.setAmountSum(event.getAmount());
 
-				if (this.agentFilter != null) {
+				if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 					List<Double> amounts = new ArrayList<>();
 					amounts.add(event.getAmount());
 					timeBin.getPersonId2amounts().put(personId, amounts);
@@ -150,7 +152,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 			TimeBin timeBin = new TimeBin(timeBinNr);
 			timeBin.setAmountSum(event.getAmount());
 
-			if (this.agentFilter != null) {
+			if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 				List<Double> amounts = new ArrayList<>();
 				amounts.add(event.getAmount());
 				timeBin.getPersonId2amounts().put(personId, amounts);
@@ -181,7 +183,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 					int numberOfEnteringAgents = timeBin.getNumberOfEnteringAgents() + 1;
 					timeBin.setNumberOfEnteringAgents(numberOfEnteringAgents );
 					
-					if (this.agentFilter != null) {
+					if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 						timeBin.getEnteringAgents().add(personId);
 					}
 					
@@ -190,7 +192,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 					TimeBin timeBin = new TimeBin(timeBinNr);
 					timeBin.setNumberOfEnteringAgents(1);
 					
-					if (this.agentFilter != null) {
+					if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 						timeBin.getEnteringAgents().add(personId);
 					}
 					
@@ -202,7 +204,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 				TimeBin timeBin = new TimeBin(timeBinNr);
 				timeBin.setNumberOfEnteringAgents(1);
 				
-				if (this.agentFilter != null) {
+				if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 					timeBin.getEnteringAgents().add(personId);
 				}
 				
@@ -292,7 +294,7 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 				timeBin.setAverageAmount(smoothenedAverageAmount);
 				
 				// average amount per agent type
-				if (this.agentFilter != null) {
+				if ( ! ( this.agentFilter instanceof AgentFilterNullImpl ) ) {
 					
 					// storing the average from the previous iteration
 					final Map<String, Double> agentTypeId2avgAmountPreviousIteration = new HashMap<>();

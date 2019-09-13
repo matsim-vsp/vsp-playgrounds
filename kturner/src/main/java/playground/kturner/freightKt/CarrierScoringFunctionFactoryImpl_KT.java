@@ -2,13 +2,9 @@ package playground.kturner.freightKt;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
@@ -20,7 +16,6 @@ import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.ScheduledTour;
-import org.matsim.contrib.freight.carrier.Tour;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
@@ -90,7 +85,7 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
         	if(selectedPlan != null) {
         		for(ScheduledTour tour : selectedPlan.getScheduledTours()){
         			if(!tour.getTour().getTourElements().isEmpty()){
-        				double fixCosts= tour.getVehicle().getVehicleType().getVehicleCostInformation().getFix();
+        				double fixCosts= tour.getVehicle().getType().getCostInformation().getFixedCosts() ;
         				fixCostWriter.addAmountToWriter(fixCosts);
         				fixCostWriter.writeMoneyToFile(fixCosts);
         				score += (-1)*fixCosts;
@@ -118,16 +113,16 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		WriteLegs legWriter = new WriteLegs(new File(outputDir + "#LegsForScoringInfor.txt"), carrier); //KT
 
 		private double getTimeParameter(CarrierVehicle vehicle) {
-            return vehicle.getVehicleType().getVehicleCostInformation().getPerTimeUnit();
+            return vehicle.getType().getCostInformation().getCostsPerSecond();
         }
 
         private double getDistanceParameter(CarrierVehicle vehicle) {
-            return vehicle.getVehicleType().getVehicleCostInformation().getPerDistanceUnit();
+            return vehicle.getType().getCostInformation().getCostsPerMeter() ;
         }
 
         private CarrierVehicle getVehicle(Id<?> vehicleId) {
             for(CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
-                if(cv.getVehicleId().equals(vehicleId)){
+                if(cv.getId().equals(vehicleId )){
                     return cv;
                 }
             }
@@ -175,7 +170,7 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
                 assert timeCosts >= 0.0 : "timeCosts must be positive";
                 score += (-1) * timeCosts;
                 
-                leg.setMode(vehicle.getVehicleType().getId().toString());		//KT: 28.03.2015 Zuweisung des VehicleTxpes als Mode -> Sinnvoll? Zumindest besser als "car".
+                leg.setMode(vehicle.getType().getId().toString() );		//KT: 28.03.2015 Zuweisung des VehicleTxpes als Mode -> Sinnvoll? Zumindest besser als "car".
                 
                 legWriter.writeLegToFile(leg);
                 legWriter.writeTextLineToFile("LegTimeCosts per s: \t"+ getTimeParameter(vehicle)+ "\t LegTimeCosts: "+ timeCosts  +  "\t LegDistanceCosts per m: "+ getDistanceParameter(vehicle) + "\t LegDistanceCosts: " + distanceCosts );
@@ -419,8 +414,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
             if(event instanceof LinkEnterEvent){
                 CarrierVehicle carrierVehicle = getVehicle(((LinkEnterEvent) event).getVehicleId());
                 if(carrierVehicle == null) throw new IllegalStateException("carrier vehicle missing");
-                double toll = roadPricing.getTollAmount(carrierVehicle.getVehicleType().getId(),network.getLinks().get(((LinkEnterEvent) event).getLinkId()),event.getTime());
-                if(toll > 0.) System.out.println("bing: vehicle " + carrierVehicle.getVehicleId() + " paid toll " + toll + "");
+                double toll = roadPricing.getTollAmount(carrierVehicle.getType().getId(),network.getLinks().get(((LinkEnterEvent) event).getLinkId() ),event.getTime() );
+                if(toll > 0.) System.out.println("bing: vehicle " + carrierVehicle.getId() + " paid toll " + toll + "" );
 
                 score += (-1) * toll;
             }
@@ -428,7 +423,7 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 
         private CarrierVehicle getVehicle(Id<Vehicle> vehicleId) {
             for(CarrierVehicle v : carrier.getCarrierCapabilities().getCarrierVehicles()){
-                if(v.getVehicleId().equals(vehicleId)){
+                if(v.getId().equals(vehicleId )){
                     return v;
                 }
             }

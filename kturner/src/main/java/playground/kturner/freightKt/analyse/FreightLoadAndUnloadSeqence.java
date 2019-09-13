@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
@@ -67,7 +67,7 @@ class FreightLoadAndUnloadSeqence {
 		
 		//Read in carriers file
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString());
+		new CarrierPlanXmlReader(carriers).readFile(new File(CARRIERFILE_INPUT).getCanonicalPath().toString() );
 		
 		//Read in vehicleTypes file
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
@@ -127,9 +127,9 @@ class FreightLoadAndUnloadSeqence {
 				//TODO: sicherstellen, dass nur load und anload gezält wird (Nochmal nachlesen,w elche es genau sind.
 				
 				//TODO: FarhzeugCapacity noch einfügen
-				System.out.println(carrier.getId() + "; " + scTour.getVehicle().getVehicleId() + "; " 
+				System.out.println(carrier.getId() + "; " + scTour.getVehicle().getId() + "; "
 							+ scTour.getVehicle().getVehicleTypeId() + "; " 
-							+ vehicleTypes.getVehicleTypes().get(scTour.getVehicle().getVehicleTypeId()).getCarrierVehicleCapacity() + "; " 
+							+ vehicleTypes.getVehicleTypes().get( scTour.getVehicle().getVehicleTypeId() ).getCapacity().getOther().intValue() + "; "
 							+ aggregatedTE.toString());
 			}
 		}

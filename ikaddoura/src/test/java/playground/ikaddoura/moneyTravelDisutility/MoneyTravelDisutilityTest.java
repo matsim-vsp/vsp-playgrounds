@@ -33,6 +33,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
 /**
  * Simply plugging everything together and starting a run for an empty scenario.
@@ -82,7 +84,14 @@ public class MoneyTravelDisutilityTest {
 				this.addControlerListenerBinding().to(MoneyEventAnalysis.class);
 				this.addEventHandlerBinding().to(MoneyEventAnalysis.class);
 			}
-		}); 
+		});
+
+		controler.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+
 
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.run();

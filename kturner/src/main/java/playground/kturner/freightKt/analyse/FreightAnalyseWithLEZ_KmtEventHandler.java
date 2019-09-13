@@ -1,12 +1,5 @@
 package playground.kturner.freightKt.analyse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -20,9 +13,10 @@ import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.freight.carrier.CarrierVehicleType;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.vehicles.VehicleType;
+
+import java.util.*;
 
 
 class FreightAnalyseWithLEZ_KmtEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
@@ -61,7 +55,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	}
 
 	private void readVehicleTypeCapabilities() {
-		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
+		for (VehicleType vehType : vehicleTypes.getVehicleTypes().values()){
 		//TODO: Emissionswerte nicht über Eigenschaften einlesbar :(	
 			log.warn("Note: emissionsPerMeter are currently not read in from vehicleTypes-file. Watch " + this.getClass().getName() + " for values."); //TODO: Reading in vehTypes from file, KMT mai/18 
 			double emissionsPerMeter = -99999.0;			
@@ -87,12 +81,12 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			log.warn(vehType.getId().toString() + " : No values for emissions defined. Using " + emissionsPerMeter + " instead!");
 				
 			VehicleTypeSpezificCapabilities vehTypeCapabilities = 
-					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().getFix(), 
-							vehType.getVehicleCostInformation().getPerDistanceUnit(), 
-							vehType.getVehicleCostInformation().getPerTimeUnit(), 
-							vehType.getEngineInformation().getGasConsumption(),
+					new VehicleTypeSpezificCapabilities(vehType.getCostInformation().getFixedCosts(),
+							vehType.getCostInformation().getCostsPerMeter() ,
+							vehType.getCostInformation().getCostsPerSecond() ,
+							vehType.getEngineInformation().getFuelConsumption() ,
 							emissionsPerMeter,
-							vehType.getCarrierVehicleCapacity());
+							vehType.getCapacity().getOther().intValue() ) ;
 			
 			vehTypId2Capabilities.put(vehType.getId(), vehTypeCapabilities);
 		}
