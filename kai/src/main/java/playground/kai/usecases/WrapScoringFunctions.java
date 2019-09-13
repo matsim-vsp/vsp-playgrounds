@@ -27,7 +27,7 @@ class WrapScoringFunctions{
 		config.controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
 		config.controler().setLastIteration( 2 );
 
-		ConfigUtils.addOrGetModule( config, BicycleConfigGroup.class ) ;
+//		ConfigUtils.addOrGetModule( config, BicycleConfigGroup.class ) ;
 
 		// ---
 
