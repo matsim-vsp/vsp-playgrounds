@@ -45,7 +45,10 @@
 			<!--<id>matsim-custom</id>-->
 			<!--<url>http://matsim.org/m2repo</url>-->
 		<!--</repository>-->
-
+		<repository>
+			<id>ch.sbb</id>
+			<url>https://schweizerischebundesbahnen.bintray.com/simba.mvn</url>
+		</repository>
 	</repositories>
 	<build>
 		<extensions>
