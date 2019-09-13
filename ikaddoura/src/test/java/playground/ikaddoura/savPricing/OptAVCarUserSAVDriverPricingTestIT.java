@@ -251,6 +251,13 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+	        
+	        controler.addOverridingModule( new AbstractModule(){
+				@Override public void install(){
+					bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+				}
+			} ) ;
+	        
 			controler.run();
 		}
 

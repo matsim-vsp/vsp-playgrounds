@@ -310,6 +310,13 @@ public class DrtPricingTestIT {
 		
 		controler2.getConfig().controler().setCreateGraphs(false);
         controler2.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        
+        controler2.addOverridingModule( new AbstractModule(){
+			@Override public void install(){
+				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+			}
+		} ) ;
+        
 		controler2.run();
 
 		// print outs
