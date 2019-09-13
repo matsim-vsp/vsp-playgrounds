@@ -64,19 +64,6 @@ public class MoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		this.marginalUtilityOfMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
 	}
 	
-	public MoneyTimeDistanceTravelDisutility(
-			TravelDisutility travelDisutility,
-			Scenario scenario,
-			MoneyEventAnalysis moneyEventHandler) {
-
-		this.travelDisutility = travelDisutility;
-		this.sigma = 0.;
-		this.moneyEventAnalysis = moneyEventHandler;
-		this.vehicleFilter = null;
-		this.timeBinSize = scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize();
-		this.marginalUtilityOfMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
-	}
-
 	@Override
 	public double getLinkTravelDisutility(Link link, double time, Person person, Vehicle vehicle) {
 

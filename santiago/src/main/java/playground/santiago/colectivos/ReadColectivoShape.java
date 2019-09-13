@@ -1,22 +1,5 @@
 package playground.santiago.colectivos;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -44,23 +27,13 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.pt.transitSchedule.api.Departure;
-import org.matsim.pt.transitSchedule.api.TransitLine;
-import org.matsim.pt.transitSchedule.api.TransitRoute;
-import org.matsim.pt.transitSchedule.api.TransitRouteStop;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
-import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
-import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleCapacityImpl;
-import org.matsim.vehicles.VehicleReaderV1;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vehicles.Vehicles;
-import org.matsim.vehicles.VehiclesFactory;
+import org.matsim.pt.transitSchedule.api.*;
+import org.matsim.vehicles.*;
 import org.opengis.feature.simple.SimpleFeature;
+
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 
 public class ReadColectivoShape {
@@ -270,7 +243,8 @@ public class ReadColectivoShape {
 		//create vehicles, get the old vehicles- and schedule-file and add new colectivo vehicles and schedule
 		createVehicles(scenario.getTransitSchedule(),scenario.getTransitVehicles());
 					
-		new VehicleReaderV1(scenario.getTransitVehicles()).readFile("C:/Users/Felix/Documents/Bachelor/Santiago de Chile/santiago/scenario/inputForMATSim/transit/old/transitvehicles.xml"); 
+		new MatsimVehicleReader(scenario.getTransitVehicles()).readFile("C:/Users/Felix/Documents/Bachelor/Santiago de " +
+													   "Chile/santiago/scenario/inputForMATSim/transit/old/transitvehicles.xml" );
  		new TransitScheduleReader(scenario).readFile(				"C:/Users/Felix/Documents/Bachelor/Santiago de Chile/santiago/scenario/inputForMATSim/transit/old/transitschedule_simplified.xml");
  				
  		new TransitScheduleWriter(transitSchedule).writeFile(		 "C:/Users/Felix/Documents/Bachelor/Santiago de Chile/v3/scheduleFinal/schedule_all.xml");
@@ -442,11 +416,11 @@ private void createVehicles (TransitSchedule schedule, Vehicles vehicles) {
 
 	VehiclesFactory vb = vehicles.getFactory();
 	VehicleType vehicleType = vb.createVehicleType(Id.create("colectivo", VehicleType.class));
-	VehicleCapacity capacity = new VehicleCapacityImpl();
+	VehicleCapacity capacity = vehicleType.getCapacity() ;
 	capacity.setSeats(Integer.valueOf(4));
 	capacity.setStandingRoom(Integer.valueOf(0));
 	vehicleType.setLength(4.0);
-	vehicleType.setCapacity(capacity);
+//	vehicleType.setCapacity(capacity);
 	vehicles.addVehicleType(vehicleType);
 	
 	long vehId = 1;

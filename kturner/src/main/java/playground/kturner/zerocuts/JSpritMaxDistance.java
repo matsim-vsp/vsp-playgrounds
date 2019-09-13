@@ -18,7 +18,6 @@
 
 package playground.kturner.zerocuts;
 
-import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.analysis.toolbox.StopWatch;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
@@ -27,8 +26,6 @@ import com.graphhopper.jsprit.core.algorithm.state.StateId;
 import com.graphhopper.jsprit.core.algorithm.state.StateManager;
 import com.graphhopper.jsprit.core.algorithm.state.StateUpdater;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
-import com.graphhopper.jsprit.core.problem.constraint.ConstraintManager;
-import com.graphhopper.jsprit.core.problem.constraint.MaxDistanceConstraint;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import com.graphhopper.jsprit.core.problem.solution.route.activity.ActivityVisitor;
@@ -111,7 +108,7 @@ public class JSpritMaxDistance {
 
 		//create or load the carrier(s) including assignment of vehicle types to the carrier(s)
 		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2( carriers ).readURL( IOUtils.extendUrl(scenarioUrl, "singleCarrierFiveActivitiesWithoutRoutes.xml" ) ) ;
+		new CarrierPlanXmlReader( carriers ).readURL( IOUtils.extendUrl(scenarioUrl, "singleCarrierFiveActivitiesWithoutRoutes.xml" ) ) ;
 
 		// assign vehicle types to the carriers
 		new CarrierVehicleTypeLoader( carriers ).loadVehicleTypes( vehicleTypes ) ;

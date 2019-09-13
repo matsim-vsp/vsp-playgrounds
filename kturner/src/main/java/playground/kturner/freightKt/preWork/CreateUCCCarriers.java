@@ -8,21 +8,9 @@ import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
-import org.matsim.contrib.freight.carrier.CarrierImpl;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierService;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
-import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
-import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
 import org.matsim.vehicles.Vehicle;
 
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
@@ -82,7 +70,7 @@ class CreateUCCCarriers {
 
 		//Carrier-Stuff
 //		Carriers carriers = new Carriers() ;
-		new CarrierPlanXmlReaderV2(carriers).readFile(CARRIERFILE) ;
+		new CarrierPlanXmlReader(carriers).readFile(CARRIERFILE ) ;
 //		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
 		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
 
@@ -133,8 +121,8 @@ class CreateUCCCarriers {
 					depotLinks.add(depotLink);
 					nOfDepots++;
 				}
-				if (!vehTypes.contains(vehicle.getVehicleType().getId().toString())){
-					vehTypes.add(vehicle.getVehicleType().getId().toString());
+				if (!vehTypes.contains(vehicle.getType().getId().toString() )){
+					vehTypes.add(vehicle.getType().getId().toString() );
 				}
 			}
 
@@ -168,7 +156,7 @@ class CreateUCCCarriers {
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	//Liste der zum UCC-Carrier übertragenen Services -> wird später aus normalen Carrier entfernt
 		
 		for (Carrier carrier : carriers.getCarriers().values()){
-			Carrier uccCarrier = CarrierImpl.newInstance(Id.create("UCC_"+carrier.getId() , Carrier.class));
+			Carrier uccCarrier = CarrierUtils.createCarrier( Id.create( "UCC_" + carrier.getId(), Carrier.class ) );
 			
 			for (CarrierService service: carrier.getServices()) {
 				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
@@ -246,8 +234,8 @@ class CreateUCCCarriers {
 			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
 				//
 				tempCc.getCarrierVehicles().add(CarrierVehicle.Builder
-						.newInstance(Id.create(cv.getVehicleId().toString() +"_" + cv.getLocation().toString(), Vehicle.class), cv.getLocation())
-						.setType(cv.getVehicleType())
+						.newInstance(Id.create(cv.getId().toString() +"_" + cv.getLocation().toString(), Vehicle.class ), cv.getLocation() )
+						.setType(cv.getType() )
 						.setEarliestStart(cv.getEarliestStartTime()).setLatestEnd(cv.getLatestEndTime())
 						.build());
 			}

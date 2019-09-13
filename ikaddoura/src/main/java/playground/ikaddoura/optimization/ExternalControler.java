@@ -22,15 +22,6 @@
  */
 package playground.ikaddoura.optimization;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,22 +33,18 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleType.DoorOperationMode;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vehicles.Vehicles;
-
-import playground.ikaddoura.optimization.io.OptSettings;
-import playground.ikaddoura.optimization.io.OptSettingsReader;
-import playground.ikaddoura.optimization.io.PopFilePathsLoader;
-import playground.ikaddoura.optimization.io.RndSeedsLoader;
-import playground.ikaddoura.optimization.io.TextFileWriter;
+import org.matsim.vehicles.*;
+import playground.ikaddoura.optimization.io.*;
 import playground.ikaddoura.optimization.operator.Operator;
 import playground.ikaddoura.optimization.users.Users;
 import playground.ikaddoura.utils.prepare.PopulationWorkOtherGenerator;
 import playground.ikaddoura.utils.pt.DeparturesGenerator;
 import playground.ikaddoura.utils.pt.ScheduleFromCorridor;
 import playground.ikaddoura.utils.pt.VehiclesGenerator;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author Ihab
@@ -381,7 +368,7 @@ class ExternalControler {
 			Id<Vehicle> ptVehId = Id.create("bus", Vehicle.class);
 			double alightingTime = 0.75;
 			double boardingTime = 1.0;
-			DoorOperationMode doorOperationMode = DoorOperationMode.serial;
+			VehicleType.DoorOperationMode doorOperationMode = VehicleType.DoorOperationMode.serial;
 			double ptVehiclePCU = 1.0;
 			double maxVelocity = 500./59.;		
 			
