@@ -43,14 +43,9 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
-
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
-import playground.ikaddoura.moneyTravelDisutility.data.TimeBin;
-import sun.management.Agent;
-
-import java.util.Map;
 
 /**
  * 
