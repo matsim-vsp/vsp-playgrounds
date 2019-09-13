@@ -196,6 +196,13 @@ public class DrtPricingTestIT {
 		
 		// run
         controler3.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        
+//        controler3.addOverridingModule( new AbstractModule(){
+//			@Override public void install(){
+//				bind( AgentFilter.class ).to( AgentFilterNullImpl.class ) ;
+//			}
+//		} ) ;
+        
 		controler3.run();
 		
 		// print outs

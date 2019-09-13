@@ -22,10 +22,7 @@ package playground.ikaddoura.savPricing.disutility;
 import org.matsim.contrib.dvrp.run.AbstractDvrpModeModule;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 
-import com.google.inject.Inject;
-
 import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
-import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 /**
 * @author ikaddoura
@@ -33,31 +30,16 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 public class SAVMoneyTravelDisutilityModule extends AbstractDvrpModeModule {
 	
-	private final SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory;
-	
-	@Inject(optional = true)
-	private AgentFilter agentFilter;
-	
-	private final AgentFilter agentFilterToBind;
-
-	public SAVMoneyTravelDisutilityModule(String savMode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory,
-			AgentFilter agentFilter) {
-		super(savMode);
-		this.factory = factory;
-		this.agentFilterToBind = agentFilter;
-	}
+	private final SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory;	
 
 	public SAVMoneyTravelDisutilityModule(String savMode,
 			SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
-		this(savMode, factory, null);
+		super(savMode);
+		this.factory = factory;
 	}
 
 	@Override
 	public void install() {
-		
-		if (agentFilterToBind != null && agentFilter == null ) {
-			this.bind(AgentFilter.class).toInstance(agentFilterToBind);
-		}
 
 		this.bindModal(TravelDisutilityFactory.class).toInstance(factory);
 		

@@ -42,7 +42,7 @@ public final class SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory implemen
 	@Inject
 	private MoneyEventAnalysis moneyAnalysis;
 	
-	@Inject(optional = true)
+	@Inject
 	private AgentFilter vehicleFilter;
 	
 	@Inject
