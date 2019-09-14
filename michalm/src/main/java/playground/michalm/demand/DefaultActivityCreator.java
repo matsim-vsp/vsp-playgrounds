@@ -33,7 +33,7 @@ import org.matsim.contrib.zone.Zone;
 import org.matsim.contrib.zone.util.RandomPointUtils;
 import org.matsim.core.network.NetworkUtils;
 
-public class DefaultActivityCreator implements ActivityCreator {
+public class DefaultActivityCreator implements ODDemandGenerator.ActivityCreator<Zone> {
 	protected final UniformRandom uniform = RandomUtils.getGlobalUniform();
 	protected final Network network;
 	protected final PopulationFactory pf;
