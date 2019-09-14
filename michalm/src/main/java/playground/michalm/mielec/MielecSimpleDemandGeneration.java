@@ -21,15 +21,21 @@ package playground.michalm.mielec;
 
 import java.util.Map;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.contrib.zone.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.zone.Zone;
+import org.matsim.contrib.zone.Zones;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.matrices.Matrix;
 
-import playground.michalm.demand.*;
-import playground.michalm.util.array2d.*;
+import playground.michalm.demand.DefaultActivityCreator;
+import playground.michalm.demand.ODDemandGenerator;
+import playground.michalm.demand.PersonCreatorWithRandomTaxiMode;
+import playground.michalm.util.array2d.Array2DReader;
+import playground.michalm.util.array2d.Array2DUtils;
 import playground.michalm.util.matrices.MatrixUtils;
 
 public class MielecSimpleDemandGeneration {
@@ -55,9 +61,9 @@ public class MielecSimpleDemandGeneration {
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		Map<Id<Zone>, Zone> zones = Zones.readZones(zonesXmlFile, zonesShpFile);
 
-		ActivityCreator ac = new DefaultActivityCreator(scenario);
+		ODDemandGenerator.ActivityCreator ac = new DefaultActivityCreator(scenario);
 		PersonCreatorWithRandomTaxiMode pc = new PersonCreatorWithRandomTaxiMode(scenario, taxiProbability);
-		ODDemandGenerator dg = new ODDemandGenerator(scenario, zones, true, ac, pc);
+		ODDemandGenerator dg = new ODDemandGenerator(scenario, zones::get, true, ac, pc);
 
 		double[][] matrix = Array2DReader.getDoubleArray(odMatrixFile, zones.size());
 		Matrix afternoonODMatrix = MatrixUtils.createSparseMatrix("afternoon", zones.keySet(), matrix);

@@ -19,11 +19,14 @@
 
 package playground.michalm.demand;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.zone.Zone;
 
-public class DefaultPersonCreator implements PersonCreator {
+public class DefaultPersonCreator implements ODDemandGenerator.PersonCreator<Zone> {
 	private final PopulationFactory pf;
 	private final String idFormat;
 	private int currentAgentId = 0;
