@@ -39,11 +39,11 @@ import playground.michalm.util.matrices.MatrixUtils;
 public class ODDemandGenerator<L> {
 
 	public interface PersonCreator<L> {
-		Person createPerson(Plan plan, L fromZone, L toZone);
+		Person createPerson(Plan plan, L fromLocation, L toLocation);
 	}
 
 	public interface ActivityCreator<L> {
-		Activity createActivity(L zone, String actType);
+		Activity createActivity(L location, String actType);
 	}
 
 	private final UniformRandom uniform = RandomUtils.getGlobalUniform();
@@ -75,19 +75,19 @@ public class ODDemandGenerator<L> {
 		Iterable<Entry> entryIter = MatrixUtils.createEntryIterable(matrix);
 
 		for (Entry e : entryIter) {
-			L fromZone = locationProvider.apply(e.getFromLocation());
-			L toZone = locationProvider.apply(e.getToLocation());
+			L fromLocation = locationProvider.apply(e.getFromLocation());
+			L toLocation = locationProvider.apply(e.getToLocation());
 			int trips = (int)uniform.floorOrCeil(flowCoeff * e.getValue());
 
 			for (int k = 0; k < trips; k++) {
 				Plan plan = pf.createPlan();
 
 				// act0
-				Activity startAct = activityCreator.createActivity(fromZone, fromActivityType);
+				Activity startAct = activityCreator.createActivity(fromLocation, fromActivityType);
 				startAct.setEndTime((int)uniform.nextDouble(startTime, startTime + duration));
 
 				// act1
-				Activity endAct = activityCreator.createActivity(toZone, toActivityType);
+				Activity endAct = activityCreator.createActivity(toLocation, toActivityType);
 
 				// leg
 				Leg leg = pf.createLeg(mode);
@@ -100,7 +100,7 @@ public class ODDemandGenerator<L> {
 				plan.addLeg(leg);
 				plan.addActivity(endAct);
 
-				Person person = personCreator.createPerson(plan, fromZone, toZone);
+				Person person = personCreator.createPerson(plan, fromLocation, toLocation);
 				person.addPlan(plan);
 				scenario.getPopulation().addPerson(person);
 			}
@@ -127,5 +127,4 @@ public class ODDemandGenerator<L> {
 		new PopulationWriter(scenario.getPopulation(), scenario.getNetwork()).write(plansFile);
 		System.out.println("Generated population written to: " + plansFile);
 	}
-
 }
