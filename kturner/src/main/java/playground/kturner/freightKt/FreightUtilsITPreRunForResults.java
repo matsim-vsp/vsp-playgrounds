@@ -88,12 +88,16 @@ public class FreightUtilsITPreRunForResults {
 
 		//Create vehicle for Carriers
 //		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
-		VehicleType carrierVehType = VehicleUtils.createVehicleType( Id.create("gridType", VehicleType.class ) )
+		VehicleType vehicleType1 = VehicleUtils.createVehicleType( Id.create("gridType", VehicleType.class ) )
 //				.setCapacity(3)
-				.setMaximumVelocity(10)
-				.setCostPerDistanceUnit(0.0001)
-				.setCostPerTimeUnit(0.001)
-				.setFixCost(130)
+				.setMaximumVelocity(10);
+		vehicleType1.getCostInformation().setCostsPerMeter( 0.0001 ) ;
+		//				.setCapacity(3)
+		vehicleType1.getCostInformation().setCostsPerSecond( 0.001 ) ;
+		VehicleType vehicleType = vehicleType1;
+		vehicleType.getCostInformation().setFixedCost( (double) 130 ) ;
+		//				.setCapacity(3)
+		VehicleType carrierVehType = vehicleType
 //				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
 //				.build();
 		;
