@@ -46,6 +46,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.vehicles.EngineInformation.FuelType;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -105,7 +106,7 @@ public class FreightWithShipments {
 
 		//Create vehicle for Carrier
 //		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
-		VehicleType carrierVehType = new VehicleType( Id.create( "gridType", VehicleType.class ) )
+		VehicleType carrierVehType = VehicleUtils.createVehicleType( Id.create( "gridType", VehicleType.class ) )
 //				.setCapacity(3)
 				.setMaximumVelocity(10)
 				.setCostPerDistanceUnit(0.0001)

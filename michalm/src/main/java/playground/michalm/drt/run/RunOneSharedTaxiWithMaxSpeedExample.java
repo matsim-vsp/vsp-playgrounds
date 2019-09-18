@@ -29,6 +29,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 /**
@@ -43,7 +44,7 @@ public class RunOneSharedTaxiWithMaxSpeedExample {
 		config.controler().setLastIteration(lastIteration);
 		config.controler().setWriteEventsInterval(lastIteration);
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
-		VehicleType vehicleType = new VehicleType(Id.create("autonomousVehicleType", VehicleType.class));
+		VehicleType vehicleType = VehicleUtils.createVehicleType(Id.create("autonomousVehicleType", VehicleType.class ) );
 		vehicleType.setMaximumVelocity(1);
 		controler.addOverridingModule(new DvrpTravelTimeWithMaxSpeedLimitModule(vehicleType));
 		controler.run();
