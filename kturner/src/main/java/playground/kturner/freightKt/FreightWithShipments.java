@@ -109,12 +109,13 @@ public class FreightWithShipments {
 		VehicleType carrierVehType = VehicleUtils.createVehicleType( Id.create( "gridType", VehicleType.class ) )
 //				.setCapacity(3)
 				.setMaximumVelocity(10)
-				.setCostPerDistanceUnit(0.0001)
-				.setCostPerTimeUnit(0.001)
-				.setFixCost(130)
+//				.setCostPerDistanceUnit(0.0001)
+//				.setCostPerTimeUnit(0.001)
+//				.setFixCost(130)
 //				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
 //				.build();
 		;
+		carrierVehType.getCostInformation().setCostsPerMeter( 0.001 ).setCostsPerSecond( 0.001 ).setFixedCost( 130. );
 		carrierVehType.getCapacity().setOther( 3 );
 		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
 		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 );
