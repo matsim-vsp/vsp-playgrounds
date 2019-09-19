@@ -101,6 +101,7 @@ public class FreightUtilsITPreRunForResults {
 //				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
 //				.build();
 		;
+		carrierVehType.getCostInformation().setFixedCost( 130. ).setCostsPerSecond( 0.001 ).setCostsPerMeter( 0.0001 );
 		carrierVehType.getCapacity().setOther( 3 );
 		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
 		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 ) ;

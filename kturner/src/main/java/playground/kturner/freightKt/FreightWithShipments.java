@@ -119,6 +119,7 @@ public class FreightWithShipments {
 //				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
 //				.build();
 		;
+		carrierVehType.getCostInformation().setCostsPerMeter( 0.001 ).setCostsPerSecond( 0.001 ).setFixedCost( 130. );
 		carrierVehType.getCapacity().setOther( 3 );
 		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
 		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 );
