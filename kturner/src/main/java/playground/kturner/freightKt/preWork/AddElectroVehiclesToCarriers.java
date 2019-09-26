@@ -147,7 +147,7 @@ class AddElectroVehiclesToCarriers {
 		Carriers carriersWithElectro = new Carriers();
 		for (Carrier carrier : carriers.getCarriers().values()) {
 			List<DepotTimeWindow> depotTimeWindows = new ArrayList<DepotTimeWindow>();
-			for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) { 	//Prüfe für jedes Fzg des Carriers ob das Zeitfenster ebreits bekannt: Ja: mache nichts, Nein-> Erweitere Fzg flotte.
+			for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles().values()) { 	//Prüfe für jedes Fzg des Carriers ob das Zeitfenster ebreits bekannt: Ja: mache nichts, Nein-> Erweitere Fzg flotte.
 				Id<Link> depotLocation = carrierVehicle.getLocation();
 				TimeWindow tw_vehicle = TimeWindow.newInstance(carrierVehicle.getEarliestStartTime(), carrierVehicle.getLatestEndTime());
 				boolean alreadyDone = false;
@@ -180,25 +180,26 @@ class AddElectroVehiclesToCarriers {
 	private static void addElectroVehicles(Carrier carrier, CarrierVehicleTypes vehicleTypes, Id<Link> depotLocation,
 			TimeWindow tw) {
 		if (carrier.getId().toString().endsWith("TIEFKUEHL")){
-				carrier.getCarrierCapabilities().getCarrierVehicles()
-				.add(CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen", Vehicle.class), depotLocation)
-						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
-						.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
-						.build());
-			
+			CarrierVehicle carrierVehicle_tk = CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen", Vehicle.class), depotLocation)
+					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
+					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
+					.build();
+			carrier.getCarrierCapabilities().getCarrierVehicles()
+				.put(carrierVehicle_tk.getId(), carrierVehicle_tk);
 		} else {
-			
-				carrier.getCarrierCapabilities().getCarrierVehicles()
-				.add(CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), depotLocation)
-						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
-						.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
-						.build());
+			CarrierVehicle carrierVehicle_light = CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), depotLocation)
+					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
+					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
+					.build();
+			carrier.getCarrierCapabilities().getCarrierVehicles()
+				.put(carrierVehicle_light.getId(), carrierVehicle_light);
 
-				carrier.getCarrierCapabilities().getCarrierVehicles()
-				.add(CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), depotLocation)
-						.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
-						.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
-						.build());
+			CarrierVehicle carrierVehicle_medium = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), depotLocation)
+					.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
+					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
+					.build();
+			carrier.getCarrierCapabilities().getCarrierVehicles()
+				.put(carrierVehicle_medium.getId(), carrierVehicle_medium);
 			}		
 	}
 
@@ -222,7 +223,7 @@ class AddElectroVehiclesToCarriers {
 			//temporären neuen Carrier & setzen der Eigenschaften.
 			CarrierCapabilities tempCc = CarrierCapabilities.newInstance();
 			tempCc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
-			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
+			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles().values()){
 				String vehIdwLink = cv.getId().toString() + "_" + cv.getLocation().toString();
 				String newVehId;
 				if (!nuOfVehPerId.containsKey(vehIdwLink)){
@@ -238,11 +239,12 @@ class AddElectroVehiclesToCarriers {
 				//Vehicle neu erstellen, da setVehicleId nicht verfügbar.
 				//Dabei eindeutigen Buchstaben für jede VehId-DepotLink-Kombination einfügen
 
-				tempCc.getCarrierVehicles().add(CarrierVehicle.Builder
+				CarrierVehicle carrierVehicle = CarrierVehicle.Builder
 						.newInstance(Id.create(newVehId, Vehicle.class), cv.getLocation())
-						.setType(cv.getType() )
+						.setType(cv.getType())
 						.setEarliestStart(cv.getEarliestStartTime()).setLatestEnd(cv.getLatestEndTime())
-						.build());
+						.build();
+				tempCc.getCarrierVehicles().put(carrierVehicle.getId(), carrierVehicle);
 			}
 			carrier.setCarrierCapabilities(tempCc); //Zurückschreiben des neuen Carriers
 

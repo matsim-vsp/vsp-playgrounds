@@ -26,6 +26,7 @@ import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.vehicles.Vehicle;
+import sun.plugin.dom.exception.InvalidStateException;
 
 /**
  * Defines carrier scoring function (factory).
@@ -121,11 +122,10 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
         }
 
         private CarrierVehicle getVehicle(Id<?> vehicleId) {
-            for(CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
-                if(cv.getId().equals(vehicleId )){
-                    return cv;
-                }
-            }
+			if(carrier.getCarrierCapabilities().getCarrierVehicles().containsKey(vehicleId)){
+				return carrier.getCarrierCapabilities().getCarrierVehicles().get(vehicleId);
+			}
+			log.error("Cannot get Vehicle of vehicleType: " + vehicleId.toString(), new InvalidStateException("Cannot get Vehicle of vehicleType: " + vehicleId.toString()));
             return null;
         }
 
@@ -397,6 +397,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
   //TollScoring von Stefan Schroeder {@see org.matsim.contrib.freight.usecases.chessboard.CarrierScoringFunctionFactoryImp.TollScoring}
     static class TollScoring implements SumScoringFunction.BasicScoring, SumScoringFunction.ArbitraryEventScoring {
 
+    	private static Logger log = Logger.getLogger(TollScoring.class);
+
         private double score = 0.;
         private Carrier carrier;
         private Network network;
@@ -422,12 +424,11 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
         }
 
         private CarrierVehicle getVehicle(Id<Vehicle> vehicleId) {
-            for(CarrierVehicle v : carrier.getCarrierCapabilities().getCarrierVehicles()){
-                if(v.getId().equals(vehicleId )){
-                    return v;
-                }
-            }
-            return null;
+			if(carrier.getCarrierCapabilities().getCarrierVehicles().containsKey(vehicleId)){
+				return carrier.getCarrierCapabilities().getCarrierVehicles().get(vehicleId);
+			}
+			log.error("Cannot get Vehicle of vehicleType: " + vehicleId.toString(), new InvalidStateException("Cannot get Vehicle of vehicleType: " + vehicleId.toString()));
+			return null;
         }
 
         @Override

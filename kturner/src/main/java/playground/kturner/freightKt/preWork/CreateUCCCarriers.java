@@ -107,7 +107,7 @@ class CreateUCCCarriers {
 
 			demand = 0; 
 			nOfServices = 0;
-			for (CarrierService service : carrier.getServices()){
+			for (CarrierService service : carrier.getServices().values()){
 				demand += service.getCapacityDemand();
 				nOfServices++;
 			}
@@ -115,7 +115,7 @@ class CreateUCCCarriers {
 			nOfDepots = 0;
 			depotLinks.clear();
 			vehTypes.clear();
-			for (CarrierVehicle vehicle : carrier.getCarrierCapabilities().getCarrierVehicles()){
+			for (CarrierVehicle vehicle : carrier.getCarrierCapabilities().getCarrierVehicles().values()){
 				String depotLink = vehicle.getLocation().toString();
 				if (!depotLinks.contains(depotLink)){
 					depotLinks.add(depotLink);
@@ -158,9 +158,9 @@ class CreateUCCCarriers {
 		for (Carrier carrier : carriers.getCarriers().values()){
 			Carrier uccCarrier = CarrierUtils.createCarrier( Id.create( "UCC_" + carrier.getId(), Carrier.class ) );
 			
-			for (CarrierService service: carrier.getServices()) {
+			for (CarrierService service: carrier.getServices().values()) {
 				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
-					uccCarrier.getServices().add(service);		//Füge Service zum UCC_Carrier hinzu
+					uccCarrier.getServices().put(service.getId(), service);		//Füge Service zum UCC_Carrier hinzu
 					serviceToRemove.add(service);
 				}
 			}
@@ -197,24 +197,27 @@ class CreateUCCCarriers {
 		if (uccCarrier.getId().toString().endsWith("TIEFKUEHL")){
 			
 			for (Id<Link> linkId : uccDepotsLinkIds ){
-			uccCarrier.getCarrierCapabilities().getCarrierVehicles().add( CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen", Vehicle.class), linkId)
-					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
-					.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
-					.build());
+				CarrierVehicle carrierVehicle_lightEFrozen = CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen", Vehicle.class), linkId)
+						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
+						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
+						.build();
+				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_lightEFrozen.getId(), carrierVehicle_lightEFrozen);
 			}
 //			uccCarrier.getCarrierCapabilities().getCarrierVehicles().add(cv_8f);
 		} else {
 			
 			for (Id<Link> linkId : uccDepotsLinkIds ){
-				uccCarrier.getCarrierCapabilities().getCarrierVehicles().add(CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), linkId)
-					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
-					.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
-					.build());
-			
-			uccCarrier.getCarrierCapabilities().getCarrierVehicles().add(CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), linkId)
-					.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
-					.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
-					.build());
+				CarrierVehicle carrierVehicle_lightE = CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), linkId)
+						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
+						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
+						.build();
+				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_lightE.getId(), carrierVehicle_lightE);
+
+				CarrierVehicle carrierVehicle_mediumE = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), linkId)
+						.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
+						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
+						.build();
+				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_mediumE.getId(), carrierVehicle_mediumE);
 
 			}
 			
@@ -231,13 +234,14 @@ class CreateUCCCarriers {
 			CarrierCapabilities tempCc = CarrierCapabilities.newInstance();
 			tempCc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
 			//Vehicle neu erstellen, da setVehicleId nicht verfügbar.
-			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles()){
+			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles().values()){
 				//
-				tempCc.getCarrierVehicles().add(CarrierVehicle.Builder
-						.newInstance(Id.create(cv.getId().toString() +"_" + cv.getLocation().toString(), Vehicle.class ), cv.getLocation() )
-						.setType(cv.getType() )
+				CarrierVehicle carrierVehicle = CarrierVehicle.Builder
+						.newInstance(Id.create(cv.getId().toString() + "_" + cv.getLocation().toString(), Vehicle.class), cv.getLocation())
+						.setType(cv.getType())
 						.setEarliestStart(cv.getEarliestStartTime()).setLatestEnd(cv.getLatestEndTime())
-						.build());
+						.build();
+				tempCc.getCarrierVehicles().put(carrierVehicle.getId(),carrierVehicle);
 			}
 			carrier.setCarrierCapabilities(tempCc);
 			

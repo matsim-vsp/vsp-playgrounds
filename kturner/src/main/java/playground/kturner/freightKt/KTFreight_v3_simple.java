@@ -336,7 +336,7 @@ public class KTFreight_v3_simple {
 			}
 
 			//Check, if all Services of the Carrier were assigned
-			for (CarrierService service : c.getServices()){
+			for (CarrierService service : c.getServices().values()){
 				if (!assignedServices.contains(service)){
 					unassignedServices.add(service);
 					log.warn("Service " + service.getId().toString() +" will NOT be served by Carrier " + c.getId().toString());

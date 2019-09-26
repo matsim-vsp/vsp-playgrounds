@@ -65,7 +65,7 @@ class CombineTimeWindowsforCarrier {
 	private static TimeWindow getMaxTimeWindow(Carrier carrier) {
 		double earliestStart = Double.MAX_VALUE; 	// initialize with extreme value 
 		double latestEnd = Double.MIN_VALUE; 	// initialize with extreme value 
-		for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) {
+		for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles().values()) {
 			if (carrierVehicle.getEarliestStartTime() < earliestStart) {
 				earliestStart = carrierVehicle.getEarliestStartTime();
 			}
@@ -81,7 +81,7 @@ class CombineTimeWindowsforCarrier {
 		
 		CarrierCapabilities cc = CarrierCapabilities.newInstance();
 		
-		for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) {
+		for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles().values()) {
 			if (!vehTypesAtDepot.containsKey(carrierVehicle.getLocation())) {
 				LinkedList<Id<VehicleType>> vehTypesAtDepotList = new LinkedList();
 				log.debug("Found " + carrierVehicle.toString() + " vehType: " + carrierVehicle.getVehicleTypeId());
@@ -103,7 +103,7 @@ class CombineTimeWindowsforCarrier {
 						.setLatestEnd(timeWindow.getEnd())
 						.setTypeId(vehTypeId)
 						.build();
-				cc.getCarrierVehicles().add(carrierVehicle);
+				cc.getCarrierVehicles().put(carrierVehicle.getId(), carrierVehicle);
 			}
 		}		
 		cc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
@@ -118,7 +118,7 @@ class CombineTimeWindowsforCarrier {
 	 * @param timeWindow	timeWindow to be set for all Shipments (comes from vehicleAvailablity
 	 */
 	private static void copyShipmentsAndResetTimeWindow(Carrier carrierWS, Carrier carrier, TimeWindow timeWindow) {
-		for (CarrierShipment carrierShipment: carrier.getShipments()){
+		for (CarrierShipment carrierShipment: carrier.getShipments().values()){
 			log.debug("Copy CarrierShipment: " + carrierShipment.toString() + " and set TimWindow to: "+  timeWindow.toString());
 			CarrierShipment cs = CarrierShipment.Builder.newInstance(carrierShipment.getId(), carrierShipment.getFrom(), carrierShipment.getTo(), carrierShipment.getSize())
 					.setPickupTimeWindow(timeWindow)
@@ -126,7 +126,7 @@ class CombineTimeWindowsforCarrier {
 					.setDeliveryServiceTime(carrierShipment.getDeliveryServiceTime())
 					.setPickupServiceTime(carrierShipment.getPickupServiceTime())
 					.build();
-			carrierWS.getShipments().add(cs);
+			carrierWS.getShipments().put(cs.getId(), cs);
 		}	
 	}
 
