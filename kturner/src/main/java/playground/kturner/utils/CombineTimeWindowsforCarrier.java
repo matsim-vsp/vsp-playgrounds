@@ -126,7 +126,7 @@ class CombineTimeWindowsforCarrier {
 					.setDeliveryServiceTime(carrierShipment.getDeliveryServiceTime())
 					.setPickupServiceTime(carrierShipment.getPickupServiceTime())
 					.build();
-			carrierWS.getShipments().put(cs.getId(), cs);
+			CarrierUtils.addShipment(carrierWS, cs);
 		}	
 	}
 

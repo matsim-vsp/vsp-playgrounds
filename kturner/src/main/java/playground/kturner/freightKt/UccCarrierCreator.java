@@ -206,7 +206,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 
 			for (CarrierService service: carrier.getServices().values()) {
 				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
-					uccCarrier.getServices().put(service.getId(), service);		//Füge Service zum UCC_Carrier hinzu
+					CarrierUtils.addService(uccCarrier, service);		//Füge Service zum UCC_Carrier hinzu
 					serviceToRemove.add(service);
 				}
 			}
@@ -312,8 +312,8 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 		}
 
 		//neue Schleife, da sonst innerhalb der Schleife das Set modifiziert wird..
-		for (CarrierService service: servicesToAdd){ 
-			carrier.getServices().put(service.getId(), service);
+		for (CarrierService service: servicesToAdd){
+			CarrierUtils.addService(carrier,  service);
 		}
 
 		//neue Schleife, da sonst innerhalb der Schleife das Set modifiziert wird..

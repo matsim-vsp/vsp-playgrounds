@@ -12,10 +12,7 @@ import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierPlan;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.ScheduledTour;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
@@ -121,13 +118,6 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
             return vehicle.getType().getCostInformation().getCostsPerMeter() ;
         }
 
-        private CarrierVehicle getVehicle(Id<?> vehicleId) {
-			if(carrier.getCarrierCapabilities().getCarrierVehicles().containsKey(vehicleId)){
-				return carrier.getCarrierCapabilities().getCarrierVehicles().get(vehicleId);
-			}
-			log.error("Cannot get Vehicle of vehicleType: " + vehicleId.toString(), new InvalidStateException("Cannot get Vehicle of vehicleType: " + vehicleId.toString()));
-            return null;
-        }
 
 		@Override
 		public void finish() {
@@ -145,8 +135,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		public void handleLeg(Leg leg) {
 			if(leg.getRoute() instanceof NetworkRoute){
                 NetworkRoute nRoute = (NetworkRoute) leg.getRoute();
-                Id<?> vehicleId = nRoute.getVehicleId();
-                CarrierVehicle vehicle = getVehicle(vehicleId);
+                Id<Vehicle> vehicleId = nRoute.getVehicleId();
+                CarrierVehicle vehicle = CarrierUtils.getCarrierVehicle(carrier, vehicleId);
                 if(vehicle == null) throw new IllegalStateException("vehicle with id " + vehicleId + " is missing");
                 
                 //Berechnung der TravelDistance (aus: org.matsim.population.algorithms.PersonPrepareForSim kopiert.) KT 08.01.15
@@ -414,21 +404,13 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
         @Override
         public void handleEvent(Event event) {
             if(event instanceof LinkEnterEvent){
-                CarrierVehicle carrierVehicle = getVehicle(((LinkEnterEvent) event).getVehicleId());
+                CarrierVehicle carrierVehicle = CarrierUtils.getCarrierVehicle(carrier, ((LinkEnterEvent) event).getVehicleId());
                 if(carrierVehicle == null) throw new IllegalStateException("carrier vehicle missing");
                 double toll = roadPricing.getTollAmount(carrierVehicle.getType().getId(),network.getLinks().get(((LinkEnterEvent) event).getLinkId() ),event.getTime() );
                 if(toll > 0.) System.out.println("bing: vehicle " + carrierVehicle.getId() + " paid toll " + toll + "" );
 
                 score += (-1) * toll;
             }
-        }
-
-        private CarrierVehicle getVehicle(Id<Vehicle> vehicleId) {
-			if(carrier.getCarrierCapabilities().getCarrierVehicles().containsKey(vehicleId)){
-				return carrier.getCarrierCapabilities().getCarrierVehicles().get(vehicleId);
-			}
-			log.error("Cannot get Vehicle of vehicleType: " + vehicleId.toString(), new InvalidStateException("Cannot get Vehicle of vehicleType: " + vehicleId.toString()));
-			return null;
         }
 
         @Override

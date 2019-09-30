@@ -12,17 +12,9 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.freight.carrier.Carrier;
-import org.matsim.contrib.freight.carrier.CarrierCapabilities;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
-import org.matsim.contrib.freight.carrier.CarrierVehicle;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
-import org.matsim.contrib.freight.carrier.TimeWindow;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleUtils;
 
 /**
  * @author: Kturner
@@ -184,22 +176,19 @@ class AddElectroVehiclesToCarriers {
 					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
 					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
 					.build();
-			carrier.getCarrierCapabilities().getCarrierVehicles()
-				.put(carrierVehicle_tk.getId(), carrierVehicle_tk);
+			CarrierUtils.addCarrierVehicle(carrier, carrierVehicle_tk);
 		} else {
 			CarrierVehicle carrierVehicle_light = CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), depotLocation)
 					.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
 					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
 					.build();
-			carrier.getCarrierCapabilities().getCarrierVehicles()
-				.put(carrierVehicle_light.getId(), carrierVehicle_light);
+			CarrierUtils.addCarrierVehicle(carrier, carrierVehicle_light);
 
 			CarrierVehicle carrierVehicle_medium = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), depotLocation)
 					.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
 					.setEarliestStart(tw.getStart()).setLatestEnd(tw.getEnd())
 					.build();
-			carrier.getCarrierCapabilities().getCarrierVehicles()
-				.put(carrierVehicle_medium.getId(), carrierVehicle_medium);
+			CarrierUtils.addCarrierVehicle(carrier, carrierVehicle_medium);
 			}		
 	}
 

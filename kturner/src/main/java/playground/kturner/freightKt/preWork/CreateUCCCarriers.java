@@ -160,7 +160,7 @@ class CreateUCCCarriers {
 			
 			for (CarrierService service: carrier.getServices().values()) {
 				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
-					uccCarrier.getServices().put(service.getId(), service);		//Füge Service zum UCC_Carrier hinzu
+					CarrierUtils.addService(uccCarrier, service);		//Füge Service zum UCC_Carrier hinzu
 					serviceToRemove.add(service);
 				}
 			}
@@ -201,7 +201,7 @@ class CreateUCCCarriers {
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
-				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_lightEFrozen.getId(), carrierVehicle_lightEFrozen);
+				CarrierUtils.addCarrierVehicle(uccCarrier, carrierVehicle_lightEFrozen);
 			}
 //			uccCarrier.getCarrierCapabilities().getCarrierVehicles().add(cv_8f);
 		} else {
@@ -211,13 +211,13 @@ class CreateUCCCarriers {
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
-				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_lightE.getId(), carrierVehicle_lightE);
+				CarrierUtils.addCarrierVehicle(uccCarrier, carrierVehicle_lightE);
 
 				CarrierVehicle carrierVehicle_mediumE = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), linkId)
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
-				uccCarrier.getCarrierCapabilities().getCarrierVehicles().put(carrierVehicle_mediumE.getId(), carrierVehicle_mediumE);
+				CarrierUtils.addCarrierVehicle(uccCarrier, carrierVehicle_mediumE);
 
 			}
 			

@@ -80,15 +80,15 @@ public class FreightUtilsITPreRunForResults {
 		carrierWServices = CarrierUtils.createCarrier( CARRIER_SERVICES_ID );
 		CarrierService service1 = createMatsimService("Service1", "i(3,9)", 2);
 		CarrierService service2 = createMatsimService("Service2", "i(4,9)", 2);
-		carrierWServices.getServices().put(service1.getId(), service1);
-		carrierWServices.getServices().put(service2.getId(), service2);
+		CarrierUtils.addService(carrierWServices, service1);
+		CarrierUtils.addService(carrierWServices, service2);
 		
 		//Create carrier with shipments
 		carrierWShipments = CarrierUtils.createCarrier( CARRIER_SHIPMENTS_ID );
 		CarrierShipment shipment1 = createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1);
-		carrierWShipments.getShipments().put(shipment1.getId(), shipment1);
 		CarrierShipment shipment2 = createMatsimShipment("shipment2", "i(3,0)", "i(3,7)", 2);
-		carrierWShipments.getShipments().put(shipment2.getId(), shipment2);
+		CarrierUtils.addShipment(carrierWShipments, shipment1);
+		CarrierUtils.addShipment(carrierWShipments, shipment2);
 
 		//Create vehicle for Carriers
 //		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
