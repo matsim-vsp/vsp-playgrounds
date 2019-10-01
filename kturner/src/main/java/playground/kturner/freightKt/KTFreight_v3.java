@@ -497,7 +497,7 @@ public class KTFreight_v3 {
 			}
 
 			//Check, if all Services of the Carrier were assigned
-			for (CarrierService service : c.getServices()){
+			for (CarrierService service : c.getServices().values()){
 				if (!assignedServices.contains(service)){
 					unassignedServices.add(service);
 					log.warn("Service " + service.getId().toString() +" will NOT be served by Carrier " + c.getId().toString());
@@ -674,7 +674,7 @@ public class KTFreight_v3 {
 		//keine Einschränkung eingegeben -> alle bemauten
 		if (onlyTollVehTypes == null) {
 			for(Carrier c : carriers.getCarriers().values()){
-				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
+				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles().values()){
 					Id<VehicleType> typeId = v.getType().getId();
 					if (!vehTypesAddedToRPS.contains(typeId)) {
 						vehTypesAddedToRPS.add(typeId);
@@ -684,7 +684,7 @@ public class KTFreight_v3 {
 			}
 		} else { //nur die angegebenen Fahrzeugtypene bemauten
 			for(Carrier c : carriers.getCarriers().values()){
-				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
+				for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles().values()){
 					Id<VehicleType> typeId = v.getType().getId();
 					if (onlyTollVehTypes.contains(typeId.toString()) & !vehTypesAddedToRPS.contains(typeId)){
 						vehTypesAddedToRPS.add(typeId);
