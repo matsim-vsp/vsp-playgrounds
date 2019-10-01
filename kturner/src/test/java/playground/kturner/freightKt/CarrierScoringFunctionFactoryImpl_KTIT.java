@@ -296,7 +296,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		//Mautschema für alle zur Verfügung stehenden FZG-Typen zuweisen
 		Collection<Id<VehicleType>> vehTypesAddedToRPS = new ArrayList<Id<VehicleType>>();
 		for(Carrier c : carriers.getCarriers().values()){
-			for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
+			for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles().values()){
 				Id<VehicleType> typeId = v.getType().getId();
 				if (!vehTypesAddedToRPS.contains(typeId)) {
 					vehTypesAddedToRPS.add(typeId);
@@ -373,7 +373,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 				//Mautschema für alle zur Verfügung stehenden FZG-Typen zuweisen
 				Collection<Id<VehicleType>> vehTypesAddedToRPS = new ArrayList<Id<VehicleType>>();
 				for(Carrier c : carriers.getCarriers().values()){
-					for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles()){
+					for(CarrierVehicle v : c.getCarrierCapabilities().getCarrierVehicles().values()){
 						Id<VehicleType> typeId = v.getType().getId();
 						if (!vehTypesAddedToRPS.contains(typeId)) {
 							vehTypesAddedToRPS.add(typeId);
