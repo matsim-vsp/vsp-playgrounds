@@ -1,9 +1,5 @@
 package playground.kturner.freightKt;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -23,7 +19,10 @@ import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.vehicles.Vehicle;
-import sun.plugin.dom.exception.InvalidStateException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Defines carrier scoring function (factory).
