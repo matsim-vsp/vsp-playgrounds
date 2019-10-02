@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
@@ -45,7 +46,9 @@ public class ModalShareCalibrator {
 
 	private final Map<String, Double> mode2realShare = new LinkedHashMap<>();
 
-	private final Map<Id<Person>, Map<String, Double>> personId2mode2simulatedShare = new LinkedHashMap<>();
+	private final Map<Id<Person>, Map<String, Double>> personId2mode2proba = new LinkedHashMap<>();
+
+	private final Map<Id<Person>, Map<String, Double>> personId2mode2expCnt = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -60,132 +63,102 @@ public class ModalShareCalibrator {
 		return Math.pow(1.0 / (1.0 + iteration), this.iterationExponent);
 	}
 
+	public Set<Id<Person>> allPersonIdView() {
+		return Collections.unmodifiableSet(this.personId2mode2proba.keySet());
+	}
+
 	public Set<String> allModesView() {
 		return Collections.unmodifiableSet(this.mode2realShare.keySet());
 	}
 
-	public void addRealData(final String mode, final double share) {
+	public void setRealShare(final String mode, final double share) {
 		this.mode2realShare.put(mode, share);
 	}
 
 	public void updateSimulatedModeUsage(final Id<Person> personId, final Map<String, Integer> mode2count,
 			final int iteration) {
 
-		// Make sure that there is an entry for the given person.
-		Map<String, Double> mode2simulatedUsage = this.personId2mode2simulatedShare.get(personId);
-		if (mode2simulatedUsage == null) {
-			mode2simulatedUsage = new LinkedHashMap<>();
-			for (String mode : this.allModesView()) {
-				mode2simulatedUsage.put(mode, 0.0);
-			}
-			this.personId2mode2simulatedShare.put(personId, mode2simulatedUsage);
-		}
+		final boolean newEntry = !this.personId2mode2proba.containsKey(personId);
+		final double innoWeight = (newEntry ? 1.0 : this.stepSizeFactor(iteration));
+		final int tripCnt = mode2count.values().stream().mapToInt(c -> c).sum();
 
-		// Update parameters.
-		final double innovationWeight = this.stepSizeFactor(iteration);
+		// Make sure that there are entries for the given person.
+		final Map<String, Double> mode2proba = this.personId2mode2proba.computeIfAbsent(personId,
+				id -> this.mode2realShare.keySet().stream().collect(Collectors.toMap(mode -> mode, mode -> 0.0)));
+		final Map<String, Double> mode2expCnt = this.personId2mode2expCnt.computeIfAbsent(personId,
+				id -> this.mode2realShare.keySet().stream().collect(Collectors.toMap(mode -> mode, mode -> 0.0)));
 
-		// Forgetting of old information.
-		for (String mode : this.allModesView()) {
-			mode2simulatedUsage.put(mode, (1.0 - innovationWeight) * mode2simulatedUsage.get(mode));
-		}
-
-		// Insertion of new modal information.
-		for (Map.Entry<String, Integer> entry : mode2count.entrySet()) {
-			mode2simulatedUsage.put(entry.getKey(), innovationWeight * entry.getValue());
-		}
-
-		// TODO At this point, mode2simulatedUsage contains iteration-filtered *counts*,
-		// but not *probabilities*.
-
+		// Updating of (existing but possibly zero) entries.
+		mode2proba.entrySet().forEach(e -> e.setValue(
+				innoWeight * mode2count.getOrDefault(e.getKey(), 0) / tripCnt + (1.0 - innoWeight) * e.getValue()));
+		mode2expCnt.entrySet().forEach(e -> e
+				.setValue(innoWeight * mode2count.getOrDefault(e.getKey(), 0) + (1.0 - innoWeight) * e.getValue()));
 	}
 
-	// TODO The problem here is that one person uses more than one mode.
-	public void updateSimulatedModeUsage(final Id<Person> personId, final String simulatedMode, final int iteration) {
-		Map<String, Double> mode2simulatedUsage = this.personId2mode2simulatedShare.get(personId);
-		if (mode2simulatedUsage == null) {
-			mode2simulatedUsage = new LinkedHashMap<>();
-			for (String mode : this.allModesView()) {
-				mode2simulatedUsage.put(mode, 0.0);
-			}
-			mode2simulatedUsage.put(simulatedMode, 1.0);
-			this.personId2mode2simulatedShare.put(personId, mode2simulatedUsage);
-		} else {
-			double sum = 0.0;
-			for (String mode : this.allModesView()) {
-				final double inertia = 1.0 - this.stepSizeFactor(iteration);
-				final double value = inertia * mode2simulatedUsage.get(mode)
-						+ (mode.equals(simulatedMode) ? (1.0 - inertia) * 1.0 : 0.0);
-				mode2simulatedUsage.put(mode, value);
-				sum += value;
-			}
-			for (String mode : this.allModesView()) {
-				mode2simulatedUsage.put(mode, mode2simulatedUsage.get(mode) / sum);
-			}
-		}
+	/* package for testing */ void updateSimulatedModeUsage(final Id<Person> personId, final String mode,
+			final int iteration) {
+		final Map<String, Integer> mode2count = new LinkedHashMap<>();
+		mode2count.put(mode, 1);
+		this.updateSimulatedModeUsage(personId, mode2count, iteration);
 	}
 
-	public Map<String, Double> getSimulatedShares() {
+	public Map<String, Double> getMode2simulatedCounts() {
 		final Map<String, Double> result = new LinkedHashMap<>();
-		for (String mode : this.allModesView()) {
-			result.put(mode, 0.0);
-		}
-		for (Map<String, Double> mode2usage : this.personId2mode2simulatedShare.values()) {
-			for (Map.Entry<String, Double> entry : mode2usage.entrySet()) {
-				result.put(entry.getKey(), result.get(entry.getKey()) + entry.getValue());
-			}
-		}
-		final double _N = this.personId2mode2simulatedShare.keySet().size();
-		for (Map.Entry<String, Double> entry : result.entrySet()) {
-			entry.setValue(entry.getValue() / _N);
-		}
+		this.personId2mode2expCnt.values().stream().forEach(mode2expCnt -> mode2expCnt.entrySet().stream().forEach(
+				entry -> result.put(entry.getKey(), result.getOrDefault(entry.getKey(), 0.0) + entry.getValue())));
 		return result;
 	}
 
-	public Map<Tuple<String, String>, Double> get_dSimulatedShares_dASCs(final Map<String, Double> simulatedShares) {
-		final double _N = this.personId2mode2simulatedShare.size();
-		final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs = new LinkedHashMap<>();
-		for (String shareMode : this.allModesView()) {
+	public Map<String, Double> getMode2simulatedShares(final Map<String, Double> mode2simulatedCounts) {
+		final double sum = mode2simulatedCounts.values().stream().mapToDouble(c -> c).sum();
+		final Map<String, Double> result = new LinkedHashMap<>();
+		mode2simulatedCounts.entrySet().forEach(e -> result.put(e.getKey(), e.getValue() / sum));
+		return result;
+	}
+
+	public Map<Tuple<String, String>, Double> get_dSimulatedCounts_dASCs(final Map<String, Double> simulatedCounts) {
+		final Map<Tuple<String, String>, Double> dSimulatedCounts_dASCs = new LinkedHashMap<>();
+		for (String countMode : this.allModesView()) {
 			for (String ascMode : this.allModesView()) {
-				dSimulatedShares_dASCs.put(new Tuple<>(shareMode, ascMode),
-						(shareMode.equals(ascMode) ? simulatedShares.get(shareMode) : 0.0));
+				dSimulatedCounts_dASCs.put(new Tuple<>(countMode, ascMode),
+						(countMode.equals(ascMode) ? simulatedCounts.get(countMode) : 0.0));
 			}
 		}
-		for (Map.Entry<Id<Person>, Map<String, Double>> person2mode2usageEntry : this.personId2mode2simulatedShare
-				.entrySet()) {
-			for (Map.Entry<String, Double> mode2usageEntry1 : person2mode2usageEntry.getValue().entrySet()) {
-				for (Map.Entry<String, Double> mode2usageEntry2 : person2mode2usageEntry.getValue().entrySet()) {
-					final Tuple<String, String> key = new Tuple<>(mode2usageEntry1.getKey(), mode2usageEntry2.getKey());
-					dSimulatedShares_dASCs.put(key, dSimulatedShares_dASCs.get(key)
-							- (1.0 / _N) * mode2usageEntry1.getValue() * mode2usageEntry2.getValue());
+		for (Id<Person> personId : this.allPersonIdView()) {
+			for (Map.Entry<String, Double> mode2expCnt : this.personId2mode2expCnt.get(personId).entrySet()) {
+				for (Map.Entry<String, Double> mode2proba : this.personId2mode2proba.get(personId).entrySet()) {
+					final Tuple<String, String> key = new Tuple<>(mode2expCnt.getKey(), mode2proba.getKey());
+					dSimulatedCounts_dASCs.put(key,
+							dSimulatedCounts_dASCs.get(key) - mode2expCnt.getValue() * mode2proba.getValue());
 				}
 			}
 		}
-		return dSimulatedShares_dASCs;
+		return dSimulatedCounts_dASCs;
 	}
 
-	public double getObjectiveFunctionValue(final Map<String, Double> simulatedShares) {
+	public double getObjectiveFunctionValue(final Map<String, Double> simulatedCounts) {
+		final double sum = simulatedCounts.values().stream().mapToDouble(c -> c).sum();
 		double result = 0.0;
 		for (Map.Entry<String, Double> realEntry : this.mode2realShare.entrySet()) {
-			result += Math.pow(simulatedShares.get(realEntry.getKey()) - realEntry.getValue(), 2.0)
-					/ realEntry.getValue() / (1.0 - realEntry.getValue());
+			result += Math.pow(simulatedCounts.get(realEntry.getKey()) - realEntry.getValue() * sum, 2.0)
+					/ realEntry.getValue();
 		}
-		result *= this.personId2mode2simulatedShare.size() / 2.0;
-		return result;
+		return (0.5 * result);
 	}
 
-	public Map<String, Double> get_dQ_dASCs(final Map<String, Double> simulatedShares,
-			final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs) {
+	public Map<String, Double> get_dQ_dASCs(final Map<String, Double> simulatedCounts,
+			final Map<Tuple<String, String>, Double> dSimulatedCounts_dASCs) {
 		final Map<String, Double> dQ_dASC = new LinkedHashMap<>();
 		for (String mode : this.allModesView()) {
 			dQ_dASC.put(mode, 0.0);
 		}
-		final double _N = this.personId2mode2simulatedShare.size();
+		final double sum = simulatedCounts.values().stream().mapToDouble(c -> c).sum();
 		for (String comparedMode : this.allModesView()) {
-			final double realShare = this.mode2realShare.get(comparedMode);
-			final double fact = _N * (simulatedShares.get(comparedMode) - realShare) / realShare / (1.0 - realShare);
+			final double realCount = this.mode2realShare.get(comparedMode) * sum;
+			final double fact = (simulatedCounts.get(comparedMode) - realCount) / realCount;
 			for (String ascMode : this.allModesView()) {
 				dQ_dASC.put(ascMode,
-						dQ_dASC.get(ascMode) + fact * dSimulatedShares_dASCs.get(new Tuple<>(comparedMode, ascMode)));
+						dQ_dASC.get(ascMode) + fact * dSimulatedCounts_dASCs.get(new Tuple<>(comparedMode, ascMode)));
 			}
 		}
 		return dQ_dASC;

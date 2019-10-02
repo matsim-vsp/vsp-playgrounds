@@ -77,17 +77,17 @@ public class WireModalShareCalibratorIntoMATSimControlerListener implements Befo
 
 		}
 
-		final Map<String, Double> simulatedShares = this.calibrator.getSimulatedShares();
-		final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs = this.calibrator
-				.get_dSimulatedShares_dASCs(simulatedShares);
-		final Map<String, Double> dQ_dASC = this.calibrator.get_dQ_dASCs(simulatedShares, dSimulatedShares_dASCs);
-		final Map<String, Double> deltaASC = this.calibrator.getDeltaASC(dQ_dASC, event.getIteration());
-
-		for (String mode : deltaASC.keySet()) {
-			final ModeParams modeParams = this.config.planCalcScore().getScoringParameters(null)
-					.getOrCreateModeParams(mode);
-			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
-		}
+//		final Map<String, Double> simulatedShares = this.calibrator.getSimulatedShares();
+//		final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs = this.calibrator
+//				.get_dSimulatedShares_dASCs(simulatedShares);
+//		final Map<String, Double> dQ_dASC = this.calibrator.get_dQ_dASCs(simulatedShares, dSimulatedShares_dASCs);
+//		final Map<String, Double> deltaASC = this.calibrator.getDeltaASC(dQ_dASC, event.getIteration());
+//
+//		for (String mode : deltaASC.keySet()) {
+//			final ModeParams modeParams = this.config.planCalcScore().getScoringParameters(null)
+//					.getOrCreateModeParams(mode);
+//			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
+//		}
 	}
 
 	@Override

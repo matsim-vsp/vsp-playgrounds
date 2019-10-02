@@ -68,10 +68,10 @@ public class ModalShareCalibratorTest {
 		final double iterationExponent = 0.5;
 		final ModalShareCalibrator calibrator = new ModalShareCalibrator(initialTrustRegion, iterationExponent);
 
-		calibrator.addRealData("car", 0.5);
-		calibrator.addRealData("pt", 0.3);
-		calibrator.addRealData("walk", 0.1);
-		calibrator.addRealData("bike", 0.1);
+		calibrator.setRealShare("car", 0.5);
+		calibrator.setRealShare("pt", 0.3);
+		calibrator.setRealShare("walk", 0.1);
+		calibrator.setRealShare("bike", 0.1);
 
 		final int _R = 100;
 		for (int r = 0; r < _R; r++) {
@@ -80,10 +80,10 @@ public class ModalShareCalibratorTest {
 				calibrator.updateSimulatedModeUsage(Id.createPersonId(n), choice, r);
 			}
 
-			final Map<String, Double> simulatedShares = calibrator.getSimulatedShares();
-			final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs = calibrator
-					.get_dSimulatedShares_dASCs(simulatedShares);
-			final Map<String, Double> dQ_dASC = calibrator.get_dQ_dASCs(simulatedShares, dSimulatedShares_dASCs);
+			final Map<String, Double> simulatedCounts = calibrator.getMode2simulatedCounts();
+			final Map<Tuple<String, String>, Double> dSimulatedCounts_dASCs = calibrator
+					.get_dSimulatedCounts_dASCs(simulatedCounts);
+			final Map<String, Double> dQ_dASC = calibrator.get_dQ_dASCs(simulatedCounts, dSimulatedCounts_dASCs);
 
 			final Map<String, Double> deltaASC = calibrator.getDeltaASC(dQ_dASC, r);
 			ascs[0] += deltaASC.get("car");
@@ -91,7 +91,7 @@ public class ModalShareCalibratorTest {
 			ascs[2] += deltaASC.get("walk");
 			ascs[3] += deltaASC.get("bike");
 
-			System.out.println(r + "\t" + calibrator.getObjectiveFunctionValue(simulatedShares) + "\t" + simulatedShares
+			System.out.println(r + "\t" + calibrator.getObjectiveFunctionValue(simulatedCounts) + "\t" + simulatedCounts
 					+ "\t" + Arrays.asList(ascs));
 		}
 
