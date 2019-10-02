@@ -3,6 +3,7 @@ package playground.kai.usecases;
 import com.google.inject.Module;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.bicycle.BicycleConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.*;
@@ -25,7 +26,7 @@ class WrapScoringFunctions{
 		config.controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
 		config.controler().setLastIteration( 2 );
 
-//		ConfigUtils.addOrGetModule( config, BicycleConfigGroup.class ) ;
+		ConfigUtils.addOrGetModule( config, BicycleConfigGroup.class ) ;
 
 		// ---
 

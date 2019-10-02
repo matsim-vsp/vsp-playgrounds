@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.*;
 import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
 import java.util.ArrayList;
@@ -99,15 +100,15 @@ public class UccCarrierCreatorTest {
 				.setLatestEnd(86399)
 				.build();
 		
-		ArrayList<Id<org.matsim.vehicles.Vehicle>> vehicleIds = new ArrayList<Id<org.matsim.vehicles.Vehicle>>();
+		ArrayList<Id<Vehicle>> vehicleIds = new ArrayList<Id<Vehicle>>();
 		
 		//Read all CarrierVehicleIds of gridCarrier
-		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles()) {
+		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles().values()) {
 			vehicleIds.add(cv.getId() );
 		}
 		
 		//Test, if Capabilities are correct.
-		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles()) {
+		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles().values()) {
 			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0.getId() ) );
 			if (cv.getId() == gridVehicle3_i6_0.getId()){
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different earliest StartTime", cv.getEarliestStartTime() == gridVehicle3_i6_0.getEarliestStartTime());
@@ -165,7 +166,7 @@ public class UccCarrierCreatorTest {
 
     	//Test ob UCC-Carrier die richtigen Services enthält (#3,#4,#6,#10)
     	ArrayList<String> serviceIdStringsofUccC = new ArrayList<String>();
-    	for (CarrierService service : uccCarrier.getServices()){
+    	for (CarrierService service : uccCarrier.getServices().values()){
     		serviceIdStringsofUccC.add(service.getId().toString());
     	}
     	Assert.assertTrue("Service #3 nicht in UCC", serviceIdStringsofUccC.contains("3"));
@@ -176,7 +177,7 @@ public class UccCarrierCreatorTest {
     	Carrier nonUccCarrier = carriers.getCarriers().get(Id.create("gridCarrier1", Carrier.class));
     	//Test ob Non-UCC-Carrier die entsprechenden Services NICHT mehr enthält (#3,#4,#6,#10)
     	ArrayList<String> serviceIdStringsofNonUccC = new ArrayList<String>();
-    	for (CarrierService service : nonUccCarrier.getServices()){
+    	for (CarrierService service : nonUccCarrier.getServices().values()){
     		serviceIdStringsofNonUccC.add(service.getId().toString());
     	}
     	Assert.assertFalse("Service #3 nicht nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("3"));
@@ -186,7 +187,7 @@ public class UccCarrierCreatorTest {
     	
     	//Enthält UCC-Carrier Fahrzeuge für alle UCC-Depot-Standorte?
     	ArrayList<String> uccVehicleDepotString = new ArrayList<String>();
-    	for (CarrierVehicle cv : uccCarrier.getCarrierCapabilities().getCarrierVehicles()){
+    	for (CarrierVehicle cv : uccCarrier.getCarrierCapabilities().getCarrierVehicles().values()){
     		uccVehicleDepotString.add(cv.getLocation().toString());
     	}
     	Assert.assertTrue("Depots UCC-Carrier nicht korrekt", uccVehicleDepotString.containsAll(uccDepotsLinkIdsString));
@@ -222,7 +223,7 @@ public class UccCarrierCreatorTest {
     	
     	// TODO: Why testet via Services? - Not wrong but not straight forward kmt/feb 18
     	ArrayList<CarrierService> services = new ArrayList<CarrierService>();
-    	for (CarrierService service : nonUCCCinclSrvToUcc.getCarriers().get(Id.create("gridCarrier1", Carrier.class)).getServices()){
+    	for (CarrierService service : nonUCCCinclSrvToUcc.getCarriers().get(Id.create("gridCarrier1", Carrier.class)).getServices().values()){
     		services.add(service);
     	}    	
     	

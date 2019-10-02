@@ -41,6 +41,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.vehicles.EngineInformation.FuelType;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -77,25 +78,34 @@ public class FreightUtilsITPreRunForResults {
 		//Create carrier with services and shipments
 		carriersWithServicesAndShpiments = new Carriers() ;
 		carrierWServices = CarrierUtils.createCarrier( CARRIER_SERVICES_ID );
-		carrierWServices.getServices().add(createMatsimService("Service1", "i(3,9)", 2));
-		carrierWServices.getServices().add(createMatsimService("Service2", "i(4,9)", 2));
+		CarrierService service1 = createMatsimService("Service1", "i(3,9)", 2);
+		CarrierService service2 = createMatsimService("Service2", "i(4,9)", 2);
+		CarrierUtils.addService(carrierWServices, service1);
+		CarrierUtils.addService(carrierWServices, service2);
 		
 		//Create carrier with shipments
 		carrierWShipments = CarrierUtils.createCarrier( CARRIER_SHIPMENTS_ID );
-		carrierWShipments.getShipments().add(createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1)); 
-		carrierWShipments.getShipments().add(createMatsimShipment("shipment2", "i(3,0)", "i(3,7)", 2));
+		CarrierShipment shipment1 = createMatsimShipment("shipment1", "i(1,0)", "i(7,6)R", 1);
+		CarrierShipment shipment2 = createMatsimShipment("shipment2", "i(3,0)", "i(3,7)", 2);
+		CarrierUtils.addShipment(carrierWShipments, shipment1);
+		CarrierUtils.addShipment(carrierWShipments, shipment2);
 
 		//Create vehicle for Carriers
 //		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
-		VehicleType carrierVehType = new VehicleType( Id.create("gridType", VehicleType.class) )
+		VehicleType vehicleType1 = VehicleUtils.createVehicleType( Id.create("gridType", VehicleType.class ) )
 //				.setCapacity(3)
-				.setMaximumVelocity(10)
-				.setCostPerDistanceUnit(0.0001)
-				.setCostPerTimeUnit(0.001)
-				.setFixCost(130)
+				.setMaximumVelocity(10);
+		vehicleType1.getCostInformation().setCostsPerMeter( 0.0001 ) ;
+		//				.setCapacity(3)
+		vehicleType1.getCostInformation().setCostsPerSecond( 0.001 ) ;
+		VehicleType vehicleType = vehicleType1;
+		vehicleType.getCostInformation().setFixedCost( (double) 130 ) ;
+		//				.setCapacity(3)
+		VehicleType carrierVehType = vehicleType
 //				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
 //				.build();
 		;
+		carrierVehType.getCostInformation().setFixedCost( 130. ).setCostsPerSecond( 0.001 ).setCostsPerMeter( 0.0001 );
 		carrierVehType.getCapacity().setOther( 3 );
 		carrierVehType.getEngineInformation().setFuelType( FuelType.diesel );
 		carrierVehType.getEngineInformation().setFuelConsumption( 0.015 ) ;
