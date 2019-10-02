@@ -38,19 +38,33 @@ import umontreal.ssj.charts.XYLineChart;
  * @author Gunnar Flötteröd
  *
  */
-public class AccelerationAnalysisLinePlot {
+public class AccelerationAnalysisIntervalPlot {
 
 	private Double legendLeftX = null;
 	private Double legendTopY = null;
 	private Double legendLineLength = null;
 	private Double legendRowDistance = null;
 
+	private boolean log = false;
+	
 	public void addLegend(final double legendLeftX, final double legendTopY, final double legendLineLength,
 			final double legendRowDistance) {
 		this.legendLeftX = legendLeftX;
 		this.legendTopY = legendTopY;
 		this.legendLineLength = legendLineLength;
 		this.legendRowDistance = legendRowDistance;
+	}
+	
+	public void setLog(final boolean log) {
+		this.log = log;
+	}
+	
+	private double logOrNot(final double val) {
+		if (this.log) {
+			return Math.signum(val) * Math.log(Math.abs(val));
+		} else {
+			return val;
+		}
 	}
 
 	private double[] range = null;
@@ -72,7 +86,7 @@ public class AccelerationAnalysisLinePlot {
 
 	private final List<YIntervalSeries> allSeries = new ArrayList<>();
 
-	public AccelerationAnalysisLinePlot() {
+	public AccelerationAnalysisIntervalPlot() {
 	}
 
 	public void addSeries(final YIntervalSeries series) {
@@ -100,9 +114,9 @@ public class AccelerationAnalysisLinePlot {
 			// final XYSeries meanLine = new XYSeries("mean" + seriesIndex);
 			final XYSeries upperLine = new XYSeries(newDummy(dummyLabels));
 			for (int itemIndex = 0; itemIndex < intervalSeries.getItemCount(); itemIndex++) {
-				final double yLow = intervalSeries.getYLowValue(itemIndex);
-				final double y = intervalSeries.getYValue(itemIndex);
-				final double yHigh = intervalSeries.getYHighValue(itemIndex);
+				final double yLow = this.logOrNot(intervalSeries.getYLowValue(itemIndex));
+				final double y = this.logOrNot(intervalSeries.getYValue(itemIndex));
+				final double yHigh = this.logOrNot(intervalSeries.getYHighValue(itemIndex));
 				if (!Double.isNaN(yLow) && !Double.isNaN(y) && !Double.isNaN(yHigh)) {
 					lowerLine.add(intervalSeries.getX(itemIndex).doubleValue(), yLow);
 					// meanLine.add(intervalSeries.getX(itemIndex).doubleValue(), y);
@@ -172,7 +186,7 @@ public class AccelerationAnalysisLinePlot {
 	public static void main(String[] args) {
 		System.out.println("STARTED");
 
-		AccelerationAnalysisLinePlot aap = new AccelerationAnalysisLinePlot();
+		AccelerationAnalysisIntervalPlot aap = new AccelerationAnalysisIntervalPlot();
 
 		{
 			YIntervalSeries series1 = new YIntervalSeries("series1");

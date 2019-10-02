@@ -72,6 +72,8 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
 			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
 
+		double road_capSum_veh_timBin = 0.0;
+		int roadCnt = 0;
 		Logger.getLogger(this.getClass()).info("Using 1/linkCapacityPerTimeBin link weights.");
 		this.concurrentLinkWeights = new ConcurrentHashMap<>();
 		if (capacitatedLinkIds != null) {
@@ -82,10 +84,15 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 					throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh_timeBin
 							+ " < 0.001 veh per " + this.getBinSize_s() + " sec.");
 				}
+				road_capSum_veh_timBin += cap_veh_timeBin;
+				roadCnt++;
 				this.concurrentLinkWeights.put(link.getId(), 1.0 / cap_veh_timeBin);
 			}
 		}
+		Logger.getLogger(this.getClass()).info("Average road link capacity is " + (road_capSum_veh_timBin / roadCnt) + " veh / timeBin.");
 
+		double ptCapSum_persons_veh = 0;
+		int ptVehCnt = 0;
 		Logger.getLogger(this.getClass()).warn("Using 1/passengerCapacity transit vehicle weights.");
 		this.concurrentTransitVehicleWeights = new ConcurrentHashMap<>();
 		if (capacitatedTransitVehicleIds != null) {
@@ -97,9 +104,13 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
 							+ " < 0.001 persons.");
 				}
+				ptCapSum_persons_veh += cap_persons;
+				ptVehCnt++;
 				this.concurrentTransitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
 			}
 		}
+		Logger.getLogger(this.getClass()).info("Average transit vehicle capacity is " + (ptCapSum_persons_veh / ptVehCnt) + " persons / veh.");
+		
 	}
 
 	public void configure(final Scenario scenario) {

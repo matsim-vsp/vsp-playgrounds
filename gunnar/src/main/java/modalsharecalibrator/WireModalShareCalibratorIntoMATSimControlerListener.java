@@ -28,7 +28,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
+import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -39,7 +41,7 @@ import com.google.inject.Inject;
  * @author Gunnar Flötteröd
  *
  */
-public class WireModalShareCalibratorIntoMATSimControlerListener implements BeforeMobsimListener {
+public class WireModalShareCalibratorIntoMATSimControlerListener implements BeforeMobsimListener, AfterMobsimListener {
 
 	private final Config config;
 
@@ -69,8 +71,10 @@ public class WireModalShareCalibratorIntoMATSimControlerListener implements Befo
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
 		
 		for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
-			this.calibrator.updateModeUsage(person.getId(), this.extractLegModes(person.getSelectedPlan()),
-					event.getIteration());
+
+//			this.calibrator.updateSimulatedModeUsage(person.getId(), this.extractLegModes(person.getSelectedPlan()),
+//					event.getIteration());
+
 		}
 
 		final Map<String, Double> simulatedShares = this.calibrator.getSimulatedShares();
@@ -84,5 +88,13 @@ public class WireModalShareCalibratorIntoMATSimControlerListener implements Befo
 					.getOrCreateModeParams(mode);
 			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
 		}
+	}
+
+	@Override
+	public void notifyAfterMobsim(AfterMobsimEvent event) {
+
+		// TODO something like this
+		// this.config.planCalcScore().setPerforming_utils_hr(this.getValue());
+
 	}
 }

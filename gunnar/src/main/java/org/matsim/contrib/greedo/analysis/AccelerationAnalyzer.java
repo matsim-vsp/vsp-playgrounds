@@ -65,12 +65,23 @@ public class AccelerationAnalyzer {
 
 		final int scenarioCnt = 10;
 
+		final boolean log = true;
+		final boolean legend = false;
+
+		final AccelerationExperimentData greedo_noAgeing_msa_enforceLambda = new AccelerationExperimentData(
+				"./greedo_no-ageing_msa_enforce-lambda", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData greedo_noAgeing_msa_freeLambda = new AccelerationExperimentData(
+				"./greedo_no-ageing_msa_free-lambda", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData greedo_noAgeing_sqrtMsa_enforceLambda = new AccelerationExperimentData(
 				"./greedo_no-ageing_sqrt-msa_enforce-lambda", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData greedo_noAgeing_sqrtMsa_freeLambda = new AccelerationExperimentData(
+				"./greedo_no-ageing_sqrt-msa_free-lambda", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData greedo_noAgeing_sqrtMsa_enforceLambda_congested = new AccelerationExperimentData(
 				"./greedo_no-ageing_sqrt-msa_enforce-lambda_congested", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested = new AccelerationExperimentData(
 				"./greedo_no-ageing_sqrt-msa_enforce-lambda_very-congested", 0, scenarioCnt, 1000);
+		final AccelerationExperimentData greedo_withAgeing_msa_enforceLambda = new AccelerationExperimentData(
+				"./greedo_with-ageing_msa_enforce-lambda", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData greedo_withAgeing_sqrtMsa_enforceLambda = new AccelerationExperimentData(
 				"./greedo_with-ageing_sqrt-msa_enforce-lambda", 0, scenarioCnt, 1000);
 		final AccelerationExperimentData greedo_withAgeing_sqrtMsa_enforceLambda_congested = new AccelerationExperimentData(
@@ -138,300 +149,238 @@ public class AccelerationAnalyzer {
 			}
 		}
 
+		// UTILITIES STARTING HERE ==========================================
+
 		{ // REALIZED UTILITY, MSA
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
 			plot.addSeries(vanillaMSA.newRealizedUtilitiesSeries("vanilla MSA"));
 			plot.addSeries(sqrtMSA.newRealizedUtilitiesSeries("sqrt MSA"));
 			plot.addSeries(adaptiveMSA.newRealizedUtilitiesSeries("adaptive MSA"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, -250, 0);
+			}
 			plot.render("realized_utilities_msa.tex");
 		}
 
-		{ // REALIZED UTILITY, PROPOSED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda
-					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA"));
-			plot.addSeries(
-					greedo_noAgeing_sqrtMsa_enforceLambda.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
-			plot.render("realized_utilities_proposed.tex");
-		}
-
 		{ // REALIZED UTILITY, SBAYTI
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(sbayti2007MSA.newRealizedUtilitiesSeries("Sbayti (2007), MSA"));
-			plot.addSeries(sbayti2007SqrtMSA.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(sbayti2007MSA.newRealizedUtilitiesSeries("with MSA"));
+			plot.addSeries(sbayti2007SqrtMSA.newRealizedUtilitiesSeries("with sqrt MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, -250, 0);
+			}
 			plot.render("realized_utilities_sbayti.tex");
 		}
 
-		{ // REALIZED UTILITY, PROPOSED, CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
-					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA, congested"));
-			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
-					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA, congested"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
-			plot.render("realized_utilities_proposed_congested.tex");
+		{ // REALIZED UTILITY, PROPOSED, WITH AGEING, FREE LAMBDA
+			// TODO
+			// final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			// plot.setLog(log);
+			// plot.addSeries(
+			// greedo_withAgeing_msa_freeLambda.newRealizedUtilitiesSeries("with MSA"));
+			// plot.addSeries(greedo_withAgeing_sqrtMsa_freeLambda.newRealizedUtilitiesSeries("with
+			// sqrt-MSA"));
+			// if (legend) {
+			// plot.addLegend(100, -150, 100, 25);
+			// }
+			// if (log) {
+			// } else {
+			// plot.setRange(0, 1000, -250, 0);
+			// }
+			// plot.render("realized_utilities_greedo_withAgeing_freeLambda.tex");
 		}
 
-		{ // REALIZED UTILITY, SBAYTI, CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(sbayti2007SqrtMSACongested.newRealizedUtilitiesSeries("Sbayti (2007), MSA, congested"));
-			plot.addSeries(sbayti2007SqrtMSACongested.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA, congested"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
-			plot.render("realized_utilities_sbayti_congested.tex");
+		{ // REALIZED UTILITY, PROPOSED, WITH AGEING, ENFORCED LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_withAgeing_msa_enforceLambda.newRealizedUtilitiesSeries("with MSA"));
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda.newRealizedUtilitiesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, -250, 0);
+			}
+			plot.render("realized_utilities_greedo_withAgeing_enforcedLambda.tex");
 		}
 
-		{ // REALIZED UTILITY, PROPOSED, VERY CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
-					.newRealizedUtilitiesSeries("proposed, with ageing, sqrtMSA, very congested"));
-			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
-					.newRealizedUtilitiesSeries("proposed, no ageing, sqrt MSA, very congested"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
-			plot.render("realized_utilities_proposed_very-congested.tex");
+		{ // REALIZED UTILITY, PROPOSED, NO AGEING, FREE LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_noAgeing_msa_freeLambda.newRealizedUtilitiesSeries("with MSA"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_freeLambda.newRealizedUtilitiesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, -250, 0);
+			}
+			plot.render("realized_utilities_greedo_noAgeing_freeLambda.tex");
 		}
 
-		{ // REALIZED UTILITY, SBAYTI, VERY CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(
-					sbayti2007SqrtMSAVeryCongested.newRealizedUtilitiesSeries("Sbayti (2007), MSA, very congested"));
-			plot.addSeries(sbayti2007SqrtMSAVeryCongested
-					.newRealizedUtilitiesSeries("Sbayti (2007), sqrt MSA, very congested"));
-			plot.addLegend(500, -150, 100, 25);
-			plot.setRange(0, 1000, -250, 0);
-			plot.render("realized_utilities_sbayti_very-congested.tex");
+		{ // REALIZED UTILITY, PROPOSED, NO AGEING, ENFORCED LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_noAgeing_msa_enforceLambda.newRealizedUtilitiesSeries("with MSA"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda.newRealizedUtilitiesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, -250, 0);
+			}
+			plot.render("realized_utilities_greedo_noAgeing_enforcedLambda.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, MSA
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+		// UTILITY GAPS STARTING HERE ==========================================
+
+		{ // MSA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
 			plot.addSeries(vanillaMSA.newExpectedUtilityChangesSeries("vanilla MSA"));
 			plot.addSeries(sqrtMSA.newExpectedUtilityChangesSeries("sqrt MSA"));
 			plot.addSeries(adaptiveMSA.newExpectedUtilityChangesSeries("adaptive MSA"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, 0, 100);
+			}
 			plot.render("utility_gaps_msa.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, PROPOSED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda
-					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA"));
-			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda
-					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
-			plot.render("utility_gaps_proposed.tex");
-		}
-
-		{ // REALIZED UTILITY GAPS, SBAYTI
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(sbayti2007MSA.newExpectedUtilityChangesSeries("Sbayti (2007), MSA"));
-			plot.addSeries(sbayti2007SqrtMSA.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
+		{ // SBAYTI
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(sbayti2007MSA.newExpectedUtilityChangesSeries("with MSA"));
+			plot.addSeries(sbayti2007SqrtMSA.newExpectedUtilityChangesSeries("with sqrt MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, 0, 100);
+			}
 			plot.render("utility_gaps_sbayti.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, PROPOSED, CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_congested
-					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA, congested"));
-			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_congested
-					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA, congested"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
-			plot.render("utility_gaps_proposed_congested.tex");
+		{ // PROPOSED, WITH AGEING, FREE LAMBDA
+			// TODO
+			// final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
+			// plot.setLog(log);
+			// plot.addSeries(
+			// greedo_withAgeing_msa_freeLambda.newRealizedUtilitiesSeries("with MSA"));
+			// plot.addSeries(greedo_withAgeing_sqrtMsa_freeLambda.newRealizedUtilitiesSeries("with
+			// sqrt-MSA"));
+			// if (legend) {
+			// plot.addLegend(100, -150, 100, 25);
+			// }
+			// if (log) {
+			// } else {
+			// plot.setRange(0, 1000, -250, 0);
+			// }
+			// plot.render("realized_utilities_greedo_withAgeing_freeLambda.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, SBAYTI, CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(sbayti2007SqrtMSACongested.newExpectedUtilityChangesSeries("Sbayti (2007), MSA, congested"));
-			plot.addSeries(
-					sbayti2007SqrtMSACongested.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, congested"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
-			plot.render("utility_gaps_sbayti_congested.tex");
+		{ // PROPOSED, WITH AGEING, ENFORCED LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_withAgeing_msa_enforceLambda.newExpectedUtilityChangesSeries("with MSA"));
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda.newExpectedUtilityChangesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, 0, 100);
+			}
+			plot.render("utility_gaps_greedo_withAgeing_enforcedLambda.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, PROPOSED, VERY CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda_veryCongested
-					.newExpectedUtilityChangesSeries("proposed, with ageing, sqrtMSA, very congested"));
-			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda_veryCongested
-					.newExpectedUtilityChangesSeries("proposed, no ageing, sqrt MSA, very congested"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
-			plot.render("utility_gaps_proposed_very-congested.tex");
+		{ // PROPOSED, NO AGEING, FREE LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_noAgeing_msa_freeLambda.newExpectedUtilityChangesSeries("with MSA"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_freeLambda.newExpectedUtilityChangesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, 0, 100);
+			}
+			plot.render("utility_gaps_greedo_noAgeing_freeLambda.tex");
 		}
 
-		{ // REALIZED UTILITY GAPS, SBAYTI, VERY CONGESTED
-			final AccelerationAnalysisLinePlot plot = new AccelerationAnalysisLinePlot();
-			plot.addSeries(sbayti2007SqrtMSAVeryCongested
-					.newExpectedUtilityChangesSeries("Sbayti (2007), MSA, very congested"));
-			plot.addSeries(sbayti2007SqrtMSAVeryCongested
-					.newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, very congested"));
-			plot.addLegend(500, 150, 100, 25);
-			plot.setRange(0, 1000, 0, 200);
-			plot.render("utility_gaps_sbayti_very-congested.tex");
+		{ // PROPOSED, NO AGEING, ENFORCED LAMBDA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(log);
+			plot.addSeries(greedo_noAgeing_msa_enforceLambda.newExpectedUtilityChangesSeries("with MSA"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda.newExpectedUtilityChangesSeries("with sqrt-MSA"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			if (log) {
+			} else {
+				plot.setRange(0, 1000, 0, 100);
+			}
+			plot.render("utility_gaps_greedo_noAgeing_enforcedLambda.tex");
 		}
 
-		/*
-		 * { // AGE PERCENTILES final YIntervalSeriesCollection dataset = new
-		 * YIntervalSeriesCollection();
-		 * 
-		 * final YIntervalSeries agePercentile10AcceptNegativeDisappointment =
-		 * acceptNegativeDisappointment .newAgePercentile10Series("10% unconstrained");
-		 * final YIntervalSeries agePercentile50AcceptNegativeDisappointment =
-		 * acceptNegativeDisappointment .newAgePercentile50Series("50% unconstrained");
-		 * final YIntervalSeries agePercentile90AcceptNegativeDisappointment =
-		 * acceptNegativeDisappointment .newAgePercentile90Series("90% unconstrained");
-		 * 
-		 * dataset.addSeries(agePercentile10AcceptNegativeDisappointment);
-		 * dataset.addSeries(agePercentile50AcceptNegativeDisappointment);
-		 * dataset.addSeries(agePercentile90AcceptNegativeDisappointment);
-		 * 
-		 * final YIntervalSeries agePercentile10RejectNegativeDisappointment =
-		 * rejectNegativeDisappointment .newAgePercentile10Series("10% constrained");
-		 * final YIntervalSeries agePercentile50RejectNegativeDisappointment =
-		 * rejectNegativeDisappointment .newAgePercentile50Series("50% constrained");
-		 * final YIntervalSeries agePercentile90RejectNegativeDisappointment =
-		 * rejectNegativeDisappointment .newAgePercentile90Series("90% constrained");
-		 * 
-		 * dataset.addSeries(agePercentile10RejectNegativeDisappointment);
-		 * dataset.addSeries(agePercentile50RejectNegativeDisappointment);
-		 * dataset.addSeries(agePercentile90RejectNegativeDisappointment);
-		 * 
-		 * final JFreeChart chart = ChartFactory.createXYLineChart("age percentiles", //
-		 * chart title "iteration", // x axis label "percentile", // y axis label
-		 * dataset, // data PlotOrientation.VERTICAL, true, // include legend false, //
-		 * tooltips false // urls ); chart.setBackgroundPaint(null);
-		 * 
-		 * final XYPlot plot = (XYPlot) chart.getPlot(); plot.setBackgroundPaint(null);
-		 * 
-		 * final DeviationRenderer renderer = new DeviationRenderer(true, false);
-		 * renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
-		 * BasicStroke.JOIN_ROUND)); renderer.setSeriesStroke(1, new BasicStroke(3.0f,
-		 * BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		 * renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
-		 * renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
-		 * plot.setRenderer(renderer);
-		 * 
-		 * // final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis(); //
-		 * yAxis.setAutoRangeIncludesZero(false); //
-		 * yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-		 * 
-		 * save(chart, "age percentiles"); }
-		 */
+		// AGE PERCENTILES ==================================================
 
-		/*
-		 * { // UTILITY GAP COMPARISON final YIntervalSeries
-		 * expectedUtilityChangesAcceptNegativeDisappointment =
-		 * acceptNegativeDisappointment .newExpectedUtilityChangesSeries("proposed");
-		 * final YIntervalSeries
-		 * expectedUtilityChangesAcceptNegativeDisappointmentCongested =
-		 * acceptNegativeDisappointmentCongested
-		 * .newExpectedUtilityChangesSeries("proposed, congested"); // final
-		 * YIntervalSeries expectedUtilityChangesRejectNegativeDisappointment = //
-		 * rejectNegativeDisappointment //
-		 * .newExpectedUtilityChangesSeries("constrained"); final YIntervalSeries
-		 * expectedUtilityChangesAdaptiveMSA = adaptiveMSA
-		 * .newExpectedUtilityChangesSeries("adaptive MSA"); final YIntervalSeries
-		 * expectedUtilityChangesSqrtMSA =
-		 * sqrtMSA.newExpectedUtilityChangesSeries("sqrt MSA"); final YIntervalSeries
-		 * expectedUtilityChangesVanillaMSA = vanillaMSA
-		 * .newExpectedUtilityChangesSeries("vanilla MSA"); final YIntervalSeries
-		 * expectedUtilityChangesSbayti2007MSA = sbayti2007MSA
-		 * .newExpectedUtilityChangesSeries("Sbayti (2007), MSA"); final YIntervalSeries
-		 * expectedUtilityChangesSbayti2007SqrtMSA = sbayti2007SqrtMSA
-		 * .newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA"); final
-		 * YIntervalSeries expectedUtilityChangesSbayti2007SqrtMSACongested =
-		 * sbayti2007SqrtMSACongested
-		 * .newExpectedUtilityChangesSeries("Sbayti (2007), sqrt MSA, congested");
-		 * 
-		 * final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-		 * dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointment);
-		 * dataset.addSeries(expectedUtilityChangesAcceptNegativeDisappointmentCongested
-		 * ); dataset.addSeries(expectedUtilityChangesAdaptiveMSA);
-		 * dataset.addSeries(expectedUtilityChangesSqrtMSA);
-		 * dataset.addSeries(expectedUtilityChangesVanillaMSA);
-		 * dataset.addSeries(expectedUtilityChangesSbayti2007MSA);
-		 * dataset.addSeries(expectedUtilityChangesSbayti2007SqrtMSA);
-		 * dataset.addSeries(expectedUtilityChangesSbayti2007SqrtMSACongested);
-		 * 
-		 * final JFreeChart chart =
-		 * ChartFactory.createXYLineChart("expected utility changes", // chart title
-		 * "iteration", // x axis label "utility change", // y axis label dataset, //
-		 * data PlotOrientation.VERTICAL, true, // include legend false, // tooltips
-		 * false // urls ); chart.setBackgroundPaint(null);
-		 * 
-		 * final XYPlot plot = (XYPlot) chart.getPlot(); plot.setBackgroundPaint(null);
-		 * 
-		 * final DeviationRenderer renderer = new DeviationRenderer(true, false);
-		 * renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
-		 * BasicStroke.JOIN_ROUND)); renderer.setSeriesStroke(1, new BasicStroke(3.0f,
-		 * BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		 * renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
-		 * renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
-		 * plot.setRenderer(renderer);
-		 * 
-		 * // final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis(); //
-		 * yAxis.setAutoRangeIncludesZero(false); //
-		 * yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-		 * 
-		 * save(chart, "utility gap comparison"); }
-		 */
+		{ // AGE PERCENTILES, SBAYTI, SQRTMSA
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(false);
+			plot.addSeries(sbayti2007SqrtMSA.newAgePercentile90Series("90 percentile"));
+			plot.addSeries(sbayti2007SqrtMSA.newAgePercentile60Series("60 percentile"));
+			plot.addSeries(sbayti2007SqrtMSA.newAgePercentile30Series("30 percentile"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			plot.setRange(0, 1000, 0, 1000);
+			plot.render("agePercentiles_sbayti_sqrtMSA.tex");
+		}
 
-		/*
-		 * { // REALIZED LAMBDA COMPARISON final YIntervalSeries realizedLambdasProposed
-		 * = acceptNegativeDisappointment .newRealizedLambdaSeries("proposed"); final
-		 * YIntervalSeries realizedLambdasAdaptiveMSA =
-		 * adaptiveMSA.newRealizedLambdaSeries("adaptive MSA"); final YIntervalSeries
-		 * realizedLambdasSqrtMSA = sqrtMSA.newRealizedLambdaSeries("sqrt MSA"); final
-		 * YIntervalSeries realizedLambdasVanillaMSA =
-		 * vanillaMSA.newRealizedLambdaSeries("vanilla MSA"); final YIntervalSeries
-		 * realizedLambdasSbayti2007MSA = sbayti2007MSA
-		 * .newRealizedLambdaSeries("Sbayti (2007), MSA"); final YIntervalSeries
-		 * realizedLambdasSbayti2007SqrtMSA = sbayti2007SqrtMSA
-		 * .newRealizedLambdaSeries("Sbayti (2007), sqrt MSA");
-		 * 
-		 * final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-		 * dataset.addSeries(realizedLambdasProposed);
-		 * dataset.addSeries(realizedLambdasAdaptiveMSA);
-		 * dataset.addSeries(realizedLambdasSqrtMSA);
-		 * dataset.addSeries(realizedLambdasVanillaMSA);
-		 * dataset.addSeries(realizedLambdasSbayti2007MSA);
-		 * dataset.addSeries(realizedLambdasSbayti2007SqrtMSA);
-		 * 
-		 * final JFreeChart chart =
-		 * ChartFactory.createXYLineChart("realized lambdas comparison", // chart title
-		 * "iteration", // x axis label "lambda value", // y axis label dataset, // data
-		 * PlotOrientation.VERTICAL, true, // include legend false, // tooltips false //
-		 * urls ); chart.setBackgroundPaint(null);
-		 * 
-		 * final XYPlot plot = (XYPlot) chart.getPlot(); plot.setBackgroundPaint(null);
-		 * 
-		 * final DeviationRenderer renderer = new DeviationRenderer(true, false);
-		 * renderer.setSeriesStroke(0, new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
-		 * BasicStroke.JOIN_ROUND)); renderer.setSeriesStroke(1, new BasicStroke(3.0f,
-		 * BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		 * renderer.setSeriesFillPaint(0, new Color(255, 200, 200));
-		 * renderer.setSeriesFillPaint(1, new Color(200, 200, 255));
-		 * plot.setRenderer(renderer);
-		 * 
-		 * // final NumberAxis yAxis = (NumberAxis) plot.getRangeAxis(); //
-		 * yAxis.setAutoRangeIncludesZero(false); //
-		 * yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-		 * 
-		 * save(chart, "realized lambdas comparison"); }
-		 */
+		{ // AGE PERCENTILES, GREEDO, WITH AGEING, sqrtMSA, enforcedLambda
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(false);
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda.newAgePercentile90Series("90 percentile"));
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda.newAgePercentile60Series("60 percentile"));
+			plot.addSeries(greedo_withAgeing_sqrtMsa_enforceLambda.newAgePercentile30Series("30 percentile"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			plot.setRange(0, 1000, 0, 1000);
+			plot.render("agePercentiles_greedo_withAgeing_sqrtMSA_enforcedLambda.tex");
+		}
+
+		{ // AGE PERCENTILES, GREEDO, NO AGEING, sqrtMSA, enforcedLambda
+			final AccelerationAnalysisIntervalPlot plot = new AccelerationAnalysisIntervalPlot();
+			plot.setLog(false);
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda.newAgePercentile90Series("90 percentile"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda.newAgePercentile60Series("60 percentile"));
+			plot.addSeries(greedo_noAgeing_sqrtMsa_enforceLambda.newAgePercentile30Series("30 percentile"));
+			if (legend) {
+				plot.addLegend(100, -150, 100, 25);
+			}
+			plot.setRange(0, 1000, 0, 1000);
+			plot.render("agePercentiles_greedo_noAgeing_sqrtMSA_enforcedLambda.tex");
+		}
 
 		System.out.println("...DONE");
 	}

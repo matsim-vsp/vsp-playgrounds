@@ -3,10 +3,12 @@ package org.matsim.contrib.ier;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.ier.emulator.AgentEmulator;
@@ -111,18 +114,34 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 				logger.info(String.format("Started replanning iteration %d/%d", i + 1,
 						this.ierConfig.getIterationsPerCycle()));
 
+				// NEW MEMORIZE OLD SELECTED PLANS
+				final Map<Id<Person>, Plan> personId2oldSelectedPlan = new LinkedHashMap<>();
+				for (Person person : this.scenario.getPopulation().getPersons().values()) {
+					personId2oldSelectedPlan.put(person.getId(), person.getSelectedPlan());
+				}
+
 				// We run replanning on all agents (exactly as it is defined in the config)
 				this.strategyManager.run(this.scenario.getPopulation(), replanningContext);
 
+				// NEW ONLY EMULATE AND SCORE PLANS THAT HAVE CHANGED
+				final Set<Person> personsToEmulate = new LinkedHashSet<>();
 				final IEREventHandlerProvider currentEventHandlerProvider;
 				if (i == this.ierConfig.getIterationsPerCycle() - 1) {
 					currentEventHandlerProvider = handlerForLastReplanningIterationProvider;
+					personsToEmulate.addAll(this.scenario.getPopulation().getPersons().values());
 				} else {
 					currentEventHandlerProvider = handlerForOtherReplanningIterationsProvider;
+					for (Person person : this.scenario.getPopulation().getPersons().values()) {
+						if (person.getSelectedPlan() != personId2oldSelectedPlan.get(person.getId())) {
+							personsToEmulate.add(person);
+						}
+					}
 				}
 
 				// if (this.ierConfig.getParallel()) {
-				emulateInParallel(this.scenario.getPopulation(), event.getIteration(), currentEventHandlerProvider);
+				// emulateInParallel(this.scenario.getPopulation(), event.getIteration(),
+				// currentEventHandlerProvider);
+				emulateInParallel(personsToEmulate, event.getIteration(), currentEventHandlerProvider);
 				// } else {
 				// emulateSequentially(this.scenario.getPopulation(), event.getIteration(),
 				// currentEventHandlerProvider.get(this.scenario.getPopulation().getPersons().keySet()));
@@ -219,10 +238,19 @@ public final class IERReplanning implements PlansReplanning, ReplanningListener 
 
 	private void emulateInParallel(Population population, int iteration,
 			final IEREventHandlerProvider eventHandlerProvider) throws InterruptedException {
-		Iterator<? extends Person> personIterator = population.getPersons().values().iterator();
+		this.emulateInParallel(population.getPersons().values(), iteration, eventHandlerProvider);
+	}
+
+	private void emulateInParallel(Collection<? extends Person> persons, int iteration,
+			final IEREventHandlerProvider eventHandlerProvider) throws InterruptedException {
+
+		// Iterator<? extends Person> personIterator =
+		// population.getPersons().values().iterator();
+		Iterator<? extends Person> personIterator = persons.iterator();
 		List<Thread> threads = new LinkedList<>();
 
-		long totalNumberOfPersons = population.getPersons().size();
+		// long totalNumberOfPersons = population.getPersons().size();
+		long totalNumberOfPersons = persons.size();
 		AtomicLong processedNumberOfPersons = new AtomicLong(0);
 		AtomicBoolean finished = new AtomicBoolean(false);
 

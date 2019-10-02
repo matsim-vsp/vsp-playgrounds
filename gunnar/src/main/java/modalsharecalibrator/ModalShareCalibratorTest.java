@@ -77,7 +77,7 @@ public class ModalShareCalibratorTest {
 		for (int r = 0; r < _R; r++) {
 			for (int n = 0; n < _N; n++) {
 				final String choice = modes[this.indexOfMax(utils[n], ascs)];
-				calibrator.updateModeUsage(Id.createPersonId(n), choice, r);
+				calibrator.updateSimulatedModeUsage(Id.createPersonId(n), choice, r);
 			}
 
 			final Map<String, Double> simulatedShares = calibrator.getSimulatedShares();
