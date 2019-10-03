@@ -149,7 +149,7 @@
 		<module>kairuns</module>
 		<module>kturner</module>
 		<module>michalm</module>
-		<module>santiago</module>
+		<!--<module>org.matsim.santiago</module>-->
 		<module>stockholm</module>
 		<module>tthunig</module>
 		<!--<module>vsp</module>-->
