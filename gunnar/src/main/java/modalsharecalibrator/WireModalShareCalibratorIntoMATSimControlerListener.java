@@ -22,17 +22,17 @@ package modalsharecalibrator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.events.AfterMobsimEvent;
-import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
-import org.matsim.core.controler.listener.BeforeMobsimListener;
-import org.matsim.core.utils.collections.Tuple;
 
 import com.google.inject.Inject;
 
@@ -41,22 +41,25 @@ import com.google.inject.Inject;
  * @author Gunnar Flötteröd
  *
  */
-public class WireModalShareCalibratorIntoMATSimControlerListener implements BeforeMobsimListener, AfterMobsimListener {
-
-	private final Config config;
+public class WireModalShareCalibratorIntoMATSimControlerListener implements AfterMobsimListener {
 
 	private final ModalShareCalibrator calibrator;
 
 	@Inject
 	public WireModalShareCalibratorIntoMATSimControlerListener(final Config config) {
-		this.config = config;
-		// TODO Get all of this from config; include concrete measurements.
-		final double initialTrustRegion = 1.0;
-		final double iterationExponent = 0.5;
-		this.calibrator = new ModalShareCalibrator(initialTrustRegion, iterationExponent);
+
+		final ModalShareCalibrationConfigGroup modeCalibrConf = ConfigUtils.addOrGetModule(config,
+				ModalShareCalibrationConfigGroup.class);
+		this.calibrator = new ModalShareCalibrator(modeCalibrConf.getInitialTrustRegion(),
+				modeCalibrConf.getIterationExponent());
+		for (ConfigGroup paramSet : modeCalibrConf
+				.getParameterSets(ModalShareCalibrationConfigGroup.TransportModeDataSet.TYPE)) {
+			final ModalShareCalibrationConfigGroup.TransportModeDataSet modeDataSet = (ModalShareCalibrationConfigGroup.TransportModeDataSet) paramSet;
+			this.calibrator.setRealShare(modeDataSet.getMode(), modeDataSet.getShare());
+		}
 	}
 
-	public Map<String, Integer> extractLegModes(final Plan plan) {
+	private Map<String, Integer> extractLegModes(final Plan plan) {
 		final Map<String, Integer> mode2count = new LinkedHashMap<>();
 		for (PlanElement pe : plan.getPlanElements()) {
 			if (pe instanceof Leg) {
@@ -68,33 +71,18 @@ public class WireModalShareCalibratorIntoMATSimControlerListener implements Befo
 	}
 
 	@Override
-	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		
+	public void notifyAfterMobsim(final AfterMobsimEvent event) {
 		for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
-
-//			this.calibrator.updateSimulatedModeUsage(person.getId(), this.extractLegModes(person.getSelectedPlan()),
-//					event.getIteration());
-
+			this.calibrator.updateSimulatedModeUsage(person.getId(), this.extractLegModes(person.getSelectedPlan()),
+					event.getIteration());
 		}
-
-//		final Map<String, Double> simulatedShares = this.calibrator.getSimulatedShares();
-//		final Map<Tuple<String, String>, Double> dSimulatedShares_dASCs = this.calibrator
-//				.get_dSimulatedShares_dASCs(simulatedShares);
-//		final Map<String, Double> dQ_dASC = this.calibrator.get_dQ_dASCs(simulatedShares, dSimulatedShares_dASCs);
-//		final Map<String, Double> deltaASC = this.calibrator.getDeltaASC(dQ_dASC, event.getIteration());
-//
-//		for (String mode : deltaASC.keySet()) {
-//			final ModeParams modeParams = this.config.planCalcScore().getScoringParameters(null)
-//					.getOrCreateModeParams(mode);
-//			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
-//		}
-	}
-
-	@Override
-	public void notifyAfterMobsim(AfterMobsimEvent event) {
-
-		// TODO something like this
-		// this.config.planCalcScore().setPerforming_utils_hr(this.getValue());
-
+		final Map<String, Double> deltaASC = this.calibrator.getDeltaASC(event.getIteration());
+		for (String mode : deltaASC.keySet()) {
+			final ModeParams modeParams = event.getServices().getConfig().planCalcScore().getScoringParameters(null)
+					.getOrCreateModeParams(mode);
+			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
+			Logger.getLogger(this.getClass())
+					.info("Set ASC for mode " + mode + " to " + modeParams.getConstant() + ".");
+		}
 	}
 }

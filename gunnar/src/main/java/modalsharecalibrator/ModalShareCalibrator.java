@@ -189,4 +189,12 @@ public class ModalShareCalibrator {
 
 		return deltaASC;
 	}
+
+	public Map<String, Double> getDeltaASC(final int iteration) {
+		final Map<String, Double> simulatedCounts = this.getMode2simulatedCounts();
+		final Map<Tuple<String, String>, Double> dSimulatedCounts_dASCs = this
+				.get_dSimulatedCounts_dASCs(simulatedCounts);
+		final Map<String, Double> dQ_dASC = this.get_dQ_dASCs(simulatedCounts, dSimulatedCounts_dASCs);
+		return this.getDeltaASC(dQ_dASC, iteration);
+	}
 }
