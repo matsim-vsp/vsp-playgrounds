@@ -37,7 +37,7 @@ import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.TripStructureUtils.StageActivityHandling;
 import org.matsim.core.scoring.EventsToScore;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 
@@ -97,8 +97,8 @@ class TravelDisutilityUtils {
 					cnt++ ;	
 					log.warn( "using an experienced plan ... ") ;
 				}
-				StageActivityTypes stageActivities = null ; // yyyy should be set to something meaningful
-				List<Activity> activities = PopulationUtils.getActivities(experiencedPlan, stageActivities ) ;
+				// not sure what StageActivityTypes = null did, trying with StageActivityHandling.ExcludeStageActivities for now. gl, oct'19
+				List<Activity> activities = PopulationUtils.getActivities(experiencedPlan, StageActivityHandling.ExcludeStageActivities ) ; 
 				typicalDuration = activities.get(1).getEndTime() - activities.get(1).getStartTime() ; 
 			}
 
