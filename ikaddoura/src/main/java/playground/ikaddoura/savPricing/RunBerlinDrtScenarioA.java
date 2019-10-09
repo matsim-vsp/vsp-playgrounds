@@ -49,8 +49,6 @@ import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripRouter;
 import org.matsim.run.RunBerlinScenario;
 
@@ -74,8 +72,6 @@ import playground.ikaddoura.savPricing.runSetupA.prepare.PersonAttributesModific
 public final class RunBerlinDrtScenarioA {
 
 	private static final Logger log = Logger.getLogger(RunBerlinDrtScenarioA.class);
-	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction",
-			"ride interaction");
 
 	public static final String drtServiceAreaAttribute = "drtServiceArea";
 	public static final String modeToReplaceCarTripsInBrandenburg = TransportMode.car;
@@ -231,7 +227,7 @@ public final class RunBerlinDrtScenarioA {
 		BerlinShpUtils shpUtils = new BerlinShpUtils(drtServiceAreaShapeFile);
 		new BerlinNetworkModification(shpUtils).addSAVmode(scenario, taxiNetworkMode, drtServiceAreaAttribute);
 		new BerlinPlansModificationTagFormerCarUsers().run(scenario);
-		new PersonAttributesModification(shpUtils, stageActivities).run(scenario);
+		new PersonAttributesModification(shpUtils).run(scenario);
 
 		hasPreparedScenario = true;
 		return scenario;

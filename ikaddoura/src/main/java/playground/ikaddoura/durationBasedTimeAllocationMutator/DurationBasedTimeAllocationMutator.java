@@ -34,8 +34,7 @@ class DurationBasedTimeAllocationMutator extends AbstractMultithreadedModule {
 		case minOfDurationAndEndTime:
 			throw new RuntimeException("Not yet implemented. Aborting...");
 		default:
-			pmta = new DurationBasedPlanMutateTimeAllocationSimplified(
-					this.tripRouterProvider.get().getStageActivityTypes(), this.mutationRange, this.affectingDuration, MatsimRandom.getLocalInstance());
+			pmta = new DurationBasedPlanMutateTimeAllocationSimplified(this.mutationRange, this.affectingDuration, MatsimRandom.getLocalInstance());
 		}
 		return pmta;	}
 
