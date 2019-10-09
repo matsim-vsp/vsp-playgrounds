@@ -25,8 +25,8 @@ import java.util.Random;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
+import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.TripStructureUtils;
-import org.matsim.core.router.TripStructureUtils.StageActivityHandling;
 import org.matsim.core.utils.misc.Time;
 
 /**
@@ -38,6 +38,7 @@ import org.matsim.core.utils.misc.Time;
  */
 public final class DurationBasedPlanMutateTimeAllocationSimplified implements PlanAlgorithm {
 
+	private final StageActivityTypes blackList;
 	private final double mutationRange;
 	private final Random random;
 	private final boolean affectingDuration;
@@ -48,7 +49,8 @@ public final class DurationBasedPlanMutateTimeAllocationSimplified implements Pl
 	 * @param affectingDuration
 	 * @param random
 	 */
-	public DurationBasedPlanMutateTimeAllocationSimplified(final double mutationRange, boolean affectingDuration, final Random random) {
+	public DurationBasedPlanMutateTimeAllocationSimplified(final StageActivityTypes blackList, final double mutationRange, boolean affectingDuration, final Random random) {
+		this.blackList = blackList;
 		this.mutationRange = mutationRange;
 		this.affectingDuration = affectingDuration;
 		this.random = random;
@@ -56,7 +58,7 @@ public final class DurationBasedPlanMutateTimeAllocationSimplified implements Pl
 
 	@Override
 	public void run(final Plan plan) {
-		for ( Activity act : TripStructureUtils.getActivities( plan, StageActivityHandling.ExcludeStageActivities ) ) {
+		for ( Activity act : TripStructureUtils.getActivities( plan , blackList ) ) {
 			
 			if (!Time.isUndefinedTime(act.getEndTime())) {
 				act.setEndTime(mutateTime(act.getEndTime(), this.mutationRange));
