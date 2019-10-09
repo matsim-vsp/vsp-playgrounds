@@ -17,14 +17,13 @@ public class DurationBasedTimeAllocationPlanStrategyProvider implements Provider
 	@Inject private GlobalConfigGroup globalConfigGroup;
 	@Inject private TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup;
 	@Inject private PlansConfigGroup plansConfigGroup;
-	@Inject private Provider<org.matsim.core.router.TripRouter> tripRouterProvider;
 	@Inject private Population population;
 
 	@Override
 	public PlanStrategy get() {
 		PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
 
-		DurationBasedTimeAllocationMutator mod = new DurationBasedTimeAllocationMutator(this.tripRouterProvider, 
+		DurationBasedTimeAllocationMutator mod = new DurationBasedTimeAllocationMutator(
 				this.plansConfigGroup, this.timeAllocationMutatorConfigGroup, this.globalConfigGroup, population);
 		builder.addStrategyModule(mod);
 
