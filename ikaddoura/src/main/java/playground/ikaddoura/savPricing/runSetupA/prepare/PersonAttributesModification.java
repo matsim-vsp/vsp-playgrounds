@@ -21,7 +21,6 @@ package playground.ikaddoura.savPricing.runSetupA.prepare;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 
@@ -34,11 +33,9 @@ import playground.ikaddoura.savPricing.BerlinShpUtils;
 public final class PersonAttributesModification {
 
 	private final BerlinShpUtils shpUtils;
-	private final StageActivityTypes stageActivities;
 
-	public PersonAttributesModification(BerlinShpUtils shpUtils, StageActivityTypes stageActivities) {
+	public PersonAttributesModification(BerlinShpUtils shpUtils) {
 		this.shpUtils = shpUtils;
-		this.stageActivities = stageActivities;
 	}
 
 	public void run(Scenario scenario) {
@@ -48,7 +45,7 @@ public final class PersonAttributesModification {
 			if (scenario.getPopulation().getPersons().get(person.getId()).getAttributes().getAttribute(scenario.getConfig().plans().getSubpopulationAttributeName()).equals("person")) {
 				boolean personHasAtLeastOneTripWithinServiceArea = false;
 				
-				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements(), stageActivities)) {
+				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements())) {
 					if (shpUtils.isCoordInDrtServiceArea(trip.getOriginActivity().getCoord()) && shpUtils.isCoordInDrtServiceArea(trip.getDestinationActivity().getCoord())) {
 						// trip in berlin city area
 						personHasAtLeastOneTripWithinServiceArea = true;

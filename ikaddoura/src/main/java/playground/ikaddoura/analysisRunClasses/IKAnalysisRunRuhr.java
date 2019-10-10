@@ -31,8 +31,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 
 public class IKAnalysisRunRuhr {
@@ -55,8 +53,6 @@ public class IKAnalysisRunRuhr {
 		String analyzeSubpopulation = null;
 		
 		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
-		final String stageActivitySubString = "interaction";
-		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		final String zoneId = "ID";
 		
 		if (args.length > 0) {

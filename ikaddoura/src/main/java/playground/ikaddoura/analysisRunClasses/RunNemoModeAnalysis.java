@@ -28,8 +28,6 @@ import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -44,7 +42,6 @@ public class RunNemoModeAnalysis {
 //		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
-		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 
 		final String runId = "nemo_baseCase_030";
 		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_030/output/";
@@ -78,7 +75,7 @@ public class RunNemoModeAnalysis {
 		
 		filter.preProcess(scenario);
 				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter, stageActivities);
+		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
 		analysis.run();
 		
 		File directory = new File(outputDirectory);

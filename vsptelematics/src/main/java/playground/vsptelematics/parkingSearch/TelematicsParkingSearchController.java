@@ -56,7 +56,6 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
-import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import java.util.Random;
@@ -160,14 +159,7 @@ public class TelematicsParkingSearchController {
                 controler.getConfig().addModule(new DvrpConfigGroup());
             }
             final DynRoutingModule routingModuleCar = new DynRoutingModule(TransportMode.car);
-            StageActivityTypes stageActivityTypesCar = new StageActivityTypes() {
-                @Override
-                public boolean isStageActivity(String activityType) {
 
-                    return (activityType.equals(ParkingUtils.PARKACTIVITYTYPE));
-                }
-            };
-            routingModuleCar.setStageActivityTypes(stageActivityTypesCar);
             controler.addOverridingModule(new DvrpTravelTimeModule());
             controler.addOverridingModule(new AbstractModule() {
                 @Override
