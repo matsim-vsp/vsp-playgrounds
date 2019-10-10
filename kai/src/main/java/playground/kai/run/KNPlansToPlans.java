@@ -34,8 +34,6 @@ import org.matsim.core.population.algorithms.PlansFilterByLegMode;
 import org.matsim.core.population.algorithms.PlansFilterByLegMode.FilterType;
 import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MainModeIdentifierImpl;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
