@@ -42,7 +42,7 @@ env:
     # - MODULE=benjamin       # 6 min 31 sec
     - MODULE=dziemke        # 4 min 35 sec
     - MODULE=kturner        # 3 min 31 sec
-    - MODULE=santiago       # 3 min 17 sec
+    # - MODULE=santiago       # 3 min 17 sec
     - MODULE=michalm        # 3 min 16 sec
     - MODULE=vspshk         # 2 min 54 sec
     - MODULE=gleich         # 2 min 52 sec
