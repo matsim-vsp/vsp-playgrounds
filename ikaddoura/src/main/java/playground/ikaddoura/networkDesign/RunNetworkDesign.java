@@ -33,8 +33,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.router.MainModeIdentifierImpl;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.run.RunBerlinScenario;
@@ -64,8 +62,7 @@ public class RunNetworkDesign {
 		// adjust population
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			Plan plan = person.getSelectedPlan();
-			StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "freight interaction", "ride interaction");
-			List<Trip> trips = TripStructureUtils.getTrips(person.getSelectedPlan(), stageActivities);
+			List<Trip> trips = TripStructureUtils.getTrips(person.getSelectedPlan());
 			
 			plan.getPlanElements().clear();
 			

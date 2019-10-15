@@ -28,8 +28,6 @@ import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -40,8 +38,6 @@ import org.matsim.core.utils.collections.Tuple;
 public class RunBerlinModeAnalysis {
 
 	public static void main(String[] args) {
-		
-		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "bike interaction", "bicycle interaction", "drt interaction");
 		
 		final String runId = "berlin-v5.4-10pct";
 		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.4-10pct/output-berlin-v5.4-10pct/";
@@ -69,7 +65,7 @@ public class RunBerlinModeAnalysis {
 		
 		filter.preProcess(scenario);
 				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter, stageActivities);
+		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
 		analysis.run();
 		
 		File directory = new File(outputDirectory);

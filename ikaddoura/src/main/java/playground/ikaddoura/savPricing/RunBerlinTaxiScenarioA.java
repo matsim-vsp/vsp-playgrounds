@@ -44,8 +44,6 @@ import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripRouter;
 import org.matsim.run.RunBerlinScenario;
 
@@ -70,7 +68,6 @@ public final class RunBerlinTaxiScenarioA {
 
 	private static final Logger log = Logger.getLogger(RunBerlinTaxiScenarioA.class);
 
-	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction");
 	public static final String taxiServiceAreaAttribute = "taxiServiceArea";
 	public static final String modeToReplaceCarTripsInBrandenburg = TransportMode.car;
 	private final String taxiNetworkMode = TransportMode.car;
@@ -208,7 +205,7 @@ public final class RunBerlinTaxiScenarioA {
 		BerlinShpUtils shpUtils = new BerlinShpUtils(serviceAreaShapeFile);
 		new BerlinNetworkModification(shpUtils).addSAVmode(scenario, taxiNetworkMode, taxiServiceAreaAttribute);
 		new BerlinPlansModificationTagFormerCarUsers().run(scenario);
-		new PersonAttributesModification(shpUtils, stageActivities).run(scenario);
+		new PersonAttributesModification(shpUtils).run(scenario);
 
 		hasPreparedScenario = true ;
 		return scenario;
