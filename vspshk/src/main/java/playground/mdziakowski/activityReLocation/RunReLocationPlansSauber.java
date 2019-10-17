@@ -44,6 +44,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * test
  * overrides the coordinates from activities from an old plan file with new coordinates from a facility file
  * needs a shape file to make sure that the coordinates will replaced with a nearby facility 
  * 
