@@ -12,6 +12,12 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
+/**
+ * TODO: Attention, no check for coordinate systems whatsoever!
+ * 
+ * @author gleich
+ *
+ */
 public class AssignLinksToStops {
 
 	public static void main(String[] args) {
