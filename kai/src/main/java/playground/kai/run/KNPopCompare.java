@@ -48,7 +48,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.router.MainModeIdentifier;
-import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.MutableScenario;
@@ -296,7 +295,6 @@ public class KNPopCompare {
 	}
 	
 	private void writePersonSpecificRecords( final Population pop1, final Population pop2 ) {
-		StageActivityTypes stateActivityTypes = activityType -> activityType.contains( " interaction" ) ;
 		MainModeIdentifier mainModeIdentifier = new TransportPlanningMainModeIdentifier() ;
 		
 		try ( BufferedWriter writer = IOUtils.getBufferedWriter("personscompare.txt") ) {
@@ -325,7 +323,7 @@ public class KNPopCompare {
 				String mode1="" ;
 				{
 					// pop1 is base
-					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan(), stateActivityTypes ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan() ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
 					mode1 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
@@ -340,7 +338,7 @@ public class KNPopCompare {
 				{
 					// pop1 is policy
 					Person person2 = pop2.getPersons().get( person.getId() ) ;
-					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan(), stateActivityTypes ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan() ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
 					mode2 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
