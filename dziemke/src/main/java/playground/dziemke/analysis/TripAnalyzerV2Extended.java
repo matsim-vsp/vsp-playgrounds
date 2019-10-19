@@ -34,7 +34,8 @@ public class TripAnalyzerV2Extended {
 	
 	// Parameters
 //	private static String runId = "be_124"; // <----------
-	private static String runId = "be400mt_58_v6"; // <----------
+//	private static String runId = "be400mt_58_v6"; // <----------
+	private static String runId = "berlin-v5.3-10pct-ctd-b-01";
 //	private static String iterationForAnalysis = "300";
 	private static String iterationForAnalysis = "";
 	private static final String cemdapPersonsInputFileId = "21"; // Check if this number corresponds correctly to the runId
@@ -67,11 +68,14 @@ public class TripAnalyzerV2Extended {
 	private static String gnuplotScriptName = "plot_rel_path_run.gnu";
 
 	// Input and output
-	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
-//	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
-	private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_network.xml.gz";
+//	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01";
+	//	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
+	//private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_network.xml.gz";
+	private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + ".output_network.xml.gz";
 //	private static String eventsFile = "../../../runs-svn/berlin_scenario_2016/" + runId + "/" + runId + ".output_events.xml.gz";
-	private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_events.xml.gz";
+	// private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_events.xml.gz";
+	private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + ".output_events.xml.gz";
 	private static String cemdapPersonsInputFile = "../../../shared-svn/projects/cemdapMatsimCadyts/scenario/cemdap_berlin/" + cemdapPersonsInputFileId + "/persons1.dat"; // TODO
 //	private static String areaShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
 	private static String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
