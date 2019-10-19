@@ -11,10 +11,12 @@ public class ExperiencedPlansResidenceApplicator {
 
     public static void main(String[] args) {
     	//
-    	String runDirectoryRoot = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
-        String runId = "berlin-v5.2-10pct";
-        String outputExperiencedPlansFile = "berlin-v5.2-10pct.experiencedPlans.xml.gz";
-        String outputExperiencedPlansFileWithResidence = "berlin-v5.2-10pct.experiencedPlans_withResidence.xml.gz";
+    	//String runDirectoryRoot = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+        String runDirectoryRoot = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01/";
+        //String runId = "berlin-v5.2-10pct";
+        String runId = "berlin-v5.3-10pct-ctd-b-01";
+        String outputExperiencedPlansFile = "experiencedPlans.xml.gz";
+        String outputExperiencedPlansFileWithResidence = "experiencedPlans_withResidence.xml.gz";
 //        String runDirectoryRoot = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
 //        String runId = "berlin-v5.2-1pct";
 //        String outputExperiencedPlansFile = "berlin-v5.2-1pct.experiencedPlans.xml.gz";

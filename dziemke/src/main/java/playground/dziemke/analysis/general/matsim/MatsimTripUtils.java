@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Activity;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,10 +20,15 @@ public class MatsimTripUtils {
     }
 
     static double calculateBeelineDistance_m(MatsimTrip trip, Network network) {
+        //
+        //Activity activityAfter = trip.getActivityTypeAfterTrip();
+        //
+
         Link departureLink = network.getLinks().get(trip.getDepartureLinkId());
         Link arrivalLink = network.getLinks().get(trip.getArrivalLinkId());
 
         // TODO use coords of toNode instead of center coord of link
+        log.info("arrivalLink = " + arrivalLink + " trip = " + trip.getTripId() + " person = " + trip.getPersonId() + " mode = " + trip.getLegMode());
         double arrivalCoordX_m = arrivalLink.getCoord().getX();
         double arrivalCoordY_m = arrivalLink.getCoord().getY();
         double departureCoordX_m = departureLink.getCoord().getX();

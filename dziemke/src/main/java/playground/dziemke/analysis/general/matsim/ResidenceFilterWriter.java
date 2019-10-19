@@ -23,10 +23,12 @@ public class ResidenceFilterWriter {
 
     public static void main(String[] args) {
 
-        String baseDir = "C:\\Users\\gthunig\\VSP\\matsim\\runs-svn\\open_berlin_scenario\\be_257\\";
+        //String baseDir = "C:\\Users\\gthunig\\VSP\\matsim\\runs-svn\\open_berlin_scenario\\be_257\\";
+        String baseDir = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01";
 
         Config config = ConfigUtils.createConfig();
-        config.network().setInputFile(baseDir + "be_257.output_network.xml.gz");
+        // config.network().setInputFile(baseDir + "be_257.output_network.xml.gz");
+        config.network().setInputFile(baseDir + "berlin-v5.3-10pct-ctd-b-01.output_network.xml.gz");
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Network network = scenario.getNetwork();
         String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
