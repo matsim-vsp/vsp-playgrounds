@@ -1,0 +1,6 @@
+requiredChecks:
+  - travis-ci
+  # - circleci
+  # - my-ci-check
+# requiredStatuses:
+#   - jenkins
