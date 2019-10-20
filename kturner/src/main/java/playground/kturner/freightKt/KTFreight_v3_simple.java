@@ -33,6 +33,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
@@ -386,13 +387,16 @@ public class KTFreight_v3_simple {
 
 	//Ausgangspunkt für die MATSim-Simulation
 	private static void matsimRun(Scenario scenario, Carriers carriers) {
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( scenario.getConfig(), FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
 		final Controler controler = new Controler( scenario ) ;
 
 		CarrierScoringFunctionFactory scoringFunctionFactory = createMyScoringFunction2(scenario);
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 		controler.run();
 	}
