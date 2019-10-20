@@ -1,0 +1,8 @@
+# if we rely on github branch protection, then I think that this does not need any configuration at all.--?  kai, oct'19
+
+# requiredChecks:
+#   - travis-ci
+  # - circleci
+  # - my-ci-check
+# requiredStatuses:
+#   - jenkins
