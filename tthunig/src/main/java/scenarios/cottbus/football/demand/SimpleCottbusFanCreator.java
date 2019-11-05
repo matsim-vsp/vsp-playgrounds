@@ -33,12 +33,19 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.ControlerDefaultsModule;
+import org.matsim.core.controler.Injector;
+import org.matsim.core.controler.NewControlerModule;
+import org.matsim.core.controler.PrepareForSim;
+import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.algorithms.PersonPrepareForSim;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -129,13 +136,30 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 		int numberOfCbFans = (int) (numberOfFans * cottbusFansPercentage);
 		int numberOfSPNFans = numberOfFans - numberOfCbFans;
 		
-		final FreespeedTravelTimeAndDisutility timeCostCalc = new FreespeedTravelTimeAndDisutility(sc.getConfig().planCalcScore());
-		PlanAlgorithm router =
-				new PlanRouter(
-						new TripRouterFactoryBuilderWithDefaults().build(
-								sc ).get(
-						) );
-		PersonPrepareForSim pp4s = new PersonPrepareForSim(router, sc);
+		com.google.inject.Injector injector = Injector.createInjector(sc.getConfig(), new AbstractModule() {
+
+			@Override
+			public void install() {
+				install(new NewControlerModule());
+				install(new ControlerDefaultCoreListenersModule());
+				install(new ControlerDefaultsModule());
+				install(new ScenarioByInstanceModule(sc));
+			}
+			
+		});
+		
+		if (true) {
+			throw new RuntimeException("PersonPrepareForSim is no longer accessible");
+		}
+		PrepareForSim pp4s = injector.getInstance(PrepareForSim.class);
+		
+//		final FreespeedTravelTimeAndDisutility timeCostCalc = new FreespeedTravelTimeAndDisutility(sc.getConfig().planCalcScore());
+//		PlanAlgorithm router =
+//				new PlanRouter(
+//						new TripRouterFactoryBuilderWithDefaults().build(
+//								sc ).get(
+//						) );
+//		PersonPrepareForSim pp4s = new PersonPrepareForSim(router, sc);
 		
 //		Scenario sc2 = ScenarioUtils.createScenario(sc.getConfig());
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
@@ -157,10 +181,15 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 			stadiumCoord = MGC.coordinate2Coord(stadiumCoordinate);
 			plan = this.createFootballPlan(sc, homeCoord, stadiumCoord);
 			p.addPlan(plan);
-			pp4s.run(p);
-			this.correctHomeEndTime(p);
+//			pp4s.run(p);
+
 //			sc2.getPopulation().addPerson(p);
 		}
+		pp4s.run();
+		for (int i = 0; i < numberOfCbFans; i++){
+			this.correctHomeEndTime(p);
+		}
+		
 		for (int i = 0; i < numberOfSPNFans; i++){
 			p = pop.getFactory().createPerson(Id.create(Integer.toString(fanId) + "_" + CottbusFootballStrings.SPN2FB, Person.class));
 			pop.addPerson(p);
