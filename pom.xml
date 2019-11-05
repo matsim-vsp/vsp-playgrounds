@@ -142,6 +142,7 @@
 
 	<modules>
 		<module>dziemke</module>
+		<module>fuerbas</module>
 		<module>gleich</module>
 		<module>gunnar</module>
 		<module>ikaddoura</module>
