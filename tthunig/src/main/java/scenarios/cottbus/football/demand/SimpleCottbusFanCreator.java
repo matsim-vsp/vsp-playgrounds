@@ -57,7 +57,9 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.Set;
 
 
 /**
@@ -135,7 +137,11 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 	public Population createAndAddFans(Scenario sc, int numberOfFans) {
 		int numberOfCbFans = (int) (numberOfFans * cottbusFansPercentage);
 		int numberOfSPNFans = numberOfFans - numberOfCbFans;
-		
+
+		if (true) {
+			throw new RuntimeException("PersonPrepareForSim is no longer accessible; the following is an attempt to retrofit without knowing if it works.  " +
+											   "gl/kn, nov'19");
+		}
 		com.google.inject.Injector injector = Injector.createInjector(sc.getConfig(), new AbstractModule() {
 
 			@Override
@@ -148,9 +154,6 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 			
 		});
 		
-		if (true) {
-			throw new RuntimeException("PersonPrepareForSim is no longer accessible");
-		}
 		PrepareForSim pp4s = injector.getInstance(PrepareForSim.class);
 		
 //		final FreespeedTravelTimeAndDisutility timeCostCalc = new FreespeedTravelTimeAndDisutility(sc.getConfig().planCalcScore());
@@ -164,47 +167,52 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 //		Scenario sc2 = ScenarioUtils.createScenario(sc.getConfig());
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
 		Population pop = sc.getPopulation();
-		Person p;
-		Plan plan;
-		Coord homeCoord;
-		Coord stadiumCoord;
-		Coordinate stadiumCoordinate;
-		Coordinate homeCoordinate;
+//		Person p;
+//		Plan plan;
+//		Coord homeCoord;
+//		Coord stadiumCoord;
+//		Coordinate stadiumCoordinate;
+//		Coordinate homeCoordinate;
 		for (int i = 0; i < numberOfCbFans; i++){
-			p = pop.getFactory().createPerson(Id.create(Integer.toString(fanId) + "_" + CottbusFootballStrings.CB2FB, Person.class));
+			Person p = pop.getFactory().createPerson(Id.create(Integer.toString(fanId) + "_" + CottbusFootballStrings.CB2FB, Person.class));
 			pop.addPerson(p);
 			fanPop.addPerson(p);
 			this.fanId++;
-			homeCoordinate = this.getRandomPointInFeature(this.random, (Geometry) this.cbFeature.getDefaultGeometry(), this.sdfGeometry);
-			homeCoord = MGC.coordinate2Coord(homeCoordinate);
-			stadiumCoordinate = this.getRandomPointInFeature(this.random, this.sdfGeometry, null);
-			stadiumCoord = MGC.coordinate2Coord(stadiumCoordinate);
-			plan = this.createFootballPlan(sc, homeCoord, stadiumCoord);
+			Coordinate homeCoordinate = this.getRandomPointInFeature(this.random, (Geometry) this.cbFeature.getDefaultGeometry(), this.sdfGeometry);
+			Coord homeCoord = MGC.coordinate2Coord(homeCoordinate);
+			Coordinate stadiumCoordinate = this.getRandomPointInFeature(this.random, this.sdfGeometry, null);
+			Coord stadiumCoord = MGC.coordinate2Coord(stadiumCoordinate);
+			Plan plan = this.createFootballPlan(sc, homeCoord, stadiumCoord);
+//			pp4s.run(p);
+//			this.correctHomeEndTime(p);
+			p.addPlan(plan);
+		}
+
+		for (int i = 0; i < numberOfSPNFans; i++){
+			Person p = pop.getFactory().createPerson(Id.create(Integer.toString(fanId) + "_" + CottbusFootballStrings.SPN2FB, Person.class));
+			pop.addPerson(p);
+			fanPop.addPerson(p);
+			this.fanId++;
+			Coordinate homeCoordinate = this.getRandomPointInFeature(this.random, (Geometry) this.spnFeature.getDefaultGeometry(),
+					(Geometry) this.cbFeature.getDefaultGeometry());
+			Coord homeCoord = MGC.coordinate2Coord(homeCoordinate);
+			Coordinate stadiumCoordinate = this.getRandomPointInFeature(this.random, this.sdfGeometry, null);
+			Coord stadiumCoord = MGC.coordinate2Coord(stadiumCoordinate);
+			Plan plan = this.createFootballPlan(sc, homeCoord, stadiumCoord);
 			p.addPlan(plan);
 //			pp4s.run(p);
+//			this.correctHomeEndTime(p);
+//			sc2.getPopulation().addPerson(p);
+		}
 
-//			sc2.getPopulation().addPerson(p);
-		}
+		// run the framework class since the individual PersonPrepareForSim is no longer accessible:
 		pp4s.run();
-		for (int i = 0; i < numberOfCbFans; i++){
-			this.correctHomeEndTime(p);
+
+		// correct the departure time _after_ we know the free speed route travel times:
+		for( Person person : fanPop.getPersons().values() ) {
+			this.correctHomeEndTime(person);
 		}
-		
-		for (int i = 0; i < numberOfSPNFans; i++){
-			p = pop.getFactory().createPerson(Id.create(Integer.toString(fanId) + "_" + CottbusFootballStrings.SPN2FB, Person.class));
-			pop.addPerson(p);
-			fanPop.addPerson(p);
-			this.fanId++;
-			homeCoordinate = this.getRandomPointInFeature(this.random, (Geometry) this.spnFeature.getDefaultGeometry(), (Geometry) this.cbFeature.getDefaultGeometry());
-			homeCoord = MGC.coordinate2Coord(homeCoordinate);
-			stadiumCoordinate = this.getRandomPointInFeature(this.random, this.sdfGeometry, null);
-			stadiumCoord = MGC.coordinate2Coord(stadiumCoordinate);
-			plan = this.createFootballPlan(sc, homeCoord, stadiumCoord);
-			p.addPlan(plan);
-			pp4s.run(p);
-			this.correctHomeEndTime(p);
-//			sc2.getPopulation().addPerson(p);
-		}
+
 		return fanPop;
 	}
 	
