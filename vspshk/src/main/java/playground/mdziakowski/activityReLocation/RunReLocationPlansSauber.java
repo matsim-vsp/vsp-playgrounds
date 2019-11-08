@@ -44,7 +44,6 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * test
  * overrides the coordinates from activities from an old plan file with new coordinates from a facility file
  * needs a shape file to make sure that the coordinates will replaced with a nearby facility 
  * 
@@ -232,7 +231,7 @@ public class RunReLocationPlansSauber {
      * @return the the zoneId as a string or "noZone", if the coordinate can't be associated
      */
     
-    private static String inDistrict( Map<String, Geometry> allZones, Coord coord) {
+    public static String inDistrict( Map<String, Geometry> allZones, Coord coord) {
         Point point = MGC.coord2Point(coord);
         for (String nameZone : allZones.keySet()) {
             Geometry geo = allZones.get(nameZone);
