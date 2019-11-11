@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -89,13 +90,12 @@ public class AnalyzeAndCompareTrips {
 		Scenario scenario = ScenarioUtils.loadScenario(networkConfig);
 		Network network = scenario.getNetwork();
 
-		ResidenceFilterReader residenceFilterReader = new ResidenceFilterReader(EXPERIENCED_PLANS_FILE_WITH_RESIDENCE);
-		Population2TripsParser population2TripsParser = new Population2TripsParser(
-//				residenceFilterReader.getWholePopulation(),
-				residenceFilterReader.filter(ResidenceFilterWriter.INTERIOR_OF_AREA),
-				network, config.plansCalcRoute().getNetworkModes());
-		List<MatsimTrip> matsimTrips = population2TripsParser.parse();
+		PopulationResidenceFilter populationResidenceFilter = new PopulationResidenceFilter(EXPERIENCED_PLANS_FILE_WITH_RESIDENCE);
+		// Population population = populationResidenceFilter.getFullPopulation();
+		Population population = populationResidenceFilter.getFilteredPopulation(PopulationResidenceFilter.INTERIOR_OF_AREA);
 
+		Population2TripsParser population2TripsParser = new Population2TripsParser(population, network, config.plansCalcRoute().getNetworkModes());
+		List<MatsimTrip> matsimTrips = population2TripsParser.parse();
 
 		// Set filters if desired
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
