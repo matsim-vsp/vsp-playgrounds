@@ -18,10 +18,11 @@ public class TestCoordinateTransformation {
 //				("EPSG:31468", "EPSG:4326");
 //				("EPSG:4326", "EPSG:21037");
 //				("EPSG:4326", "EPSG:26911");
-				("EPSG:4326", "EPSG:25832"); // WGS84 -> Essen
+//				("EPSG:4326", "EPSG:25832"); // WGS84 -> Essen
 //				("EPSG:3006", "EPSG:4326");
 //				(TransformationFactory.WGS84_SA_Albers, "EPSG:4326");
 //				("EPSG:32734", "EPSG:4326"); // EPSG:32734 = WGS 84 / UTM zone 34S, Cape Town
+				("EPSG:4326", "EPSG:31464");
 
 //		Coord originalCoord1 = new Coord(36.82829619497265, -1.291087691581653); // near Nairobi, Kenya
 //		Coord originalCoord1 = new Coord(13.124627, 52.361485); // Berlin lower left
@@ -47,7 +48,11 @@ public class TestCoordinateTransformation {
 //		Coord coordNE = new Coord(290000, 6251000); // Cape Town City Bowl NE
 //		Coord coordSW = new Coord(256000, 6222000); // Cape Town City Bowl SW
 		Coord coordNE = new Coord(7.994, 51.826); // Ruhrgebiet NE
-		Coord coordSW = new Coord(6.283, 51.212); // Ruhrgebiet SW
+//		Coord coordSW = new Coord(6.283, 51.212); // Ruhrgebiet SW
+		Coord coordSW = new Coord(13.091243, 52.413506); // Königsweg Bln
+
+
+
 		
 		Coord convertedCoordNE = transformation.transform(coordNE);
 		Coord convertedCoordSW = transformation.transform(coordSW);
