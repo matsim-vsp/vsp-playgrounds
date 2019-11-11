@@ -28,14 +28,18 @@ public class ModalShareDiagramCreator {
     public static final Logger log = Logger.getLogger(ModalShareDiagramCreator.class);
 
     private static final int DISTANCE_BIN_SIZE = 250; // metres
-    private static final String RUN_ID = "be_117l";
-    private static final String RUN_DIR = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/";
-    private static final String EVENTS_FILE = RUN_DIR + RUN_ID + ".output_events.xml.gz";
+    // private static final String RUN_ID = "be_117l";
+    // private static final String RUN_DIR = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/";
+    private static final String RUN_DIR = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01/";
+    // private static final String EVENTS_FILE = RUN_DIR + RUN_ID + ".output_events.xml.gz";
+    private static final String EVENTS_FILE = RUN_DIR + "berlin-v5.3-10pct-ctd-b-01.output_events.xml.gz";
 //    private static final String NETWORK_FILE = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network.xml.gz";
-    private static final String NETWORK_FILE = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz";
+    // private static final String NETWORK_FILE = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz";
+    private static final String NETWORK_FILE = RUN_DIR + "berlin-v5.3-10pct-ctd-b-01.output_network.xml.gz";
     private static final String OUTPUT_DIR = RUN_DIR + "modalShare/";
     private static final String GNUPLOT_SCRIPT_NAME = "plot-modal-share.gnu";
-    private static final String RELATIVE_PATH_TO_GNUPLOT_SCRIPT = "../../../../shared-svn/projects/cemdapMatsimCadyts/analysis/gnuplot/" + GNUPLOT_SCRIPT_NAME;
+    //private static final String RELATIVE_PATH_TO_GNUPLOT_SCRIPT = "../../../../shared-svn/projects/cemdapMatsimCadyts/analysis/gnuplot/" + GNUPLOT_SCRIPT_NAME;
+    private static final String RELATIVE_PATH_TO_GNUPLOT_SCRIPT = "../" + GNUPLOT_SCRIPT_NAME;
     // remember: this path leads relatively from your OutputDir(GNUPLOT_OUTPUT_PATH) to the gnuplot script file(GNUPLOT_SCRIPT_NAME)
     private static final String MODALSHARE_PATH = OUTPUT_DIR + "modal-share.txt";
     private static final String MODALSHARE_CUMULATIVE_PATH = OUTPUT_DIR + "modal-share_cumulative.txt";
@@ -60,9 +64,9 @@ public class ModalShareDiagramCreator {
 
         ModalShareDiagramCreator creator = new ModalShareDiagramCreator();
         creator.addMode(Mode.CAR, TransportMode.car);
-        creator.addMode(Mode.PT, TransportMode.pt);
+//        creator.addMode(Mode.PT, TransportMode.pt);
 //        creator.addMode(Mode.PT_SLOW, "ptSlow");
-        creator.addMode(Mode.PT_SLOW, "slowPt");
+//        creator.addMode(Mode.PT_SLOW, "slowPt");
         creator.createModalSplitDiagram(EVENTS_FILE, NETWORK_FILE, DISTANCE_BIN_SIZE);
     }
 
