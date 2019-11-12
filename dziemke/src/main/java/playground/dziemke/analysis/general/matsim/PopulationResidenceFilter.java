@@ -16,8 +16,12 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import playground.dziemke.utils.ShapeReader;
+import org.matsim.core.utils.gis.ShapeFileReader;
+import org.opengis.feature.simple.SimpleFeature;
+import playground.dziemke.utils.ShapeFileUtils;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,8 +33,9 @@ public class PopulationResidenceFilter {
     public static final String UNKNOWN_AREA = "unknown";
 
     private Network network;
-    private Geometry areaGeometry;
     private Population population;
+    private Geometry areaGeometry;
+
     public static final String RESIDENCE_ATTRIBUTE_LABEL = "residence";
     private String interiorOfArea = INTERIOR_OF_AREA;
     private String exteriorOfArea = EXTERIOR_OF_AREA;
@@ -60,8 +65,8 @@ public class PopulationResidenceFilter {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         this.network = scenario.getNetwork();
 
-        Map<Integer, Geometry> zoneGeometries = ShapeReader.read(areaShapeFile, attributeCaption);
-        this.areaGeometry = zoneGeometries.get(distinctiveFeatureId);
+        Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(areaShapeFile);
+        this.areaGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, attributeCaption, distinctiveFeatureId);
 
         new PopulationReader(scenario).readFile(populationFile);
         this.population = scenario.getPopulation();

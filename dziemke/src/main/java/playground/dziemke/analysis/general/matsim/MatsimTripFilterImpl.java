@@ -7,9 +7,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.gis.ShapeFileReader;
+import org.opengis.feature.simple.SimpleFeature;
 import playground.dziemke.analysis.general.Trip;
 import playground.dziemke.analysis.general.TripFilter;
-import playground.dziemke.utils.ShapeReader;
+import playground.dziemke.utils.ShapeFileUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -83,8 +85,8 @@ public class MatsimTripFilterImpl implements TripFilter {
     }
 
     private void assignAreGeometry(String areaShapeFile) {
-        Map<Integer, Geometry> zoneGeometries = ShapeReader.read(areaShapeFile, "NR");
-        areaGeometry = zoneGeometries.get(areaId);
+        Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(areaShapeFile);
+        areaGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, "NR", String.valueOf(areaId));
     }
 
     public void activateDist(double minDistance_km, double maxDistance_km) {
