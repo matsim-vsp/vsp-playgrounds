@@ -1,10 +1,7 @@
 package playground.dziemke.analysis;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
@@ -18,12 +15,14 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 
-import playground.dziemke.utils.ShapeReader;
+import org.opengis.feature.simple.SimpleFeature;
+import playground.dziemke.utils.ShapeFileUtils;
 import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
@@ -132,8 +131,8 @@ public class TripAnalyzerV2Extended {
 		MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
 		networkReader.readFile(networkFile);
 
-		Map<Integer, Geometry> zoneGeometries = ShapeReader.read(areaShapeFile, "NR");
-		areaGeometry = zoneGeometries.get(areaId);
+		Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(areaShapeFile);
+		areaGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, "NR", areaId.toString());
 
 		AnalysisFileWriter writer = new AnalysisFileWriter();
 
