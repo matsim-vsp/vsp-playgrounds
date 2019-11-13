@@ -19,8 +19,15 @@
  */
 package modalsharecalibrator;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ReflectiveConfigGroup;
+
+import floetteroed.cadyts.calibrators.Calibrator;
+import utils.MyConfigUtils;
 
 /**
  *
@@ -29,62 +36,106 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  */
 public class ModalShareCalibrationConfigGroup extends ReflectiveConfigGroup {
 
+	// -------------------- CONSTANTS --------------------
+
 	public static final String GROUP_NAME = "modalShareCalibration";
+
+	// -------------------- CONSTRUCTION --------------------
 
 	public ModalShareCalibrationConfigGroup() {
 		super(GROUP_NAME);
 	}
 
-	private Double initialTrustRegion = null;
+	// -------------------- mode --------------------
 
-	@StringGetter("initialTrustRegion")
-	public Double getInitialTrustRegion() {
-		return this.initialTrustRegion;
+	public static enum ModeType {
+		on, off
+	};
+
+	private ModeType mode = ModeType.on;
+
+	@StringGetter("mode")
+	public ModeType getMode() {
+		return this.mode;
 	}
 
-	@StringSetter("initialTrustRegion")
-	public void setInitialTrustRegion(final double initialTrustRegion) {
-		this.initialTrustRegion = initialTrustRegion;
+	@StringSetter("mode")
+	public void setMode(final ModeType mode) {
+		this.mode = mode;
 	}
 
-	private Double iterationExponent = null;
-
-	@StringGetter("iterationExponent")
-	public Double getIterationExponent() {
-		return this.iterationExponent;
+	public boolean isOn() {
+		return ModeType.on.equals(this.mode);
 	}
 
-	@StringSetter("iterationExponent")
-	public void setIterationExponent(final double iterationExponent) {
-		this.iterationExponent = iterationExponent;
+	// -------------------- inertia --------------------
+
+	private double inertia = Calibrator.DEFAULT_REGRESSION_INERTIA;
+
+	@StringGetter("inertia")
+	public Double getInertia() {
+		return this.inertia;
 	}
 
-	/* package for testing */ void addObservation(final String mode, final double share) {
-		this.addParameterSet(new TransportModeDataSet(mode, share));
+	@StringSetter("inertia")
+	public void setInertia(final double inertia) {
+		this.inertia = inertia;
 	}
-	
+
+	// -------------------- reproductionWeight --------------------
+
+	private double reproductionWeight = 1.0;
+
+	@StringGetter("reproductionWeight")
+	public Double getReproductionWeight() {
+		return this.reproductionWeight;
+	}
+
+	@StringSetter("reproductionWeight")
+	public void setReproductionWeight(final double reproductionWeight) {
+		this.reproductionWeight = reproductionWeight;
+	}
+
+	// -------------------- iterationExponent --------------------
+	//
+	// private Double iterationExponent = null;
+	//
+	// @StringGetter("iterationExponent")
+	// public Double getIterationExponent() {
+	// return this.iterationExponent;
+	// }
+	//
+	// @StringSetter("iterationExponent")
+	// public void setIterationExponent(final double iterationExponent) {
+	// this.iterationExponent = iterationExponent;
+	// }
+
+	// -------------------- OVERRIDING OF ConfigGroup --------------------
+
 	@Override
 	public ConfigGroup createParameterSet(final String type) {
 		if (TransportModeDataSet.TYPE.equals(type)) {
 			return new TransportModeDataSet();
 		} else {
-			return super.createParameterSet(type);
+			throw new RuntimeException("Unknown parameter set type: " + type);
 		}
 	}
 
+	// -------------------- INNER CLASS --------------------
+
 	public static class TransportModeDataSet extends ReflectiveConfigGroup {
+
+		// CONSTANT
 
 		public static final String TYPE = "modalShareData";
 
-		public TransportModeDataSet() {
+		// CONSTRUCTION
+
+		TransportModeDataSet() {
 			super(TYPE);
 		}
 
-		public TransportModeDataSet(final String mode, final double share) {
-			this();
-			this.mode = mode;
-			this.share = share;
-		}
+		// mode
 
 		private String mode = null;
 
@@ -98,7 +149,27 @@ public class ModalShareCalibrationConfigGroup extends ReflectiveConfigGroup {
 			this.mode = mode;
 		}
 
-		private Double share = null;
+		// subModes
+
+		private Set<String> subModes = new LinkedHashSet<>();
+
+		@StringGetter("subModes")
+		public String getSubModes() {
+			return MyConfigUtils.listToString(new ArrayList<>(this.subModes));
+		}
+
+		@StringSetter("subModes")
+		public void setSubModes(final String subModes) {
+			this.subModes = new LinkedHashSet<>(MyConfigUtils.stringToList(subModes));
+		}
+
+		public Set<String> getSubModeSet() {
+			return this.subModes;
+		}
+
+		// share
+
+		private Double share = null; // may be null for unobserved mode
 
 		@StringGetter("share")
 		public Double getShare() {
@@ -106,22 +177,22 @@ public class ModalShareCalibrationConfigGroup extends ReflectiveConfigGroup {
 		}
 
 		@StringSetter("share")
-		public void setShare(final double share) {
+		public void setShare(final Double share) {
 			this.share = share;
 		}
-	}
+		
+		// initialASC
 
-	public static void main(String[] args) {
+		private double initialASC = 0.0;
 
-		ModalShareCalibrationConfigGroup config = new ModalShareCalibrationConfigGroup();
-		config.addObservation("car", 0.4);
-		config.addObservation("pt", 0.6);
-
-		System.out.println(config.toString());
-		for (ConfigGroup modeconf : config.getParameterSets(TransportModeDataSet.TYPE)) {
-			System.out.println(modeconf);
+		@StringGetter("initialASC")
+		public double getInitialASC() {
+			return this.initialASC;
 		}
 
+		@StringSetter("initialASC")
+		public void setInitialASC(final double initialASC) {
+			this.initialASC = initialASC;
+		}
 	}
-
 }

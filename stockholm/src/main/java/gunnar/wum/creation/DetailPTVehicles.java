@@ -42,6 +42,53 @@ import org.matsim.vehicles.VehiclesFactory;
  */
 public class DetailPTVehicles {
 
+	private final String transitVehicleTypeDefinitionsFileName;
+	private final String scheduleFileName;
+	private final String oldTransitVehiclesFileName; 
+	
+	public DetailPTVehicles(final String transitVehicleTypeDefinitionsFileName,
+			final String scheduleFileName,
+			final String vehiclesFileName) {
+		this.transitVehicleTypeDefinitionsFileName = transitVehicleTypeDefinitionsFileName;
+		this.scheduleFileName = scheduleFileName;
+		this.oldTransitVehiclesFileName = vehiclesFileName;
+	}
+	
+	public void run(final String newTransitVehiclesFileName) {
+		final Vehicles newVehicles = VehicleUtils.createVehiclesContainer();
+		{
+			final VehicleReaderV1 reader = new VehicleReaderV1(newVehicles);
+			reader.readFile(transitVehicleTypeDefinitionsFileName);
+		}
+
+		final Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		{
+			final TransitScheduleReader scheduleReader = new TransitScheduleReader(scenario);
+			scheduleReader.readFile(scheduleFileName);
+			final VehicleReaderV1 vehicleReader = new VehicleReaderV1(scenario.getTransitVehicles());
+			vehicleReader.readFile(oldTransitVehiclesFileName);
+		}
+
+		final VehiclesFactory vehiclesFactory = VehicleUtils.getFactory();
+		for (TransitLine line : scenario.getTransitSchedule().getTransitLines().values()) {
+			for (TransitRoute route : line.getRoutes().values()) {
+				final VehicleType newVehicleType = newVehicles.getVehicleTypes()
+						.get(Id.create(route.getTransportMode(), VehicleType.class));
+				if (newVehicleType == null) {
+					System.out.println("no vehicle type for " + route.getTransportMode());
+				}
+				for (Departure dpt : route.getDepartures().values()) {
+					final Vehicle oldVehicle = scenario.getTransitVehicles().getVehicles().get(dpt.getVehicleId());
+					final Vehicle newVehicle = vehiclesFactory.createVehicle(oldVehicle.getId(), newVehicleType);
+					newVehicles.addVehicle(newVehicle);
+				}
+			}
+		}
+
+		final VehicleWriterV1 vehicleWriter = new VehicleWriterV1(newVehicles);
+		vehicleWriter.writeFile(newTransitVehiclesFileName);
+	}
+	
 	public static void main(String[] args) {
 
 		System.out.println("STARTED ...");

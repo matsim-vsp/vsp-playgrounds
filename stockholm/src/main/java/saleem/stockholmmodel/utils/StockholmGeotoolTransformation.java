@@ -19,7 +19,6 @@
  */ 
 package saleem.stockholmmodel.utils;
 
-import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -27,9 +26,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Point;
 /**
  * A class to convert coordinates from one coordinate system to
  * another one.
@@ -61,14 +57,16 @@ public class StockholmGeotoolTransformation implements CoordinateTransformation{
 		}
 	}
 
+	@Deprecated
 	public Coord transform(final Coord coord) {
-		Point p = null;
-		try {
-			p = (Point) JTS.transform(StockholmMGC.coord2Point(coord), this.transform);
-		} catch (TransformException e) {
-			throw new RuntimeException(e);
-		}
-		return StockholmMGC.point2Coord(p);
+		throw new UnsupportedOperationException();
+//		Point p = null;
+//		try {
+//			p = (Point) JTS.transform(StockholmMGC.coord2Point(coord), this.transform);
+//		} catch (TransformException e) {
+//			throw new RuntimeException(e);
+//		}
+//		return StockholmMGC.point2Coord(p);
 	}
 
 }

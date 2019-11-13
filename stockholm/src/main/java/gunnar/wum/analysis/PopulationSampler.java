@@ -19,7 +19,10 @@
  */
 package gunnar.wum.analysis;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
@@ -57,8 +60,11 @@ public class PopulationSampler {
 		config.plans().setInputFile(from);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
+		final List<Id<Person>> allPersonIdsShuffled = new ArrayList<>(scenario.getPopulation().getPersons().keySet());
+		Collections.shuffle(allPersonIdsShuffled);
+		
 		Set<Id<Person>> allToRemove = new LinkedHashSet<>();
-		for (Id<Person> personId : new FractionalIterable<>(scenario.getPopulation().getPersons().keySet(),
+		for (Id<Person> personId : new FractionalIterable<>(allPersonIdsShuffled, // scenario.getPopulation().getPersons().keySet(),
 				1.0 - frac)) {
 			allToRemove.add(personId);
 		}

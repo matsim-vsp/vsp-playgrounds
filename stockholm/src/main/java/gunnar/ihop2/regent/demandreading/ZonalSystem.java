@@ -70,23 +70,32 @@ public class ZonalSystem implements Iterable<Zone> {
 	// -------------------- CONSTRUCTION --------------------
 
 	public ZonalSystem(final String zonesShapeFileName, final String zonalCoordinateSystem) {
+		this(zonesShapeFileName, zonalCoordinateSystem, "ZONE");
+	}
+
+	public ZonalSystem(final String zonesShapeFileName, final String zonalCoordinateSystem,
+			final String idAttributeName) {
 		this.zonalCoordinateSystem = zonalCoordinateSystem;
 		final GeometryFactory geometryFactory = new GeometryFactory();
 		final WKTReader wktReader = new WKTReader(geometryFactory);
 		for (SimpleFeature ft : ShapeFileReader.getAllFeatures(zonesShapeFileName)) {
 			try {
-				final String zoneId = ft.getAttribute("ZONE").toString();
+				final String zoneId = ft.getAttribute(idAttributeName).toString();
 				final Zone zone = new Zone(zoneId);
-				zone.setGeometry(wktReader.read((ft.getAttribute("the_geom")).toString()));
-
-				if (this.entireRegion == null) {
-					this.entireRegion = wktReader.read((ft.getAttribute("the_geom")).toString());
+				
+				if (ft.getAttribute("the_geom") != null) {				
+					zone.setGeometry(wktReader.read((ft.getAttribute("the_geom")).toString()));
+					if (this.entireRegion == null) {
+						this.entireRegion = wktReader.read((ft.getAttribute("the_geom")).toString());
+					} else {
+						this.entireRegion = this.entireRegion
+								.union(wktReader.read((ft.getAttribute("the_geom")).toString()));
+					}
+					this.id2zone.put(zoneId, zone);
 				} else {
-					this.entireRegion = this.entireRegion
-							.union(wktReader.read((ft.getAttribute("the_geom")).toString()));
+					System.out.println("Skipping zone " + zoneId + ", which has no geometry.");
 				}
-
-				this.id2zone.put(zoneId, zone);
+				
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
 			}

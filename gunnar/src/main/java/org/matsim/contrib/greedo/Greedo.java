@@ -32,6 +32,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 
 import com.google.inject.Singleton;
@@ -68,7 +69,9 @@ public class Greedo {
 			throw new RuntimeException("Have already met a config.");
 		}
 		if (config.controler().getFirstIteration() != 0) {
-			throw new RuntimeException("Expecting the simulation to start at iteration zero.");
+			Logger.getLogger(this.getClass()).warn("The simulation does not start at iteration zero.");
+			// throw new RuntimeException("Expecting the simulation to start at iteration
+			// zero.");
 		}
 		this.config = config;
 
@@ -362,6 +365,15 @@ public class Greedo {
 		}
 		this.scenario = scenario;
 		ConfigUtils.addOrGetModule(this.config, GreedoConfigGroup.class).configure(scenario);
+	}
+
+	public void meet(final Controler controler) {
+		if (this.scenario == null) {
+			throw new RuntimeException("First meet the scenario.");
+		}
+		for (AbstractModule module : this.getModules()) {
+			controler.addOverridingModule(module);
+		}
 	}
 
 	// TODO Can these be summarized into one module?

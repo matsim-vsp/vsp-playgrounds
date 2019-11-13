@@ -53,6 +53,10 @@ import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import gunnar.ihop4.sampersutilities.SampersDifferentiatedPTScoringFunctionModule;
+import modalsharecalibrator.CalibrationModeExtractor;
+import modalsharecalibrator.ModalShareCalibrationConfigGroup;
+import modalsharecalibrator.ModeASCContainer;
+import modalsharecalibrator.WireModalShareCalibratorIntoMATSimControlerListener;
 
 /**
  *
@@ -65,7 +69,7 @@ public class WUMProductionRunner {
 	// static final String archivePath = "/Users/GunnarF/OneDrive - VTI/My
 	// Data/wum/";
 
-	static void scaleTransitCapacities(final Scenario scenario, final double factor) {
+	public static void scaleTransitCapacities(final Scenario scenario, final double factor) {
 		for (VehicleType vehicleType : scenario.getTransitVehicles().getVehicleTypes().values()) {
 			// vehicle capacities (in person units) get scaled DOWN
 			final VehicleCapacity capacity = vehicleType.getCapacity();
@@ -108,27 +112,19 @@ public class WUMProductionRunner {
 		Logger.getLogger(WUMProductionRunner.class).info(drivers + " drivers, " + nonDrivers + " non-drivers");
 	}
 
-	static void runProductionScenarioWithSampersDynamics() {
+	static void runProductionScenarioWithSampersDynamics(final String configFileName) {
 
 		final boolean terminateUponBoardingDenied = false;
-		final boolean removeModeInformation = true;
-		final String configFileName = "./config.xml";
-		// final String configFileName = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml";
+		// final boolean removeModeInformation = true;
+		final boolean removeModeInformation = false;
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new ModalShareCalibrationConfigGroup(),
+				new GreedoConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		final Greedo greedo;
-		if (config.getModule(GreedoConfigGroup.GROUP_NAME) != null) {
-			greedo = new Greedo();
-		} else {
-			greedo = null;
-		}
-
-		if (greedo != null) {
-			greedo.meet(config);
-		}
+		final Greedo greedo = new Greedo();
+		greedo.meet(config);
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		if (removeModeInformation) {
@@ -137,9 +133,7 @@ public class WUMProductionRunner {
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 		fixCarAvailability(scenario);
 		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
-		if (greedo != null) {
-			greedo.meet(scenario);
-		}
+		greedo.meet(scenario);
 
 		// {
 		// ValidationResult result =
@@ -166,11 +160,12 @@ public class WUMProductionRunner {
 				return components;
 			}
 		});
-		if (greedo != null) {
-			for (AbstractModule module : greedo.getModules()) {
-				controler.addOverridingModule(module);
-			}
-		}
+
+		greedo.meet(controler);
+		// for (AbstractModule module : greedo.getModules()) {
+		// controler.addOverridingModule(module);
+		// }
+
 		if (terminateUponBoardingDenied) {
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
@@ -189,12 +184,39 @@ public class WUMProductionRunner {
 			});
 		}
 
+		// the following for modal share calibration
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(ModeASCContainer.class);
+			}
+		});
+		if (ConfigUtils.addOrGetModule(config, ModalShareCalibrationConfigGroup.class).isOn()) {
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					bind(CalibrationModeExtractor.class).toInstance(new WUMModeExtractor(
+							ConfigUtils.addOrGetModule(getConfig(), ModalShareCalibrationConfigGroup.class), "home",
+							"work", "other", "intermediate_home"));
+					// addControlerListenerBinding().to(WireCadytsModalShareCalibratorIntoMATSimControlerListener.class);
+					addControlerListenerBinding().to(WireModalShareCalibratorIntoMATSimControlerListener.class);
+				}
+			});
+		}
+
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addControlerListenerBinding().to(WUMASCInstaller.class);
+			}
+		});
+
 		controler.run();
 	}
 
 	public static void main(String[] args) {
 		System.out.println("STARTED ...");
-		runProductionScenarioWithSampersDynamics();
+		runProductionScenarioWithSampersDynamics(args[0]);
 		System.out.println("... DONE");
 	}
 

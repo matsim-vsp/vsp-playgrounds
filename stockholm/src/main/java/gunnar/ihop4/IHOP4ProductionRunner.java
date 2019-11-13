@@ -71,6 +71,7 @@ import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
 import gunnar.ihop4.sampersutilities.SampersScoringFunctionModule;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
+import modalsharecalibrator.ModeASCContainer;
 
 /**
  *
@@ -778,6 +779,7 @@ public class IHOP4ProductionRunner {
 
 	static void runWithSampersDynamics(final Config config) {
 
+		Logger.getLogger(IHOP4ProductionRunner.class).warn("Overriding plans input file in-codes.");
 		config.plans().setInputFile("1PctAllModes_enriched.xml");
 
 		config.getModules().remove(IhopConfigGroup.GROUP_NAME);
@@ -798,7 +800,15 @@ public class IHOP4ProductionRunner {
 		for (AbstractModule module : greedo.getModules()) {
 			controler.addOverridingModule(module);
 		}
-
+		
+		// The following because Sampers scoring requires it
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(ModeASCContainer.class);
+			}
+		});
+		
 		controler.run();
 	}
 

@@ -19,22 +19,20 @@
  */
 package modalsharecalibrator;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 
 import com.google.inject.Inject;
+
+import modalsharecalibrator.ModalShareCalibrationConfigGroup.TransportModeDataSet;
+import modalsharecalibrator.ModalShareCalibrator.Mode;
 
 /**
  *
@@ -43,46 +41,51 @@ import com.google.inject.Inject;
  */
 public class WireModalShareCalibratorIntoMATSimControlerListener implements AfterMobsimListener {
 
+	// -------------------- CONSTANTS --------------------
+
 	private final ModalShareCalibrator calibrator;
 
+	private final ModeASCContainer modeASCContainer;
+
+	private final CalibrationModeExtractor modeExtractor;
+
+	// -------------------- CONSTRUCTION --------------------
+
 	@Inject
-	public WireModalShareCalibratorIntoMATSimControlerListener(final Config config) {
-
-		final ModalShareCalibrationConfigGroup modeCalibrConf = ConfigUtils.addOrGetModule(config,
+	public WireModalShareCalibratorIntoMATSimControlerListener(final Config config,
+			final ModeASCContainer modeASCContainer, final CalibrationModeExtractor modeExtractor) {
+		final ModalShareCalibrationConfigGroup calibrConf = ConfigUtils.addOrGetModule(config,
 				ModalShareCalibrationConfigGroup.class);
-		this.calibrator = new ModalShareCalibrator(modeCalibrConf.getInitialTrustRegion(),
-				modeCalibrConf.getIterationExponent());
-		for (ConfigGroup paramSet : modeCalibrConf
-				.getParameterSets(ModalShareCalibrationConfigGroup.TransportModeDataSet.TYPE)) {
-			final ModalShareCalibrationConfigGroup.TransportModeDataSet modeDataSet = (ModalShareCalibrationConfigGroup.TransportModeDataSet) paramSet;
-			this.calibrator.setRealShare(modeDataSet.getMode(), modeDataSet.getShare());
+		this.calibrator = new ModalShareCalibrator();
+		// calibrConf.getInitialTrustRegion(),
+		// calibrConf.getIterationExponent(), calibrConf.getUseSolutionDerivatives());
+		for (ConfigGroup paramSet : calibrConf.getParameterSets(TransportModeDataSet.TYPE)) {
+			final TransportModeDataSet modeDataSet = (TransportModeDataSet) paramSet;
+			this.calibrator.addMode(modeDataSet.getMode(), modeDataSet.getShare());
+			modeASCContainer.setASC(modeDataSet.getMode(), modeDataSet.getInitialASC());
 		}
+		this.modeASCContainer = modeASCContainer;
+		this.modeExtractor = modeExtractor;
 	}
 
-	private Map<String, Integer> extractLegModes(final Plan plan) {
-		final Map<String, Integer> mode2count = new LinkedHashMap<>();
-		for (PlanElement pe : plan.getPlanElements()) {
-			if (pe instanceof Leg) {
-				final String mode = ((Leg) pe).getMode();
-				mode2count.put(mode, 1 + mode2count.getOrDefault(mode, 0));
-			}
-		}
-		return mode2count;
-	}
+	// --------------- IMPLEMENTATION OF AfterMobsimListener ---------------
 
 	@Override
 	public void notifyAfterMobsim(final AfterMobsimEvent event) {
+		this.calibrator.clearSimulatedData();
 		for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
-			this.calibrator.updateSimulatedModeUsage(person.getId(), this.extractLegModes(person.getSelectedPlan()),
-					event.getIteration());
+			this.calibrator.setSimulatedData(person.getId(),
+					this.modeExtractor.extractTripModes(person.getSelectedPlan()), event.getIteration());
 		}
-		final Map<String, Double> deltaASC = this.calibrator.getDeltaASC(event.getIteration());
-		for (String mode : deltaASC.keySet()) {
-			final ModeParams modeParams = event.getServices().getConfig().planCalcScore().getScoringParameters(null)
-					.getOrCreateModeParams(mode);
-			modeParams.setConstant(modeParams.getConstant() + deltaASC.get(mode));
-			Logger.getLogger(this.getClass())
-					.info("Set ASC for mode " + mode + " to " + modeParams.getConstant() + ".");
+		// Logger.getLogger(this.getClass()).warn("Using hardwired sqrtMSA step size
+		// guess.");
+
+		for (Map.Entry<Mode, Double> ascEntry : this.calibrator.getDeltaASC().entrySet()) {
+			this.modeASCContainer.setASC(ascEntry.getKey().name,
+					this.modeASCContainer.getASC(ascEntry.getKey().name) + ascEntry.getValue());
+			Logger.getLogger(this.getClass()).info("Set ASC for mode " + ascEntry.getKey().name + " to "
+					+ this.modeASCContainer.getASC(ascEntry.getKey().name) + ".");
 		}
+
 	}
 }

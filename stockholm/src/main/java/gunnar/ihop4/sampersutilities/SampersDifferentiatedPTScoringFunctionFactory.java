@@ -28,6 +28,7 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import com.google.inject.Inject;
 
 import gunnar.StockholmConfigGroup;
+import modalsharecalibrator.ModeASCContainer;
 
 /**
  *
@@ -41,14 +42,14 @@ public class SampersDifferentiatedPTScoringFunctionFactory implements ScoringFun
 	private final StockholmConfigGroup sthlmConfig;
 
 	@Inject
-	public SampersDifferentiatedPTScoringFunctionFactory(final Config config) {
+	public SampersDifferentiatedPTScoringFunctionFactory(final Config config, final ModeASCContainer modeASCs) {
 
 		this.sthlmConfig = ConfigUtils.addOrGetModule(config, StockholmConfigGroup.class);
 		// System.out.println("free of charge = " + sthlmConfig.getFreeOfCharge());
 		// System.out.println("boat factor = " + sthlmConfig.getBoatFactor());
 		// System.exit(0);
 
-		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters());
+		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters(modeASCs));
 	}
 
 	@Override

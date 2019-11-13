@@ -46,7 +46,7 @@ public class AccelerationAnalysisIntervalPlot {
 	private Double legendRowDistance = null;
 
 	private boolean log = false;
-	
+
 	public void addLegend(final double legendLeftX, final double legendTopY, final double legendLineLength,
 			final double legendRowDistance) {
 		this.legendLeftX = legendLeftX;
@@ -54,11 +54,11 @@ public class AccelerationAnalysisIntervalPlot {
 		this.legendLineLength = legendLineLength;
 		this.legendRowDistance = legendRowDistance;
 	}
-	
+
 	public void setLog(final boolean log) {
 		this.log = log;
 	}
-	
+
 	private double logOrNot(final double val) {
 		if (this.log) {
 			return Math.signum(val) * Math.log(Math.abs(val));
@@ -69,8 +69,16 @@ public class AccelerationAnalysisIntervalPlot {
 
 	private double[] range = null;
 
+	private Double xGrid = null;
+	private Double yGrid = null;
+
 	public void setRange(final double xmin, final double xmax, final double ymin, final double ymax) {
 		this.range = new double[] { xmin, xmax, ymin, ymax };
+	}
+
+	public void setGrid(double xGrid, double yGrid) {
+		this.xGrid = xGrid;
+		this.yGrid = yGrid;
 	}
 
 	// private final List<Color> colors = Arrays.asList(Color.RED, Color.BLUE,
@@ -103,7 +111,7 @@ public class AccelerationAnalysisIntervalPlot {
 		return result;
 	}
 
-	public void render(String fileName) {
+	public void render(String fileName, final int deltaX) {
 
 		List<String> dummyLabels = new LinkedList<>();
 
@@ -114,13 +122,15 @@ public class AccelerationAnalysisIntervalPlot {
 			// final XYSeries meanLine = new XYSeries("mean" + seriesIndex);
 			final XYSeries upperLine = new XYSeries(newDummy(dummyLabels));
 			for (int itemIndex = 0; itemIndex < intervalSeries.getItemCount(); itemIndex++) {
-				final double yLow = this.logOrNot(intervalSeries.getYLowValue(itemIndex));
-				final double y = this.logOrNot(intervalSeries.getYValue(itemIndex));
-				final double yHigh = this.logOrNot(intervalSeries.getYHighValue(itemIndex));
-				if (!Double.isNaN(yLow) && !Double.isNaN(y) && !Double.isNaN(yHigh)) {
-					lowerLine.add(intervalSeries.getX(itemIndex).doubleValue(), yLow);
-					// meanLine.add(intervalSeries.getX(itemIndex).doubleValue(), y);
-					upperLine.add(intervalSeries.getX(itemIndex).doubleValue(), yHigh);
+				if (intervalSeries.getX(itemIndex).intValue() % deltaX == 0) {
+					final double yLow = this.logOrNot(intervalSeries.getYLowValue(itemIndex));
+					final double y = this.logOrNot(intervalSeries.getYValue(itemIndex));
+					final double yHigh = this.logOrNot(intervalSeries.getYHighValue(itemIndex));
+					if (!Double.isNaN(yLow) && !Double.isNaN(y) && !Double.isNaN(yHigh)) {
+						lowerLine.add(intervalSeries.getX(itemIndex).doubleValue(), yLow);
+						// meanLine.add(intervalSeries.getX(itemIndex).doubleValue(), y);
+						upperLine.add(intervalSeries.getX(itemIndex).doubleValue(), yHigh);
+					}
 				}
 			}
 			data.addSeries(lowerLine);
@@ -138,7 +148,7 @@ public class AccelerationAnalysisIntervalPlot {
 
 			chart.getSeriesCollection().setDashPattern(seriesIndex * 2 + 0, this.dashPatterns.get(seriesIndex));
 			chart.getSeriesCollection().setDashPattern(seriesIndex * 2 + 1, this.dashPatterns.get(seriesIndex));
-			
+
 			chart.getSeriesCollection().setPlotStyle(seriesIndex * 2 + 0, "sharp plot");
 			chart.getSeriesCollection().setPlotStyle(seriesIndex * 2 + 1, "sharp plot");
 		}
@@ -159,7 +169,10 @@ public class AccelerationAnalysisIntervalPlot {
 			chart.setManualRange(this.range);
 		} else {
 			chart.setAutoRange00(true, true);
+		}
 
+		if ((this.xGrid != null) && (this.yGrid != null)) {
+			chart.enableGrid(this.xGrid, this.yGrid);
 		}
 
 		chart.setLatexDocFlag(false);
@@ -220,7 +233,7 @@ public class AccelerationAnalysisIntervalPlot {
 			aap.addSeries(series4);
 		}
 
-		aap.render("NormalChart.tex");
+		aap.render("NormalChart.tex", 1);
 
 		System.out.println("DONE");
 	}

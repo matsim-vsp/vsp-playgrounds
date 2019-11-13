@@ -20,11 +20,12 @@
 package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.config.Config;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 
 import com.google.inject.Inject;
+
+import modalsharecalibrator.ModeASCContainer;
 
 /**
  *
@@ -36,8 +37,9 @@ public class SampersScoringFunctionFactory implements ScoringFunctionFactory {
 	private final SampersTourUtilityFunction utilityFunction;
 
 	@Inject
-	public SampersScoringFunctionFactory(Config config) {
-		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters());
+	public SampersScoringFunctionFactory(final ModeASCContainer modeASCs) {
+		// final SampersUtilityParameters params
+		this.utilityFunction = new SampersTourUtilityFunction(new SampersUtilityParameters(modeASCs));
 	}
 
 	@Override

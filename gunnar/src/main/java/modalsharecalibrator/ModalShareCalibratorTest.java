@@ -19,13 +19,15 @@
  */
 package modalsharecalibrator;
 
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
+
+import modalsharecalibrator.ModalShareCalibrator.Mode;
 
 /**
  *
@@ -64,35 +66,38 @@ public class ModalShareCalibratorTest {
 		}
 		final Double[] ascs = new Double[] { 0.0, 0.0, 0.0, 0.0 };
 
-		final double initialTrustRegion = 1.0;
-		final double iterationExponent = 0.5;
-		final ModalShareCalibrator calibrator = new ModalShareCalibrator(initialTrustRegion, iterationExponent);
+ 		final ModalShareCalibrator calibrator = new ModalShareCalibrator();
 
-		calibrator.setRealShare("car", 0.5);
-		calibrator.setRealShare("pt", 0.3);
-		calibrator.setRealShare("walk", 0.1);
-		calibrator.setRealShare("bike", 0.1);
+		calibrator.addMode("car", 0.5);
+		calibrator.addMode("pt", 0.3);
+		calibrator.addMode("walk", 0.1);
+		calibrator.addMode("bike", 0.1);
 
+		final Random rnd = new Random();
 		final int _R = 100;
 		for (int r = 0; r < _R; r++) {
 			for (int n = 0; n < _N; n++) {
 				final String choice = modes[this.indexOfMax(utils[n], ascs)];
-				calibrator.updateSimulatedModeUsage(Id.createPersonId(n), choice, r);
+				final Map<String, Integer> mode2count = new LinkedHashMap<>();
+				mode2count.put(choice, 1);
+
+				final String randomChoice = modes[rnd.nextInt(modes.length)];
+				mode2count.put(randomChoice, mode2count.getOrDefault(randomChoice, 0) + 1);
+
+				calibrator.setSimulatedData(Id.createPersonId(n), mode2count, r);
 			}
 
-			final Map<String, Double> simulatedCounts = calibrator.getMode2simulatedCounts();
-			final Map<Tuple<String, String>, Double> dSimulatedCounts_dASCs = calibrator
-					.get_dSimulatedCounts_dASCs(simulatedCounts);
-			final Map<String, Double> dQ_dASC = calibrator.get_dQ_dASCs(simulatedCounts, dSimulatedCounts_dASCs);
+			final Map<Mode, Integer> simulatedCounts = calibrator.newMode2simulatedCounts();
+			final Map<Mode, Double> deltaASC = calibrator.getDeltaASC();
+			ascs[0] += deltaASC.get(calibrator.getMode("car"));
+			ascs[1] += deltaASC.get(calibrator.getMode("pt"));
+			ascs[2] += deltaASC.get(calibrator.getMode("walk"));
+			ascs[3] += deltaASC.get(calibrator.getMode("bike"));
 
-			final Map<String, Double> deltaASC = calibrator.getDeltaASC(dQ_dASC, r);
-			ascs[0] += deltaASC.get("car");
-			ascs[1] += deltaASC.get("pt");
-			ascs[2] += deltaASC.get("walk");
-			ascs[3] += deltaASC.get("bike");
-
-			System.out.println(r + "\t" + calibrator.getObjectiveFunctionValue(simulatedCounts) + "\t" + simulatedCounts
-					+ "\t" + Arrays.asList(ascs));
+			System.out.println("\tcar\tsim=" + simulatedCounts.get(calibrator.getMode("car")));
+			System.out.println("\tpt\tsim=" + simulatedCounts.get(calibrator.getMode("pt")));
+			System.out.println("\twalk\tsim=" + simulatedCounts.get(calibrator.getMode("walk")));
+			System.out.println("\tbikt\tsim=" + simulatedCounts.get(calibrator.getMode("bike")));
 		}
 
 		System.out.println("... DONE");

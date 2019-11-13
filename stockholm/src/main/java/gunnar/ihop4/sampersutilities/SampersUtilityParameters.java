@@ -43,6 +43,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import gunnar.ihop2.regent.demandreading.PopulationCreator;
+import modalsharecalibrator.ModeASCContainer;
 
 /**
  *
@@ -133,11 +134,15 @@ public class SampersUtilityParameters {
 	private final ParameterPerStratum scheduleDelayTooShort_1_min = new ParameterPerStratum();
 	private final ParameterPerStratum scheduleDelayTooLong_1_min = new ParameterPerStratum();
 
-	private final ParameterPerStratum modeASC = new ParameterPerStratum();
+	// TODO Simplified treatment of ASCs, compatible with modal share calibration.
+	// private final ParameterPerStratum modeASC = new ParameterPerStratum();
+	// private final Map<String, Double> modeASC = new LinkedHashMap<>();
+	private final ModeASCContainer modeASCs;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SampersUtilityParameters() {
+	public SampersUtilityParameters(final ModeASCContainer modeASCs) {
+		this.modeASCs = modeASCs;
 
 		if (!Purpose.work.toString().equals(PopulationCreator.WORK)) {
 			throw new RuntimeException("Purpose.work has different String representation from PopulationCreator.WORK");
@@ -176,10 +181,14 @@ public class SampersUtilityParameters {
 		this.logDistanceCoeff_lnArgInKm
 				.addNext(new ConcreteParameterPerStratum(work, walk, 0, POSITIVE_INFINITY, -0.631));
 
-		this.modeASC.addNext(new ConcreteParameterPerStratum(work, car, 0, POSITIVE_INFINITY, 0.0));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(work, bike, 0, POSITIVE_INFINITY, 0.433));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(work, pt, 0, POSITIVE_INFINITY, -0.758));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(work, walk, 0, POSITIVE_INFINITY, 0.101));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(work, car, 0,
+		// POSITIVE_INFINITY, 0.0));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(work, bike, 0,
+		// POSITIVE_INFINITY, 0.433));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(work, pt, 0,
+		// POSITIVE_INFINITY, -0.758));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(work, walk, 0,
+		// POSITIVE_INFINITY, 0.101));
 
 		// OTHER
 
@@ -215,10 +224,14 @@ public class SampersUtilityParameters {
 
 		this.linDistanceCoeff_1_km.addNext(new ConcreteParameterPerStratum(other, walk, 0, POSITIVE_INFINITY, -0.3993));
 
-		this.modeASC.addNext(new ConcreteParameterPerStratum(other, car, 0, POSITIVE_INFINITY, 0.0));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(other, bike, 0, POSITIVE_INFINITY, -1.942));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(other, pt, 0, POSITIVE_INFINITY, -0.6944));
-		this.modeASC.addNext(new ConcreteParameterPerStratum(other, walk, 0, POSITIVE_INFINITY, 0.482));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(other, car, 0,
+		// POSITIVE_INFINITY, 0.0));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(other, bike, 0,
+		// POSITIVE_INFINITY, -1.942));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(other, pt, 0,
+		// POSITIVE_INFINITY, -0.6944));
+		// this.modeASC.addNext(new ConcreteParameterPerStratum(other, walk, 0,
+		// POSITIVE_INFINITY, 0.482));
 
 		// SCHEDULE DELAY COSTS.
 		// Should probably be derived from activity-specific travel costs. TODO Revisit!
@@ -237,8 +250,6 @@ public class SampersUtilityParameters {
 		}
 
 		// ========== BELOW: PARAMETERS THAT CURRENTLY ARE NOT USED! ==========
-
-		// TODO Add mode-specific ASCs!
 
 		// RECREATION
 
@@ -442,7 +453,8 @@ public class SampersUtilityParameters {
 	}
 
 	public double getModeASC(final Purpose purpose, final String mode, final Double income_money) {
-		return this.modeASC.getOrZero(purpose, mode, income_money);
+		// return this.modeASC.getOrZero(purpose, mode, income_money);
+		return this.modeASCs.getASC(mode);
 	}
 
 	public double getMonetaryDistanceCost_SEK_km() {
@@ -473,5 +485,4 @@ public class SampersUtilityParameters {
 	public double getPTTransferPenalty_min() {
 		return 5.0;
 	}
-
 }

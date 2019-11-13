@@ -98,4 +98,62 @@ public class StockholmConfigGroup extends ReflectiveConfigGroup {
 			return false;
 		}
 	}
+	
+	// -------------------- car ASC --------------------
+
+	private double carASC = 0.0;
+
+	@StringGetter("carASC")
+	public double getCarASC() {
+		return this.carASC;
+	}
+
+	@StringSetter("carASC")
+	public void setCarASC(final double carASC) {
+		this.carASC = carASC;
+	}
+
+	// -------------------- pt ASC --------------------
+
+	private double ptASC = 0.0;
+
+	@StringGetter("ptASC")
+	public double getPtASC() {
+		return this.ptASC;
+	}
+
+	@StringSetter("ptASC")
+	public void setPtASC(final double ptASC) {
+		this.ptASC = ptASC;
+	}
+
+	// -------------------- walk ASC --------------------
+
+	private double walkASC = 0.0;
+
+	@StringGetter("walkASC")
+	public double getWalkASC() {
+		return this.walkASC;
+	}
+
+	@StringSetter("walkASC")
+	public void setWalkASC(final double walkASC) {
+		this.walkASC = walkASC;
+	}
+
+	// -------------------- walk ASC --------------------
+
+	private double bikeASC = 0.0;
+
+	@StringGetter("bikeASC")
+	public double getBikeASC() {
+		return this.bikeASC;
+	}
+
+	@StringSetter("bikeASC")
+	public void setBikeASC(final double bikeASC) {
+		this.bikeASC = bikeASC;
+	}
+
+
 }
