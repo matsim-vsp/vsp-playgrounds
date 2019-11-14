@@ -29,6 +29,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.router.MainModeIdentifierImpl;
+import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -65,11 +67,11 @@ public class RunReLocationPlansSauber {
     	
     	if ( args.length==0 || args[0].equals("")) {
 
-	        planFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.4-10pct/input/berlin-v5.4-10pct.plans.xml.gz";	
-	        shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_10000_intersect_Id.shp";
-	        facilitiesFile = "D:/Arbeit/Berlin/ReLocation/combinedFacilities_BB_BE.xml.gz";
-	        outputPlans = "D:/Arbeit/Berlin/ReLocation/SecondBerlinBrandenburgPlans/PlansWithNewLocations10000_2.xml";
-	        logFile = "D:/Arbeit/Berlin/ReLocation/SecondBerlinBrandenburgPlans/log10000_2";
+	        planFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.4-1pct/input/berlin-v5.4-1pct.plans.xml.gz";
+            shapeFile = "D:/Arbeit/Berlin/ReLocation/BB_BE_Shape/grid_10000_intersect_Id.shp";
+            facilitiesFile = "D:/Arbeit/Berlin/ReLocation/combinedFacilities_BB_BE.xml.gz";
+            outputPlans = "D:/Arbeit/Berlin/ReLocation/zweiter Versuch/PlansWithNewLocations10000.xml";
+            logFile = "D:/Arbeit/Berlin/ReLocation/zweiter Versuch/log10000";
 	        
     	} else {
     		
@@ -137,37 +139,51 @@ public class RunReLocationPlansSauber {
 	private static void createNewPopulation(String outputPlans, Map<String, Geometry> allZones,
 			Map<String, List<Coord>> newLeisureFacilities, Map<String, List<Coord>> newShoppingFacilities,
 			Population population) {
-		
-		 Population outPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
-		 for (Person person : population.getPersons().values()) {
-            for (Plan plan : person.getPlans()) {
-                for (PlanElement planElement : plan.getPlanElements()) {
-                    if (planElement instanceof Activity) {
-                        Activity activity = (Activity) planElement;
-                        String act = inDistrict(allZones, activity.getCoord());
-                        if (activity.getType().contains("leisure")) {
-                            if (!(act.equals("noZone"))) {
-                                List<Coord> coords = newLeisureFacilities.get(act);
-                                if (coords != null) {
-                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
-                                }
-                            }
+
+        PopulationFactory populationFactory = population.getFactory();
+        MainModeIdentifierImpl mainModeIdentifier = new MainModeIdentifierImpl();
+
+        for (Person person : population.getPersons().values()) {
+
+            Plan newPlan = populationFactory.createPlan();
+            Plan plan = person.getSelectedPlan();
+
+            boolean stratlocation = false;
+
+            for(TripStructureUtils.Trip trip : TripStructureUtils.getTrips(plan)) {
+                if(!stratlocation) {
+                    stratlocation = true;
+                    newPlan.addActivity(trip.getOriginActivity());
+                }
+
+                newPlan.addLeg(populationFactory.createLeg(mainModeIdentifier.identifyMainMode(trip.getLegsOnly())));
+                newPlan.addActivity(trip.getDestinationActivity());
+                if (trip.getDestinationActivity().getType().contains("shopping")) {
+                    String act = inDistrict(allZones, trip.getDestinationActivity().getCoord());
+                    if (!(act.equals("noZone"))) {
+                        List<Coord> coords = newShoppingFacilities.get(act);
+                        if (coords != null) {
+                            trip.getDestinationActivity().setCoord(coords.get(random.nextInt(coords.size())));
+                            trip.getDestinationActivity().setLinkId(null);
                         }
-                        if (activity.getType().contains("shopping")) {
-                            if (!(act.equals("noZone"))) {
-                                List<Coord> coords = newShoppingFacilities.get(act);
-                                if (coords != null) {
-                                    activity.setCoord(coords.get(random.nextInt(coords.size())));
-                                }
-                            }
+                    }
+                } else if (trip.getDestinationActivity().getType().contains("leisure")) {
+                    String act = inDistrict(allZones, trip.getDestinationActivity().getCoord());
+                    if (!(act.equals("noZone"))) {
+                        List<Coord> coords = newLeisureFacilities.get(act);
+                        if (coords != null) {
+                            trip.getDestinationActivity().setCoord(coords.get(random.nextInt(coords.size())));
+                            trip.getDestinationActivity().setLinkId(null);
                         }
                     }
                 }
-            }
-            outPopulation.addPerson(person);
-        }
 
-        new PopulationWriter(outPopulation).write(outputPlans);
+            }
+            person.removePlan(plan);
+            person.addPlan(newPlan);
+        }
+        System.out.println("Writing");
+        new PopulationWriter(population).write(outputPlans);
 	}
 
     /**

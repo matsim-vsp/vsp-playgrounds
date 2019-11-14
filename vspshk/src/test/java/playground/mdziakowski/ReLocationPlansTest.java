@@ -52,8 +52,8 @@ public class ReLocationPlansTest {
 
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 
-//        PolygonFeatureFactory polygonFeatureFactory = new PolygonFeatureFactory.Builder()
-//                .create();
+        PolygonFeatureFactory polygonFeatureFactory = new PolygonFeatureFactory.Builder()
+                .create();
 
         Coordinate[] coordZone1 = new Coordinate[5];
         coordZone1[0] = new Coordinate(0, 0);
