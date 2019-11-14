@@ -150,6 +150,9 @@ public class RunReLocationNewPlans {
                         if (mode.equals("transit_walk") || mode.equals("non_network_walk")) {
                             removeElements.add(leg);
                         }
+                        if (mode.contains("pt")) {
+                            leg.setRoute(null);
+                        }
                     }
                 }
                 plan.getPlanElements().removeAll(removeElements);
