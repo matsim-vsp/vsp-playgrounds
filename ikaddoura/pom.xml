@@ -85,6 +85,27 @@
 		<scope>compile</scope>
 	  </dependency>
 
+	<!-- https://mvnrepository.com/artifact/org.geotools/gt-geometry -->
+<!-- 	<dependency> -->
+<!-- 	    <groupId>org.geotools</groupId> -->
+<!-- 	    <artifactId>gt-geometry</artifactId> -->
+<!-- 	    <version>12.1</version> -->
+<!-- 	</dependency> -->
+		
+		<!-- https://mvnrepository.com/artifact/org.geotools/gt-main -->
+	<dependency>
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-main</artifactId>
+		<version>21.1</version>
+	</dependency>
+	
+	<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>21.1</version>
+			<scope>runtime</scope>
+		</dependency>
+	
 	  <dependency>
 		  <groupId>org.locationtech.jts</groupId>
 		  <artifactId>jts-core</artifactId>
