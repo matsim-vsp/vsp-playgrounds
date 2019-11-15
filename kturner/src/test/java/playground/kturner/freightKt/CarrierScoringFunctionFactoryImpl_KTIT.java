@@ -11,6 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
@@ -63,7 +64,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
-		
+
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		final Controler controler = new Controler( scenario ) ;
 		CarrierScoringFunctionFactory scoringFunctionFactory = new CarrierScoringFunctionFactoryImpl_KT(scenario, scenario.getConfig().controler().getOutputDirectory()) {
@@ -81,7 +86,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
@@ -132,7 +137,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
@@ -166,7 +171,12 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
-		
+
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
+
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		final Controler controler = new Controler( scenario ) ;
 		CarrierScoringFunctionFactory scoringFunctionFactory = new CarrierScoringFunctionFactoryImpl_KT(scenario, scenario.getConfig().controler().getOutputDirectory()) {
@@ -185,7 +195,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
@@ -222,7 +232,12 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
-		
+
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
+
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		final Controler controler = new Controler( scenario ) ;
 		CarrierScoringFunctionFactory scoringFunctionFactory = new CarrierScoringFunctionFactoryImpl_KT(scenario, scenario.getConfig().controler().getOutputDirectory()) {
@@ -241,7 +256,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
@@ -275,7 +290,12 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
-		
+
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
+
+
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		final Controler controler = new Controler( scenario ) ;
 		
@@ -320,7 +340,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
@@ -354,7 +374,12 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
-		
+
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
+
+
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		
 		ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
@@ -408,7 +433,7 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 
 		controler.run();
