@@ -21,12 +21,7 @@ package playground.ikaddoura.savPricing.noiseSAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.noise.NoiseCalculationOnline;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.noise.data.NoiseContext;
-import org.matsim.contrib.noise.handler.LinkSpeedCalculation;
-import org.matsim.contrib.noise.handler.NoiseTimeTracker;
-import org.matsim.contrib.noise.handler.PersonActivityTracker;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 
@@ -48,19 +43,19 @@ public class NoiseComputationModuleSAV extends AbstractModule {
 		
 		NoiseConfigGroup noiseParameters = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
 
-		NoiseContext noiseContext = new NoiseContext(this.scenario);
-		this.bind(NoiseContext.class).toInstance(noiseContext);
-		
-		this.bind(NoiseTimeTracker.class).asEagerSingleton();
-		this.addEventHandlerBinding().to(NoiseTimeTracker.class);
-				
-		if (noiseParameters.isUseActualSpeedLevel()) {
-			this.addEventHandlerBinding().to(LinkSpeedCalculation.class).asEagerSingleton();
-		}
-		
-		if (noiseParameters.isComputePopulationUnits()) {
-			this.addEventHandlerBinding().toInstance(new PersonActivityTracker(noiseContext));
-		}
+//		NoiseContext noiseContext = new NoiseContext(this.scenario);
+//		this.bind(NoiseContext.class).toInstance(noiseContext);
+//		
+//		this.bind(NoiseTimeTracker.class).asEagerSingleton();
+//		this.addEventHandlerBinding().to(NoiseTimeTracker.class);
+//				
+//		if (noiseParameters.isUseActualSpeedLevel()) {
+//			this.addEventHandlerBinding().to(LinkSpeedCalculation.class).asEagerSingleton();
+//		}
+//		
+//		if (noiseParameters.isComputePopulationUnits()) {
+//			this.addEventHandlerBinding().toInstance(new PersonActivityTracker(noiseContext));
+//		}
 				
 		if (noiseParameters.isInternalizeNoiseDamages()) {
 			
@@ -69,7 +64,7 @@ public class NoiseComputationModuleSAV extends AbstractModule {
 			log.info("Internalizing noise damages. This requires that the default travel disutility is replaced by a travel distuility which accounts for noise tolls.");
 		}
 		
-		this.addControlerListenerBinding().to(NoiseCalculationOnline.class);
+//		this.addControlerListenerBinding().to(NoiseCalculationOnline.class);
 	}
 
 }

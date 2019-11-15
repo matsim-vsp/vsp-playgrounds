@@ -180,10 +180,10 @@ public class CNEIntegration {
 			
 			if (noisePricing) {	
 				ncg.setInternalizeNoiseDamages(true);
-				controler.addOverridingModule(new NoiseComputationModule(controler.getScenario()));
+				controler.addOverridingModule(new NoiseComputationModule());
 			} else {
 				ncg.setInternalizeNoiseDamages(false);
-				controler.addOverridingModule(new NoiseComputationModule(controler.getScenario()));
+				controler.addOverridingModule(new NoiseComputationModule());
 			}
 		}
 						
