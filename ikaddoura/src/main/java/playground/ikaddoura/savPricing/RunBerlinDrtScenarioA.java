@@ -252,7 +252,7 @@ public final class RunBerlinDrtScenarioA {
 		ConfigGroup[] modulesArray = new ConfigGroup[modules.size()];
 		config = berlin.prepareConfig(modules.toArray(modulesArray));
 
-		DrtConfigs.adjustDrtConfig(DrtConfigGroup.getSingleModeDrtConfig(config), config.planCalcScore());
+		DrtConfigs.adjustDrtConfig(DrtConfigGroup.getSingleModeDrtConfig(config), config.planCalcScore(), config.plansCalcRoute());
 
 		hasPreparedConfig = true;
 		return config;

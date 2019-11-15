@@ -125,8 +125,6 @@
 			<param name="numberOfThreads" value="1"/>
 			<!-- Operational Scheme, either door2door or stopbased. door2door by default -->
 			<param name="operationalScheme" value="door2door"/>
-			<!-- Prints detailed warnings for DRT customers that cannot be served or routed. Default is false. -->
-			<param name="plotDetailedWarnings" value="true"/>
 			<!-- If true, the max travel and wait times of a submitted request are considered hard constraints (the request gets rejected if one of the constraints is violated). If false, the max travel and wait times are considered soft constraints (insertion of a request that violates one of the constraints is allowed, but its cost is increased by additional penalty to make it relatively less attractive). Penalisation of insertions can be customised by injecting a customised InsertionCostCalculator.PenaltyCalculator -->
 			<param name="rejectRequestIfMaxWaitOrTravelTimeViolated" value="false"/>
 			<!-- Bus stop duration. -->
