@@ -61,7 +61,8 @@ public class Incident2Network {
 	public Incident2Network(Scenario scenario, String targetCRS) {
 		this.scenario = scenario;
 		this.carNetwork = loadCarNetwork(scenario);
-		ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, targetCRS);
+		ct = TransformationFactory.getCoordinateTransformation("EPSG:4326", targetCRS);
+//		ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, targetCRS);
 	}
 
 	public void computeIncidentPaths(Map<String, TrafficItem> trafficItems, Set<String> relevantTrafficItemIds) {

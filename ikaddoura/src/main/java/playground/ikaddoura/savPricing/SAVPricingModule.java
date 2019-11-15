@@ -37,8 +37,6 @@ import playground.ikaddoura.savPricing.disutility.SAVMoneyTravelDisutilityModule
 import playground.ikaddoura.savPricing.disutility.SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.savPricing.noiseSAV.NoiseComputationModuleSAV;
 
-import java.lang.annotation.Annotation;
-
 /**
  * Idea:
  * (1) Adjusts the sav (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer' / 'drt_optimizer')
@@ -152,7 +150,7 @@ public class SAVPricingModule extends AbstractModule {
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
 			}
-			install(new NoiseComputationModuleSAV(this.scenario));
+			install(new NoiseComputationModuleSAV());
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}

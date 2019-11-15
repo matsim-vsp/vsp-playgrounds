@@ -23,12 +23,12 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.noise.MergeNoiseCSVFile;
+import org.matsim.contrib.noise.MergeNoiseCSVFile.OutputFormat;
+import org.matsim.contrib.noise.NoiseAllocationApproach;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.NoiseOfflineCalculation;
-import org.matsim.contrib.noise.data.NoiseAllocationApproach;
-import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
-import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
-import org.matsim.contrib.noise.utils.MergeNoiseCSVFile.OutputFormat;
+import org.matsim.contrib.noise.ProcessNoiseImmissions;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;

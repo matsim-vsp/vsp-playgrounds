@@ -31,12 +31,10 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.analysis.spatial.Grid;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.noise.NoiseWriter;
-import org.matsim.contrib.noise.data.Grid;
-import org.matsim.contrib.noise.data.ReceiverPoint;
-import org.matsim.contrib.noise.events.NoiseEventsReader;
-import org.matsim.contrib.noise.utils.NoiseEventAnalysisHandler;
+import org.matsim.contrib.noise.NoiseEventsReader;
+import org.matsim.contrib.noise.ReceiverPoint;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -44,6 +42,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import playground.ikaddoura.noise.NoiseEventAnalysisHandler;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MoneyEventHandler;
 import playground.vsp.analysis.modules.userBenefits.UserBenefitsCalculator;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;
@@ -161,7 +160,7 @@ public class SpatialGridAnalysis {
 		File file = new File(outputFilePath);
 		file.mkdirs();
 				
-		Grid grid = new Grid(scenario);
+//		Grid grid = new Grid();
 		
 		// events	
 		
@@ -242,7 +241,8 @@ public class SpatialGridAnalysis {
 			} else {
 
 				// get the nearest receiver point 
-				Id<ReceiverPoint> homeRPid = grid.getActivityCoord2receiverPointId().get(homeActivity.getCoord());
+//				Id<ReceiverPoint> homeRPid = grid.getActivityCoord2receiverPointId().get(homeActivity.getCoord());
+				Id<ReceiverPoint> homeRPid = null; // FIXME
 				if (rp2homeLocations.containsKey(homeRPid)) {
 					double homeLocationsNew = rp2homeLocations.get(homeRPid) + 1;
 					rp2homeLocations.put(homeRPid, homeLocationsNew);
@@ -333,7 +333,7 @@ public class SpatialGridAnalysis {
 		values.add(rp2totalCausedNoiseCost);
 		values.add(rp2totalAffectedNoiseCost);
 		
-		NoiseWriter.write(outputFilePath, 7, headers, values, useCompression);
+//		NoiseWriter.write(outputFilePath, 7, headers, values, useCompression);
 
 	}
 

@@ -27,15 +27,17 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.noise.data.NoiseContext;
-import org.matsim.contrib.noise.events.NoiseEventCaused;
-import org.matsim.contrib.noise.handler.NoiseEventCausedHandler;
+import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseEventCaused;
+import org.matsim.contrib.noise.NoiseEventCausedHandler;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
@@ -56,7 +58,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	private EventsManager events;
 	
 	@Inject
-	private NoiseContext noiseContext;
+	private Scenario scenario;
 	
 	@Inject
 	private SAVPricingConfigGroup optAVParams;
@@ -82,7 +84,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	public void handleEvent(NoiseEventCaused event) {
 		
 		// negative amount since from here the amount is interpreted as costs
-		double amount = this.noiseContext.getNoiseParams().getNoiseTollFactor() * event.getAmount() * (-1);
+		double amount = ConfigUtils.addOrGetModule(scenario.getConfig(), NoiseConfigGroup.class).getNoiseTollFactor() * event.getAmount() * (-1);
 		this.amountSum = this.amountSum + amount;
 		
 		if (this.savPassengerTracker.getTaxiVehicles().contains(event.getCausingVehicleId())) {
