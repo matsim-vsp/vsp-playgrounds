@@ -22,8 +22,8 @@
  */
 package playground.ikaddoura.noise;
 
-import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
-import org.matsim.contrib.noise.utils.MergeNoiseCSVFile.OutputFormat;
+import org.matsim.contrib.noise.MergeNoiseCSVFile;
+import org.matsim.contrib.noise.MergeNoiseCSVFile.OutputFormat;
 
 /**
  * @author ikaddoura

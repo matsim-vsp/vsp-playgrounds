@@ -55,7 +55,8 @@ public class IncidentData2MATSim {
 	private final Logger log = Logger.getLogger(IncidentData2MATSim.class);
 
 	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/be_251.output_network.xml.gz";
-	private String crs = TransformationFactory.DHDN_GK4;
+//	private String crs = TransformationFactory.DHDN_GK4;
+	private String crs = "EPSG:31468";
 	
 	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-02/";
 	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/longterm-vs-shortterm_incidentData_berlin_2016-02-11/";

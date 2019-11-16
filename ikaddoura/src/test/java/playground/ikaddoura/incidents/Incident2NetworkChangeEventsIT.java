@@ -62,7 +62,8 @@ public class Incident2NetworkChangeEventsIT {
 		String startDateTime = "2016-03-15";
 		String endDateTime = "2016-03-15";
 
-		String crs = TransformationFactory.DHDN_GK4;
+//		String crs = TransformationFactory.DHDN_GK4;
+		String crs = "EPSG:31468";
 		
 		IncidentData2MATSim analysis = new IncidentData2MATSim(
 				networkFile,
