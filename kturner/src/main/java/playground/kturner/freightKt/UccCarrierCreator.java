@@ -213,7 +213,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 
 			//neue Schleife, da sonst innerhalb der Schleife das Set modifiziert wird..
 			for (CarrierService service: serviceToRemove){ 
-				carrier.getServices().remove(service);	//und lösche ihn aus dem normalen Carrier raus
+				carrier.getServices().remove(service.getId());	//und lösche ihn aus dem normalen Carrier raus
 			}
 
 			//bisherigen Carrier reinschreiben, darf auch ohne Service sein, 
