@@ -5,11 +5,17 @@ package playground.kturner.guiceMatsimWith;
 import com.google.inject.Module;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
-import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Injector;
+import org.matsim.core.controler.*;
+import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
+import org.matsim.core.router.TripRouter;
+import org.matsim.core.scenario.ScenarioByInstanceModule;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.facilities.Facility;
 
 public class Main {
 
@@ -27,21 +33,26 @@ public class Main {
 // ---------
 
         Config config = ConfigUtils.createConfig();
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        Scenario scenario = ScenarioUtils.createScenario(config);
         Module module = new AbstractModule(){
             @Override
-            public void install() {
-                bind (Abc.class).to(AbcImpl1.class);
-                if (getConfig().controler().getRoutingAlgorithmType() == ControlerConfigGroup.RoutingAlgorithmType.Dijkstra){
-                    bind(Helper.class).to(HelperImpl1.class).in(Singleton.class);
-                }else {
-                    bind(Helper.class).to(HelperImpl2.class).in(Singleton.class);
-                }
+            public void install() {                 //Das so lernen. Man braucht all diese vier!
+                install(new NewControlerModule());
+                install(new ControlerDefaultCoreListenersModule());
+                install(new ControlerDefaultsModule());
+                install(new ScenarioByInstanceModule(scenario));
             }
         };
         com.google.inject.Injector injector = Injector.createInjector(config, module); //Note google Injector and MATSim part here.
 
-        Abc abc = injector.getInstance(Abc.class);
-        abc.doSomething();
+        TripRouter tripRouter = injector.getInstance(TripRouter.class);
+//        String mainMode;
+//        Facility fromFacility;
+//        Facility toFacility;
+//        double departureTime;
+//        Person person;
+//        tripRouter.calcRoute(mainMode, fromFacility, toFacility, departureTime, person);
     }
 
     private static class HelperImpl2 implements Helper{
