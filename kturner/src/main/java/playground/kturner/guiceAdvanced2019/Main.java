@@ -6,7 +6,7 @@ public class Main {
 
     public static void main( String[] args) {
 
-        Module module = new AbstractModule(){
+        com.google.inject.Module module = new AbstractModule(){
             @Override protected void configure(){
                 bind (Abc.class).to(AbcImpl1.class);
                 bind (Helper.class).to(HelperImpl2.class);
