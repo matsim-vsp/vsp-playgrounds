@@ -13,6 +13,8 @@ public class Main {
             }
         };
         Injector injector = Guice.createInjector(module);
+        Abc abc = injector.getInstance(Abc.class);
+        abc.doSomething();
 
     }
 
