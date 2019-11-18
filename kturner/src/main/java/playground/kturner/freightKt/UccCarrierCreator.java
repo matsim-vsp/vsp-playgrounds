@@ -224,6 +224,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			if (!uccCarrier.getServices().isEmpty()){		//keinen UCC ohne Nachfrage übernehmen.
 				ArrayList<TimeWindow> timeWindows = calcTimeWindows(uccCarrier);
 				log.info("Zeitfenster: " + timeWindows.toString());
+				log.debug("UCC Depots links are now: "  + uccDepotsLinkIds2.toString());
 				for (TimeWindow tw : timeWindows) {
 					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug mit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
 							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime));  //TODO: Warum 3500? KMT feb/18
@@ -333,7 +334,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 
 		if (carrier.getId().toString().endsWith("TIEFKUEHL")){
 			for (Id<Link> linkId : uccDepotsLinkIds ){
-				CarrierVehicle carrierVehicle_lightEfrozen = CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen", Vehicle.class), linkId)
+				CarrierVehicle carrierVehicle_lightEfrozen = CarrierVehicle.Builder.newInstance(Id.create("light8telectro_frozen" +linkId.toString(), Vehicle.class), linkId)
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro_frozen", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
@@ -342,14 +343,14 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			}
 		} else {
 			for (Id<Link> linkId : uccDepotsLinkIds ){
-				CarrierVehicle carrierVehicle_lightE = CarrierVehicle.Builder.newInstance(Id.create("light8telectro", Vehicle.class), linkId)
+				CarrierVehicle carrierVehicle_lightE = CarrierVehicle.Builder.newInstance(Id.create("light8telectro_" +linkId.toString(), Vehicle.class), linkId)
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("light8telectro", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
 				carrier.getCarrierCapabilities().getCarrierVehicles()
 				.put(carrierVehicle_lightE.getId(), carrierVehicle_lightE);
 
-				CarrierVehicle carrierVehicle_mediumE = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro", Vehicle.class), linkId)
+				CarrierVehicle carrierVehicle_mediumE = CarrierVehicle.Builder.newInstance(Id.create("medium18telectro" +linkId.toString(), Vehicle.class), linkId)
 						.setType(vehicleTypes.getVehicleTypes().get(Id.create("medium18telectro", VehicleType.class)))
 						.setEarliestStart(uccOpeningTime).setLatestEnd(uccClosingTime)
 						.build();
@@ -379,7 +380,12 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			CarrierCapabilities tempCc = CarrierCapabilities.newInstance();
 			tempCc.setFleetSize(carrier.getCarrierCapabilities().getFleetSize());
 			for (CarrierVehicle cv : carrier.getCarrierCapabilities().getCarrierVehicles().values()){
-				String vehIdwLink = cv.getId().toString() + "_" + cv.getLocation().toString();
+                String vehIdwLink;
+                if (cv.getId().toString().contains(cv.getLocation().toString())){       //Depot location is already in vehicleId -> Don't add it again
+                    vehIdwLink = cv.getId().toString();
+                } else {                                                                //Depot location is missing in vehicleId -> add it
+                    vehIdwLink = cv.getId().toString() + "_" + cv.getLocation().toString();
+                }
 				String newVehId;
 				if (!nuOfVehPerId.containsKey(vehIdwLink)){
 					nuOfVehPerId.put(vehIdwLink, 1);
