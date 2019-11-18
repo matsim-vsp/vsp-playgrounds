@@ -1,4 +1,4 @@
-package playground.kturner.guiceMatsimWith;
+package playground.kturner.guiceAdvanced2019;
 
 // import com.google.inject.*;
 
@@ -27,7 +27,7 @@ import org.matsim.facilities.Facility;
 import java.net.URL;
 import java.util.List;
 
-public class Main {
+public class MainWControlerLoaded {
 
     public static void main( String[] args) {
 
