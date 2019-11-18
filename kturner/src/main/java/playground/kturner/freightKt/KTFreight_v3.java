@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
@@ -427,7 +428,7 @@ public class KTFreight_v3 {
 	 * @param network
 	 * @param carriers
 	 * @param vehicleTypes
-	 * @param config
+//	 * @param config
 	 */
 	private static void generateCarrierPlans(Network network, Carriers carriers, CarrierVehicleTypes vehicleTypes, Scenario scenario) {
 		Builder netBuilder = NetworkBasedTransportCosts.Builder.newInstance( network, vehicleTypes.getVehicleTypes().values() );
@@ -547,6 +548,9 @@ public class KTFreight_v3 {
 
 	//Ausgangspunkt für die MATSim-Simulation
 	private static void matsimRun(Scenario scenario, Carriers carriers) {
+		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( scenario.getConfig(), FreightConfigGroup.class );
+		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+
 		final Controler controler = new Controler( scenario ) ;
 
 		if (addingToll){		 //Add roadpricingScheme to MATSIM-Controler Added, KT, 02.12.2014
@@ -557,7 +561,7 @@ public class KTFreight_v3 {
 		CarrierPlanStrategyManagerFactory planStrategyManagerFactory =  createMyStrategymanager(); //Benötigt, da listener kein "Null" als StrategyFactory mehr erlaubt, KT 17.04.2015
 
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
-		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
+//		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 		
 //		//TODO: Added from KN: Prototype for injection of timeDependent and replanning with jsprit.
@@ -651,7 +655,7 @@ public class KTFreight_v3 {
 	 * Beachte: Wird das Mautschema mehrfach hinzugefügt, so wird die Maut mehrfach erhoben
 	 * 
 	 * @param netBuilder
-	 * @param config
+//	 * @param config
 	 * @param carriers
 	 */
 	static void generateRoadPricingCalculator(final Builder netBuilder, final Scenario scenario, final Carriers carriers) {
