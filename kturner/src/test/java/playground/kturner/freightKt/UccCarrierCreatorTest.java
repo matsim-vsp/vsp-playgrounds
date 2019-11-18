@@ -194,6 +194,7 @@ public class UccCarrierCreatorTest {
     	//Enthält UCC-Carrier Fahrzeuge für alle UCC-Depot-Standorte?
     	ArrayList<String> uccVehicleDepotString = new ArrayList<String>();
     	for (CarrierVehicle cv : uccCarrier.getCarrierCapabilities().getCarrierVehicles().values()){
+    		log.debug("UCCCarrier has vehicles at the following depots: " + cv.getId().toString() + " : " + cv.getLocation().toString() );
     		uccVehicleDepotString.add(cv.getLocation().toString());
     	}
     	Assert.assertTrue("Depots UCC-Carrier nicht korrekt", uccVehicleDepotString.containsAll(uccDepotsLinkIdsString));
