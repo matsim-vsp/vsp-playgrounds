@@ -1,5 +1,6 @@
 package playground.kturner.freightKt;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,8 +20,9 @@ import java.util.Arrays;
  *
  */
 public class UccCarrierCreatorTest {
-	
-	
+
+	private static final Logger log = Logger.getLogger(UccCarrierCreatorTest.class);
+
 	@Rule public MatsimTestUtils utils = new MatsimTestUtils();
 	
 	// Test, ob bei retailerNames = null alle Carrier extrahiert werden.
@@ -106,7 +108,9 @@ public class UccCarrierCreatorTest {
 		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles().values()) {
 			vehicleIds.add(cv.getId() );
 		}
-		
+
+		log.debug("CarrierVehicle Ids are: " + vehicleIds.toString());
+
 		//Test, if Capabilities are correct.
 		for (CarrierVehicle cv : gridCarrierCapabilties.getCarrierVehicles().values()) {
 			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0.getId() ) );
@@ -116,14 +120,16 @@ public class UccCarrierCreatorTest {
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different location", cv.getLocation() == gridVehicle3_i6_0.getLocation());
 				Assert.assertTrue(gridVehicle3_i6_0.toString()+ "has different latest EndTime", cv.getType() == gridVehicle3_i6_0.getType() );
 			}
-			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0b.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0b.getId() ) );
-			if (cv.getId() == gridVehicle3_i6_0b.getId()){
-				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different earliest StartTime", cv.getEarliestStartTime() == gridVehicle3_i6_0b.getEarliestStartTime());
-				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getLatestEndTime() == gridVehicle3_i6_0b.getLatestEndTime());
-				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different location", cv.getLocation() == gridVehicle3_i6_0b.getLocation());
-				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getType() == gridVehicle3_i6_0b.getType() );
-			
-			}
+
+			//Reading in vehicles with same id not longer supported (now using Maps instead of Lists.)
+//			Assert.assertTrue("Vehicle Id doesn't exists: "+ gridVehicle3_i6_0b.getId().toString(), vehicleIds.contains(gridVehicle3_i6_0b.getId() ) );
+//			if (cv.getId() == gridVehicle3_i6_0b.getId()){
+//				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different earliest StartTime", cv.getEarliestStartTime() == gridVehicle3_i6_0b.getEarliestStartTime());
+//				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getLatestEndTime() == gridVehicle3_i6_0b.getLatestEndTime());
+//				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different location", cv.getLocation() == gridVehicle3_i6_0b.getLocation());
+//				Assert.assertTrue(gridVehicle3_i6_0b.toString()+ "has different latest EndTime", cv.getType() == gridVehicle3_i6_0b.getType() );
+//
+//			}
 		}
 		
     }
