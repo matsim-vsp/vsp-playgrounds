@@ -186,10 +186,10 @@ public class UccCarrierCreatorTest {
     	for (CarrierService service : nonUccCarrier.getServices().values()){
     		serviceIdStringsofNonUccC.add(service.getId().toString());
     	}
-    	Assert.assertFalse("Service #3 nicht nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("3"));
-    	Assert.assertFalse("Service #4 nicht nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("4"));
-    	Assert.assertFalse("Service #6 nicht nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("6"));
-    	Assert.assertFalse("Service #10 nicht nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("10"));
+    	Assert.assertFalse("Service #3 nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("3"));
+    	Assert.assertFalse("Service #4 nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("4"));
+    	Assert.assertFalse("Service #6 nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("6"));
+    	Assert.assertFalse("Service #10 nicht aus NonUcc entfernt", serviceIdStringsofNonUccC.contains("10"));
     	
     	//Enthält UCC-Carrier Fahrzeuge für alle UCC-Depot-Standorte?
     	ArrayList<String> uccVehicleDepotString = new ArrayList<String>();
