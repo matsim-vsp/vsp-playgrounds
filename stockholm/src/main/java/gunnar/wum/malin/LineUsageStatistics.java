@@ -46,7 +46,7 @@ import floetteroed.utilities.Time;
  * @author Gunnar Flötteröd
  *
  */
-class LineUsageStatistics implements PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
+public class LineUsageStatistics implements PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
 		VehicleArrivesAtFacilityEventHandler {
 
 	private class Entry {
@@ -86,7 +86,7 @@ class LineUsageStatistics implements PersonEntersVehicleEventHandler, PersonLeav
 
 	private final Set<Id<Person>> travelers = new LinkedHashSet<>();
 
-	LineUsageStatistics(final Predicate<Id<Vehicle>> vehicleSelector, final Predicate<Double> timeSelector,
+	public LineUsageStatistics(final Predicate<Id<Vehicle>> vehicleSelector, final Predicate<Double> timeSelector,
 			final Predicate<Id<Person>> personSelector, final Predicate<Id<TransitStopFacility>> stopSelector,
 			final Scenario scenario) {
 		this.vehicleSelector = vehicleSelector;
@@ -109,7 +109,7 @@ class LineUsageStatistics implements PersonEntersVehicleEventHandler, PersonLeav
 		}
 	}
 
-	Set<Id<Person>> getTravelers() {
+	public Set<Id<Person>> getTravelers() {
 		return this.travelers;
 	}
 
@@ -134,7 +134,7 @@ class LineUsageStatistics implements PersonEntersVehicleEventHandler, PersonLeav
 		}
 	}
 
-	String getEntryExitLog() {
+	public String getEntryExitLog() {
 		final StringBuffer result = new StringBuffer();
 		for (Entry entry : this.entries) {
 			result.append(entry.toString());

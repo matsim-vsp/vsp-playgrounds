@@ -39,7 +39,7 @@ public class AccelerationExperimentData {
 	private final File parentFolder;
 
 	// -------------------- MEMBERS --------------------
-
+	
 	private final Double[][] betas;
 	private final Double[][] realizedLambdas;
 	private final Double[][] realizedUtilities;

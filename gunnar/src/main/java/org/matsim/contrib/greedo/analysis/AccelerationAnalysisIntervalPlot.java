@@ -45,6 +45,9 @@ public class AccelerationAnalysisIntervalPlot {
 	private Double legendLineLength = null;
 	private Double legendRowDistance = null;
 
+	private Double xTick = null;
+	private Double yTick = null;
+	
 	private boolean log = false;
 
 	public void addLegend(final double legendLeftX, final double legendTopY, final double legendLineLength,
@@ -53,6 +56,14 @@ public class AccelerationAnalysisIntervalPlot {
 		this.legendTopY = legendTopY;
 		this.legendLineLength = legendLineLength;
 		this.legendRowDistance = legendRowDistance;
+	}
+	
+	public void setXTick(final double xTick) {
+		this.xTick = xTick;
+	}
+	
+	public void setYTick(final double yTick) {
+		this.yTick = yTick;
 	}
 
 	public void setLog(final boolean log) {
@@ -175,6 +186,13 @@ public class AccelerationAnalysisIntervalPlot {
 			chart.enableGrid(this.xGrid, this.yGrid);
 		}
 
+		if (this.xTick != null) {
+			chart.getXAxis().setLabels(this.xTick);
+		}
+		if (this.yTick != null) {
+			chart.getYAxis().setLabels(this.yTick);
+		}
+		
 		chart.setLatexDocFlag(false);
 
 		String result = chart.toLatex(6, 4);
