@@ -53,7 +53,6 @@ public class ODDemandGenerator<L> {
 	private final PersonCreator personCreator;
 	private final Function<String, L> locationProvider;
 	private final boolean addEmptyRoute;
-	private final PopulationFactory pf;
 
 	public ODDemandGenerator(Scenario scenario, Function<String, L> locationProvider, boolean addEmptyRoute) {
 		this(scenario, locationProvider, addEmptyRoute, new DefaultActivityCreator(scenario),
@@ -67,11 +66,11 @@ public class ODDemandGenerator<L> {
 		this.addEmptyRoute = addEmptyRoute;
 		this.activityCreator = activityCreator;
 		this.personCreator = personCreator;
-		pf = scenario.getPopulation().getFactory();
 	}
 
 	public void generateSinglePeriod(Matrix matrix, String fromActivityType, String toActivityType, String mode,
 			double startTime, double duration, double flowCoeff) {
+		PopulationFactory pf = scenario.getPopulation().getFactory();
 		Iterable<Entry> entryIter = MatrixUtils.createEntryIterable(matrix);
 
 		for (Entry e : entryIter) {
