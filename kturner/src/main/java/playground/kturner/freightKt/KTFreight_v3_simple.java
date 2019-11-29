@@ -52,8 +52,8 @@ import org.matsim.contrib.freight.jsprit.MatsimJspritFactory;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.contrib.freight.jsprit.NetworkRouter;
-import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
-import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
+import org.matsim.contrib.freight.controler.CarrierPlanStrategyManagerFactory;
+import org.matsim.contrib.freight.controler.CarrierScoringFunctionFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
@@ -388,7 +388,11 @@ public class KTFreight_v3_simple {
 	//Ausgangspunkt für die MATSim-Simulation
 	private static void matsimRun(Scenario scenario, Carriers carriers) {
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( scenario.getConfig(), FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 		final Controler controler = new Controler( scenario ) ;
 

@@ -26,12 +26,11 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.noise.MergeNoiseCSVFile;
+import org.matsim.contrib.noise.NoiseAllocationApproach;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.NoiseModule;
-import org.matsim.contrib.noise.data.NoiseAllocationApproach;
-import org.matsim.contrib.noise.data.NoiseContext;
-import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
-import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
+import org.matsim.contrib.noise.ProcessNoiseImmissions;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -49,9 +48,7 @@ public class RunBaseCase {
 		Config config = ConfigUtils.loadConfig( args[0], new NoiseConfigGroup() );
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
-		
-		NoiseContext noiseContext = null;
-		
+				
 		NoiseConfigGroup noiseParameters = (NoiseConfigGroup) config.getModules().get(NoiseConfigGroup.GROUP_NAME);
 		
 		noiseParameters.setInternalizeNoiseDamages(false);
@@ -112,10 +109,8 @@ public class RunBaseCase {
 		tunnelLinkIDs.add(Id.create("73496", Link.class));
 		tunnelLinkIDs.add(Id.create("73497", Link.class));
 		noiseParameters.setTunnelLinkIDsSet(tunnelLinkIDs);
-		
-		noiseContext = new NoiseContext(controler.getScenario());
-		
-		controler.addOverridingModule(new NoiseModule(scenario));
+				
+		controler.addOverridingModule(new NoiseModule());
 		controler.run();
 		
 		// delete unnecessary iterations folder here.

@@ -22,8 +22,8 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.controler.CarrierModule;
 import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
-import org.matsim.contrib.freight.replanning.CarrierPlanStrategyManagerFactory;
-import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
+import org.matsim.contrib.freight.controler.CarrierPlanStrategyManagerFactory;
+import org.matsim.contrib.freight.controler.CarrierScoringFunctionFactory;
 import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
 import org.matsim.contrib.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.contrib.roadpricing.RoadPricingSchemeImpl;
@@ -66,7 +66,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
 
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -173,8 +177,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
 
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
-
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -234,8 +241,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
 
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
-
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -292,8 +302,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
 
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
-
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -376,8 +389,11 @@ public class CarrierScoringFunctionFactoryImpl_KTIT {
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration );
 
 		FreightConfigGroup freightConfig = ConfigUtils.addOrGetModule( config, FreightConfigGroup.class );
-		freightConfig.setPhysicallyEnforceTimeWindowBeginnings( true );
-
+		if ( true ){
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.enforceBeginnings );
+		} else{
+			freightConfig.setTimeWindowHandling( FreightConfigGroup.TimeWindowHandling.ignore );
+		}
 
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
