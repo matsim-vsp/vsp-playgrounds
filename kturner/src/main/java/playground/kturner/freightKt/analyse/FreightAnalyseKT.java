@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.contrib.freight.carrier.CarrierPlanXmlReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
-import org.matsim.contrib.freight.carrier.Carriers;
+import org.matsim.contrib.freight.carrier.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -32,7 +29,7 @@ public class FreightAnalyseKT {
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIa-CityMautE/Run_1/" ;; 	//City-Maut mit electro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleToursSingleTimeWindow/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/FoodOpenBerlin/I-Base/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
 
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
 	
@@ -59,7 +56,7 @@ public class FreightAnalyseKT {
 			File carrierFile = new File(RUN_DIR+ "output_carriers.xml.gz");
 			File vehicleTypefile = new File(RUN_DIR+ "output_vehicleTypes.xml.gz");
 			
-			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());		
+			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());
 			config.plans().setInputFile(populationFile.getAbsolutePath());
 			config.network().setInputFile(networkFile.getAbsolutePath());
 			
@@ -84,12 +81,12 @@ public class FreightAnalyseKT {
 			log.info("Reading the event file... Done.");
 			
 			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
-//			for (Carrier carrier : carriers.getCarriers().values()){
-//				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
-//				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
-//			}
-//			
-//			tripWriter.writeResultsPerVehicleTypes();
+			for (Carrier carrier : carriers.getCarriers().values()){
+				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
+				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
+			}
+
+			tripWriter.writeResultsPerVehicleTypes();
 			tripWriter.writeTourResultsAllCarrier();
 			
 			
