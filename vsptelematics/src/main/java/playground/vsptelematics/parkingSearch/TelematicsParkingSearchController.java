@@ -167,7 +167,12 @@ public class TelematicsParkingSearchController {
                     addRoutingModuleBinding(TransportMode.car).toInstance(routingModuleCar);
                     bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
                     bind(WalkLegFactory.class).asEagerSingleton();
-                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
+
+//                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
+                    // we were unable to find out what ParkingSearchPrepareForSimImpl was doing that the default method was not doing.  Since the default
+                    // method has moved on, the parking variant is no longer there.  Am thus commenting this one here out as well and hoping for the best.
+                    // kai, dec'19
+
                     this.install(new ParkingSearchQSimModule());
                     bind(ParkingRouter.class).to(WithinDayParkingRouter.class);
 
