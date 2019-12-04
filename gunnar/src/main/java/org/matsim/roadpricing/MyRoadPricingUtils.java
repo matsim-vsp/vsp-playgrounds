@@ -23,6 +23,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.roadpricing.CalcPaidToll;
+import org.matsim.roadpricing.RoadPricingScheme;
 
 /**
  *

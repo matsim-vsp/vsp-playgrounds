@@ -45,9 +45,14 @@ public class AccelerationAnalysisIntervalPlot {
 	private Double legendLineLength = null;
 	private Double legendRowDistance = null;
 
+	private Double relLegendLeftX = null;
+	private Double relLegendTopY = null;
+	private Double relLegendLineLength = null;
+	private Double relLegendRowDistance = null;
+
 	private Double xTick = null;
 	private Double yTick = null;
-	
+
 	private boolean log = false;
 
 	public void addLegend(final double legendLeftX, final double legendTopY, final double legendLineLength,
@@ -57,11 +62,20 @@ public class AccelerationAnalysisIntervalPlot {
 		this.legendLineLength = legendLineLength;
 		this.legendRowDistance = legendRowDistance;
 	}
-	
+
+	public void addRelativeLegend(final double relLegendLeftX, final double relLegendTopY,
+			final double relLegendLineLength, final double relLegendRowDistance) {
+		this.relLegendLeftX = relLegendLeftX;
+		this.relLegendTopY = relLegendTopY;
+		this.relLegendLineLength = relLegendLineLength;
+		this.relLegendRowDistance = relLegendRowDistance;
+
+	}
+
 	public void setXTick(final double xTick) {
 		this.xTick = xTick;
 	}
-	
+
 	public void setYTick(final double yTick) {
 		this.yTick = yTick;
 	}
@@ -164,6 +178,17 @@ public class AccelerationAnalysisIntervalPlot {
 			chart.getSeriesCollection().setPlotStyle(seriesIndex * 2 + 1, "sharp plot");
 		}
 
+		// override absolute by relative legend if available
+
+		if ((this.range != null) && (this.relLegendLeftX != null)) {
+			this.addLegend(this.range[0] + this.relLegendLeftX * (this.range[1] - this.range[0]),
+					this.range[2] + this.relLegendTopY * (this.range[3] - this.range[2]),
+					this.relLegendLineLength * (this.range[1] - this.range[0]),
+					this.relLegendRowDistance * (this.range[3] - this.range[2]));
+		}
+
+		// override absolute by relative legend if available
+
 		if (this.legendLeftX != null) {
 			for (int seriesIndex = 0; seriesIndex < this.allSeries.size(); seriesIndex++) {
 				final int lineIndex = chart.add(
@@ -192,7 +217,7 @@ public class AccelerationAnalysisIntervalPlot {
 		if (this.yTick != null) {
 			chart.getYAxis().setLabels(this.yTick);
 		}
-		
+
 		chart.setLatexDocFlag(false);
 
 		String result = chart.toLatex(6, 4);
