@@ -29,9 +29,12 @@ public class FreightAnalyseKT {
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIa-CityMautE/Run_1/" ;; 	//City-Maut mit electro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/FoodOpenBerlin/I-Base/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/FoodOpenBerlin/I-Base/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
+//
+//    private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base2000it_NwCE/";
+//    private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_2000it/";
+	private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_Pickup_2000it/";
 
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
@@ -48,15 +51,16 @@ public class FreightAnalyseKT {
 	
 		private void run() throws UncheckedIOException, IOException {
 			
-			//TODO: Why is the configfile not used as .gz?
-			File configFile = new File(RUN_DIR + "output_config.xml");
+//			TODO: Why is the configfile not used as .gz?
+//			File configFile = new File(RUN_DIR + "output_config.xml");
 //			File configFile = new File(RUN_DIR + "output_config.xml.gz");
 			File populationFile = new File(RUN_DIR + "output_plans.xml.gz");
 			File networkFile = new File(RUN_DIR+ "output_network.xml.gz");
+			File eventsFile = new File(RUN_DIR + "output_events.xml.gz");
 			File carrierFile = new File(RUN_DIR+ "output_carriers.xml.gz");
 			File vehicleTypefile = new File(RUN_DIR+ "output_vehicleTypes.xml.gz");
 			
-			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());
+			Config config = ConfigUtils.createConfig();
 			config.plans().setInputFile(populationFile.getAbsolutePath());
 			config.network().setInputFile(networkFile.getAbsolutePath());
 			
@@ -72,12 +76,12 @@ public class FreightAnalyseKT {
 			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
 			eventsManager.addHandler(tripHandler);
 					
-			int iteration = config.controler().getLastIteration();
-			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+//			int iteration = config.controler().getLastIteration();
+//			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
 			
 			log.info("Reading the event file...");
 			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
-			reader.readFile(eventsFile);
+			reader.readFile(eventsFile.getAbsolutePath());
 			log.info("Reading the event file... Done.");
 			
 			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
@@ -89,9 +93,6 @@ public class FreightAnalyseKT {
 			tripWriter.writeResultsPerVehicleTypes();
 			tripWriter.writeTourResultsAllCarrier();
 			
-			
 			log.info("### Analysis DONE");
-			
 	}
-
 }
