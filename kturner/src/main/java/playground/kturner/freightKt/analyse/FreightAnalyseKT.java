@@ -30,10 +30,11 @@ public class FreightAnalyseKT {
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/FoodOpenBerlin/I-Base/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
-//
-//    private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base2000it_NwCE/";
-//    private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_2000it/";
-	private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_Pickup_2000it/";
+
+	private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base2000it/";
+//  private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base2000it_NwCE/";
+//  private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_2000it/";
+//	private static final String RUN_DIR = "../../tubCloud/Shared/vsp_zerocuts/scenarios/Fracht_LEH_OpenBln_oneTW/output/I-Base_NwCE_BVWP_Pickup_2000it/";
 
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
@@ -84,15 +85,16 @@ public class FreightAnalyseKT {
 			reader.readFile(eventsFile.getAbsolutePath());
 			log.info("Reading the event file... Done.");
 			
-			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
-			for (Carrier carrier : carriers.getCarriers().values()){
-				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
-				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
-			}
+//			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
+//			for (Carrier carrier : carriers.getCarriers().values()){
+//				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
+//				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
+//			}
+//
+//			tripWriter.writeResultsPerVehicleTypes();
+//			tripWriter.writeTourResultsAllCarrier();
 
-			tripWriter.writeResultsPerVehicleTypes();
-			tripWriter.writeTourResultsAllCarrier();
-			
+			new WriteCarrierScoreInfos(carriers, new File(OUTPUT_DIR + "#CarrierScoreInformation.txt"));
 			log.info("### Analysis DONE");
 	}
 }
