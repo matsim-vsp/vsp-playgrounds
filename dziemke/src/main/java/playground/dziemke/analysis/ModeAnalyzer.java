@@ -24,11 +24,21 @@ public class ModeAnalyzer {
     public static final Logger LOG = Logger.getLogger(ModalShareDiagramCreator.class);
 
     public static void main(String[] args) {
-        String directory = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/n2-01/";
+        // String directory = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/n2-01/";
+        // String runId = "berlin-v5.3-10pct-ctd-n2-01";
+        // String plansFile = directory + runId + ".experiencedPlans_withResidence.xml.gz";
+        // String configFile = directory + runId + ".output_config_adjusted.xml";
 
-        String plansFile = directory + "berlin-v5.3-10pct-ctd-n2-01.experiencedPlans_withResidence.xml.gz";
-        String configFile = directory + "berlin-v5.3-10pct-ctd-n2-01.output_config_adjusted.xml";
-        String modeFileName = directory + "modes.txt";
+        String directory = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-17/output/";
+        String runId = "berlin-v5.5-1pct-17";
+        // String plansFile = directory + "berlin-v5.5-1pct-15.output_plans.xml.gz";
+        // String plansFile = directory + "berlin-v5.5-1pct-15.experiencedPlans_withResidence_inside.xml.gz";
+        String configFile = directory + runId + ".output_config.xml";
+        String plansFile = directory + runId + ".output_plans_no-freight_berlin.xml.gz";
+        String modeFileName = directory + "modes_berlin.txt";
+
+//        String plansFile = directory + runId + ".output_plans_no-freight.xml.gz";
+//        String modeFileName = directory + "modes.txt";
 
         Map<String,Double> modeCnt = new TreeMap<>() ;
         Set<String> modes;
@@ -57,7 +67,16 @@ public class ModeAnalyzer {
             Plan plan = person.getSelectedPlan();
             List<TripStructureUtils.Trip> trips = TripStructureUtils.getTrips(plan);
             for (TripStructureUtils.Trip trip : trips) {
-                String mode = identifyMainMode(trip.getTripElements());
+                Leg firstLegOfTrip = (Leg) trip.getTripElements().get(0);
+                String mode;
+
+                // If routingMode is available
+                mode = (String) firstLegOfTrip.getAttributes().getAttribute("routingMode");
+
+                // If not, use old main mode detection
+                if (mode == null) {
+                    mode = identifyMainMode(trip.getTripElements());
+                }
 
                 Double cnt = modeCnt.get(mode);
                 if ( cnt==null ) {
@@ -80,7 +99,7 @@ public class ModeAnalyzer {
                 if (cnt!=null) {
                     share = cnt/sum;
                 }
-                LOG.info("-- mode share of mode " + mode + " = " + share);
+                LOG.info("Mode share of " + mode + " = " + share);
                 modeOut.write("\t" + share);
 
                 Map<Integer, Double> modeHistory = modeHistories.get(mode) ;
