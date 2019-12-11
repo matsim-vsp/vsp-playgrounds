@@ -10,8 +10,8 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -21,8 +21,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.dziemke.utils.ShapeFileUtils;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author dziemke
@@ -42,11 +40,11 @@ public class PopulationResidenceFilter {
     private String unknownArea = UNKNOWN_AREA;
 
     public static void main(String[] args) {
-        String baseDir = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01";
-
-        String networkFile = baseDir + "berlin-v5.3-10pct-ctd-b-01.output_network.xml.gz";
-        String inputPopulationFile = baseDir + "be_257.experiencedPlans.xml.gz";
-        String outputPopulationFile = baseDir + "be_257.experiencedPlansWithResidence.xml.gz";
+        String baseDir = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01/";
+        String runId = "berlin-v5.3-10pct-ctd-b-01";
+        String networkFile = baseDir + runId + ".output_network.xml.gz";
+        String inputPopulationFile = baseDir + runId + ".experiencedPlans.xml.gz";
+        String outputPopulationFile = baseDir + runId + ".experiencedPlansWithResidence.xml.gz";
 
         String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
         String attributeCaption = "NR";
@@ -54,15 +52,15 @@ public class PopulationResidenceFilter {
 
         PopulationResidenceFilter populationResidenceFilter = new PopulationResidenceFilter(networkFile, inputPopulationFile,
                 areaShapeFile, attributeCaption, distinctiveFeatureId);
-        populationResidenceFilter.changeIdentifier("BERLIN", "BRANDENBURG", "unknown");
+        populationResidenceFilter.changeIdentifier("berlin", "brandenburg", "unknown");
         populationResidenceFilter.assignResidenceAttribute();
         populationResidenceFilter.writePopulation(outputPopulationFile);
     }
 
     public PopulationResidenceFilter(String networkFile, String populationFile, String areaShapeFile, String attributeCaption, String distinctiveFeatureId) {
-        Config config = ConfigUtils.createConfig();
-        config.network().setInputFile(networkFile);
-        Scenario scenario = ScenarioUtils.loadScenario(config);
+        Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
+        MatsimNetworkReader matsimNetworkReader = new MatsimNetworkReader(scenario.getNetwork());
+        matsimNetworkReader.readFile(networkFile);
         this.network = scenario.getNetwork();
 
         Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(areaShapeFile);
@@ -70,20 +68,6 @@ public class PopulationResidenceFilter {
 
         new PopulationReader(scenario).readFile(populationFile);
         this.population = scenario.getPopulation();
-    }
-
-    public PopulationResidenceFilter(String inputPopulationFile) {
-        Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-        new PopulationReader(scenario).readFile(inputPopulationFile);
-        this.population = scenario.getPopulation();
-
-        for (Person person : population.getPersons().values()) {
-            if (person.getSelectedPlan().getPlanElements().size() > 0) {
-                if (person.getAttributes().getAttribute(RESIDENCE_ATTRIBUTE_LABEL) == null) {
-                    throw new IllegalArgumentException("Residence attribute must already exist.");
-                }
-            }
-        }
     }
 
     public void changeIdentifier(String interiorOfArea, String exteriorOfArea, String unknownArea) {
