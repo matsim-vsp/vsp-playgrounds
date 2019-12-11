@@ -13,8 +13,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.dziemke.analysis.general.matsim.*;
-import playground.dziemke.analysis.general.srv.Srv2MATSimPopulation;
-import playground.dziemke.analysis.general.srv.SrvTrip;
 import playground.dziemke.analysis.general.srv.SrvTripFilterImpl;
 import playground.vsp.analysis.utils.GnuplotUtils;
 
@@ -90,9 +88,9 @@ public class AnalyzeAndCompareTrips {
 		Scenario scenario = ScenarioUtils.loadScenario(networkConfig);
 		Network network = scenario.getNetwork();
 
-		PopulationResidenceFilter populationResidenceFilter = new PopulationResidenceFilter(EXPERIENCED_PLANS_FILE_WITH_RESIDENCE);
+		PopulationAttributeFilter populationAttributeFilter = new PopulationAttributeFilter(EXPERIENCED_PLANS_FILE_WITH_RESIDENCE, "residence");
 		// Population population = populationResidenceFilter.getFullPopulation();
-		Population population = populationResidenceFilter.getFilteredPopulation(PopulationResidenceFilter.INTERIOR_OF_AREA);
+		Population population = populationAttributeFilter.getFilteredPopulation(PopulationResidenceFilter.INTERIOR_OF_AREA);
 
 		Population2TripsParser population2TripsParser = new Population2TripsParser(population, network, config.plansCalcRoute().getNetworkModes());
 		List<MatsimTrip> matsimTrips = population2TripsParser.parse();
