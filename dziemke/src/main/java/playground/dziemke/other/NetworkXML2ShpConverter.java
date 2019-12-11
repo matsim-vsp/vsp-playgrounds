@@ -9,15 +9,15 @@ public class NetworkXML2ShpConverter {
 
 //		String networkFile = "../../../shared-svn/projects/maxess/data/kenya/network/2016-10-19_network_detailed.xml";
 //		String networkFile = "../../runs-svn/nemo/marginals/run255/output/run255.output_network.xml.gz";
-		String networkFile = "../../runs-svn/fabilut/muc/sm-tl11/matsim/input/mergedLight_trains.xml";
+		String networkFile = "../../runs-svn/fabilut/muc/sm-b30/matsim/input/mergedLight.xml";
 		
 //		String shapeFileLine = "../../../shared-svn/projects/maxess/data/kenya/network/2016-10-19_network_detailed_line.shp";
 //		String shapeFileLine = "../../runs-svn/nemo/marginals/run255/output/run255.output_network_line.shp";
-		String shapeFileLine = "../../runs-svn/fabilut/muc/sm-tl11/matsim/input/mergedLight_trains_line.shp.xml";
+		String shapeFileLine = "../../runs-svn/fabilut/muc/sm-b30/matsim/input/mergedLight_line.shp.xml";
 		
 //		String shapeFilePoly = "../../../shared-svn/projects/maxess/data/kenya/network/2016-10-19_network_detailed_poly.shp";
 //		String shapeFilePoly = "../../runs-svn/nemo/marginals/run255/output/run255.output_network_poly.shp";
-		String shapeFilePoly = "../../runs-svn/fabilut/muc/sm-tl11/matsim/input/mergedLight_trains_poly.shp.xml";
+		String shapeFilePoly = "../../runs-svn/fabilut/muc/sm-b30/matsim/input/mergedLight_poly.shp.xml";
 		
 //		String crs = "EPSG:32632"; // for NRW, Germany
 //		String crs = "EPSG:21037"; // for Nairobi, Kenya
