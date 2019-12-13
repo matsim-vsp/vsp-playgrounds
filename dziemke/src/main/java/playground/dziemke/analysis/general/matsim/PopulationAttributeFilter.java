@@ -32,8 +32,8 @@ public class PopulationAttributeFilter {
 
     public static void main(String[] args) {
 
-        String baseDir = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-15/output/";
-        String runId = "berlin-v5.5-1pct-15";
+        String baseDir = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-20/output/";
+        String runId = "berlin-v5.5-1pct-20";
 //        String inputPopulationFile = baseDir + runId + ".output_plans.xml.gz";
 //        String outputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
         String inputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
