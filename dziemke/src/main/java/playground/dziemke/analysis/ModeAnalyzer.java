@@ -29,8 +29,8 @@ public class ModeAnalyzer {
         // String plansFile = directory + runId + ".experiencedPlans_withResidence.xml.gz";
         // String configFile = directory + runId + ".output_config_adjusted.xml";
 
-        String directory = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-17/output/";
-        String runId = "berlin-v5.5-1pct-17";
+        String directory = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-20/output/";
+        String runId = "berlin-v5.5-1pct-20";
         // String plansFile = directory + "berlin-v5.5-1pct-15.output_plans.xml.gz";
         // String plansFile = directory + "berlin-v5.5-1pct-15.experiencedPlans_withResidence_inside.xml.gz";
         String configFile = directory + runId + ".output_config.xml";
