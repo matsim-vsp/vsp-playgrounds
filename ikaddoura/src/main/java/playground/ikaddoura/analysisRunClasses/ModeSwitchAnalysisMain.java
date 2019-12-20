@@ -76,7 +76,9 @@ public class ModeSwitchAnalysisMain {
 		
 		BasicPersonTripAnalysisHandler basicHandler0;
 		BasicPersonTripAnalysisHandler basicHandler1;
-		
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.walk};
+		final String stageActivitySubString = "interaction";
+
 		Scenario scenario0;
 		{
 			log.info("Loading scenario0 and reading events...");
@@ -88,10 +90,7 @@ public class ModeSwitchAnalysisMain {
 			config.network().setInputFile(dir0networkFile);
 			
 			scenario0 = ScenarioUtils.loadScenario(config);
-			
-			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
-			final String stageActivitySubString = "interaction";
-	        
+				        
 	        basicHandler0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler0.setScenario(scenario0);
 			
@@ -113,10 +112,7 @@ public class ModeSwitchAnalysisMain {
 			config.network().setInputFile(dir1networkFile);
 			
 			scenario1 = ScenarioUtils.loadScenario(config);
-	        
-			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
-			final String stageActivitySubString = "interaction";
-			
+	        			
 	        basicHandler1 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
 			basicHandler1.setScenario(scenario1);
 			
