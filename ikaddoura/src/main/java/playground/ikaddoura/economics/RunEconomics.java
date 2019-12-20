@@ -127,8 +127,8 @@ public class RunEconomics {
 		double totalTravelTime0 = getTotalTravelTime(analysis0.getPersonId2tripNumber2travelTime());
 		double totalTravelTime1 = getTotalTravelTime(analysis1.getPersonId2tripNumber2travelTime());
 				
-		int carDemand0 = getModeDemand(analysis0.getPersonId2tripNumber2legMode(), TransportMode.car);
-		int carDemand1 = getModeDemand(analysis1.getPersonId2tripNumber2legMode(), TransportMode.car);
+		int carDemand0 = getModeDemand(analysis0.getPersonId2tripNumber2tripMainMode(), TransportMode.car);
+		int carDemand1 = getModeDemand(analysis1.getPersonId2tripNumber2tripMainMode(), TransportMode.car);
 		
 		double avgTravelTime0 = totalTravelTime0 / carDemand0;
 		double avgTravelTime1 = totalTravelTime1 / carDemand1;
