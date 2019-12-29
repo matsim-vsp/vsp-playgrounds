@@ -32,8 +32,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.dvrp.router.DvrpGlobalRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.router.DvrpModeRoutingModule;
-import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModes;
@@ -172,21 +172,21 @@ public class TelematicsParkingSearchController {
             controler.addOverridingModule(new AbstractModule() {
                 @Override
                 public void install() {
-					bind(TravelDisutilityFactory.class).annotatedWith(DvrpModes.mode(TransportMode.car))
-							.toInstance(TimeAsTravelDisutility::new);
-					install(new DvrpModeRoutingModule(TransportMode.car, new AStarEuclideanFactory()));
+                    bind(TravelDisutilityFactory.class).annotatedWith(DvrpModes.mode(TransportMode.car))
+                            .toInstance(TimeAsTravelDisutility::new);
+                    install(new DvrpModeRoutingModule(TransportMode.car, new AStarEuclideanFactory()));
 
-					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING))
-							.to(Network.class)
-							.asEagerSingleton();
-					bind(WalkLegFactory.class).asEagerSingleton();
+                    bind(Network.class).annotatedWith(Names.named(DvrpGlobalRoutingNetworkProvider.DVRP_ROUTING))
+                            .to(Network.class)
+                            .asEagerSingleton();
+                    bind(WalkLegFactory.class).asEagerSingleton();
 
-					//                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
-					// we were unable to find out what ParkingSearchPrepareForSimImpl was doing that the default method was not doing.  Since the default
-					// method has moved on, the parking variant is no longer there.  Am thus commenting this one here out as well and hoping for the best.
-					// kai, dec'19
+                    //                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
+                    // we were unable to find out what ParkingSearchPrepareForSimImpl was doing that the default method was not doing.  Since the default
+                    // method has moved on, the parking variant is no longer there.  Am thus commenting this one here out as well and hoping for the best.
+                    // kai, dec'19
 
-					this.install(new ParkingSearchQSimModule());
+                    this.install(new ParkingSearchQSimModule());
                     bind(ParkingRouter.class).to(WithinDayParkingRouter.class);
 
                     //parking manager
