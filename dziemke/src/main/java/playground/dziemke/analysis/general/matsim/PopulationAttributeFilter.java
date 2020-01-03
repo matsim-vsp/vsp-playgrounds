@@ -31,18 +31,27 @@ public class PopulationAttributeFilter {
     private String attributeFilterLabel;
 
     public static void main(String[] args) {
+        String baseDir = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-122/output/";
+        String runId = "berlin-v5.5-1pct-122";
+        String inputPopulationFile = baseDir + runId + ".output_plans.xml.gz";
+        String outputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
+        String attributeFilterLabel = "subpopulation";
+        String filterValue = "person";
+//        String inputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
+//        String outputPopulationFile = baseDir + runId + ".output_plans_no-freight_berlin.xml.gz";
+//        String attributeFilterLabel = "home-activity-zone";
+//        String filterValue = "berlin";
 
-        String baseDir = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-20/output/";
-        String runId = "berlin-v5.5-1pct-20";
-//        String inputPopulationFile = baseDir + runId + ".output_plans.xml.gz";
-//        String outputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
-        String inputPopulationFile = baseDir + runId + ".output_plans_no-freight.xml.gz";
-        String outputPopulationFile = baseDir + runId + ".output_plans_no-freight_berlin.xml.gz";
+        if (args.length == 4) {
+            inputPopulationFile = args[0];
+            outputPopulationFile = args[1];
+            attributeFilterLabel = args[2];
+            filterValue = args[3];
+        }
 
-//        PopulationAttributeFilter populationAttributeFilter = new PopulationAttributeFilter(inputPopulationFile, "subpopulation");
-//        Population filteredPopulation = populationAttributeFilter.getFilteredPopulation("person");
-        PopulationAttributeFilter populationAttributeFilter = new PopulationAttributeFilter(inputPopulationFile, "home-activity-zone");
-        Population filteredPopulation = populationAttributeFilter.getFilteredPopulation("berlin");
+        PopulationAttributeFilter populationAttributeFilter = new PopulationAttributeFilter(inputPopulationFile, attributeFilterLabel);
+        Population filteredPopulation = populationAttributeFilter.getFilteredPopulation(filterValue);
+
         populationAttributeFilter.writePopulation(filteredPopulation, outputPopulationFile);
     }
 
