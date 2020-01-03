@@ -29,16 +29,21 @@ public class ModeAnalyzer {
         // String plansFile = directory + runId + ".experiencedPlans_withResidence.xml.gz";
         // String configFile = directory + runId + ".output_config_adjusted.xml";
 
-        String directory = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-20/output/";
-        String runId = "berlin-v5.5-1pct-20";
+        String directory = "../../runs-svn/open_berlin_scenario/v5.5-bicycle/bc-122/output/";
+        String runId = "berlin-v5.5-1pct-122";
         // String plansFile = directory + "berlin-v5.5-1pct-15.output_plans.xml.gz";
         // String plansFile = directory + "berlin-v5.5-1pct-15.experiencedPlans_withResidence_inside.xml.gz";
         String configFile = directory + runId + ".output_config.xml";
         String plansFile = directory + runId + ".output_plans_no-freight_berlin.xml.gz";
         String modeFileName = directory + "modes_berlin.txt";
-
 //        String plansFile = directory + runId + ".output_plans_no-freight.xml.gz";
 //        String modeFileName = directory + "modes.txt";
+
+        if (args.length == 3) {
+            configFile = args[0];
+            plansFile = args[1];
+            modeFileName = args[2];
+        }
 
         Map<String,Double> modeCnt = new TreeMap<>() ;
         Set<String> modes;
