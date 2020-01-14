@@ -113,6 +113,12 @@
 			<artifactId>matsim-sbb-extensions</artifactId>
 			<version>11.5</version>
 		</dependency>
+        <dependency>
+            <groupId>org.matsim</groupId>
+            <artifactId>matsim</artifactId>
+            <version>12.0-2019w34-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
 
     </dependencies>
