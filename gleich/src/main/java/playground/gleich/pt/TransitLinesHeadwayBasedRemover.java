@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -27,8 +26,11 @@ import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
+import org.matsim.pt.utils.TransitScheduleValidator;
+import org.matsim.pt.utils.TransitScheduleValidator.ValidationResult;
 
 import playground.vsp.andreas.utils.pt.TransitLineRemover;
+import playground.vsp.andreas.utils.pt.TransitScheduleCleaner;
 
 public class TransitLinesHeadwayBasedRemover {
 
@@ -83,7 +85,13 @@ public class TransitLinesHeadwayBasedRemover {
 		linesToRemove.stream().sorted().forEach(l -> log.info(l.toString()));
 				
 		TransitSchedule outTransitSchedule = TransitLineRemover.removeTransitLinesFromTransitSchedule(inTransitSchedule, linesToRemove);
-		new TransitScheduleWriter(outTransitSchedule).writeFile(outScheduleFile);
+		
+		TransitSchedule outTransitScheduleCleaned = TransitScheduleCleaner.removeStopsNotUsed(outTransitSchedule);
+		
+		ValidationResult validationResult = TransitScheduleValidator.validateAll(outTransitScheduleCleaned, scenario.getNetwork());
+		log.warn(validationResult);
+		
+		new TransitScheduleWriter(outTransitScheduleCleaned).writeFile(outScheduleFile);
 	}
 	
 	private static Map<String, List<TransitLine>> filterBVGBus(
