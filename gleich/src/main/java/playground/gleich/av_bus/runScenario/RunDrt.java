@@ -11,8 +11,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
-import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
+//import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
+//import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -28,19 +28,21 @@ import playground.gleich.analysis.experiencedTrips.DrtEventsReader;
 import playground.gleich.analysis.experiencedTrips.DrtPtTripEventHandler;
 import playground.gleich.analysis.experiencedTrips.ExperiencedTripsWriter;
 
+@Deprecated
 public class RunDrt {
 	public static void main(String[] args) {
 		if (args.length != 2) {
 			throw new RuntimeException("Wrong number of args to main method. Should be path to config and path to outputDir");
 		}
-		Config config = ConfigUtils.loadConfig(args[0], new MultiModeDrtConfigGroup(), new DvrpConfigGroup(),
-				new VariableAccessConfigGroup());
+		Config config = ConfigUtils.loadConfig(args[0], new MultiModeDrtConfigGroup(), new DvrpConfigGroup()
+				//,new VariableAccessConfigGroup()
+				);
 
 		config.controler().setOutputDirectory(IOUtils.extendUrl(config.getContext(), args[1]).getFile());
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
-		controler.addOverridingModule(new VariableAccessTransitRouterModule());
+//		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 		controler.run();
 		
 		// Analysis
