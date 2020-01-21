@@ -22,16 +22,11 @@ package playground.ikaddoura.integrationCNE.prepare;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.HbefaVehicleAttributes;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vehicles.Vehicles;
+import org.matsim.vehicles.*;
 
 /**
 * @author ikaddoura
@@ -61,15 +56,30 @@ public class EmissionVehicleGenerator {
 			Id<Vehicle> vehicleId = Id.create(personId, Vehicle.class);
 
 			HbefaVehicleCategory vehicleCategory = HbefaVehicleCategory.PASSENGER_CAR;
-			HbefaVehicleAttributes vehicleAttributes = new HbefaVehicleAttributes();
-			Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" + 
-//					vehicleAttributes.getHbefaTechnology() + ";" + // TODO
-					vehicleAttributes.getHbefaSizeClass() + ";" + 
-					vehicleAttributes.getHbefaEmConcept(), VehicleType.class);
-			VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
+
+			// This is what I found:
+
+//			HbefaVehicleAttributes vehicleAttributes = new HbefaVehicleAttributes();
+//			Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" +
+////					vehicleAttributes.getHbefaTechnology() + ";" + // TODO
+//					vehicleAttributes.getHbefaSizeClass() + ";" +
+//					vehicleAttributes.getHbefaEmConcept(), VehicleType.class);
+//			VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
 			
 			// TODO
 //			vehicleType.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS + vehTypeId.toString() + EmissionSpecificationMarker.END_EMISSIONS);
+
+			// replacing it by
+
+			final Id<VehicleType> vehTypeId = Id.create( "emissionsVehicle", VehicleType.class );
+			VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType( vehTypeId ) ;
+			EngineInformation engineInformation = vehicleType.getEngineInformation();
+			VehicleUtils.setHbefaVehicleCategory( engineInformation, vehicleCategory.name() );
+			VehicleUtils.setHbefaTechnology( engineInformation, "average" );
+			VehicleUtils.setHbefaSizeClass( engineInformation, "average" );
+			VehicleUtils.setHbefaEmissionsConcept( engineInformation, "average" );
+
+			// end replace. No idea if it will work or corresponds to intention.  kai, jan'20
 			
 			if(!(outputVehicles.getVehicleTypes().containsKey(vehTypeId))){
 				outputVehicles.addVehicleType(vehicleType);
