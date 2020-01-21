@@ -78,9 +78,10 @@ public class RunExperiencedTripsAnalysis {
 		// add some common default monitored modes
 		monitoredModes.add(TransportMode.pt);
 		monitoredModes.add(TransportMode.drt);
-		monitoredModes.add(TransportMode.transit_walk);
-		monitoredModes.add(TransportMode.access_walk);
-		monitoredModes.add(TransportMode.egress_walk);
+		monitoredModes.add(TransportMode.walk);
+		monitoredModes.add(TransportMode.car);
+		monitoredModes.add("bicycle");
+		monitoredModes.add("freight");
 		// find transportModes in schedule
 		for (TransitLine line : scenario.getTransitSchedule().getTransitLines().values()) {
 			for (TransitRoute route : line.getRoutes().values()) {
