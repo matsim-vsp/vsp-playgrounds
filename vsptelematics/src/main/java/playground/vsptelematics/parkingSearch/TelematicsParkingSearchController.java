@@ -20,18 +20,24 @@
 
 package playground.vsptelematics.parkingSearch;
 
-import com.google.inject.name.Names;
+import java.util.Random;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.dvrp.router.DvrpGlobalRoutingNetworkProvider;
+import org.matsim.contrib.dvrp.router.DvrpModeRoutingModule;
+import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.dynagent.run.DynRoutingModule;
-import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingListener;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingSearchEvaluator;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingSlotVisualiser;
@@ -43,22 +49,25 @@ import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogi
 import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogic.VehicleTeleportationLogic;
 import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.routing.WithinDayParkingRouter;
-import org.matsim.contrib.parking.parkingsearch.sim.*;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchConfigGroup;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPopulationModule;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchQSimModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.PrepareForSim;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
+import org.matsim.core.router.AStarEuclideanFactory;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import java.util.Random;
+import com.google.inject.name.Names;
 
 
 public class TelematicsParkingSearchController {
@@ -158,17 +167,21 @@ public class TelematicsParkingSearchController {
             if (!controler.getConfig().getModules().containsKey(DvrpConfigGroup.GROUP_NAME)){
                 controler.getConfig().addModule(new DvrpConfigGroup());
             }
-            final DynRoutingModule routingModuleCar = new DynRoutingModule(TransportMode.car);
 
             controler.addOverridingModule(new DvrpTravelTimeModule());
             controler.addOverridingModule(new AbstractModule() {
                 @Override
                 public void install() {
-                    addRoutingModuleBinding(TransportMode.car).toInstance(routingModuleCar);
-                    bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+                    bind(TravelDisutilityFactory.class).annotatedWith(DvrpModes.mode(TransportMode.car))
+                            .toInstance(TimeAsTravelDisutility::new);
+                    install(new DvrpModeRoutingModule(TransportMode.car, new AStarEuclideanFactory()));
+
+                    bind(Network.class).annotatedWith(Names.named(DvrpGlobalRoutingNetworkProvider.DVRP_ROUTING))
+                            .to(Network.class)
+                            .asEagerSingleton();
                     bind(WalkLegFactory.class).asEagerSingleton();
 
-//                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
+                    //                    bind(PrepareForSim.class).to(ParkingSearchPrepareForSimImpl.class);
                     // we were unable to find out what ParkingSearchPrepareForSimImpl was doing that the default method was not doing.  Since the default
                     // method has moved on, the parking variant is no longer there.  Am thus commenting this one here out as well and hoping for the best.
                     // kai, dec'19

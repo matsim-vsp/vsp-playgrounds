@@ -30,10 +30,8 @@ import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
+import org.matsim.contrib.dvrp.router.DvrpGlobalRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeEstimator;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
@@ -296,12 +294,14 @@ public class IncidentWithinDayReplanningIT {
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
 				@Override public void install() {
-										
+
 					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
-					
+
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+					bind(Network.class).annotatedWith(Names.named(DvrpGlobalRoutingNetworkProvider.DVRP_ROUTING))
+							.to(Network.class)
+							.asEagerSingleton();
 				}
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
