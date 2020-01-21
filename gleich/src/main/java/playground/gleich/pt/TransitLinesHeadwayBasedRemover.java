@@ -41,11 +41,11 @@ public class TransitLinesHeadwayBasedRemover {
 		final String inNetworkFile  = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
 		final String outScheduleFileBase = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule-";
 
-		double maxHeadway = 23 * 60.0; // min
-		double measurePeriodStart = 16 * 3600.0 + 30 * 60; // h; better use pm peak, because e.g. Bus 100 has 25 min gaps before 8:00!
-		double measurePeriodEnd = 17 * 3600.0; // h
+		double maxHeadway = 15 * 60.0; // min
+		double measurePeriodStart = 7 * 3600.0 + 30 * 60; // h; better use pm peak, because e.g. Bus 100 has 25 min gaps before 8:00!
+		double measurePeriodEnd = 19 * 3600.0; // h
 		double minShareOfStopsWithHeadway = 0.5; // parts of the line may be served less frequently
-		int minDeparturesForStopToBeConsidered = 20; // ignore branch routes served only twice a day etc.
+		int minDeparturesForStopToBeConsidered = 50; // ignore branch routes served only twice a day etc.
 		
 		DecimalFormat df0 = new DecimalFormat("#");
 		df0.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
