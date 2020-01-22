@@ -1,5 +1,7 @@
 package playground.gleich.pt;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -26,9 +29,12 @@ import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.pt.utils.TransitScheduleValidator;
 import org.matsim.pt.utils.TransitScheduleValidator.ValidationResult;
+import org.matsim.utils.gis.shp2matsim.ShpGeometryUtils;
 
+import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 import playground.vsp.andreas.utils.pt.TransitLineRemover;
 import playground.vsp.andreas.utils.pt.TransitScheduleCleaner;
 
@@ -36,10 +42,11 @@ public class TransitLinesHeadwayBasedRemover {
 
 	private static final Logger log = Logger.getLogger(TransitLinesHeadwayBasedRemover.class);
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws MalformedURLException {
 		final String inScheduleFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule.xml.gz";
 		final String inNetworkFile  = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
 		final String outScheduleFileBase = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule-";
+		final String zoneShpFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/shp-files/shp-inner-city-area/inner-city-area.shp";
 
 		double maxHeadway = 15 * 60.0; // min
 		double measurePeriodStart = 7 * 3600.0 + 30 * 60; // h; better use pm peak, because e.g. Bus 100 has 25 min gaps before 8:00!
@@ -60,10 +67,13 @@ public class TransitLinesHeadwayBasedRemover {
 				"-shareStops" + df2.format(minShareOfStopsWithHeadway) +
 				"-minDepsAnaStop" + minDeparturesForStopToBeConsidered +
 				"-maxHeadwayMM" + df0.format(maxHeadway / 60) + 
-				".xml.gz";
+				"-zoneA.xml.gz";
 		
 //		log.setLevel(Level.ALL);
 		
+		//load shp file
+		List<PreparedGeometry> geometries = ShpGeometryUtils.loadPreparedGeometries(new URL(zoneShpFile));
+
 		Config config = ConfigUtils.createConfig();
 		config.transit().setTransitScheduleFile(inScheduleFile);
 		config.network().setInputFile(inNetworkFile);
@@ -76,7 +86,9 @@ public class TransitLinesHeadwayBasedRemover {
 		Map<String, List<TransitLine>> gtfsRouteShortName2BVGBusTransitLines = filterBVGBus(gtfsRouteShortName2TransitLines);
 				
 		Set<Id<TransitLine>> linesToRemove = gtfsRouteShortName2BVGBusTransitLines.entrySet().stream().
-				filter(entry -> !maxHeadwayBelowThreshold(entry.getValue(), maxHeadway, measurePeriodStart, measurePeriodEnd, minShareOfStopsWithHeadway, minDeparturesForStopToBeConsidered)).
+//				filter(entry -> !maxHeadwayBelowThreshold(entry.getValue(), maxHeadway, measurePeriodStart, measurePeriodEnd, minShareOfStopsWithHeadway, minDeparturesForStopToBeConsidered)).
+				filter(entry -> !touchesZone(entry.getValue(), geometries)).
+
 				map(entry -> entry.getValue().stream().
 						map(line -> line.getId()).
 						collect(Collectors.toSet())).
@@ -89,11 +101,22 @@ public class TransitLinesHeadwayBasedRemover {
 		TransitSchedule outTransitScheduleCleaned = TransitScheduleCleaner.removeStopsNotUsed(outTransitSchedule);
 		
 		ValidationResult validationResult = TransitScheduleValidator.validateAll(outTransitScheduleCleaned, scenario.getNetwork());
-		log.warn(validationResult);
+		log.warn(validationResult.getErrors());
 		
 		new TransitScheduleWriter(outTransitScheduleCleaned).writeFile(outScheduleFile);
 	}
 	
+	private static boolean touchesZone (List<TransitLine> lines, List<PreparedGeometry> zones) {
+		Map<Id<TransitStopFacility>, Boolean> stop2LocationInZone = new HashMap<>();
+		
+		lines.forEach(line -> line.getRoutes().values().forEach(route -> checkAndWriteLocationPerStop(stop2LocationInZone, route, zones)));
+		return stop2LocationInZone.values().stream().anyMatch(b -> b == true);
+	}
+	
+	private static void checkAndWriteLocationPerStop(Map<Id<TransitStopFacility>, Boolean> stop2LocationInZone, TransitRoute route, List<PreparedGeometry> zones) {
+		route.getStops().forEach(stop -> stop2LocationInZone.put(stop.getStopFacility().getId(), ShpGeometryUtils.isCoordInPreparedGeometries(stop.getStopFacility().getCoord(), zones)));
+	}
+
 	private static Map<String, List<TransitLine>> filterBVGBus(
 			Map<String, List<TransitLine>> gtfsRouteShortName2TransitLines) {
 		
