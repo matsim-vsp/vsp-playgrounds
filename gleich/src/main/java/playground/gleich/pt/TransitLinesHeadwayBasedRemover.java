@@ -34,7 +34,6 @@ import org.matsim.pt.utils.TransitScheduleValidator;
 import org.matsim.pt.utils.TransitScheduleValidator.ValidationResult;
 import org.matsim.utils.gis.shp2matsim.ShpGeometryUtils;
 
-import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 import playground.vsp.andreas.utils.pt.TransitLineRemover;
 import playground.vsp.andreas.utils.pt.TransitScheduleCleaner;
 
