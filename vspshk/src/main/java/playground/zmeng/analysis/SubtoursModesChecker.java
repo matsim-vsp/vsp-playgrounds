@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /*
+
 this class is used to check if in a subtour a violation of chain-based-mode rule exist.
 How to use the following code? see below:
 
@@ -27,6 +28,15 @@ How to use the following code? see below:
         subtoursModesChecker.check();
     }
 
+results will be written like following:
+     number of persons = n1, number of total subtours = n2
+     n3(n4%) person violated the chain-based-mode rule
+     n5(n6%) subtours violated the chain-based-mode rule
+
+ */
+
+/**
+ * @author zmeng
  */
 
 public class SubtoursModesChecker {
@@ -77,7 +87,7 @@ public class SubtoursModesChecker {
 
             }
         }
-        logger.info("number of Persons = " + this.personId2SubtoursModes.keySet().size() + ", number of total subtours = " + this.totalSubtoursCount);
+        logger.info("number of persons = " + this.personId2SubtoursModes.keySet().size() + ", number of total subtours = " + this.totalSubtoursCount);
         logger.info(chainBasedModesRuleViolationPersonCount + "(" + (double) chainBasedModesRuleViolationPersonCount / (double) this.personId2SubtoursModes.keySet().size() * 100 + "%)" + " person violated the chain-based-mode rule");
         logger.info(chainBasedModesRuleViolationSubtoursCount + "(" + (double) chainBasedModesRuleViolationSubtoursCount / (double) this.totalSubtoursCount * 100 + "%)" + " subtours violated the chain-based-mode rule");
     }
