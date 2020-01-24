@@ -1,5 +1,14 @@
 package playground.zmeng.analysis;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -7,11 +16,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.router.*;
+import org.matsim.core.router.MainModeIdentifier;
+import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /*
 
@@ -43,7 +50,7 @@ public class SubtoursModesChecker {
     Logger logger = Logger.getLogger(SubtoursModesChecker.class);
     private final String PLANSF_ILE;
     private final String CONFIG_FILE;
-    private final StageActivityTypes stageActivityTypes;
+    private final Set<String> stageActivityTypes;
     private final MainModeIdentifier mainModeIdentifier;
     private String[] chainBasedModes;
 
@@ -55,7 +62,8 @@ public class SubtoursModesChecker {
     private Map<Id<Person>, Collection<TripStructureUtils.Subtour>> personId2Subtours = new HashMap<>();
     private Map<Id<Person>, List<List<String>>> personId2SubtoursModes = new HashMap<>();
 
-    SubtoursModesChecker(String plansFile, String configFile, StageActivityTypes stageActivityTypes, MainModeIdentifier mainModeIdentifier) {
+    SubtoursModesChecker(String plansFile, String configFile, Set<String> stageActivityTypes,
+            MainModeIdentifier mainModeIdentifier) {
 
         this.PLANSF_ILE = plansFile;
         this.CONFIG_FILE = configFile;
