@@ -111,7 +111,7 @@ public class SubtoursModesChecker {
     private void createPersonId2Subtours() {
         for (Id<Person> personId :
                 this.personId2SelectedPlan.keySet()) {
-            Collection<TripStructureUtils.Subtour> subtours = TripStructureUtils.getSubtours(this.personId2SelectedPlan.get(personId), this.stageActivityTypes);
+            Collection<TripStructureUtils.Subtour> subtours = TripStructureUtils.getSubtours(this.personId2SelectedPlan.get(personId), this.stageActivityTypes::contains);
             this.personId2Subtours.put(personId, subtours);
             this.totalSubtoursCount += subtours.size();
         }
