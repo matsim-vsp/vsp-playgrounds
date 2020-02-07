@@ -1,18 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.matsim.vsp</groupId>
 		<artifactId>vsp-playgrounds</artifactId>
-        <version>12.0-SNAPSHOT</version>
+		<version>12.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 	<artifactId>kai</artifactId>
 	<name>kai</name>
 
 	<properties>
 		<kotlin.version>1.2.0</kotlin.version>
-        <matsim.version>12.0-SNAPSHOT</matsim.version>
+		<matsim.version>12.0-SNAPSHOT</matsim.version>
 	</properties>
 
 	<build>
@@ -35,19 +35,19 @@
 	</build>
 
 	<repositories>
-<!-- 		<repository>
-			<id>org.janusproject-maven</id>
-			<name>Janus Project Repository</name>
-			<url>http://www.janus-project.org/maven</url>
-		</repository>
-		<repository>
-			<id>sarl-repository</id>
-			<url>http://maven.sarl.io/</url>
-		</repository>
- -->		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
+		<!-- 		<repository>
+					<id>org.janusproject-maven</id>
+					<name>Janus Project Repository</name>
+					<url>http://www.janus-project.org/maven</url>
+				</repository>
+				<repository>
+					<id>sarl-repository</id>
+					<url>http://maven.sarl.io/</url>
+				</repository>
+		 -->		<repository>
+		<id>jitpack.io</id>
+		<url>https://jitpack.io</url>
+	</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -62,10 +62,16 @@
 	</pluginRepositories>
 
 	<dependencies>
-        <dependency>
+		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>otfvis</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -85,56 +91,170 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>analysis</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>junit</artifactId>
+					<groupId>junit</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
 			<version>master-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>gt-main</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-io</artifactId>
+					<groupId>commons-io</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-math3</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>gt-epsg-hsql</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>gt-referencing</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>gt-shapefile</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jcommon</artifactId>
+					<groupId>org.jfree</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jfreechart</artifactId>
+					<groupId>org.jfree</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>matsim</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>roadpricing</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>analysis</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>matsim-examples</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+			</exclusions>
 			<!-- <version>-77a4cad5f1-1</version>  -->
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>noise</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>gt-main</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang3</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>json-simple</artifactId>
+					<groupId>com.googlecode.json-simple</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.matsim.contrib</groupId>-->
+<!--			<artifactId>matsim4urbansim</artifactId>-->
+<!--			<version>${matsim.version}</version>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>matsim4urbansim</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>kairuns</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>matsim</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>taxi</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dvrp</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>drt</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>matsim-examples</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
 			<artifactId>java</artifactId>
 			<version>master-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jfreechart</artifactId>
+					<groupId>jfree</groupId>
+				</exclusion>
+			</exclusions>
 			<!--<version>cdc96ff</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
-		 <!-- 
-		<dependency>
-			  <groupId>vsp-playground</groupId>
-			<artifactId>gunnar</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		 -->
+		<!--
+	       <dependency>
+			 <groupId>vsp-playground</groupId>
+		       <artifactId>gunnar</artifactId>
+		       <version>0.10.0-SNAPSHOT</version>
+	       </dependency>
+		-->
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>emissions</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jackson-core</artifactId>
+					<groupId>com.fasterxml.jackson.core</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>minibus</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- 
 		<dependency>
@@ -143,26 +263,68 @@
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		 -->
-		 <dependency>
+		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>taxi</artifactId>
-             <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-text</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang3</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-csv</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>drt</artifactId>
-            <version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.matsim.contrib</groupId>
-            <artifactId>common</artifactId>
-            <version>12.0-SNAPSHOT</version>
-        </dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>common</artifactId>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-vsp</groupId>
 			<artifactId>matsim-berlin</artifactId>
 			<version>v5.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>matsim</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>emissions</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>common</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>analysis</artifactId>
+					<groupId>org.matsim.contrib</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>matsim-examples</artifactId>
+					<groupId>org.matsim</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!--to get ExamplesUtils:-->
@@ -180,17 +342,76 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>freight</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-math3</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>roadpricing</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>bicycle</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>gt-main</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-io</artifactId>
+					<groupId>commons-io</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>gt-referencing</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jts-core</artifactId>
+					<groupId>org.locationtech.jts</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>accessibility</artifactId>
+			<version>${matsim.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-compress</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax2-api</artifactId>
+					<groupId>org.codehaus.woodstox</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xercesImpl</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>gt-main</artifactId>
+					<groupId>org.geotools</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
