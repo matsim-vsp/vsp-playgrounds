@@ -63,7 +63,7 @@ public class PricingHandler implements PersonDepartureEventHandler {
 		if (event.getLegMode().equals(TransportMode.car)) {
 			double amount = -1 * toll;
 			
-			PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount);
+			PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount, null, null);
 			this.events.processEvent(moneyEvent);
 		}
 	}

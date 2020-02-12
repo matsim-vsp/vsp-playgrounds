@@ -94,7 +94,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 			if (optAVParams.isChargeTollsFromSAVDriver()) {
 				// charge the driver
 				
-				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount, null, null);
 				this.events.processEvent(moneyEvent);
 				
 				PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
@@ -186,7 +186,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 
 					log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 					
-					this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
+					this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()), null, null));
 					this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
 				}
 			}
