@@ -125,7 +125,7 @@ class TravelDisutilityUtils {
 				es.get(ii).processEvent(new PersonArrivalEvent(now, person.getId(), null, TransportMode.car));
 				es.get(ii).processEvent(new ActivityStartEvent(now, person.getId(), null, null, firstAct.getType())) ;
 			}
-			es.get(N_TESTS).processEvent( new PersonMoneyEvent( 33.*3600., person.getId(), 1. ) ) ;
+			es.get(N_TESTS).processEvent( new PersonMoneyEvent( 33.*3600., person.getId(), 1., null, null ) ) ;
 		}
 		for ( EventsToScore eee : e2s ) {
 			eee.finish();

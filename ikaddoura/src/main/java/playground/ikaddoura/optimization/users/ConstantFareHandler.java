@@ -61,7 +61,7 @@ public class ConstantFareHandler implements PersonEntersVehicleEventHandler, Tra
 			if (fareForTrip == 0.){
 				// not processing zero money events
 			} else {
-				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), fareForTrip);
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), fareForTrip, null, null);
 				this.events.processEvent(moneyEvent);
 			}
 		}
