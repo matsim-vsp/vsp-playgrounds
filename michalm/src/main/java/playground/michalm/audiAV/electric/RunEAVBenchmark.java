@@ -28,7 +28,7 @@ import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.contrib.ev.temperature.TemperatureService;
 import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.schedule.TaxiTask;
+import org.matsim.contrib.taxi.schedule.TaxiTaskType;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -62,7 +62,7 @@ public class RunEAVBenchmark {
 	private static boolean isServingCustomer(DvrpVehicle vehicle) {
 		Schedule schedule = vehicle.getSchedule();
 		if (schedule.getStatus() == ScheduleStatus.STARTED) {
-			switch (((TaxiTask)schedule.getCurrentTask()).getTaxiTaskType()) {
+			switch ((TaxiTaskType)schedule.getCurrentTask().getTaskType()) {
 				case PICKUP:
 				case OCCUPIED_DRIVE:
 				case DROPOFF:

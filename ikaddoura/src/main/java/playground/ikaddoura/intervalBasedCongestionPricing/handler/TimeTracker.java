@@ -162,7 +162,7 @@ public class TimeTracker implements LinkLeaveEventHandler {
 				
 				if (amount < 0) {
 					for (Id<Vehicle> vehicleId : this.congestionInfo.getCongestionLinkInfos().get(linkId).getLeavingVehicles()) {
-						this.eventsManager.processEvent(new PersonMoneyEvent(this.currentTime, this.congestionInfo.getVehicleId2personId().get(vehicleId), amount));
+						this.eventsManager.processEvent(new PersonMoneyEvent(this.currentTime, this.congestionInfo.getVehicleId2personId().get(vehicleId), amount, null, null));
 						this.totalTollPaymentsPerDay_monetaryUnits = this.totalTollPaymentsPerDay_monetaryUnits + (-1 * amount);
 					}
 				}

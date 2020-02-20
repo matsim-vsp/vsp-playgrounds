@@ -22,10 +22,10 @@ public class PtVehicleOperationCostAnalysis {
 	
 	Scenario scenario;
 
-	private final String networkFile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT_ACCESS_LOOPS;
-	private final String scheduleFile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT;
-	private static final String resultFileRoutes = FilePaths.PATH_BASE_DIRECTORY + "data/analysis/operationCost/operationCost_transitSchedule.100pct.base.perRoute.csv";
-	private static final String resultFileLines = FilePaths.PATH_BASE_DIRECTORY + "data/analysis/operationCost/operationCost_transitSchedule.100pct.base.perLine.csv";
+	private final String networkFile = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
+	private final String scheduleFile = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule--measurePeriodHH16.5-17-shareStops0.5-minDepsAnaStop20-maxHeadwayMM1.xml.gz";
+	private static final String resultFileRoutes = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule--measurePeriodHH16.5-17-shareStops0.5-minDepsAnaStop20-maxHeadwayMM1.perRoute.csv";
+	private static final String resultFileLines = "/home/gregor/git/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule--measurePeriodHH16.5-17-shareStops0.5-minDepsAnaStop20-maxHeadwayMM1.perLine.csv";
 	
 	private final double costPerM = 0.0023;
 	private final double costPerS = 0.0;

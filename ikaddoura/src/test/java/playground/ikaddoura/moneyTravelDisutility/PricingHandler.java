@@ -67,7 +67,7 @@ public class PricingHandler implements PersonEntersVehicleEventHandler, LinkEnte
 				amount = -50.0;
 			}
 					
-			PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), this.vehicleId2personId.get(event.getVehicleId()), amount);
+			PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), this.vehicleId2personId.get(event.getVehicleId()), amount, null, null);
 			this.events.processEvent(moneyEvent);	
 			
 			log.warn(moneyEvent.toString());

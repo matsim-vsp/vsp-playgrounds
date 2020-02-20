@@ -224,7 +224,7 @@ public class CadytsDistanceBasedExample {
 					planBuilder.addTurn(HistogramBin.values()[(int) ((Math.min(v, 91000) - 89000) / 200)], 0);
 					double offset = calibrator.calcLinearPlanEffect(planBuilder.getResult());
 //					log.info("########## Offset = " + offset + " -- personId = " + personId + " -- v = " + v);
-					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.UNDEFINED_TIME, personId, cadytsWeightHistogram * offset));
+					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.UNDEFINED_TIME, personId, cadytsWeightHistogram * offset, null, null));
 				});
 			});
 		});

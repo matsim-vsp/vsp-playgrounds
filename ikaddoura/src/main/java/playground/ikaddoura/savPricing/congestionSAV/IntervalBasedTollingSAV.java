@@ -95,7 +95,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 							
 							// charge the driver
 							
-							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
+							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll, null, null));
 							this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
 						}
 						
@@ -116,7 +116,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 //								log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 								
 							} else {
-								this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), passenger, -1. * toll));
+								this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), passenger, -1. * toll, null, null));
 								this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
 							}
 							
@@ -132,7 +132,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 							
 							// charge the car user
 							
-							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
+							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll, null, null));
 							this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
 						}
 					}
@@ -160,7 +160,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 
 //				log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 				
-				this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), -1. * this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
+				this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), -1. * this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()), null, null));
 				this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
 			}
 		}
