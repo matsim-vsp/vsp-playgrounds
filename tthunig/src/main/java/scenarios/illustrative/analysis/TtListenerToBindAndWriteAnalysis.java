@@ -28,7 +28,8 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
+import analysis.GnuplotUtils;
+
 
 /**
  * Class to bind the analyze and writing tool to the simulation. 
@@ -73,7 +74,7 @@ public class TtListenerToBindAndWriteAnalysis implements IterationEndsListener {
 	 */
 	private void runGnuplotScript(String gnuplotScriptName, int iteration){
 		String pathToSpecificAnalysisDir = scenario.getConfig().controler().getOutputDirectory() + "ITERS/it." + iteration + "/analysis";		
-		String relativePathToGnuplotScript = "../../../../../analysis/" + gnuplotScriptName  + ".p";
+		String relativePathToGnuplotScript = "../../../../../../../analysis/" + gnuplotScriptName  + ".p";
 		
 		log.info("execute command: cd " + pathToSpecificAnalysisDir);
 		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);

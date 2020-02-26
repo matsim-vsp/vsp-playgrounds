@@ -105,14 +105,14 @@ public final class ResponsiveLocalDelayMinimizingSignal implements AfterMobsimLi
 	private void computeAbsoluteDelays() {
 		absoluteDelay = new Double[analyzeTool.getNumberOfRoutes()];
 		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
-			absoluteDelay[route] = analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route];
+			absoluteDelay[route] = analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers_PCU()[route] * freeflowRouteTT[route];
 		}
 	}
 
 	private void computeAverageDelays() {
 		avgDelay = new Double[analyzeTool.getNumberOfRoutes()];
 		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
-			avgDelay[route] = (analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route]) / analyzeTool.getRouteUsers()[route];
+			avgDelay[route] = (analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers_PCU()[route] * freeflowRouteTT[route]) / analyzeTool.getRouteUsers_PCU()[route];
 		}
 	}
 	

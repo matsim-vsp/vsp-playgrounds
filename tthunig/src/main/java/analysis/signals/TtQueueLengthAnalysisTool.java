@@ -49,7 +49,7 @@ import org.matsim.lanes.Lanes;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
+import analysis.GnuplotUtils;
 
 /**
  * @author tthunig
@@ -68,11 +68,9 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	private Map<Id<SignalSystem>, Double> totalWaitingTimePerSystem = new HashMap<>();
 	
 	private final int lastIteration;
-	private boolean currentItIslastIt = false;
+	private boolean analyzeThisIt = false;
 	
-	private String lastItDir;
-	private String lastItOutputDir;
-	private String lastItOutputDirPerSystem;
+	private String itersDir;
 	
 	private PrintStream queueLengthOverTime;
 	private Map<Id<SignalSystem>, PrintStream> queueLengthPerSignalOverTime = new HashMap<>();
@@ -86,9 +84,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 		this.lanes = scenario.getLanes();
 		
 		this.lastIteration = scenario.getConfig().controler().getLastIteration();
-		this.lastItDir = scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + this.lastIteration + "/";
-		this.lastItOutputDir = lastItDir + "analysis/";
-		this.lastItOutputDirPerSystem = lastItOutputDir + "perSystem/";
+		this.itersDir = scenario.getConfig().controler().getOutputDirectory() + "/ITERS/";
 	}
 	
 	/* initialize sensor manager and fields. can not be done earlier because the sensor manager resets all sensors before mobsim starts */
@@ -113,7 +109,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	// writes the values at the beginning of the time step. afterwards the agents may move further
 	@Override
 	public void notifyMobsimBeforeSimStep(MobsimBeforeSimStepEvent event) {
-		if (currentItIslastIt) {
+		if (analyzeThisIt) {
 			// write a line for each time step of the last iteration in all queue length files
 			StringBuffer queueLengthLine = new StringBuffer("" + event.getSimulationTime());
 			long totalQueueLength = 0;
@@ -157,22 +153,24 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
 		// prepare writing of queue length over time
-		if (event.getIteration() == lastIteration) {
-			currentItIslastIt = true;
+//		if (event.getIteration() == lastIteration) {
+			analyzeThisIt = true;
 			
 			// create analysis output directories
-			new File(lastItDir).mkdir();
-			new File(lastItOutputDir).mkdir();
-			new File(lastItOutputDirPerSystem).mkdir();
+			String thisItAnalysisDir = itersDir + "/it." + event.getIteration() + "/analysis/";
+			String thisItAnalysisDirPerSystem = thisItAnalysisDir + "perSystem/";
+			new File(thisItAnalysisDirPerSystem).mkdirs();
 			
 			// create writing streams
 			try {
-				this.queueLengthOverTime = new PrintStream(new File(lastItOutputDir + "queueLengthOverTimePerSystem.txt"));
+				this.queueLengthOverTime = new PrintStream(new File(thisItAnalysisDir + "queueLengthOverTimePerSystem.txt"));
 				String headerQueueLengthOverTime = "time";
 				for (SignalSystemData system : signals.getSignalSystemsData().getSignalSystemData().values()) {
 					headerQueueLengthOverTime += "\t" + system.getId();
 					
-					queueLengthPerSignalOverTime.put(system.getId(), new PrintStream(new File(lastItOutputDirPerSystem + "queueLengthOverTimePerSignal_System" + system.getId() + ".txt")));
+					queueLengthPerSignalOverTime.put(system.getId(), 
+							new PrintStream(new File(thisItAnalysisDirPerSystem + 
+									"queueLengthOverTimePerSignal_System" + system.getId() + ".txt")));
 					// print header for every system-file
 					String headerQueueLengthPerSignalOverTime = "time";
 					for (Id<Signal> signalId : system.getSignalData().keySet()) {
@@ -186,34 +184,36 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 				e.printStackTrace();
 				return;
 			}
-		}
+//		}
 		
 	}
 
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
-		if (event.getIteration() == lastIteration) {
+//		if (event.getIteration() == lastIteration) {
 			// close queue length writing streams
 			queueLengthOverTime.close();
 			for (Id<SignalSystem> systemId : signals.getSignalSystemsData().getSignalSystemData().keySet()) {
 				queueLengthPerSignalOverTime.get(systemId).close();
 			}
 			
-			writeWaitingTimes();
+			String thisItAnalysisDir = itersDir + "/it." + event.getIteration() + "/analysis/";
+
+			writeWaitingTimes(thisItAnalysisDir);
 			
 			// call gnuplot scripts
-			runGnuplotScript("plot_avgQueueLengthOverTime", lastItOutputDir);
-			runGnuplotScript("plot_totalQueueLengthOverTime", lastItOutputDir);
-//			runGnuplotScript("plot_queueLengthPerSystemOverTime", lastItOutputDir); // TODO one file with all system queue length
-//			runGnuplotScript("plot_queueLengthPerSignalOverTime", lastItOutputDirPerSystem); // TODO file per system
-			runGnuplotScript("plot_waitingTimePerSystem", lastItOutputDir);
-//			runGnuplotScript("plot_waitingTimePerSignal", lastItOutputDirPerSystem); // TODO file per system
-		}
+			runGnuplotScript("plot_avgQueueLengthOverTime", thisItAnalysisDir);
+			runGnuplotScript("plot_totalQueueLengthOverTime", thisItAnalysisDir);
+//			runGnuplotScript("plot_queueLengthPerSystemOverTime", thisItAnalysisDir); // TODO one file with all system queue length
+//			runGnuplotScript("plot_queueLengthPerSignalOverTime", thisItAnalysisDirPerSystem); // TODO file per system
+			runGnuplotScript("plot_waitingTimePerSystem", thisItAnalysisDir);
+//			runGnuplotScript("plot_waitingTimePerSignal", thisItAnalysisDirPerSystem); // TODO file per system
+//		}
 	}
 
-	private void writeWaitingTimes() {
+	private void writeWaitingTimes(String outputDir) {
 		PrintStream waitingTimesStream;
-		String filenameWaitingTimes = lastItOutputDir + "totalWaitingTimesPerSystem.txt";
+		String filenameWaitingTimes = outputDir + "totalWaitingTimesPerSystem.txt";
 		try {
 			waitingTimesStream = new PrintStream(new File(filenameWaitingTimes));
 		} catch (FileNotFoundException e) {
@@ -227,16 +227,16 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 		for (SignalSystemData system : signals.getSignalSystemsData().getSignalSystemData().values()){
 			waitingTimesStream.println(system.getId() + "\t" + totalWaitingTimePerSystem.get(system.getId()));
 			
-			writeWaitingTimesPerSignal(system);
+			writeWaitingTimesPerSignal(system, outputDir);
 		}
 		
 		waitingTimesStream.close();
 		LOG.info("waiting times for last iteration written to " + filenameWaitingTimes);
 	}
 
-	private void writeWaitingTimesPerSignal(SignalSystemData system) {
+	private void writeWaitingTimesPerSignal(SignalSystemData system, String outputDir) {
 		PrintStream stream;
-		String filename = lastItOutputDirPerSystem + "totalWaitingTimesPerSignal_System"+system.getId()+".txt";
+		String filename = outputDir + "totalWaitingTimesPerSignal_System"+system.getId()+".txt";
 		try {
 			stream = new PrintStream(new File(filename));
 		} catch (FileNotFoundException e) {
@@ -256,7 +256,8 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	
 	private void runGnuplotScript(String gnuplotScriptName, String pathToInputDir) {	
 		// 'Users/theresa/workspace/' is the common top level, i.e. subtract 3 levels
-		int noLevels = pathToInputDir.trim().split("/").length - 4;
+//		int noLevels = pathToInputDir.trim().split("/").length - 4;
+		int noLevels = 7;
 		String levels = "";
 		for (int i=0; i<noLevels; i++) {
 			levels += "../";

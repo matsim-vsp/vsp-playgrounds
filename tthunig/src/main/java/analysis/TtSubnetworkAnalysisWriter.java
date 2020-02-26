@@ -31,8 +31,6 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
-
 /**
  * @author tthunig
  */
