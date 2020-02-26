@@ -11,6 +11,8 @@ import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 
@@ -27,7 +29,7 @@ public class TtAnalyzeBraessRouteDistributionAndTTTest {
 
 	@Test
 	public void testHandlerViaEvents(){
-		TtAnalyzeBraess handler = new TtAnalyzeBraess();
+		TtAnalyzeBraess handler = new TtAnalyzeBraess(ScenarioUtils.createScenario(ConfigUtils.createConfig()));
 		
 		Id<Link> firstLinkId = Id.createLinkId("0_1");
 		Id<Link> middleLinkId = Id.createLinkId("3_4");

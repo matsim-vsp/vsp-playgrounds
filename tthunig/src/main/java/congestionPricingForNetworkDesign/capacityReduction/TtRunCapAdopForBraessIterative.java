@@ -104,7 +104,7 @@ public class TtRunCapAdopForBraessIterative {
 		TtStaticLinkFlowValues flowValuesPricing = new TtStaticLinkFlowValues();
 		TtStaticLinkFlowValues flowValuesBasic = new TtStaticLinkFlowValues();
 		// create tools for overall analysis
-		TtAbstractAnalysisTool analyzerBasic = new TtAnalyzeBraess();
+		TtAbstractAnalysisTool analyzerBasic = new TtAnalyzeBraess(controlerBasic.getScenario());
 		TtBindAnalysis analyzerBindingBasic = new TtBindAnalysis(controlerBasic.getScenario(), analyzerBasic);
 		// add all handlers and listeners
 		controlerPricing.addOverridingModule(new AbstractModule() {

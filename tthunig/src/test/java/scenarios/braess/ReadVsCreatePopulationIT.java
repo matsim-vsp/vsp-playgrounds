@@ -129,7 +129,7 @@ public class ReadVsCreatePopulationIT {
 		
 		Controler controler = new Controler(scenario);
 					
-		TtAbstractAnalysisTool handler = new TtAnalyzeBraess();
+		TtAbstractAnalysisTool handler = new TtAnalyzeBraess(scenario);
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {

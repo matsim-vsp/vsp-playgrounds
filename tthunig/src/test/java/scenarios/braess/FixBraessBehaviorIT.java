@@ -125,7 +125,7 @@ public final class FixBraessBehaviorIT{
 			controler.addControlerListener(new MarginalCongestionPricingContolerListener(controler.getScenario(), tollHandler, congestionHandler));
 		}
 					
-		TtAbstractAnalysisTool handler = new TtAnalyzeBraess();
+		TtAbstractAnalysisTool handler = new TtAnalyzeBraess(scenario);
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
