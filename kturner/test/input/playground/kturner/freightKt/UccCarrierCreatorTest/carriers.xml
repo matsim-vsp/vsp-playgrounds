@@ -9,7 +9,7 @@
 			<capabilities fleetSize="INFINITE">
 				<vehicles>
 					<vehicle id="gridVehicle3" depotLinkId="i(6,0)" typeId="gridType03" earliestStart="00:00:00" latestEnd="23:59:59"/>
-					<vehicle id="gridVehicle3" depotLinkId="i(6,0)" typeId="gridType03" earliestStart="00:00:00" latestEnd="23:59:59"/>
+					<!--<vehicle id="gridVehicle3" depotLinkId="i(6,0)" typeId="gridType03" earliestStart="00:00:00" latestEnd="23:59:59"/>  same vehicle Id not longer supported, because it is safed in a Map.-->
 				</vehicles>
 
 			</capabilities>

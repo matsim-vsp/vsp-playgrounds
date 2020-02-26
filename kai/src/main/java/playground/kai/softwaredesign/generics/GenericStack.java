@@ -1,4 +1,4 @@
-package playground.kai.softwaredesign;
+package playground.kai.softwaredesign.generics;
 
 import org.matsim.withinday.utils.EditTrips;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class WildcardGenerics{
+class GenericStack{
 
 	static class Stack<E> {
 		private List<E> list ;

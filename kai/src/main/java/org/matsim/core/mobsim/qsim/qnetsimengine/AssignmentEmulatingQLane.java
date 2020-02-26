@@ -487,7 +487,7 @@ class AssignmentEmulatingQLane implements QLaneI {
 			double remainingTravelTime = veh.getEarliestLinkExitTime() - now ;
 			lastDistanceFromFromNode = snapshotInfoBuilder.calculateOdometerDistanceFromFromNode(length, spacing, 
 					lastDistanceFromFromNode, now, freespeedTravelTime, remainingTravelTime);
-			Integer lane = VisUtils.guessLane(veh, NetworkUtils.getNumberOfLanesAsInt(Time.UNDEFINED_TIME, link));
+			Integer lane = VisUtils.guessLane(veh, NetworkUtils.getNumberOfLanesAsInt(link));
 			double speedValue ;
 			double vehEnterTime = veh.getLinkEnterTime() ;
 			if ( Double.isNaN(vehEnterTime) ) { // vehicle has entered from wait

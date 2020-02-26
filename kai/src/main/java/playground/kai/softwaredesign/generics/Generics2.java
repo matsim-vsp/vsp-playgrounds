@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.kai.test;
+package playground.kai.softwaredesign.generics;
 
 import java.util.ArrayList;
 import java.util.List;

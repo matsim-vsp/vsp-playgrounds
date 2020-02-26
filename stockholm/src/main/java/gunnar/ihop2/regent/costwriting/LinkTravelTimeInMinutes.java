@@ -52,7 +52,6 @@ public class LinkTravelTimeInMinutes implements TravelDisutility {
 	@Override
 	public double getLinkMinimumTravelDisutility(Link link) {
 		return Units.MIN_PER_S
-				* this.travelTimeInSeconds.getLinkTravelTime(link,
-						Time.UNDEFINED_TIME, null, null);
+				* link.getLength() / link.getFreespeed();
 	}
 }

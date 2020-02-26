@@ -54,7 +54,7 @@ public class TtAnalyzeBraessRouteDistributionAndTTTest {
 		handler.handleEvent(new PersonDepartureEvent(0, agent1Id, firstLinkId, TransportMode.car));
 		handler.handleEvent(new PersonEntersVehicleEvent(0, agent1Id, vehicle1Id));
 		handler.handleEvent(new LinkEnterEvent(10, vehicle1Id, middleLinkId));
-		handler.handleEvent(new PersonMoneyEvent(15, agent1Id, -5));
+		handler.handleEvent(new PersonMoneyEvent(15, agent1Id, -5, null, null));
 		handler.handleEvent(new PersonArrivalEvent(20, agent1Id, lastLinkId, TransportMode.car));
 		
 		double departureAgent2 = 1;

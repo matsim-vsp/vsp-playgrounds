@@ -28,8 +28,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
-import org.matsim.contrib.av.intermodal.router.config.*;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.*;
