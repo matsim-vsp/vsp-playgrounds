@@ -100,9 +100,9 @@ public class ReadVsCreatePopulationIT {
 		
 		// compare results
 		log.info("the total travel times are: " + readResults.getFirst().getTotalTT() + " and " + createResults.getFirst().getTotalTT());
-		log.info("the route distributions are: " + readResults.getFirst().getRouteUsers()[0] + ", " + readResults.getFirst().getRouteUsers()[1] + ", " + readResults.getFirst().getRouteUsers()[2] 
-				+ " and " + createResults.getFirst().getRouteUsers()[0] + ", " + createResults.getFirst().getRouteUsers()[1] + ", " + createResults.getFirst().getRouteUsers()[2]);
-		Assert.assertArrayEquals("route distributions differ", readResults.getFirst().getRouteUsers(), createResults.getFirst().getRouteUsers());
+		log.info("the route distributions are: " + readResults.getFirst().getRouteUsers_PCU()[0] + ", " + readResults.getFirst().getRouteUsers_PCU()[1] + ", " + readResults.getFirst().getRouteUsers_PCU()[2] 
+				+ " and " + createResults.getFirst().getRouteUsers_PCU()[0] + ", " + createResults.getFirst().getRouteUsers_PCU()[1] + ", " + createResults.getFirst().getRouteUsers_PCU()[2]);
+		Assert.assertArrayEquals("route distributions differ", readResults.getFirst().getRouteUsers_PCU(), createResults.getFirst().getRouteUsers_PCU(), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("total travel times differ", readResults.getFirst().getTotalTT(), createResults.getFirst().getTotalTT(), MatsimTestUtils.EPSILON);
 	}
 

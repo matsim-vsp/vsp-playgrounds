@@ -39,9 +39,9 @@ public class TtAnalyzeBraessRouteDistributionAndTTTest {
 		Id<Vehicle> vehicle2Id = Id.createVehicleId(2);
 		
 		double expectedTotalTT = 20 + 30;
-		int[] expectedRouteUsers = {0,2,0};
-		int[] expectedRouteDeparturesTimeZero = {0,1,0};
-		int[] expectedRouteDeparturesTimeOne = {0,1,0};
+		double[] expectedRouteUsers = {0,2,0};
+		double[] expectedRouteDeparturesTimeZero = {0,1,0};
+		double[] expectedRouteDeparturesTimeOne = {0,1,0};
 		double[] expectedTotalRouteTTs = {Double.NaN, 50, Double.NaN};
 		double[] expectedAvgRouteTTs = {Double.NaN, 25, Double.NaN};
 		double[] expectedRouteTTsAtDepartureTimeZero = {Double.NaN, 20, Double.NaN};
@@ -64,13 +64,13 @@ public class TtAnalyzeBraessRouteDistributionAndTTTest {
 		handler.handleEvent(new PersonArrivalEvent(30 + departureAgent2, agent2Id, lastLinkId, TransportMode.car));
 		
 		Assert.assertEquals("total travel time not correct", expectedTotalTT , handler.getTotalTT(), MatsimTestUtils.EPSILON);
-		Assert.assertArrayEquals("number of route users not correct", expectedRouteUsers, handler.getRouteUsers());
+		Assert.assertArrayEquals("number of route users not correct", expectedRouteUsers, handler.getRouteUsers_PCU(), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("avg route travel times not correct", expectedAvgRouteTTs , handler.calculateAvgRouteTTs(), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("total route travel times not correct", expectedTotalRouteTTs , handler.getTotalRouteTTs(), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("total route tolls not correct", expectedTotalRouteTolls , handler.getTotalRouteTolls(), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("avg route tolls not correct", expectedAvgRouteTolls , handler.calculateAvgRouteTolls(), MatsimTestUtils.EPSILON);
-		Assert.assertArrayEquals("number of route departures at time 0 not correct", expectedRouteDeparturesTimeZero, handler.getRouteDeparturesPerSecond().get(0.));
-		Assert.assertArrayEquals("number of route departures at time 1 not correct", expectedRouteDeparturesTimeOne, handler.getRouteDeparturesPerSecond().get(1.));
+		Assert.assertArrayEquals("number of route departures at time 0 not correct", expectedRouteDeparturesTimeZero, handler.getRouteDeparturesPerTimeStep_PCU().get(0.), MatsimTestUtils.EPSILON);
+		Assert.assertArrayEquals("number of route departures at time 1 not correct", expectedRouteDeparturesTimeOne, handler.getRouteDeparturesPerTimeStep_PCU().get(1.), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("avg route travel times at departure time 0 not correct", expectedRouteTTsAtDepartureTimeZero , handler.calculateAvgRouteTTsByDepartureTime().get(0.), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("avg route travel times at departure time 1 not correct", expectedRouteTTsAtDepartureTimeOne , handler.calculateAvgRouteTTsByDepartureTime().get(1.), MatsimTestUtils.EPSILON);
 		Assert.assertArrayEquals("avg route tolls at departure time 0 not correct", expectedRouteTollsAtDepartureTimeZero , handler.calculateAvgRouteTollsByDepartureTime().get(0.), MatsimTestUtils.EPSILON);
