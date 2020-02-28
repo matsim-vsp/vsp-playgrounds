@@ -32,6 +32,7 @@ import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.EndtimeInterpretation;
 import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
@@ -62,6 +63,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.matsim.core.config.groups.ControlerConfigGroup.*;
 
 /**
  * The problem with this approach is that, because of the buffer, the vehicles do not go around in undisturbed circles.  kai, jun'16
@@ -481,8 +484,8 @@ public class KNCALink {
 
 		config.controler().setLastIteration(0);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		Collection<String> sf = new ArrayList<>() ;
-		sf.add("otfvis") ;
+		Collection<SnapshotFormat> sf = new ArrayList<>() ;
+		sf.add( SnapshotFormat.otfvis );
 		config.controler().setSnapshotFormat(sf);
 		config.controler().setWriteSnapshotsInterval(1);
 		

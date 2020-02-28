@@ -69,7 +69,8 @@ public class CadytsModule extends AbstractModule {
             };
             Counts<Link> calibrationCounts = (Counts<Link>) scenario.getScenarioElement("calibrationCounts");
             cadytsConfig.setCalibratedItems(calibrationCounts.getCounts().keySet().stream().map(Id::toString).collect(Collectors.toSet()));
-            AnalyticalCalibrator<Link> linkAnalyticalCalibrator = new CadytsBuilderImpl().buildCalibratorAndAddMeasurements(scenario.getConfig(), calibrationCounts, linkLookUp, Link.class);
+            AnalyticalCalibrator<Link> linkAnalyticalCalibrator = CadytsBuilderImpl.buildCalibratorAndAddMeasurements(scenario.getConfig(),
+                            calibrationCounts, linkLookUp, Link.class);
             for (MeasurementLoader<Link> measurementLoader : measurementLoaders) {
                 measurementLoader.load(linkAnalyticalCalibrator);
             }

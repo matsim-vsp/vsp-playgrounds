@@ -1,15 +1,11 @@
 package playground.dziemke.accessibility.ptmatrix;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
-import org.matsim.contrib.accessibility.gis.GridUtils;
+import org.matsim.contrib.accessibility.GridUtils;
 import org.matsim.contrib.matrixbasedptrouter.MatrixBasedPtRouterConfigGroup;
 import org.matsim.contrib.matrixbasedptrouter.utils.BoundingBox;
 import org.matsim.core.config.Config;
@@ -18,8 +14,11 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilitiesImpl;
 import org.matsim.facilities.Facility;
 import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
-
 import playground.dziemke.utils.LogToOutputSaver;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author dziemke
@@ -117,7 +116,7 @@ public class CreateMatrixBasedPtInputs {
 			
 			ActivityFacilitiesImpl measuringPoints;
 			measuringPoints = GridUtils.createGridLayerByGridSizeByBoundingBoxV2(
-					boundingBox.getXMin(), boundingBox.getYMin(), boundingBox.getXMax(), boundingBox.getYMax(), cellSize);
+					boundingBox.getXMin(), boundingBox.getYMin(), boundingBox.getXMax(), boundingBox.getYMax(), cellSize );
 
 			// Conversion from ActivityFacilities=measuringPoints to coordinates
 //			for (ActivityFacility activityFacility : measuringPoints.getFacilities().values()) {
