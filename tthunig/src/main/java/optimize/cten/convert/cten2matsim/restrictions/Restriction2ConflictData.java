@@ -10,7 +10,7 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
 import org.matsim.contrib.signals.data.conflicts.Direction;
 import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.model.SignalSystem;
