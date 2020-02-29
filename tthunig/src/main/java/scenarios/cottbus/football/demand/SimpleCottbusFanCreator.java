@@ -19,19 +19,27 @@
  * *********************************************************************** */
 package scenarios.cottbus.football.demand;
 
+import java.util.Collection;
+import java.util.Random;
+
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.algorithms.PersonPrepareForSim;
@@ -48,9 +56,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
-import java.util.Collection;
-import java.util.Random;
 
 
 /**
@@ -183,7 +188,7 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 		Activity homeAct = (Activity) p.getPlans().get(0).getPlanElements().get(0);
 		Activity footballAct = (Activity) p.getPlans().get(0).getPlanElements().get(2);
 		Leg leg = (Leg) p.getPlans().get(0).getPlanElements().get(1);
-		homeAct.setEndTime(footballAct.getStartTime() - leg.getTravelTime());
+		homeAct.setEndTime(footballAct.getStartTime().seconds() - leg.getTravelTime());
 	}
 
 	private Plan createFootballPlan(Scenario sc, Coord homeCoord, Coord stadiumCoord){

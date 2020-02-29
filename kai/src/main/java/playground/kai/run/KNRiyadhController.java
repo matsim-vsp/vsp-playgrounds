@@ -61,7 +61,7 @@ class KNRiyadhController {
 		MatsimRandom.reset(4711);
 		for ( Person person : scenario1.getPopulation().getPersons().values() ) {
 			Activity firstAct =  (Activity) person.getSelectedPlan().getPlanElements().get(0) ;
-			if ( firstAct.getEndTime() >= 14.*3600 + 28.*60 + 20 ) {
+			if ( firstAct.getEndTime().seconds() >= 14.*3600 + 28.*60 + 20 ) {
 				continue ;
 			}
 			//			if ( firstAct.getEndTime()== 14.*3600 + 28.*60 + 53 ) {

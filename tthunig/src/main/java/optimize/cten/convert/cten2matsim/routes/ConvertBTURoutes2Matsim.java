@@ -50,7 +50,6 @@ import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.core.utils.misc.Time;
 
 import optimize.cten.data.DgCommodities;
 import optimize.cten.data.DgCommodity;
@@ -438,7 +437,7 @@ public class ConvertBTURoutes2Matsim {
 				for (PlanElement plEl : plan.getPlanElements()) {
 					// plans were created with exactly two activities
 					if (plEl instanceof Activity) {
-						if (((Activity) plEl).getEndTime() == Time.UNDEFINED_TIME) {
+						if (((Activity) plEl).getEndTime().isUndefined()) {
 							// plEl is end activity (without end time)
 							checkEndAct++;
 							endAct = (Activity) plEl;
@@ -464,7 +463,7 @@ public class ConvertBTURoutes2Matsim {
 				// remove person from the population without routes 
 				// to touch every person only once	
 				correspondingPerson = this.population.getPersons().remove(person.getId());
-				this.currentDepartureTime = startAct.getEndTime();
+				this.currentDepartureTime = startAct.getEndTime().seconds();
 				break;
 			}
 		}

@@ -93,7 +93,7 @@ public class WeirdPlanAnalysis {
 						Activity act = (Activity) pE;
 						
 						//if act is the last activity, the end time is -Infinity, therefore the restriction is necessary
-						if (previousAct != null && act.getEndTime() < 24*60*60 && act.getEndTime() > 0) {
+						if (previousAct != null && act.getEndTime().seconds() < 24*60*60 && act.getEndTime().seconds() > 0) {
 							//Distance calculation with beeline distance factor
 							dist = CoordUtils.calcEuclideanDistance(act.getCoord(), previousAct.getCoord()) * beelineDistanceFactor;
 							//log.info("distance: "+dist);
@@ -101,10 +101,10 @@ public class WeirdPlanAnalysis {
 							
 							//estimated arrival time
 							double traveltime = dist / speedForTravelTimeComputation;
-							double estArrival = previousAct.getEndTime() + traveltime;
+							double estArrival = previousAct.getEndTime().seconds() + traveltime;
 							
 							//find weird Activities
-							if (act.getEndTime() - estArrival < diff) {
+							if (act.getEndTime().seconds() - estArrival < diff) {
 								weirdAct++;
 							}
 						

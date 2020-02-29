@@ -93,7 +93,7 @@ public class ReadVsCreatePopulationIT {
 				for (Plan planCreate : pCreate.getPlans()){
 					Activity startActRead = (Activity) planRead.getPlanElements().get(0);
 					Activity startActCreate = (Activity) planCreate.getPlanElements().get(0);
-					Assert.assertEquals("activity end times differ", startActRead.getEndTime(), startActCreate.getEndTime(), MatsimTestUtils.EPSILON);
+					Assert.assertEquals("activity end times differ", startActRead.getEndTime().seconds(), startActCreate.getEndTime().seconds(), MatsimTestUtils.EPSILON);
 				}
 			}
 		}
