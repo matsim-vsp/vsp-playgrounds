@@ -742,7 +742,7 @@ public final class RunBraessSimulation {
 			runName += "_" + config.strategy().getMaxAgentPlanMemorySize() + "pl";
 		
 		runName += "_stuckT" + (int)config.qsim().getStuckTime();
-		if (config.qsim().getEndTime() != Time.UNDEFINED_TIME)
+		if (!Time.isUndefinedTime(config.qsim().getEndTime()))
 			runName += "_simEndT" + (int)(config.qsim().getEndTime()/24) + "h";
 		
 		return runName;
