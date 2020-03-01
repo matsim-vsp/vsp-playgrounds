@@ -99,7 +99,7 @@ class TravelDisutilityUtils {
 				}
 				// not sure what StageActivityTypes = null did, trying with StageActivityHandling.ExcludeStageActivities for now. gl, oct'19
 				List<Activity> activities = PopulationUtils.getActivities(experiencedPlan, StageActivityHandling.ExcludeStageActivities ) ; 
-				typicalDuration = activities.get(1).getEndTime() - activities.get(1).getStartTime() ; 
+				typicalDuration = activities.get(1).getEndTime().seconds() - activities.get(1).getStartTime().seconds() ;
 			}
 
 			double triptime=0, distance=0 ;

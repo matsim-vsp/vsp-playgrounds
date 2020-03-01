@@ -33,12 +33,9 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
-import org.matsim.contrib.cadyts.car.CadytsContext;
-// import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -54,12 +51,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.counts.Counts;
 import org.matsim.counts.CountsReaderMatsimV1;
@@ -68,6 +60,8 @@ import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.demand.PlanBuilder;
 import cadyts.measurements.SingleLinkMeasurement;
 import cadyts.supply.SimResults;
+
+// import org.matsim.contrib.cadyts.general.CadytsScoring;
 
 /**
  * @author dziemke, mzilske
@@ -224,7 +218,7 @@ public class CadytsDistanceBasedExample {
 					planBuilder.addTurn(HistogramBin.values()[(int) ((Math.min(v, 91000) - 89000) / 200)], 0);
 					double offset = calibrator.calcLinearPlanEffect(planBuilder.getResult());
 //					log.info("########## Offset = " + offset + " -- personId = " + personId + " -- v = " + v);
-					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.UNDEFINED_TIME, personId, cadytsWeightHistogram * offset, null, null));
+					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId, cadytsWeightHistogram * offset, null, null));
 				});
 			});
 		});

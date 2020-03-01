@@ -14,7 +14,7 @@ import org.matsim.core.scoring.SumScoringFunction.ArbitraryEventScoring;
 import org.matsim.core.scoring.SumScoringFunction.BasicScoring;
 import org.matsim.core.scoring.SumScoringFunction.LegScoring;
 import org.matsim.core.scoring.SumScoringFunction.MoneyScoring;
-import org.matsim.core.utils.misc.Time;
+import org.matsim.core.utils.misc.OptionalTime;
 
 public final class MySumScoringFunction implements ScoringFunction {
 
@@ -39,17 +39,17 @@ public final class MySumScoringFunction implements ScoringFunction {
 
 		@Override
 	public final void handleActivity(Activity activity) {
-		double startTime = activity.getStartTime();
-		double endTime = activity.getEndTime();
-		if (startTime == Time.UNDEFINED_TIME && endTime != Time.UNDEFINED_TIME) {
+		OptionalTime startTime = activity.getStartTime();
+		OptionalTime endTime = activity.getEndTime();
+		if (startTime.isUndefined() && endTime.isDefined()) {
 			for (ActivityScoring activityScoringFunction : activityScoringFunctions) {
 				activityScoringFunction.handleFirstActivity(activity);
 			}
-		} else if (startTime != Time.UNDEFINED_TIME && endTime != Time.UNDEFINED_TIME) {
+		} else if (startTime.isDefined() && endTime.isDefined()) {
 			for (ActivityScoring activityScoringFunction : activityScoringFunctions) {
 				activityScoringFunction.handleActivity(activity);
 			}
-		} else if (startTime != Time.UNDEFINED_TIME && endTime == Time.UNDEFINED_TIME) {
+		} else if (startTime.isDefined() && endTime.isUndefined()) {
 			for (ActivityScoring activityScoringFunction : activityScoringFunctions) {
 				activityScoringFunction.handleLastActivity(activity);
 			}

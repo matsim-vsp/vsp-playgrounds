@@ -1,5 +1,9 @@
 package playground.kturner.freightKt;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -8,21 +12,21 @@ import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.contrib.freight.carrier.*;
+import org.matsim.contrib.freight.carrier.Carrier;
+import org.matsim.contrib.freight.carrier.CarrierPlan;
+import org.matsim.contrib.freight.carrier.CarrierUtils;
+import org.matsim.contrib.freight.carrier.CarrierVehicle;
+import org.matsim.contrib.freight.carrier.ScheduledTour;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
-import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.contrib.freight.controler.CarrierScoringFunctionFactory;
 import org.matsim.contrib.freight.controler.FreightActivity;
+import org.matsim.contrib.freight.jsprit.VehicleTypeDependentRoadPricingCalculator;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.vehicles.Vehicle;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Defines carrier scoring function (factory).
@@ -235,8 +239,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		//Kosten für Zeit von Beginn bis Ende der Aktivität (enthält aktuell jun '15 auch Wartezeit bis Service beginnt)
 		private double calcActCosts(FreightActivity act) {
 				// deduct score for the time spent at the facility:
-				final double actStartTime = act.getStartTime();
-				final double actEndTime = act.getEndTime();
+				final double actStartTime = act.getStartTime().seconds();
+				final double actEndTime = act.getEndTime().seconds();
 				return (actEndTime - actStartTime) * this.margUtlOfTime_s ;
 		}
 
@@ -339,8 +343,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		//Costs für Zeit von Begin bis Ende der Aktivität (enthält aktuell jun '15 auch Wartezeit bis Service beginnt)
 		private double calcActCosts(FreightActivity act) {
 				// deduct score for the time spent at the facility:
-				final double actStartTime = act.getStartTime();
-				final double actEndTime = act.getEndTime();
+				final double actStartTime = act.getStartTime().seconds();
+				final double actEndTime = act.getEndTime().seconds();
 				return (actEndTime - actStartTime) * this.margUtlOfTime_s ;
 		}
 		
@@ -369,7 +373,7 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
 		//Korrigiert den Score bei der ersten Service-Aktivität (Wartezeit, da bereits zu Beginn der Depotöffnung losgefahren)
 		//indem diese Zeit wieder mit einem positiven Wert gegengerechnet wird
 		private double correctFirstService(FreightActivity act){
-			final double actStartTime = act.getStartTime();
+			final double actStartTime = act.getStartTime().seconds();
 			final double windowStartTime = act.getTimeWindow().getStart();
 				if ( actStartTime < windowStartTime ) {	//Fahrzeug vor Öffnungszeit angekommen.
 					return ( windowStartTime - actStartTime ) * this.margUtlOfTime_s ;

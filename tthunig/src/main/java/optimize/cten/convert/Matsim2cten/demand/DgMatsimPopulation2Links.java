@@ -89,7 +89,7 @@ public class DgMatsimPopulation2Links {
 					}
 					else if (targetAct == null) {
 						targetAct = (Activity) pe;
-						if (startTime <= startAct.getEndTime() && startAct.getEndTime() <= endTime) {
+						if (startTime <= startAct.getEndTime().seconds() && startAct.getEndTime().seconds() <= endTime) {
 							processLeg(startAct, leg, targetAct, networkBoundingBox);
 						}
 						startAct = targetAct;

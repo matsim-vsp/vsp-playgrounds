@@ -39,6 +39,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.utils.geometry.transformations.GeotoolsTransformation;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.core.utils.misc.Time;
 
 import playground.kai.urbansim.Utils;
@@ -90,9 +91,9 @@ public class PersWirtVConvert {
 					act = pop.getFactory().createActivityFromCoord("@"+sourceType, fromCoord ) ;
 					newPlan.addActivity(act) ;
 				}
-				double tripStartTime = Time.parseTime( parts[idxFromKey.get("\"start_time\"")].replace('"', ' ').trim() ) ;
-				if ( tripStartTime != Time.UNDEFINED_TIME ) {
-					act.setEndTime( tripStartTime ) ;
+				OptionalTime tripStartTime = Time.parseOptionalTime( parts[idxFromKey.get("\"start_time\"")].replace('"', ' ').trim() ) ;
+				if ( tripStartTime.isDefined() ) {
+					act.setEndTime( tripStartTime.seconds() ) ;
 					// trip start time is activity end time
 					// this is either the first or the previous activity.  Last activity gets no end time.
 				} else {

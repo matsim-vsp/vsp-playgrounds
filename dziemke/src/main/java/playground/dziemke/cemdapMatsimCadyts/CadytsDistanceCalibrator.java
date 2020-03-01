@@ -1,10 +1,11 @@
 package playground.dziemke.cemdapMatsimCadyts;
 
-import cadyts.calibrators.Calibrator;
-import cadyts.calibrators.analytical.AnalyticalCalibrator;
-import cadyts.demand.PlanBuilder;
-import cadyts.measurements.SingleLinkMeasurement;
-import cadyts.supply.SimResults;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.apache.commons.math.util.MathUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -37,13 +38,16 @@ import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.counts.Counts;
 import org.matsim.counts.CountsReaderMatsimV1;
+
+import cadyts.calibrators.Calibrator;
+import cadyts.calibrators.analytical.AnalyticalCalibrator;
+import cadyts.demand.PlanBuilder;
+import cadyts.measurements.SingleLinkMeasurement;
+import cadyts.supply.SimResults;
 import playground.dziemke.cemdapMatsimCadyts.measurement.CadytsModule;
 import playground.dziemke.cemdapMatsimCadyts.measurement.CadytsScoringSimplified;
 import playground.dziemke.cemdapMatsimCadyts.measurement.PersoDistHistoModule;
 import playground.dziemke.cemdapMatsimCadyts.measurement.PersoDistHistogram;
-
-import javax.inject.Inject;
-import java.util.*;
 
 /**
  * @author gthunig on 21.02.2017.
@@ -206,7 +210,7 @@ public class CadytsDistanceCalibrator {
 
                 distances.forEach((personId, v) -> {
                     double displacement = Math.abs(v-distanceAverage);
-                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.UNDEFINED_TIME, personId, -cadytsWeightHistogram * displacement, null, null));
+                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId, -cadytsWeightHistogram * displacement, null, null));
                 });
             });
         });
@@ -326,7 +330,7 @@ public class CadytsDistanceCalibrator {
                     PlanBuilder<DistanceBin> planBuilder = new PlanBuilder<>();
                     planBuilder.addTurn(results.getBinFromDistance(v.intValue()), 0);
                     double offset = calibrator.calcLinearPlanEffect(planBuilder.getResult());
-                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.UNDEFINED_TIME, personId,
+                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId,
                             cadytsWeightHistogram * offset, null, null));
 
 

@@ -34,8 +34,6 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.testcases.MatsimTestUtils;
 
-import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
-
 public class RunDurationBasedTimeAllocationTestIT {
 	
 	@Rule
@@ -74,9 +72,9 @@ public class RunDurationBasedTimeAllocationTestIT {
 				if (pE instanceof Activity) {
 					Activity act = (Activity) pE;
 					
-					if (!Time.isUndefinedTime(act.getMaximumDuration())) {
+					if (!Time.isUndefinedTime(act.getMaximumDuration().seconds())) {
 						System.out.println(act.getMaximumDuration());
-						Assert.assertEquals("Wrong activity end time.", true, act.getMaximumDuration() <= 10 + 10);
+						Assert.assertEquals("Wrong activity end time.", true, act.getMaximumDuration().seconds() <= 10 + 10);
 					}
 				}
 			}
