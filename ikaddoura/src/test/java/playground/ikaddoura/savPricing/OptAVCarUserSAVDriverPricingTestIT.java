@@ -76,6 +76,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
 			
+			config.plansCalcRoute().setRoutingRandomness(0.);
+			
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
@@ -130,6 +132,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
+			config.plansCalcRoute().setRoutingRandomness(0.);
+			
 			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
@@ -168,6 +172,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 					new TaxiFareConfigGroup(),
 					new OTFVisConfigGroup());
 			
+			config.plansCalcRoute().setRoutingRandomness(0.);
+
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-only");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
