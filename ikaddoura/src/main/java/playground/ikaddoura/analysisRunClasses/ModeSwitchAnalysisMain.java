@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.AgentAnalysisFilter;
 import org.matsim.analysis.TripAnalysisFilter;
-import org.matsim.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+import org.matsim.analysis.detailedPersonTripAnalysis.BasicPersonTripAnalysisHandler;
 import org.matsim.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
