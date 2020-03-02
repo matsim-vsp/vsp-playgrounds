@@ -20,7 +20,7 @@
 package playground.ikaddoura.router;
 
 import org.matsim.analysis.vtts.VTTSHandler;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.Config;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -32,22 +32,17 @@ import org.matsim.core.router.util.TravelTime;
  */
 public final class VTTSTimeDistanceTravelDisutilityFactory implements TravelDisutilityFactory {
 
-	private double sigma = 0. ;
 	private VTTSHandler vttsHandler;
-	private final PlanCalcScoreConfigGroup cnScoringGroup;
+	private final Config config;
 	
-	public VTTSTimeDistanceTravelDisutilityFactory(VTTSHandler vttsHandler, PlanCalcScoreConfigGroup cnScoringGroup) {
+	public VTTSTimeDistanceTravelDisutilityFactory(VTTSHandler vttsHandler, Config config) {
 		this.vttsHandler = vttsHandler ;
-		this.cnScoringGroup = cnScoringGroup;
+		this.config = config;
 	}
 
 	@Override
 	public final TravelDisutility createTravelDisutility(TravelTime timeCalculator) {
-		return new VTTSTimeDistanceTravelDisutility(timeCalculator, cnScoringGroup, this.sigma, vttsHandler);
+		return new VTTSTimeDistanceTravelDisutility(timeCalculator, config, vttsHandler);
 	}
 	
-	public void setSigma ( double val ) {
-		this.sigma = val;
-	}
-
 }

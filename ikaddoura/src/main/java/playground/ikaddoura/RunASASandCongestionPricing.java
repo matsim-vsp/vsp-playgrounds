@@ -109,7 +109,6 @@ public class RunASASandCongestionPricing {
 		
 		controler.addOverridingModule(new DecongestionModule(scenario));
 		final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-		travelDisutilityFactory.setSigma(0.);
 		
 		controler.addOverridingModule(new AbstractModule(){
 			@Override

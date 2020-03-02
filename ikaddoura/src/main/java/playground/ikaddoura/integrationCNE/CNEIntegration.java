@@ -267,7 +267,7 @@ public class CNEIntegration {
 			
 			if (useTripAndAgentSpecificVTTSForRouting) {
 				final VTTSMoneyTimeDistanceTravelDisutilityFactory factory = new VTTSMoneyTimeDistanceTravelDisutilityFactory(
-						new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, controler.getConfig().planCalcScore())
+						new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, controler.getConfig())
 						);
 				factory.setSigma(sigma);
 				
@@ -289,7 +289,7 @@ public class CNEIntegration {
 				
 			} else {
 				final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-						new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+						new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 				factory.setSigma(sigma);
 				

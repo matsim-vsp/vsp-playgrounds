@@ -333,6 +333,7 @@ public final class RunBraessSimulation {
 
 	private static Controler prepareController(Scenario scenario) {
 		Config config = scenario.getConfig();
+		config.plansCalcRoute().setRoutingRandomness(SIGMA);
 		Controler controler = new Controler(scenario);
 	
 		switch (SIGNAL_LOGIC){
@@ -389,7 +390,7 @@ public final class RunBraessSimulation {
 					if (strategies[i].getWeight() > 0.0){ // ReRoute is used
 						final CongestionTollTimeDistanceTravelDisutilityFactory factory =
 								new CongestionTollTimeDistanceTravelDisutilityFactory(
-										new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() ),
+										new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config ),
 								tollHandler, config.planCalcScore()
 							) ;
 						factory.setSigma(SIGMA);
@@ -465,7 +466,6 @@ public final class RunBraessSimulation {
 			// toll-adjusted routing
 			
 			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-			travelDisutilityFactory.setSigma(0.);
 			
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
@@ -478,8 +478,7 @@ public final class RunBraessSimulation {
 			
 			// adapt sigma for randomized routing
 			final RandomizingTimeDistanceTravelDisutilityFactory builder =
-					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() );
-			builder.setSigma(SIGMA);
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {

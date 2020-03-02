@@ -142,6 +142,7 @@ public final class RunParallelSimulation {
 
 	private static Controler prepareController(Scenario scenario) {
 		Config config = scenario.getConfig();
+		config.plansCalcRoute().setRoutingRandomness(SIGMA);
 		Controler controler = new Controler(scenario);
 
 		// add the signals module if signal systems are used
@@ -212,8 +213,7 @@ public final class RunParallelSimulation {
 			
 			// adapt sigma for randomized routing
 			final RandomizingTimeDistanceTravelDisutilityFactory builder =
-					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() );
-			builder.setSigma(SIGMA);
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {

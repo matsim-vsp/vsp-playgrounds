@@ -62,7 +62,7 @@ public class MyControlerListener implements /*IterationEndsListener,*/ ShutdownL
 		MatsimServices controler = event.getServices() ;
 
 		TravelTime ttc = controler.getLinkTravelTimes();
-		LeastCostPathTree st = new LeastCostPathTree(ttc, new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, controler.getConfig().planCalcScore() ).createTravelDisutility(ttc));
+		LeastCostPathTree st = new LeastCostPathTree(ttc, new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, controler.getConfig() ).createTravelDisutility(ttc));
 
         Network network = (Network) controler.getScenario().getNetwork();
 		double dpTime = 8.*3600 ;

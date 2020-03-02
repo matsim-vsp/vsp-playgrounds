@@ -25,6 +25,7 @@ import org.matsim.analysis.vtts.VTTSHandler;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
@@ -50,14 +51,13 @@ public final class VTTSTimeDistanceTravelDisutility implements TravelDisutility 
 	private static int toSmallVTTSWarning = 0;
 	private static int toLargeVTTSWarning = 0;
 
-	VTTSTimeDistanceTravelDisutility(final TravelTime timeCalculator, PlanCalcScoreConfigGroup cnScoringGroup, double sigma, VTTSHandler vttsHandler) {
+	VTTSTimeDistanceTravelDisutility(final TravelTime timeCalculator, Config config, VTTSHandler vttsHandler) {
 		this.timeCalculator = timeCalculator;
 		this.vttsHandler = vttsHandler;
-		this.cnScoringGroup = cnScoringGroup;
-		this.sigma = sigma;
+		this.cnScoringGroup = config.planCalcScore();
+		this.sigma = config.plansCalcRoute().getRoutingRandomness();
 		
-		final RandomizingTimeDistanceTravelDisutilityFactory builder = new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, cnScoringGroup );
-		builder.setSigma(sigma);
+		final RandomizingTimeDistanceTravelDisutilityFactory builder = new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 		this.delegate = builder.createTravelDisutility(timeCalculator);
 	}
 

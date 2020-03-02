@@ -325,6 +325,8 @@ public class TtRunCapAdopForBraessIterative {
 		config.planCalcScore().setWriteExperiencedPlans(false);
 		config.controler().setCreateGraphs(true);
 		
+		config.plansCalcRoute().setRoutingRandomness(SIGMA);
+		
 		// define activity types
 		{
 			ActivityParams dummyAct = new ActivityParams("dummy");
@@ -359,7 +361,7 @@ public class TtRunCapAdopForBraessIterative {
 			for (int i = 0; i < strategies.length; i++) {
 				if (strategies[i].getStrategyName().equals(DefaultStrategy.ReRoute.toString())) {
 					if (strategies[i].getWeight() > 0.0) { // ReRoute is used
-						final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config.planCalcScore()),
+						final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config),
 								tollHandler, config.planCalcScore());
 						factory.setSigma(SIGMA);
 						controler.addOverridingModule(new AbstractModule() {
@@ -402,8 +404,7 @@ public class TtRunCapAdopForBraessIterative {
 			
 			// adapt sigma for randomized routing
 			final RandomizingTimeDistanceTravelDisutilityFactory builder =
-					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() );
-			builder.setSigma(SIGMA);
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
