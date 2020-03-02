@@ -72,7 +72,7 @@ public class RunDurationBasedTimeAllocationTestIT {
 				if (pE instanceof Activity) {
 					Activity act = (Activity) pE;
 					
-					if (!Time.isUndefinedTime(act.getMaximumDuration().seconds())) {
+					if (act.getMaximumDuration().isDefined()) {
 						System.out.println(act.getMaximumDuration());
 						Assert.assertEquals("Wrong activity end time.", true, act.getMaximumDuration().seconds() <= 10 + 10);
 					}

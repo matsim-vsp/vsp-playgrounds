@@ -220,6 +220,8 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
+			config.plansCalcRoute().setRoutingRandomness(0.);
+			
 			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
