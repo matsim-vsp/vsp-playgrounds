@@ -32,7 +32,6 @@ import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.EndtimeInterpretation;
 import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
@@ -45,7 +44,6 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.LaneFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine.NetsimInternalInterface;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.Facility;
 import org.matsim.lanes.Lane;
@@ -64,7 +62,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.matsim.core.config.groups.ControlerConfigGroup.*;
+import static org.matsim.core.config.groups.ControlerConfigGroup.SnapshotFormat;
+import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.createAgentSnapshotInfoBuilder;
+import static org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineI.NetsimInternalInterface;
 
 /**
  * The problem with this approach is that, because of the buffer, the vehicles do not go around in undisturbed circles.  kai, jun'16
@@ -445,7 +445,7 @@ public class KNCALink {
 			if (! Double.isNaN(network.getEffectiveLaneWidth())){
 				linkWidthCalculator.setLaneWidth( network.getEffectiveLaneWidth() );
 			}
-			AbstractAgentSnapshotInfoBuilder snapshotBuilder = QNetsimEngine.createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
+			AbstractAgentSnapshotInfoBuilder snapshotBuilder = createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
 			this.snapshotInfoFactory = new AgentSnapshotInfoFactory( linkWidthCalculator );
 
 
