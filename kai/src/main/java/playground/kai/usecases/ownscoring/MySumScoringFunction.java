@@ -43,7 +43,7 @@ public class MySumScoringFunction implements ScoringFunction {
 		delegate.handleActivity(activity);
 		
 		Activity pseudoActivity = PopulationUtils.createActivity(activity) ;
-		pseudoActivity.setStartTime( pseudoActivity.getStartTime() - 1 ) ;
+		pseudoActivity.setStartTime( pseudoActivity.getStartTime().seconds() - 1 ) ;
 		pDelegate.handleActivity(pseudoActivity);
 		
 		// score change by regular activity

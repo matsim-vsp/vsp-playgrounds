@@ -170,7 +170,7 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
                 if (route != null) {
                     leg = PopulationUtils.createLeg(TransportMode.pt);
                     ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
-                    double arrivalOffset = (link.getFromNode().stop.getArrivalOffset() != Time.UNDEFINED_TIME) ? link.fromNode.stop.getArrivalOffset() : link.fromNode.stop.getDepartureOffset();
+                    double arrivalOffset = !Time.isUndefinedTime(link.getFromNode().stop.getArrivalOffset()) ? link.fromNode.stop.getArrivalOffset() : link.fromNode.stop.getDepartureOffset();
                     double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
                     ptRoute.setTravelTime(arrivalTime - time);
                     ptRoute.setDistance( currentDistance );
@@ -233,7 +233,7 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
             ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
             ptRoute.setDistance( currentDistance );
             leg.setRoute(ptRoute);
-            double arrivalOffset = ((prevLink).toNode.stop.getArrivalOffset() != Time.UNDEFINED_TIME) ?
+            double arrivalOffset = !Time.isUndefinedTime((prevLink).toNode.stop.getArrivalOffset()) ?
                     (prevLink).toNode.stop.getArrivalOffset()
                     : (prevLink).toNode.stop.getDepartureOffset();
             double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());

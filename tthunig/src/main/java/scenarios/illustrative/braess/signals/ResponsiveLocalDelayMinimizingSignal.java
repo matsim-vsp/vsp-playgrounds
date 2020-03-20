@@ -30,10 +30,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlData;
+import org.matsim.contrib.signals.data.signalcontrol.v20.SignalGroupSettingsData;
+import org.matsim.contrib.signals.data.signalcontrol.v20.SignalPlanData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
@@ -105,14 +105,14 @@ public final class ResponsiveLocalDelayMinimizingSignal implements AfterMobsimLi
 	private void computeAbsoluteDelays() {
 		absoluteDelay = new Double[analyzeTool.getNumberOfRoutes()];
 		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
-			absoluteDelay[route] = analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route];
+			absoluteDelay[route] = analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers_PCU()[route] * freeflowRouteTT[route];
 		}
 	}
 
 	private void computeAverageDelays() {
 		avgDelay = new Double[analyzeTool.getNumberOfRoutes()];
 		for (int route=0; route < analyzeTool.getNumberOfRoutes(); route++) {
-			avgDelay[route] = (analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers()[route] * freeflowRouteTT[route]) / analyzeTool.getRouteUsers()[route];
+			avgDelay[route] = (analyzeTool.getTotalRouteTTs()[route] - analyzeTool.getRouteUsers_PCU()[route] * freeflowRouteTT[route]) / analyzeTool.getRouteUsers_PCU()[route];
 		}
 	}
 	

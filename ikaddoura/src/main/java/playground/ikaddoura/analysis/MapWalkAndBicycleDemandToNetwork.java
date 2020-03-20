@@ -102,14 +102,14 @@ public class MapWalkAndBicycleDemandToNetwork {
 					// only consider trips with a single leg
 					if (trip.getLegsOnly().get(0).getMode().equals("walk") || trip.getLegsOnly().get(0).getMode().equals("bicycle")) {
 						// only consider walk or bicycle trips
-						if (trip.getOriginActivity().getEndTime() >= 0. && trip.getOriginActivity().getEndTime() < 24 * 3600.) {
+						if (trip.getOriginActivity().getEndTime().seconds() >= 0. && trip.getOriginActivity().getEndTime().seconds() < 24 * 3600.) {
 							
-							int timeBin = (int) (trip.getOriginActivity().getEndTime() / 3600.);
+							int timeBin = (int) (trip.getOriginActivity().getEndTime().seconds() / 3600.);
 							
 							Facility fromFacility = FacilitiesUtils.wrapLink(scenario.getNetwork().getLinks().get(trip.getOriginActivity().getLinkId()));
 							Facility toFacility = FacilitiesUtils.wrapLink(scenario.getNetwork().getLinks().get(trip.getDestinationActivity().getLinkId()));
 							
-							double departureTime = trip.getOriginActivity().getEndTime();
+							double departureTime = trip.getOriginActivity().getEndTime().seconds();
 							
 							List<? extends PlanElement> result = tripRouter.calcRoute(mainMode, fromFacility, toFacility, departureTime, person);
 							

@@ -28,8 +28,6 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
-
 /**
  * Class to bind general analyze and writing tool to the simulation.
  * 

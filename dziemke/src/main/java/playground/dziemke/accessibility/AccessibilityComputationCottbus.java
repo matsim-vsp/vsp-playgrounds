@@ -18,15 +18,9 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.log4j.Logger;
-import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
-import org.matsim.contrib.accessibility.AccessibilityModule;
-import org.matsim.contrib.accessibility.FacilityTypes;
-import org.matsim.contrib.accessibility.Modes4Accessibility;
-import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
+import org.locationtech.jts.geom.Envelope;
+import org.matsim.contrib.accessibility.*;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -36,7 +30,8 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilities;
 
-import org.locationtech.jts.geom.Envelope;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author dziemke
@@ -80,7 +75,7 @@ public class AccessibilityComputationCottbus {
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		
 		// Create facilities from plans
-		ActivityFacilities activityFacilities = AccessibilityUtils.createFacilitiesFromPlans(scenario.getPopulation());
+		ActivityFacilities activityFacilities = AccessibilityUtils.createFacilitiesFromPlans(scenario.getPopulation() );
 		scenario.setActivityFacilities(activityFacilities);
 
 		// Activity types

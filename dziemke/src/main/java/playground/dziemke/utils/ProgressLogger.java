@@ -18,9 +18,11 @@ public class ProgressLogger extends Logger {
         return new ProgressLogger(name);
     }
 
-    public static ProgressLogger getLogger(Class clazz) {
+    public static ProgressLogger getLogger(Class<?> clazz) {
         return new ProgressLogger(clazz.getName());
     }
+    // it needs the <?>, otherwise it sometimes (always) picks up the getLogger( Class<?> clazz ) method that is inherited rather than this one here. kai,
+    // mar'20
 
     public void initializeProgress(String subject, long currentSize) {
         this.subject = subject;

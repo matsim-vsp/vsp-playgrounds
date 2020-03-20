@@ -70,7 +70,6 @@ public class CongestionPricingControler {
 	static String router; // standard, VTTSspecific	
 	static String implementation; // V3, V7, V8, V9, noPricing
 	static String VTTSapproach; // different, equal
-	static double sigma;
 
 	public static void main(String[] args) throws IOException {
 		
@@ -90,9 +89,6 @@ public class CongestionPricingControler {
 			
 			router = args[4];
 			log.info("router: " + router);
-			
-			sigma = Double.parseDouble(args[5]);
-			log.info("Sigma: " + sigma);
 
 		} else {
 			outputDirectory = "../../../runs-svn/vickrey-decongestion/output-FINAL/V9_different_rndSeed234/";
@@ -100,7 +96,6 @@ public class CongestionPricingControler {
 			VTTSapproach = "different";
 			implementation = "V9";
 			router = "standard";
-			sigma = 0.;
 		}
 
 		CongestionPricingControler main = new CongestionPricingControler();
@@ -137,8 +132,7 @@ public class CongestionPricingControler {
 
 			if (router.equals("standard")) {
 
-				final RandomizingTimeDistanceTravelDisutilityFactory factory = new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() );
-				factory.setSigma(sigma);
+				final RandomizingTimeDistanceTravelDisutilityFactory factory = new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 				controler.addOverridingModule(new AbstractModule(){
 					@Override
 					public void install() {
@@ -148,8 +142,7 @@ public class CongestionPricingControler {
 				
 			} else if (router.equals("VTTSspecific")) {
 
-				final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config.planCalcScore());
-				factory.setSigma(sigma);
+				final VTTSTimeDistanceTravelDisutilityFactory factory = new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config);
 				
 				controler.addOverridingModule(new AbstractModule(){
 					@Override
@@ -171,8 +164,7 @@ public class CongestionPricingControler {
 			
 			if (router.equals("standard")) {
 
-				final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() ), tollHandler, config.planCalcScore());
-				factory.setSigma(sigma);
+				final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config ), tollHandler, config.planCalcScore());
 				
 				controler.addOverridingModule(new AbstractModule() {
 					@Override
@@ -184,10 +176,9 @@ public class CongestionPricingControler {
 			} else if (router.equals("VTTSspecific")) {
 				
 				final VTTSCongestionTollTimeDistanceTravelDisutilityFactory factory = new VTTSCongestionTollTimeDistanceTravelDisutilityFactory(
-						new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config.planCalcScore()),
+						new VTTSTimeDistanceTravelDisutilityFactory(vttsHandler, config),
 						tollHandler, config.planCalcScore()
 					);
-				factory.setSigma(sigma);
 				
 				controler.addOverridingModule(new AbstractModule(){
 					@Override

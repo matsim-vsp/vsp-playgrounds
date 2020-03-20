@@ -35,7 +35,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.opengis.feature.simple.SimpleFeature;
@@ -874,8 +873,8 @@ public class VWRCreateDemand {
 	private void enrichPlanByReturnLegAndActivity(Activity last, Plan plan, String mode, int maxDur) {
 
 		double lastEnd = 0.0;
-		if (last.getEndTime() != Time.UNDEFINED_TIME){
-			lastEnd = last.getEndTime();
+		if (last.getEndTime().isDefined()){
+			lastEnd = last.getEndTime().seconds();
 		}
 		String newMode  = enrichPlanBySingleLegAndActivity(last.getCoord(), plan, mode, maxDur, true);
 		Leg returnTrip = scenario.getPopulation().getFactory().createLeg(newMode);

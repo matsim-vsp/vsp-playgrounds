@@ -93,16 +93,16 @@ public class ReadVsCreatePopulationIT {
 				for (Plan planCreate : pCreate.getPlans()){
 					Activity startActRead = (Activity) planRead.getPlanElements().get(0);
 					Activity startActCreate = (Activity) planCreate.getPlanElements().get(0);
-					Assert.assertEquals("activity end times differ", startActRead.getEndTime(), startActCreate.getEndTime(), MatsimTestUtils.EPSILON);
+					Assert.assertEquals("activity end times differ", startActRead.getEndTime().seconds(), startActCreate.getEndTime().seconds(), MatsimTestUtils.EPSILON);
 				}
 			}
 		}
 		
 		// compare results
 		log.info("the total travel times are: " + readResults.getFirst().getTotalTT() + " and " + createResults.getFirst().getTotalTT());
-		log.info("the route distributions are: " + readResults.getFirst().getRouteUsers()[0] + ", " + readResults.getFirst().getRouteUsers()[1] + ", " + readResults.getFirst().getRouteUsers()[2] 
-				+ " and " + createResults.getFirst().getRouteUsers()[0] + ", " + createResults.getFirst().getRouteUsers()[1] + ", " + createResults.getFirst().getRouteUsers()[2]);
-		Assert.assertArrayEquals("route distributions differ", readResults.getFirst().getRouteUsers(), createResults.getFirst().getRouteUsers());
+		log.info("the route distributions are: " + readResults.getFirst().getRouteUsers_PCU()[0] + ", " + readResults.getFirst().getRouteUsers_PCU()[1] + ", " + readResults.getFirst().getRouteUsers_PCU()[2] 
+				+ " and " + createResults.getFirst().getRouteUsers_PCU()[0] + ", " + createResults.getFirst().getRouteUsers_PCU()[1] + ", " + createResults.getFirst().getRouteUsers_PCU()[2]);
+		Assert.assertArrayEquals("route distributions differ", readResults.getFirst().getRouteUsers_PCU(), createResults.getFirst().getRouteUsers_PCU(), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("total travel times differ", readResults.getFirst().getTotalTT(), createResults.getFirst().getTotalTT(), MatsimTestUtils.EPSILON);
 	}
 
@@ -129,7 +129,7 @@ public class ReadVsCreatePopulationIT {
 		
 		Controler controler = new Controler(scenario);
 					
-		TtAbstractAnalysisTool handler = new TtAnalyzeBraess();
+		TtAbstractAnalysisTool handler = new TtAnalyzeBraess(scenario);
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {

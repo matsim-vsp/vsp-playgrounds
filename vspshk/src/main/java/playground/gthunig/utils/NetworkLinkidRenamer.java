@@ -1,12 +1,15 @@
 package playground.gthunig.utils;
 
-import com.opencsv.CSVReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.contrib.util.CSVReaders;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
@@ -14,13 +17,14 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.counts.*;
+import org.matsim.counts.Count;
+import org.matsim.counts.Counts;
+import org.matsim.counts.CountsReaderMatsimV1;
+import org.matsim.counts.CountsWriter;
+import org.matsim.counts.Volume;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 
 /**
  * @author gthunig on 28.02.2017.
@@ -202,11 +206,17 @@ public class NetworkLinkidRenamer {
 
     }
 
-    private static Map<String, String> getShortIdsFromFile(String inputShortIdsFile, String seperator) throws IOException {
+    private static Map<String, String> getShortIdsFromFile(String inputShortIdsFile, String seperator)
+            throws IOException {
         Map<String, String> result = new HashMap<>();
 
         CSVReader reader = new CSVReader(IOUtils.getBufferedReader(inputShortIdsFile));
-        List<String[]> lines = reader.readAll();
+        List<String[]> lines = null;
+        try {
+            lines = reader.readAll();
+        } catch (CsvException e) {
+            throw new RuntimeException(e);
+        }
 
         for (String[] line : lines) {
             String[] lineString = line[0].split(seperator);

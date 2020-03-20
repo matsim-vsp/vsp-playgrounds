@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.analysis.spatial.Grid;
 import org.matsim.contrib.analysis.time.TimeBinMap;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.analysis.EmissionGridAnalyzer;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -108,20 +109,23 @@ public class BerlinSpatialPlots {
                 .withGridType(EmissionGridAnalyzer.GridType.Square)
                 .build();
 
-        TimeBinMap<Grid<Map<String, Double>>> timeBins = analyzer.process(eventsPath.toString());
+        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(eventsPath.toString() );
 
         log.info("Writing to csv...");
-        writeGridToCSV(timeBins, "NOX", outputPath);
+        writePollutantGridToCSV(timeBins, Pollutant.NOx, outputPath );
     }
 
-    private void writeGridToCSV(TimeBinMap<Grid<Map<String, Double>>> bins, String pollutant, String outputPath) {
+    private void writePollutantGridToCSV( TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant, String outputPath ) {
+            // this method originally used "String" instead of "Pollutant".  After the emissions material was changed (back) to enum types, I also changed
+            // this method here (back) to enum.  I have, however, not tested it.  kai, feb'20
+            // (yy I am also not sure why a "Berlin" method sits in a playground and not in the "Berlin" repo. kai, feb'20)
 
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(outputPath.toString()), CSVFormat.TDF)) {
             printer.printRecord("timeBinStartTime", "centroidX", "centroidY", "weight");
 
-            for (TimeBinMap.TimeBin<Grid<Map<String, Double>>> bin : bins.getTimeBins()) {
+            for (TimeBinMap.TimeBin<Grid<Map<Pollutant, Double>>> bin : bins.getTimeBins()) {
                 final double timeBinStartTime = bin.getStartTime();
-                for (Grid.Cell<Map<String, Double>> cell : bin.getValue().getCells()) {
+                for (Grid.Cell<Map<Pollutant, Double>> cell : bin.getValue().getCells()) {
                     double weight = cell.getValue().containsKey(pollutant) ? cell.getValue().get(pollutant) : 0;
                     printer.printRecord(timeBinStartTime, cell.getCoordinate().x, cell.getCoordinate().y, weight);
 				}

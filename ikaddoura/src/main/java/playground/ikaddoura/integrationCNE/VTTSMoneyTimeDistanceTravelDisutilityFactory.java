@@ -59,9 +59,7 @@ public final class VTTSMoneyTimeDistanceTravelDisutilityFactory implements Trave
 
 	@Override
 	public final TravelDisutility createTravelDisutility(TravelTime timeCalculator) {
-		
-		vttsTimeDistanceTravelDisutilityFactory.setSigma(sigma);
-		
+				
 		return new MoneyTimeDistanceTravelDisutility(
 				vttsTimeDistanceTravelDisutilityFactory.createTravelDisutility(timeCalculator),
 				this.sigma,

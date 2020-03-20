@@ -1,16 +1,15 @@
 package interpolationTest;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
-import org.matsim.contrib.accessibility.gis.SpatialGrid;
-import org.matsim.contrib.accessibility.interpolation.Interpolation;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.matsim.contrib.accessibility.SpatialGrid;
+import org.matsim.contrib.accessibility.interpolation.Interpolation;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Class for testing the implemented interpolation methods bilinear interpolation, bicubic spline interpolation and inverse distance weighting.

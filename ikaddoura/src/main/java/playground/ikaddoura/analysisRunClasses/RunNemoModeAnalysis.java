@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.analysis.AgentAnalysisFilter;
+import org.matsim.analysis.DefaultAnalysisMainModeIdentifier;
 import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -75,7 +76,7 @@ public class RunNemoModeAnalysis {
 		
 		filter.preProcess(scenario);
 				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
+		ModeAnalysis analysis = new ModeAnalysis(scenario, filter, new DefaultAnalysisMainModeIdentifier());
 		analysis.run();
 		
 		File directory = new File(outputDirectory);

@@ -115,7 +115,7 @@ class ConfigurableOccupancyAnalyzer implements 	PersonEntersVehicleEventHandler,
 	}
 
 	@Override
-	public void writeResultsForSelectedStopIds(String filename, Counts<Link> occupCounts,
+	public void writeResultsForSelectedStopIds(String filename, Counts<TransitStopFacility> occupCounts,
 			Collection<Id<TransitStopFacility>> stopIds) {
 		log.warn("not implemented");
 	}

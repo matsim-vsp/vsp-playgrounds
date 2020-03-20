@@ -203,7 +203,7 @@ public class SAVPricingModule extends AbstractModule {
 
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
         			new MoneyTimeDistanceTravelDisutilityFactory(
-        				new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig().planCalcScore())
+        				new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig())
         			);
         		install(new MoneyTravelDisutilityModule(privateCarMode, dvrpTravelDisutilityFactory));
 			
@@ -215,7 +215,7 @@ public class SAVPricingModule extends AbstractModule {
 				log.info("Using the default travel disutility for private car users.");
 			} else {
 				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig().planCalcScore()); 
+					new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig()); 
 				this.addTravelDisutilityFactoryBinding(privateCarMode).toInstance(defaultTravelDisutilityFactory);
 			}
 		}

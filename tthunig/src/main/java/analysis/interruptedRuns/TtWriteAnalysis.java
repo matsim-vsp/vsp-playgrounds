@@ -90,8 +90,8 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		// get results
 		double totalTTIt = analyzer.getTotalTT();
 		double[] avgRouteTTsIt = analyzer.calculateAvgRouteTTs();
-		int[] routeUsersIt = analyzer.getRouteUsers();
-		int numberOfStuckedAgents = analyzer.getNumberOfStuckedAgents();
+		double[] routeUsersIt = analyzer.getRouteUsers_PCU();
+		double stuckedAgentsPCU = analyzer.getStuckedAgentsInPCU();
 		
 		// write results
 		StringBuffer line = new StringBuffer();
@@ -102,7 +102,7 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {
 			line.append("\t" + avgRouteTTsIt[routeNr]);
 		}
-		line.append("\t" + numberOfStuckedAgents);
+		line.append("\t" + stuckedAgentsPCU);
 		this.overallItWritingStream.println(line.toString());
 	}
 
@@ -113,14 +113,14 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		
 		// write iteration specific analysis
 		log.info("Results of iteration " + iteration + ":");
-		writeFinalResults(outputDir, analyzer.getTotalTT(), analyzer.getTotalRouteTTs(), analyzer.calculateAvgRouteTTs(), analyzer.getRouteUsers(), analyzer.getNumberOfStuckedAgents());
-		writeOnRoutes(outputDir, analyzer.getOnRoutePerSecond());
-		writeRouteStarts(outputDir, analyzer.getRouteDeparturesPerSecond());
-		writeSummedRouteStarts(outputDir, analyzer.calculateSummedRouteDeparturesPerSecond());
+		writeFinalResults(outputDir, analyzer.getTotalTT(), analyzer.getTotalRouteTTs(), analyzer.calculateAvgRouteTTs(), analyzer.getRouteUsers_PCU(), analyzer.getStuckedAgentsInPCU());
+		writeOnRoutes(outputDir, analyzer.getOnRoutePerSecond_PCU());
+		writeRouteStarts(outputDir, analyzer.getRouteDeparturesPerTimeStep_PCU());
+		writeSummedRouteStarts(outputDir, analyzer.calculateSummedRouteDeparturesPerTimeStep_PCU());
 		writeAvgRouteTTs(outputDir, "Departure", analyzer.calculateAvgRouteTTsByDepartureTime());
 	}
 
-	private void writeSummedRouteStarts(String outputDir, Map<Double, int[]> summedRouteDeparturesPerSecond) {
+	private void writeSummedRouteStarts(String outputDir, Map<Double, double[]> summedRouteDeparturesPerTimeStep_PCU) {
 		PrintStream stream;
 		String filename = outputDir + "summedDeparturesPerRoute.txt";
 		try {
@@ -136,10 +136,10 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		}
 		header += "\tsum_starts_total";
 		stream.println(header);
-		for (Double time : summedRouteDeparturesPerSecond.keySet()) {
+		for (Double time : summedRouteDeparturesPerTimeStep_PCU.keySet()) {
 			StringBuffer line = new StringBuffer();
-			int[] routeStarts = summedRouteDeparturesPerSecond.get(time);
-			int totalStarts = 0;
+			double[] routeStarts = summedRouteDeparturesPerTimeStep_PCU.get(time);
+			double totalStarts = 0;
 			
 			line.append(time);
 			for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {
@@ -160,7 +160,7 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 	 * results to the console.
 	 */
 	private void writeFinalResults(String outputDir, double totalTT, double[] totalRouteTTs,
-			double[] avgRouteTTs, int[] routeUsers, int numberOfStuckedAgents) {
+			double[] avgRouteTTs, double[] routeUsers, double stuckedAgentsPCU) {
 
 		PrintStream stream;
 		String filename = outputDir + "FinalResults.txt";
@@ -193,9 +193,9 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 			latexFormat += " & " + (Double.isNaN(avgRouteTTs[routeNr]) ? "-" : (int)avgRouteTTs[routeNr]);
 		}
 		
-		log.info("Number of stucked agents: " + numberOfStuckedAgents);
+		log.info("Number of stucked agents: " + stuckedAgentsPCU);
 		header += "\t#stucked";
-		resultLine.append("\t" + numberOfStuckedAgents);
+		resultLine.append("\t" + stuckedAgentsPCU);
 		
 		latexFormat += " \\\\";
 		log.info("Latex format: " + latexFormat);
@@ -207,7 +207,7 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		log.info("output written to " + filename);
 	}
 
-	private void writeRouteStarts(String outputDir, Map<Double, int[]> routeStartsMap) {
+	private void writeRouteStarts(String outputDir, Map<Double, double[]> routeStartsMap) {
 		PrintStream stream;
 		String filename = outputDir + "startsPerRoute.txt";
 		try {
@@ -225,8 +225,8 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		stream.println(header);
 		for (Double time : routeStartsMap.keySet()) {
 			StringBuffer line = new StringBuffer();
-			int[] routeStarts = routeStartsMap.get(time);
-			int totalStarts = 0;
+			double[] routeStarts = routeStartsMap.get(time);
+			double totalStarts = 0;
 			
 			line.append(time);
 			for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {
@@ -242,7 +242,7 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		log.info("output written to " + filename);
 	}
 
-	private void writeOnRoutes(String outputDir, Map<Double, int[]> onRoutesMap) {
+	private void writeOnRoutes(String outputDir, Map<Double, double[]> onRoutesMap) {
 		PrintStream stream;
 		String filename = outputDir + "onRoutes.txt";
 		try {
@@ -260,8 +260,8 @@ private static final Logger log = Logger.getLogger(TtWriteAnalysis.class);
 		stream.println(header);
 		for (Double time : onRoutesMap.keySet()) {
 			StringBuffer line = new StringBuffer();
-			int[] onRoutes = onRoutesMap.get(time);
-			int totalOnRoute = 0;
+			double[] onRoutes = onRoutesMap.get(time);
+			double totalOnRoute = 0;
 			
 			line.append(time);
 			for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {

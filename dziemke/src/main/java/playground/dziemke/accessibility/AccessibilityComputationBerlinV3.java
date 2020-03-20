@@ -1,18 +1,10 @@
 package playground.dziemke.accessibility;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
+import org.locationtech.jts.geom.Envelope;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
+import org.matsim.contrib.accessibility.*;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
-import org.matsim.contrib.accessibility.AccessibilityModule;
-import org.matsim.contrib.accessibility.FacilityTypes;
-import org.matsim.contrib.accessibility.Labels;
-import org.matsim.contrib.accessibility.Modes4Accessibility;
-import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -23,7 +15,9 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilities;
 
-import org.locationtech.jts.geom.Envelope;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Compute accessibility based on Berlin scenario version 5.0
@@ -99,7 +93,7 @@ public class AccessibilityComputationBerlinV3 {
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.MALL});
 //		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork() ); // will be aggregated in downstream code!
 		
 		Controler controler = new Controler(scenario);
 		

@@ -29,6 +29,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -44,6 +45,7 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.Vehicles;
 
 import com.google.inject.Inject;
 
@@ -79,8 +81,8 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	
 	private double totalTT;
 	private double[] totalRouteTTs;
-	private int[] routeUsers;
-	private int numberOfStuckedAgents = 0;
+	private double[] routeUsers_PCU;
+	private double stuckedAgents_PCU = 0;
 	private double[] totalRouteTolls;
 
 	// collects the departure times per person
@@ -90,25 +92,32 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	// collects tolls paid per person
 	private Map<Id<Person>, Double> personTolls;
 	
-	// counts the number of route starts per second (gets filled when the agent
+	// sums up the PCUs of route starts per second (gets filled when the agent
 	// arrives)
-	private Map<Double, int[]> routeStartsPerSecond;
-	// counts the number of agents on each route per second
-	private Map<Double, int[]> onRoutePerSecond;
+	private Map<Double, double[]> routeStartsPerTimeStep_PCU;
+	// sums up the PCUs of agents on each route per second
+	private Map<Double, double[]> onRoutePerSecond_PCU;
 
 	private Map<Double, double[]> totalRouteTollsByDepartureTime;	
 	private Map<Double, double[]> totalRouteTTsByDepartureTime;
-	private Map<Double, int[]> routeUsersByDepartureTime;
+	private Map<Double, int[]> numberOfRouteUsersByDepartureTime; // note: not PCU, but number of!
 	
 	
 	private Map<Id<Vehicle>, Set<Id<Person>>> vehicle2PersonsMap;
+	private Map<Id<Person>, Id<Vehicle>> person2VehicleMap;
 	
 	private int numberOfRoutes;
 
+//	@Inject private ;
+	private final double timeStepSize;
+	private final Vehicles vehicles;
+
 	@Inject
-	public TtAbstractAnalysisTool() {
+	public TtAbstractAnalysisTool(Scenario scenario) {
 		defineNumberOfRoutes();
 		reset(0);
+		this.timeStepSize = scenario.getConfig().qsim().getTimeStepSize();
+		this.vehicles = scenario.getVehicles();
 	}
 	
 	/**
@@ -118,21 +127,22 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	public void reset(int iteration) {
 		this.totalTT = 0.0;
 		this.totalRouteTTs = new double[numberOfRoutes];
-		this.routeUsers = new int[numberOfRoutes];
-		this.numberOfStuckedAgents = 0;
+		this.routeUsers_PCU = new double[numberOfRoutes];
+		this.stuckedAgents_PCU = 0;
 		this.totalRouteTolls = new double[numberOfRoutes];
 		
 		this.personDepartureTimes = new HashMap<>();
 		this.personRouteChoice = new HashMap<>();
-		this.routeStartsPerSecond = new TreeMap<>();
-		this.onRoutePerSecond = new TreeMap<>();
+		this.routeStartsPerTimeStep_PCU = new TreeMap<>();
+		this.onRoutePerSecond_PCU = new TreeMap<>();
 		this.personTolls = new HashMap<>();
 
 		this.totalRouteTTsByDepartureTime = new TreeMap<>();
-		this.routeUsersByDepartureTime = new TreeMap<>();
+		this.numberOfRouteUsersByDepartureTime = new TreeMap<>();
 		this.totalRouteTollsByDepartureTime = new TreeMap<>();
 		
 		this.vehicle2PersonsMap = new HashMap<>();
+		this.person2VehicleMap = new HashMap<>();
 	}
 	
 	/**
@@ -149,6 +159,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		if (!vehicle2PersonsMap.containsKey(event.getVehicleId()))
 			vehicle2PersonsMap.put(event.getVehicleId(), new HashSet<Id<Person>>());
 		vehicle2PersonsMap.get(event.getVehicleId()).add(event.getPersonId());
+		person2VehicleMap.put(event.getPersonId(), event.getVehicleId());
 	}
 	
 	/**
@@ -209,11 +220,12 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 			throw new IllegalStateException(
 					"Person " + event.getPersonId() + " arrived, but was not seen on any route.");
 		}
+		Vehicle vehicle = vehicles.getVehicles().get(person2VehicleMap.get(event.getPersonId()));
+		double vehPCU = vehicle.getType().getPcuEquivalents();
 
 		// calculate total travel time
 		double personArrivalTime = event.getTime();
-		double personDepartureTime = this.personDepartureTimes.get(event
-				.getPersonId());
+		double personDepartureTime = this.personDepartureTimes.get(event.getPersonId());
 		double personTotalTT = personArrivalTime - personDepartureTime;
 		this.totalTT += personTotalTT;
 		double personTotalToll = this.personTolls.containsKey(event.getPersonId())? this.personTolls.get(event.getPersonId()) : 0.0;
@@ -221,7 +233,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		// store route specific information
 		int personRoute = this.personRouteChoice.get(event.getPersonId());
 		this.totalRouteTTs[personRoute] += personTotalTT;
-		this.routeUsers[personRoute]++;
+		this.routeUsers_PCU[personRoute]+= vehPCU;
 		this.totalRouteTolls[personRoute] += personTotalToll;
 
 		// fill maps for calculating avg tt per route
@@ -231,28 +243,28 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 			// and
 			// !this.totalRouteTollsByDepartureTime.containsKey(personDepartureTime)
 			this.totalRouteTTsByDepartureTime.put(personDepartureTime, new double[numberOfRoutes]);
-			this.routeUsersByDepartureTime.put(personDepartureTime, new int[numberOfRoutes]);
+			this.numberOfRouteUsersByDepartureTime.put(personDepartureTime, new int[numberOfRoutes]);
 			this.totalRouteTollsByDepartureTime.put(personDepartureTime, new double[numberOfRoutes]);
 		}
 		this.totalRouteTTsByDepartureTime.get(personDepartureTime)[personRoute] += personTotalTT;
-		this.routeUsersByDepartureTime.get(personDepartureTime)[personRoute]++;
+		this.numberOfRouteUsersByDepartureTime.get(personDepartureTime)[personRoute]++;
 		this.totalRouteTollsByDepartureTime.get(personDepartureTime)[personRoute] += personTotalToll;
 
 		// increase the number of persons on route for each second the
 		// person is traveling on it
 		for (int i = 0; i < personTotalTT; i++) {
-			if (!this.onRoutePerSecond.containsKey(personDepartureTime + i)) {
-				this.onRoutePerSecond.put(personDepartureTime + i, new int[numberOfRoutes]);
+			if (!this.onRoutePerSecond_PCU.containsKey(personDepartureTime + i)) {
+				this.onRoutePerSecond_PCU.put(personDepartureTime + i, new double[numberOfRoutes]);
 			}
-			this.onRoutePerSecond.get(personDepartureTime + i)[this.personRouteChoice
-					.get(event.getPersonId())]++;
+			this.onRoutePerSecond_PCU.get(personDepartureTime + i)[this.personRouteChoice
+					.get(event.getPersonId())]+= vehPCU;
 		}
 
 		// add one route start for the specific departure time
-		if (!this.routeStartsPerSecond.containsKey(personDepartureTime)) {
-			this.routeStartsPerSecond.put(personDepartureTime, new int[numberOfRoutes]);
+		if (!this.routeStartsPerTimeStep_PCU.containsKey(personDepartureTime)) {
+			this.routeStartsPerTimeStep_PCU.put(personDepartureTime, new double[numberOfRoutes]);
 		}
-		this.routeStartsPerSecond.get(personDepartureTime)[personRoute]++;
+		this.routeStartsPerTimeStep_PCU.get(personDepartureTime)[personRoute]+= vehPCU;
 
 		// remove all trip dependent information of the arrived person
 		this.personDepartureTimes.remove(event.getPersonId());
@@ -262,14 +274,17 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	@Override
 	public void handleEvent(PersonStuckEvent event) {
 		log.warn("Agent " + event.getPersonId() + " stucked on link " + event.getLinkId());
-		if (numberOfStuckedAgents == 0){
+		if (stuckedAgents_PCU == 0){
 			log.warn("This handler counts stucked agents but doesn't consider its travel times or route choice.");
 		}
 		
 		this.personDepartureTimes.remove(event.getPersonId());
 		this.personRouteChoice.remove(event.getPersonId());
 		
-		numberOfStuckedAgents++;
+		Vehicle vehicle = vehicles.getVehicles().get(person2VehicleMap.get(event.getPersonId()));
+		double vehPCU = vehicle.getType().getPcuEquivalents();
+
+		stuckedAgents_PCU+= vehPCU;
 	}
 	
 	@Override
@@ -297,10 +312,10 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	public double[] calculateAvgRouteTTs() {
 		double[] avgRouteTTs = new double[numberOfRoutes];
 		for (int i = 0; i < numberOfRoutes; i++) {
-			if (this.routeUsers[i] == 0)
+			if (this.routeUsers_PCU[i] == 0)
 				avgRouteTTs[i] = Double.NaN;
 			else
-				avgRouteTTs[i] = this.totalRouteTTs[i] / this.routeUsers[i];
+				avgRouteTTs[i] = this.totalRouteTTs[i] / this.routeUsers_PCU[i];
 		}
 		return avgRouteTTs;
 	}
@@ -315,10 +330,10 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	public double[] calculateAvgRouteTolls() {
 		double[] avgRouteTolls = new double[numberOfRoutes];
 		for (int i = 0; i < numberOfRoutes; i++) {
-			if (this.routeUsers[i] == 0)
+			if (this.routeUsers_PCU[i] == 0)
 				avgRouteTolls[i] = Double.NaN;
 			else
-				avgRouteTolls[i] = this.totalRouteTolls[i] / this.routeUsers[i];
+				avgRouteTolls[i] = this.totalRouteTolls[i] / this.routeUsers_PCU[i];
 		}
 		return avgRouteTolls;
 	}
@@ -330,20 +345,20 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	public double[] getTotalRouteTTs() {
 		// return NaN for routes where no agent has traveled
 		for (int i = 0; i < numberOfRoutes; i++){
-			if (routeUsers[i] == 0)
+			if (routeUsers_PCU[i] == 0)
 				totalRouteTTs[i] = Double.NaN;
 		}
 		return totalRouteTTs;
 	}
 
-	public int[] getRouteUsers() {
-		return routeUsers;
+	public double[] getRouteUsers_PCU() {
+		return routeUsers_PCU;
 	}
 	
 	public double[] getTotalRouteTolls() {
 		// return NaN for routes where no agent has traveled
 		for (int i = 0; i < numberOfRoutes; i++){
-			if (routeUsers[i] == 0)
+			if (routeUsers_PCU[i] == 0)
 				totalRouteTolls[i] = Double.NaN;
 		}
 		return totalRouteTolls;
@@ -353,19 +368,22 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	 * @return a map containing the number of route starts for each time step.
 	 * Thereby a route start is the departure event of an agent using this route.
 	 */
-	public Map<Double, int[]> getRouteDeparturesPerSecond() {
+	public Map<Double, double[]> getRouteDeparturesPerTimeStep_PCU() {
 		// determine minimum and maximum departure time
-		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerSecond.keySet());
+		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerTimeStep_PCU.keySet());
 		
 		// fill missing time steps between first and last departure with zero starts
-		// note: matsim departure times are always integer
-		for (long l = firstLastDepartureTuple.getFirst().longValue(); l <= firstLastDepartureTuple.getSecond().longValue(); l++) {
-			if (!this.routeStartsPerSecond.containsKey((double) l)) {
-				this.routeStartsPerSecond.put((double) l, new int[numberOfRoutes]);
+		// note: with time steps != 1, matsim departure times need not be integer values
+		double time = firstLastDepartureTuple.getFirst();
+		
+		while (time <= firstLastDepartureTuple.getSecond()) {
+			if (!this.routeStartsPerTimeStep_PCU.containsKey(time)) {
+				this.routeStartsPerTimeStep_PCU.put(time, new double[numberOfRoutes]);
 			}
+			time += timeStepSize;
 		}
 
-		return routeStartsPerSecond;
+		return routeStartsPerTimeStep_PCU;
 	}
 	
 	/**
@@ -389,45 +407,47 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	 * Thereby a route start is the departure event of an agent using this route.
 	 * For each time step all bygone route starts are summed up.
 	 */
-	public Map<Double, int[]> calculateSummedRouteDeparturesPerSecond(){
+	public Map<Double, double[]> calculateSummedRouteDeparturesPerTimeStep_PCU(){
 		
 		// determine minimum and maximum departure time
-		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerSecond.keySet());
+		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerTimeStep_PCU.keySet());
 		
-		Map<Double, int[]> summedRouteDeparturesPerSecond = new TreeMap<>();
+		Map<Double, double[]> summedRouteDeparturesPerTimeStep_PCU = new TreeMap<>();
 		
 		// create a map entry for each time step between minimum and maximum departure time
-		// note: matsim departure times are always integer. time steps are assumed to be 1
-		for (long second = firstLastDepartureTuple.getFirst().longValue(); 
-				second <= firstLastDepartureTuple.getSecond().longValue(); second++) {
+		// note: with time step size != 1, matsim departure times need not be integer values
+		double time = firstLastDepartureTuple.getFirst();
+		double[] summedDepPreviousTimeStep = new double[numberOfRoutes];
+		
+		while (time <= firstLastDepartureTuple.getSecond()) {
 			
 			// initialize departure array as {0,...,0}
-			summedRouteDeparturesPerSecond.put((double) second, new int[numberOfRoutes]);
+			summedRouteDeparturesPerTimeStep_PCU.put(time, new double[numberOfRoutes]);
 			for (int i = 0; i < numberOfRoutes; i++){
-				// add value from the previous second if second > min
-				if (second > firstLastDepartureTuple.getFirst().longValue()){
-					summedRouteDeparturesPerSecond.get((double)second)[i] +=
-							summedRouteDeparturesPerSecond.get((double)second - 1)[i];
-				}
+				// add value from the previous second
+				summedRouteDeparturesPerTimeStep_PCU.get(time)[i] += summedDepPreviousTimeStep[i];
 				// increment for every departure in this second
-				if (this.routeStartsPerSecond.containsKey((double) second)) {
-					summedRouteDeparturesPerSecond.get((double) second)[i] += 
-							this.routeStartsPerSecond.get((double) second)[i];
+				if (this.routeStartsPerTimeStep_PCU.containsKey(time)) {
+					summedRouteDeparturesPerTimeStep_PCU.get(time)[i] += 
+							this.routeStartsPerTimeStep_PCU.get(time)[i];
 				}
-			}			
+			}		
+			
+			summedDepPreviousTimeStep = summedRouteDeparturesPerTimeStep_PCU.get(time);
+			time += timeStepSize;
 		}
 		
-		return summedRouteDeparturesPerSecond;
+		return summedRouteDeparturesPerTimeStep_PCU;
 	}
 
 	/**
 	 * @return the number of agents on route (between departure and arrival
 	 * event) per time step.
 	 */
-	public Map<Double, int[]> getOnRoutePerSecond() {
+	public Map<Double, double[]> getOnRoutePerSecond_PCU() {
 		// already contains entries for all time steps (seconds)
 		// between first departure and last arrival
-		return onRoutePerSecond;
+		return onRoutePerSecond_PCU;
 	}
 
 	/**
@@ -444,7 +464,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		for (Double departureTime : this.totalRouteTTsByDepartureTime.keySet()) {
 			double[] totalTTsPerRoute = this.totalRouteTTsByDepartureTime
 					.get(departureTime);
-			int[] usersPerRoute = this.routeUsersByDepartureTime
+			int[] usersPerRoute = this.numberOfRouteUsersByDepartureTime
 					.get(departureTime);
 			double[] avgTTsPerRoute = new double[numberOfRoutes];
 			for (int i = 0; i < numberOfRoutes; i++) {
@@ -458,18 +478,21 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		}
 
 		// fill missing time steps between first and last departure
-		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerSecond.keySet());
+		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerTimeStep_PCU.keySet());
 		// create a map entry for each time step between minimum and maximum departure time
-		// note: matsim departure times are always integer. time steps are assumed to be 1
-		for (long sec = firstLastDepartureTuple.getFirst().longValue(); sec <= firstLastDepartureTuple.getSecond().longValue(); sec++) {
-			if (!avgTTsPerRouteByDepartureTime.containsKey((double) sec)) {
+		// note: with time step size != 1, matsim departure times need not be integer values
+		double time = firstLastDepartureTuple.getFirst();
+				
+		while (time <= firstLastDepartureTuple.getSecond()) {
+			if (!avgTTsPerRouteByDepartureTime.containsKey(time)) {
 				// add NaN-values as travel times when no agent departures
 				double[] nanTTsPerRoute = new double[numberOfRoutes];
 				for (int i = 0; i < numberOfRoutes; i++){
 					nanTTsPerRoute[i] = Double.NaN;
 				}
-				avgTTsPerRouteByDepartureTime.put((double) sec, nanTTsPerRoute);
+				avgTTsPerRouteByDepartureTime.put(time, nanTTsPerRoute);
 			}
+			time += timeStepSize;
 		}
 
 		return avgTTsPerRouteByDepartureTime;
@@ -489,7 +512,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		for (Double departureTime : this.totalRouteTollsByDepartureTime.keySet()) {
 			double[] totalTollsPerRoute = this.totalRouteTollsByDepartureTime
 					.get(departureTime);
-			int[] usersPerRoute = this.routeUsersByDepartureTime
+			int[] usersPerRoute = this.numberOfRouteUsersByDepartureTime
 					.get(departureTime);
 			double[] avgTollPerRoute = new double[numberOfRoutes];
 			for (int i = 0; i < numberOfRoutes; i++) {
@@ -503,25 +526,28 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		}
 
 		// fill missing time steps between first and last departure
-		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerSecond.keySet());
+		Tuple<Double, Double> firstLastDepartureTuple = determineMinMaxDoubleInSet(this.routeStartsPerTimeStep_PCU.keySet());
 		// create a map entry for each time step between minimum and maximum departure time
-		// note: matsim departure times are always integer. time steps are assumed to be 1
-		for (long sec = firstLastDepartureTuple.getFirst().longValue(); sec <= firstLastDepartureTuple.getSecond().longValue(); sec++) {
-			if (!avgTollsPerRouteByDepartureTime.containsKey((double) sec)) {
+		// note: with time step size != 1, matsim departure times need not be integer values
+		double time = firstLastDepartureTuple.getFirst();
+						
+		while (time <= firstLastDepartureTuple.getSecond()) {
+			if (!avgTollsPerRouteByDepartureTime.containsKey(time)) {
 				// add NaN-values as tolls when no agent departures
 				double[] nanTollsPerRoute = new double[numberOfRoutes];
 				for (int i = 0; i < numberOfRoutes; i++){
 					nanTollsPerRoute[i] = Double.NaN;
 				}
-				avgTollsPerRouteByDepartureTime.put((double) sec, nanTollsPerRoute);
+				avgTollsPerRouteByDepartureTime.put(time, nanTollsPerRoute);
 			}
+			time += timeStepSize;
 		}
 
 		return avgTollsPerRouteByDepartureTime;
 	}
 
-	public int getNumberOfStuckedAgents() {
-		return numberOfStuckedAgents;
+	public double getStuckedAgentsInPCU() {
+		return stuckedAgents_PCU;
 	}
 
 	public void setNumberOfRoutes(int numberOfRoutes) {

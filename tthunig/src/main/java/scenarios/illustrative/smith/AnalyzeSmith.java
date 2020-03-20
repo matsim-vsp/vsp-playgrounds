@@ -21,6 +21,7 @@
  */
 package scenarios.illustrative.smith;
 
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 
 import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
@@ -36,6 +37,10 @@ import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
  */
 final class AnalyzeSmith extends TtAbstractAnalysisTool {
 	
+	public AnalyzeSmith(Scenario scenario) {
+		super(scenario);
+	}
+
 	@Override
 	protected int determineRoute(LinkEnterEvent linkEnterEvent) {
 		int route = -1;

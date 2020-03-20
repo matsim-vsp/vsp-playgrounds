@@ -99,7 +99,7 @@ class TravelDisutilityUtils {
 				}
 				// not sure what StageActivityTypes = null did, trying with StageActivityHandling.ExcludeStageActivities for now. gl, oct'19
 				List<Activity> activities = PopulationUtils.getActivities(experiencedPlan, StageActivityHandling.ExcludeStageActivities ) ; 
-				typicalDuration = activities.get(1).getEndTime() - activities.get(1).getStartTime() ; 
+				typicalDuration = activities.get(1).getEndTime().seconds() - activities.get(1).getStartTime().seconds() ;
 			}
 
 			double triptime=0, distance=0 ;
@@ -115,13 +115,13 @@ class TravelDisutilityUtils {
 				es.get(ii).processEvent(new ActivityEndEvent(now, person.getId(), null, null, firstAct.getType())); ;
 				es.get(ii).processEvent(new PersonDepartureEvent(now, person.getId(), null, TransportMode.car));
 				now = DEPARTURE + triptime ;
-				es.get(ii).processEvent(new TeleportationArrivalEvent(now, person.getId(), distance)) ;
+				es.get(ii).processEvent(new TeleportationArrivalEvent(now, person.getId(), distance, TransportMode.car) );
 				es.get(ii).processEvent(new PersonArrivalEvent(now, person.getId(), null, TransportMode.car));
 				es.get(ii).processEvent(new ActivityStartEvent(now, person.getId(), null, null, firstAct.getType())) ;
 				now = DEPARTURE + typicalDuration + 0.5*DELTA_TRIPTIME ;
 				es.get(ii).processEvent(new ActivityEndEvent(now, person.getId(), null, null, firstAct.getType())) ;
 				es.get(ii).processEvent(new PersonDepartureEvent(now, person.getId(), null, TransportMode.car));
-				es.get(ii).processEvent(new TeleportationArrivalEvent(now, person.getId(), 0.)) ;
+				es.get(ii).processEvent(new TeleportationArrivalEvent(now, person.getId(), 0., TransportMode.car) );
 				es.get(ii).processEvent(new PersonArrivalEvent(now, person.getId(), null, TransportMode.car));
 				es.get(ii).processEvent(new ActivityStartEvent(now, person.getId(), null, null, firstAct.getType())) ;
 			}

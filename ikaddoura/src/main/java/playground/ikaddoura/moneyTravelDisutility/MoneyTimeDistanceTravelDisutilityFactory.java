@@ -73,7 +73,6 @@ public final class MoneyTimeDistanceTravelDisutilityFactory implements TravelDis
 				);
 			
 		} else {
-			randomizedTimeDistanceTravelDisutilityFactory.setSigma(sigma);
 
 			return new MoneyTimeDistanceTravelDisutility(
 					randomizedTimeDistanceTravelDisutilityFactory.createTravelDisutility(timeCalculator),

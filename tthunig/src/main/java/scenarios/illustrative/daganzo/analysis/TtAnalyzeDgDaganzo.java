@@ -21,6 +21,7 @@
  */
 package scenarios.illustrative.daganzo.analysis;
 
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 
 import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
@@ -35,6 +36,10 @@ import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
  *
  */
 public class TtAnalyzeDgDaganzo extends TtAbstractAnalysisTool {
+
+	public TtAnalyzeDgDaganzo(Scenario scenario) {
+		super(scenario);
+	}
 
 	@Override
 	protected int determineRoute(LinkEnterEvent linkEnterEvent) {

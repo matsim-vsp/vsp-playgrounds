@@ -18,7 +18,7 @@ public class MyTimeMutator implements PlanStrategyModule {
 	public void handlePlan(Plan plan) {
 		for ( PlanElement pe : plan.getPlanElements() ) {
 			if ( pe instanceof Activity ) {
-				double endTime = ((Activity)pe).getEndTime() ;
+				double endTime = ((Activity)pe).getEndTime().seconds() ;
 				double newEndTime ;
 				if ( Math.random() < 0.5 ) {
 					newEndTime = endTime + Math.random() * 3600. ;

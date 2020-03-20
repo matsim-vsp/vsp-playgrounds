@@ -44,7 +44,6 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.LaneFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine.NetsimInternalInterface;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.Facility;
 import org.matsim.lanes.Lane;
@@ -62,6 +61,10 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.matsim.core.config.groups.ControlerConfigGroup.SnapshotFormat;
+import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.createAgentSnapshotInfoBuilder;
+import static org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineI.NetsimInternalInterface;
 
 /**
  * The problem with this approach is that, because of the buffer, the vehicles do not go around in undisturbed circles.  kai, jun'16
@@ -442,7 +445,7 @@ public class KNCALink {
 			if (! Double.isNaN(network.getEffectiveLaneWidth())){
 				linkWidthCalculator.setLaneWidth( network.getEffectiveLaneWidth() );
 			}
-			AbstractAgentSnapshotInfoBuilder snapshotBuilder = QNetsimEngine.createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
+			AbstractAgentSnapshotInfoBuilder snapshotBuilder = createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
 			this.snapshotInfoFactory = new AgentSnapshotInfoFactory( linkWidthCalculator );
 
 
@@ -481,8 +484,8 @@ public class KNCALink {
 
 		config.controler().setLastIteration(0);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		Collection<String> sf = new ArrayList<>() ;
-		sf.add("otfvis") ;
+		Collection<SnapshotFormat> sf = new ArrayList<>() ;
+		sf.add( SnapshotFormat.otfvis );
 		config.controler().setSnapshotFormat(sf);
 		config.controler().setWriteSnapshotsInterval(1);
 		

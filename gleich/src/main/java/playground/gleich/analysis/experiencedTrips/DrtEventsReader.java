@@ -19,9 +19,6 @@
  * *********************************************************************** */
 package playground.gleich.analysis.experiencedTrips;
 
-import java.util.Map;
-import java.util.Stack;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.GenericEvent;
 import org.matsim.api.core.v01.network.Link;
@@ -37,6 +34,9 @@ import org.matsim.core.events.MatsimEventsReader.CustomEventMapper;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * An events reader which reads the default events and the additional drt events DrtRequestSubmittedEvent, PassengerRequestRejectedEvent, PassengerRequestScheduledEvent.

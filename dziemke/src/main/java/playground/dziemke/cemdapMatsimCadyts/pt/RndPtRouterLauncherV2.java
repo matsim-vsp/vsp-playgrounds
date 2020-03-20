@@ -149,7 +149,8 @@ public class RndPtRouterLauncherV2 {
 		controler.addOverridingModule(new AbstractModule(){
 			@Override public void install() {
 				bind(CadytsPtContext2.class).asEagerSingleton();
-				addControlerListenerBinding().to(CadytsPtContext2.class);
+//				addControlerListenerBinding().to(CadytsPtContext2.class);
+				if ( true ) throw new RuntimeException( "the above class is no longer functional; see there.  kai, feb'20" );
 				bind(CadytsPtOccupancyAnalyzerI.class).toInstance(ctrlListener4configurableOcuppAnalysis.getAnalyzer()) ;
 			}
 		});
@@ -165,10 +166,14 @@ public class RndPtRouterLauncherV2 {
 				sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
 				sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-				final CadytsScoring<TransitStopFacility> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
-				final double cadytsScoringWeight = finalCadytsWeight * config.planCalcScore().getBrainExpBeta();
-				scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight);
-				sumScoringFunction.addScoringFunction(scoringFunction);
+//				final CadytsScoring<TransitStopFacility> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
+//				final double cadytsScoringWeight = finalCadytsWeight * config.planCalcScore().getBrainExpBeta();
+//				scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight);
+//				sumScoringFunction.addScoringFunction(scoringFunction);
+				if ( true ) throw new RuntimeException( "the above couple of lines do no longer compile after changes in cadytsIntegration.  " +
+											"Since the whole class can't work any more since it depends on " +
+											"CadytsPtContext2 which does not work any more, I am not attempting " +
+											"to repair it.  kai, feb'20" );
 
 				return sumScoringFunction;
 			}

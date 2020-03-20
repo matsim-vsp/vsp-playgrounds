@@ -136,7 +136,6 @@ public class BerlinControler {
 			// toll-adjusted routing
 			
 			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-			travelDisutilityFactory.setSigma(sigma);
 			
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
@@ -149,7 +148,7 @@ public class BerlinControler {
 			
 			final TollHandler congestionTollHandlerQBP = new TollHandler(controler.getScenario());
 			final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
-					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()),
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()),
 					congestionTollHandlerQBP, controler.getConfig().planCalcScore()
 				);
 			factory.setSigma(sigma);
@@ -167,7 +166,7 @@ public class BerlinControler {
 			
 			final TollHandler congestionTollHandlerQBP = new TollHandler(controler.getScenario());
 			final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
-					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()),
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()),
 					congestionTollHandlerQBP, controler.getConfig().planCalcScore()
 				);
 			factory.setSigma(sigma);
@@ -185,7 +184,7 @@ public class BerlinControler {
 			
 			final TollHandler congestionTollHandlerQBP = new TollHandler(controler.getScenario());
 			final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
-					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()),
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()),
 					congestionTollHandlerQBP, controler.getConfig().planCalcScore()
 				);
 			factory.setSigma(sigma);

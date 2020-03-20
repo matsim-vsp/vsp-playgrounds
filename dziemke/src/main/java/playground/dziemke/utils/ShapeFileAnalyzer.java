@@ -1,8 +1,7 @@
 package playground.dziemke.utils;
 
-import org.matsim.contrib.accessibility.gis.GridUtils;
-
 import org.locationtech.jts.geom.Geometry;
+import org.matsim.contrib.accessibility.GridUtils;
 
 public class ShapeFileAnalyzer {
 	static String shapeFileName = "../../data/cemdapMatsimCadyts/input/shapefiles/Berlin_DHDN_GK4.shp";
@@ -10,7 +9,7 @@ public class ShapeFileAnalyzer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		Geometry boundary = GridUtils.getBoundary(shapeFileName);
+		Geometry boundary = GridUtils.getBoundary(shapeFileName );
 		
 		// System.out.println("boundary.getEnvelope() = " + boundary.getEnvelope());
 		

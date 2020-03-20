@@ -230,7 +230,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 					linkTotalDelayLastIt, linkAvgDelayLastIt, linkNumberOfVehLastIt));
 		}
 		
-		ShapeFileWriter.writeGeometries(features, this.outputDirBase + "ITERS/it." + iteration + "/analysis/spatialAnalysis.shp");
+		ShapeFileWriter.writeGeometries(features, this.outputDirBase + "/ITERS/it." + iteration + "/analysis/spatialAnalysis.shp");
 	}
 	
 	private PolygonFeatureFactory createFeatureType(CoordinateReferenceSystem crs) {

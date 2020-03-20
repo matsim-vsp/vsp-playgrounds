@@ -94,8 +94,8 @@ public class PopulationTools {
 				double startTime = Double.NEGATIVE_INFINITY;
 				double endTime = Double.NEGATIVE_INFINITY;
 			
-				if (act.getStartTime() >= 0. && act.getStartTime() <= 24 * 3600.) {
-					startTime = act.getStartTime();
+				if (act.getStartTime().isDefined()) {
+					startTime = act.getStartTime().seconds();
 				} else {
 					
 					// trying to identify the activity start time via the arrival time...
@@ -124,8 +124,8 @@ public class PopulationTools {
 					throw new RuntimeException("No meaningful start time identified. Aborting...");
 				}
 				
-				if (act.getEndTime() >= 0. && act.getEndTime() <= 24 * 3600.) {
-					endTime = act.getEndTime();
+				if (act.getEndTime().isDefined()) {
+					endTime = act.getEndTime().seconds();
 				} else {
 					// Last activity!
 					
@@ -204,8 +204,8 @@ public class PopulationTools {
 					double startTime = Double.NEGATIVE_INFINITY;
 					double endTime = Double.NEGATIVE_INFINITY;
 				
-					if (act.getStartTime() >= 0. && act.getStartTime() <= 24 * 3600.) {
-						startTime = act.getStartTime();
+					if (act.getStartTime().isDefined()) {
+						startTime = act.getStartTime().seconds();
 					} else {
 						
 						// trying to identify the activity start time via the arrival time...
@@ -230,8 +230,8 @@ public class PopulationTools {
 					}
 					
 					
-					if (act.getEndTime() >= 0. && act.getEndTime() <= 24 * 3600.) {
-						endTime = act.getEndTime();
+					if (act.getEndTime().isDefined()) {
+						endTime = act.getEndTime().seconds();
 					} else {
 						// Last activity!
 						
