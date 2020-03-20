@@ -307,13 +307,14 @@ public class TtAnalyzedResultsWriter {
 		for (int routeNr=0; routeNr < numberOfRoutes; routeNr++){
 			header += "\tavg tt " + routeNr;
 		}
+		header += "\tavg tt all";
 		stream.println(header);
 		for (Double eventTime : avgTTs.keySet()) {
 			StringBuffer line = new StringBuffer();
 			double[] avgRouteTTs = avgTTs.get(eventTime);
 			
 			line.append(eventTime);
-			for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {
+			for (int routeNr = 0; routeNr < avgRouteTTs.length; routeNr++) {
 				line.append("\t" + avgRouteTTs[routeNr]);
 			}
 			stream.println(line.toString());
@@ -345,13 +346,14 @@ public class TtAnalyzedResultsWriter {
 		for (int routeNr=0; routeNr < numberOfRoutes; routeNr++){
 			header += "\tavg toll " + routeNr;
 		}
+		header += "\tavg tt all";
 		stream.println(header);
 		for (Double eventTime : avgTolls.keySet()) {
 			StringBuffer line = new StringBuffer();
 			double[] avgRouteTolls = avgTolls.get(eventTime);
 			
 			line.append(eventTime);
-			for (int routeNr = 0; routeNr < numberOfRoutes; routeNr++) {
+			for (int routeNr = 0; routeNr < avgRouteTolls.length; routeNr++) {
 				line.append("\t" + avgRouteTolls[routeNr]);
 			}
 			stream.println(line.toString());

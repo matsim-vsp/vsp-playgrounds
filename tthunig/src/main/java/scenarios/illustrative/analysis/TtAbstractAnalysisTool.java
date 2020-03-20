@@ -455,6 +455,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	 * 
 	 * Thereby the double array in each map entry contains the average
 	 * route travel times for all different routes in the network
+	 * and as the last entry, the average travel time on all routes together
 	 * (always for agents with the specific departure time)
 	 */
 	public Map<Double, double[]> calculateAvgRouteTTsByDepartureTime() {
@@ -466,14 +467,20 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 					.get(departureTime);
 			int[] usersPerRoute = this.numberOfRouteUsersByDepartureTime
 					.get(departureTime);
-			double[] avgTTsPerRoute = new double[numberOfRoutes];
+			double[] avgTTsPerRoute = new double[numberOfRoutes+1];
+			double totalTtAllRoutes = 0;
+			int usersAllRoutes = 0;
 			for (int i = 0; i < numberOfRoutes; i++) {
 				if (usersPerRoute[i] == 0)
 					// no agent is departing for the specific route at this time
 					avgTTsPerRoute[i] = Double.NaN;
-				else
+				else {
 					avgTTsPerRoute[i] = totalTTsPerRoute[i] / usersPerRoute[i];
+					totalTtAllRoutes += totalTTsPerRoute[i];
+					usersAllRoutes += usersPerRoute[i];
+				}
 			}
+			avgTTsPerRoute[numberOfRoutes] = totalTtAllRoutes / usersAllRoutes;
 			avgTTsPerRouteByDepartureTime.put(departureTime, avgTTsPerRoute);
 		}
 
@@ -486,7 +493,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		while (time <= firstLastDepartureTuple.getSecond()) {
 			if (!avgTTsPerRouteByDepartureTime.containsKey(time)) {
 				// add NaN-values as travel times when no agent departures
-				double[] nanTTsPerRoute = new double[numberOfRoutes];
+				double[] nanTTsPerRoute = new double[numberOfRoutes+1];
 				for (int i = 0; i < numberOfRoutes; i++){
 					nanTTsPerRoute[i] = Double.NaN;
 				}
@@ -503,6 +510,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 	 * 
 	 * Thereby the double array in each map entry contains the average
 	 * route toll for all different routes in the network
+	 * and as the last entry, the average travel time on all routes together
 	 * (always for agents with the specific departure time)
 	 */
 	public Map<Double, double[]> calculateAvgRouteTollsByDepartureTime() {
@@ -514,14 +522,20 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 					.get(departureTime);
 			int[] usersPerRoute = this.numberOfRouteUsersByDepartureTime
 					.get(departureTime);
-			double[] avgTollPerRoute = new double[numberOfRoutes];
+			double[] avgTollPerRoute = new double[numberOfRoutes+1];
+			double totalTollAllRoutes = 0;
+			int usersAllRoutes = 0;
 			for (int i = 0; i < numberOfRoutes; i++) {
 				if (usersPerRoute[i] == 0)
 					// no agent is departing for the specific route at this time
 					avgTollPerRoute[i] = Double.NaN;
-				else
+				else {
 					avgTollPerRoute[i] = totalTollsPerRoute[i] / usersPerRoute[i];
+					totalTollAllRoutes += totalTollsPerRoute[i];
+					usersAllRoutes += usersPerRoute[i];
+				}
 			}
+			avgTollPerRoute[numberOfRoutes] = totalTollAllRoutes / usersAllRoutes;
 			avgTollsPerRouteByDepartureTime.put(departureTime, avgTollPerRoute);
 		}
 
@@ -534,7 +548,7 @@ public abstract class TtAbstractAnalysisTool implements PersonArrivalEventHandle
 		while (time <= firstLastDepartureTuple.getSecond()) {
 			if (!avgTollsPerRouteByDepartureTime.containsKey(time)) {
 				// add NaN-values as tolls when no agent departures
-				double[] nanTollsPerRoute = new double[numberOfRoutes];
+				double[] nanTollsPerRoute = new double[numberOfRoutes+1];
 				for (int i = 0; i < numberOfRoutes; i++){
 					nanTollsPerRoute[i] = Double.NaN;
 				}
