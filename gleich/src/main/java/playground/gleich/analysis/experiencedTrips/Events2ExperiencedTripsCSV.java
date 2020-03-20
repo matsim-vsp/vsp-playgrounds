@@ -26,16 +26,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.matsim.analysis.TripsCSVWriter;
+import org.matsim.analysis.TripsAndLegsCSVWriter;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.ReplayEvents;
 import org.matsim.core.events.EventsManagerModule;
+import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.*;
+import org.matsim.pt.routes.ExperimentalTransitRoute;
 
 /**
  * 
@@ -52,15 +56,16 @@ public final class Events2ExperiencedTripsCSV {
 	private final String sep2 = ",";
     
     public static void main(String[] args) {
-    	String pathInclRunId = "/home/gregor/git/matsim-berlin/scenarios/berlin-v5.5-1pct/output-berlin-drt-v5.5-1pct/berlin-drt-v5.5-1pct";
+    	String pathInclRunId = "/home/gregor/tmp/Vulkaneifel/snzDrt301a/snzDrt301a";
         Config config = ConfigUtils.loadConfig(pathInclRunId + ".output_config.xml");
         config.network().setInputFile(pathInclRunId + ".output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunId + ".output_transitSchedule.xml.gz");
         config.plans().setInputFile(pathInclRunId + ".output_plans.xml.gz");
+		config.facilities().setInputFile(pathInclRunId + ".output_facilities.xml.gz");
         
         Events2ExperiencedTripsCSV runner = new Events2ExperiencedTripsCSV(config, 
         		pathInclRunId + ".output_events.xml.gz");
-        runner.runAnalysisAndWriteResult(pathInclRunId + ".output_experiencedTrips.csv.gz");
+        runner.runAnalysisAndWriteResult(pathInclRunId + ".output_experiencedTrips.csv.gz", pathInclRunId + ".output_experiencedLegs.csv.gz");
     }
 
     public Events2ExperiencedTripsCSV(Config config, String eventsFile) {
@@ -86,45 +91,81 @@ public final class Events2ExperiencedTripsCSV {
         experiencedPlansService = ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class));
     }
     
-    public void runAnalysisAndWriteResult(String outputExperiencedTripsFile) {
-    	TripsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension();
-    	 new TripsCSVWriter(scenario, customTripsWriterExtension).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile);
+    public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile) {
+    	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension();
+		TripsAndLegsCSVWriter.CustomLegsWriterExtension customLegsWriterExtension = new ExperiencedLegsExtension();
+    	 new TripsAndLegsCSVWriter(scenario, customTripsWriterExtension, customLegsWriterExtension).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile, outputExperiencedLegsFile);
     }
     
-    private class ExperiencedTripsExtension implements TripsCSVWriter.CustomTripsWriterExtension {
+    private class ExperiencedTripsExtension implements TripsAndLegsCSVWriter.CustomTripsWriterExtension {
 
 		@Override
-		public String[] getAdditionalHeader() {
+		public String[] getAdditionalTripHeader() {
 			List<String> header = new ArrayList<>();
 			header.add("transitStopsVisited");
 			
-			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
-			for(String mode: monitoredModes){
-				header.add(mode + ".InVehicleTime");
-				header.add(mode + ".Distance");
-				header.add(mode + ".WaitTime");
-				header.add(mode + ".maxPerLegWaitTime");
-				header.add(mode + ".NumberOfLegs");
-			}
+//			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
+//			for(String mode: monitoredModes){
+//				header.add(mode + ".InVehicleTime");
+//				header.add(mode + ".Distance");
+//				header.add(mode + ".WaitTime");
+//				header.add(mode + ".maxPerLegWaitTime");
+//				header.add(mode + ".NumberOfLegs");
+//			}
 			
 			return header.toArray(new String[0]);
 		}
 
 		@Override
-		public List<String> getAdditionalColumns(Trip trip) {
+		public List<String> getAdditionalTripColumns(Trip trip) {
 			List<String> values = new ArrayList<>();
 			// TODO: add real values
-			values.add("transitStopsVisited");
-			
-			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
-			for(String mode: monitoredModes){
-				values.add(mode + ".InVehicleTime");
-				values.add(mode + ".Distance");
-				values.add(mode + ".WaitTime");
-				values.add(mode + ".maxPerLegWaitTime");
-				values.add(mode + ".NumberOfLegs");
+			String transitStopsVisited = "";
+			for (Leg leg: trip.getLegsOnly()) {
+				if (leg.getRoute() instanceof ExperimentalTransitRoute) {
+					ExperimentalTransitRoute expTransitRoute = (ExperimentalTransitRoute) leg.getRoute();
+					transitStopsVisited += expTransitRoute.getAccessStopId().toString() + sep2 + expTransitRoute.getEgressStopId().toString() + sep2;
+				}
 			}
+
+			values.add(transitStopsVisited);
+			
+//			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
+//			for(String mode: monitoredModes){
+//				values.add(mode + ".InVehicleTime");
+//				values.add(mode + ".Distance");
+//				values.add(mode + ".WaitTime");
+//				values.add(mode + ".maxPerLegWaitTime");
+//				values.add(mode + ".NumberOfLegs");
+//			}
 			return values;
 		}
     }
+
+	static class ExperiencedLegsExtension implements TripsAndLegsCSVWriter.CustomLegsWriterExtension {
+		@Override
+		public String[] getAdditionalLegHeader() {
+			String[] legHeader = new String[]{"isIntermodalDrtPt"};
+			return legHeader;
+		}
+
+		@Override
+		public List<String> getAdditionalLegColumns(TripStructureUtils.Trip experiencedTrip, Leg experiencedLeg) {
+			List<String> legColumn = new ArrayList<>();
+
+			boolean containsDrt = false;
+			boolean containsPt = false;
+
+			for (Leg leg: experiencedTrip.getLegsOnly()) {
+				if (leg.getMode().equals(TransportMode.drt) || leg.getMode().equals("drt_teleportation")) {
+					containsDrt = true;
+				} else if (leg.getMode().equals(TransportMode.pt)) {
+					containsPt = true;
+				}
+			}
+			String isIntermodalDrtPt = (containsDrt && containsPt) ? "true" : "false";
+			legColumn.add(isIntermodalDrtPt);
+			return legColumn;
+		}
+	}
 }
