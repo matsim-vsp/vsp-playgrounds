@@ -105,11 +105,11 @@ public class PlanFilesDifferOnlyInAttributes {
 	private static boolean activityEquals (Activity act1, Activity act2) {
 		return /* act1.getAttributes().equals(act2.getAttributes()) && */
 				act1.getCoord().equals(act2.getCoord()) &&
-				Double.compare(act1.getEndTime(), act2.getEndTime()) == 0 &&
+				act1.getEndTime().equals(act2.getEndTime()) &&
 				(act1.getFacilityId() != null ? act1.getFacilityId().equals(act2.getFacilityId()) : act2.getFacilityId() == null) &&
 				act1.getLinkId().equals(act2.getLinkId()) &&
-				Double.compare(act1.getMaximumDuration(), act2.getMaximumDuration()) == 0 &&
-				Double.compare(act1.getStartTime(), act2.getStartTime()) == 0;
+				act1.getMaximumDuration().equals(act2.getMaximumDuration()) &&
+				act1.getStartTime().equals(act2.getStartTime());
 	}
 	
 	private static boolean legEquals (Leg leg1, Leg leg2) {
