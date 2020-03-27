@@ -188,7 +188,7 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 		Activity homeAct = (Activity) p.getPlans().get(0).getPlanElements().get(0);
 		Activity footballAct = (Activity) p.getPlans().get(0).getPlanElements().get(2);
 		Leg leg = (Leg) p.getPlans().get(0).getPlanElements().get(1);
-		homeAct.setEndTime(footballAct.getStartTime().seconds() - leg.getTravelTime());
+		homeAct.setEndTime(footballAct.getStartTime().seconds() - leg.getTravelTime().seconds());
 	}
 
 	private Plan createFootballPlan(Scenario sc, Coord homeCoord, Coord stadiumCoord){

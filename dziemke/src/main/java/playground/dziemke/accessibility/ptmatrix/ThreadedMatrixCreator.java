@@ -1,6 +1,10 @@
 package playground.dziemke.accessibility.ptmatrix;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -13,13 +17,13 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.facilities.Facility;
+import org.matsim.pt.router.TransitRouter;
+import org.matsim.pt.router.TransitRouterConfig;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.pt.router.TransitRouter;
-import org.matsim.pt.router.TransitRouterConfig;
 
 /**
  * @author dziemke, gthunig
@@ -126,7 +130,7 @@ class ThreadedMatrixCreator implements Runnable {
 						if(leg == null) {
 							throw new RuntimeException("Leg is null.");
 						}
-						travelTime = travelTime + leg.getTravelTime();
+						travelTime = travelTime + leg.getTravelTime().seconds();
 						Route legRoute = leg.getRoute();
 						String mode = leg.getMode();
 						
@@ -139,7 +143,8 @@ class ThreadedMatrixCreator implements Runnable {
 								double beelineWalkSpeed = transitRouterConfig.getBeelineWalkSpeed();
 								
 								// beelineWalkSpeed * beelineDistanceFactor = (non-beeline or "real") walk speed
-								double transitWalkDistance = beelineWalkSpeed * beelineDistanceFactor * leg.getTravelTime();
+								double transitWalkDistance = beelineWalkSpeed * beelineDistanceFactor * leg.getTravelTime()
+										.seconds();
 								
 								travelDistance = travelDistance + transitWalkDistance;
 							}			
@@ -209,7 +214,8 @@ class ThreadedMatrixCreator implements Runnable {
 							} else if (Objects.equals(mode, TransportMode.transit_walk)) {
 								// This (route != null and mode = transit_walk) is the case for intermediate transit walks between stops)
 								double beelineWalkSpeed = transitRouterConfig.getBeelineWalkSpeed();
-								double transitWalkDistance = beelineWalkSpeed * beelineDistanceFactor * leg.getTravelTime();
+								double transitWalkDistance = beelineWalkSpeed * beelineDistanceFactor * leg.getTravelTime()
+										.seconds();
 
 								travelDistance = travelDistance + transitWalkDistance;
 							} else { // i.e. mode is neither pt nor transit_walk

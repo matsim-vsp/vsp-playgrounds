@@ -159,7 +159,8 @@ public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScor
 	@Override
 	public void handleLeg(Leg leg) {
 		double legScore = calcLegScore(
-				leg.getDepartureTime().seconds(), leg.getDepartureTime().seconds() + leg.getTravelTime(), leg);
+				leg.getDepartureTime().seconds(), leg.getDepartureTime().seconds() + leg.getTravelTime()
+						.seconds(), leg);
 		this.score += legScore;
 	}
 
