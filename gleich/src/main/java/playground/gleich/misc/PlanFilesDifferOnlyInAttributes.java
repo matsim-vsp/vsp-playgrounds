@@ -114,10 +114,10 @@ public class PlanFilesDifferOnlyInAttributes {
 	
 	private static boolean legEquals (Leg leg1, Leg leg2) {
 		return /* leg1.getAttributes().equals(leg2.getAttributes()) && */
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0 &&
+				Double.compare(leg1.getDepartureTime().seconds(), leg2.getDepartureTime().seconds()) == 0 &&
 				leg1.getMode().equals(leg2.getMode()) &&
 				routeEquals(leg1.getRoute(), leg2.getRoute()) &&
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0;
+				Double.compare(leg1.getDepartureTime().seconds(), leg2.getDepartureTime().seconds()) == 0;
 	}
 	
 	/*

@@ -49,8 +49,8 @@ public class Population2TripsParser {
                     trip.setPersonId(currentPerson.getId());
                     trip.setTripId(getNewTripId(currentPerson.getId()));
                     trip.setActivityTypeBeforeTrip(getActivityTypeBeforeTrip(selectedPlan, i));
-                    trip.setDepartureTime_s(leg.getDepartureTime());
-                    trip.setArrivalTime_s(leg.getDepartureTime()+leg.getTravelTime());
+					trip.setDepartureTime_s(leg.getDepartureTime().seconds());
+					trip.setArrivalTime_s(leg.getDepartureTime().seconds() +leg.getTravelTime());
                     trip.setDuration_s(leg.getTravelTime());
                     trip.setActivityTypeAfterTrip(getActivityTypeAfterTrip(selectedPlan, i));
 

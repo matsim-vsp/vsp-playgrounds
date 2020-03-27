@@ -174,7 +174,7 @@ public class Trip {
 
     private void calculateDepartureTime_h() {
 
-        this.departureTime_h = leg.getDepartureTime() / 3600;
+		this.departureTime_h = leg.getDepartureTime().seconds() / 3600;
     }
 
     private void calculateTravelTime_h() {

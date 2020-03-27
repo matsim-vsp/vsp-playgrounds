@@ -101,8 +101,9 @@ public class PopulationTools {
 					// trying to identify the activity start time via the arrival time...
 					double arrivalTime = Double.NEGATIVE_INFINITY;
 					if (previousLeg != null) {
-						if (previousLeg.getDepartureTime() >= 0. && previousLeg.getDepartureTime() <= 24 * 3600. && previousLeg.getTravelTime() >= 0. && previousLeg.getTravelTime() <= 24 * 3600.) {
-							arrivalTime = previousLeg.getDepartureTime() + previousLeg.getTravelTime();
+						if (previousLeg.getDepartureTime().seconds()
+								>= 0. && previousLeg.getDepartureTime().seconds() <= 24 * 3600. && previousLeg.getTravelTime() >= 0. && previousLeg.getTravelTime() <= 24 * 3600.) {
+							arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime();
 						} else {
 							if (previousLeg.getRoute().getTravelTime() >= 0. && previousLeg.getRoute().getTravelTime() <= 24 * 3600.) {
 								arrivalTime = previousActEndTime + previousLeg.getRoute().getTravelTime();
@@ -211,8 +212,9 @@ public class PopulationTools {
 						// trying to identify the activity start time via the arrival time...
 						double arrivalTime = Double.NEGATIVE_INFINITY;
 						if (previousLeg != null) {
-							if (previousLeg.getDepartureTime() >= 0. && previousLeg.getDepartureTime() <= 24 * 3600. && previousLeg.getTravelTime() >= 0. && previousLeg.getTravelTime() <= 24 * 3600.) {
-								arrivalTime = previousLeg.getDepartureTime() + previousLeg.getTravelTime();
+							if (previousLeg.getDepartureTime().seconds()
+									>= 0. && previousLeg.getDepartureTime().seconds() <= 24 * 3600. && previousLeg.getTravelTime() >= 0. && previousLeg.getTravelTime() <= 24 * 3600.) {
+								arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime();
 							} else {
 								if (previousLeg.getRoute().getTravelTime() >= 0. && previousLeg.getRoute().getTravelTime() <= 24 * 3600.) {
 									arrivalTime = previousActEndTime + previousLeg.getRoute().getTravelTime();

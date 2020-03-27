@@ -172,7 +172,7 @@ public class PopulationAnalyzer {
         Id<Link> endLinkId = trips.get(trips.size()-1).getLeg().getRoute().getEndLinkId();
 
         Leg leg = population.getFactory().createLeg(null);
-        leg.setDepartureTime(trips.get(0).getLeg().getDepartureTime());
+		leg.setDepartureTime(trips.get(0).getLeg().getDepartureTime().seconds());
         double travelTime = 0;
         String mode = null;
         NetworkRoute route = null;

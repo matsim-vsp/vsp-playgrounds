@@ -114,7 +114,7 @@ public class PopulationAnalyzer {
 
                 if (planElement instanceof Leg) {
 
-                    double departureTime_h = ((Leg) planElement).getDepartureTime() / 3600;
+					double departureTime_h = ((Leg)planElement).getDepartureTime().seconds() / 3600;
 
         		    // Note: Here, "floor" is used instead of "ceiling". A departure at 6:43 should go into the 6.a.m. bin.
                     AnalysisUtils.addToMapIntegerKeyFloor(departureTimeMap, departureTime_h, config.getBinWidthTime_h(), getWeight((Leg) planElement));

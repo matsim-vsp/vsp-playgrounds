@@ -109,7 +109,9 @@ class WriteLegs {
 			// Text wird in den Stream geschrieben
 			writer.write("### Legs: ###" + System.getProperty("line.separator"));
 			for (Leg leg : legs){
-				writer.write(leg.getDepartureTime() +"\t"+ leg.getTravelTime() +"\t"+  leg.getMode() +"\t"+  leg.getRoute().getDistance() +"\t"+ leg.getRoute().toString() );
+				writer.write(
+						leg.getDepartureTime().seconds()
+								+"\t"+ leg.getTravelTime() +"\t"+  leg.getMode() +"\t"+  leg.getRoute().getDistance() +"\t"+ leg.getRoute().toString() );
 				writer.write(System.getProperty("line.separator"));
 			}
 
@@ -134,7 +136,8 @@ class WriteLegs {
 			writer = new FileWriter(file, true);  //true ---> wird ans Ende und nicht an den Anfang geschrieben
 
 			// Text wird in den Stream geschrieben
-			writer.write(leg.getDepartureTime() +"\t"+ leg.getTravelTime() +"\t"+ leg.getMode() +"\t"+ leg.getRoute().getDistance() + "\t" + leg.getRoute().toString());
+			writer.write(leg.getDepartureTime().seconds()
+					+"\t"+ leg.getTravelTime() +"\t"+ leg.getMode() +"\t"+ leg.getRoute().getDistance() + "\t" + leg.getRoute().toString());
 			writer.write(System.getProperty("line.separator"));
 
 			writer.flush();
