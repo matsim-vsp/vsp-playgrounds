@@ -278,7 +278,7 @@ public class ExtractAgentsInAreaStreamReading {
 		for (PlanElement pe : plan.getPlanElements()){
 			if (pe instanceof Leg){
 				Leg leg = (Leg) pe;
-				leg.setDepartureTime(Time.getUndefinedTime());
+				leg.setDepartureTimeUndefined();
 				leg.setTravelTime(Time.getUndefinedTime());
 				leg.setRoute(null);
 			} else if (pe instanceof Activity){
