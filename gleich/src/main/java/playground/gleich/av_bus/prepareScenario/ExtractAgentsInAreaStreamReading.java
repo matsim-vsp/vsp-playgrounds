@@ -279,7 +279,7 @@ public class ExtractAgentsInAreaStreamReading {
 			if (pe instanceof Leg){
 				Leg leg = (Leg) pe;
 				leg.setDepartureTimeUndefined();
-				leg.setTravelTime(Time.getUndefinedTime());
+				leg.setTravelTimeUndefined();
 				leg.setRoute(null);
 			} else if (pe instanceof Activity){
 				Activity act =  (Activity) pe;
