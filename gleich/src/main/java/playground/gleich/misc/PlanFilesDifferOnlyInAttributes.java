@@ -123,13 +123,13 @@ public class PlanFilesDifferOnlyInAttributes {
 	/*
 	 * TODO: Look into sub-classes (ExperimentalTransitRoute, GenericRouteImpl, NetworkRoute ... )
 	 */
-	private static boolean routeEquals (Route route1, Route route2) { 
+	private static boolean routeEquals (Route route1, Route route2) {
 		return Double.compare(route1.getDistance(), route2.getDistance()) == 0 &&
 				route1.getEndLinkId().equals(route2.getEndLinkId()) &&
 				route1.getRouteDescription().equals(route2.getRouteDescription()) &&
 				route1.getRouteType().equals(route2.getRouteType()) &&
 				route1.getStartLinkId().equals(route2.getStartLinkId()) &&
-				Double.compare(route1.getTravelTime(), route2.getTravelTime()) == 0;
+				Double.compare(route1.getTravelTime().seconds(), route2.getTravelTime().seconds()) == 0;
 	}
 
 }

@@ -107,8 +107,12 @@ public class PopulationTools {
 							arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime()
 									.seconds();
 						} else {
-							if (previousLeg.getRoute().getTravelTime() >= 0. && previousLeg.getRoute().getTravelTime() <= 24 * 3600.) {
-								arrivalTime = previousActEndTime + previousLeg.getRoute().getTravelTime();
+							if (previousLeg.getRoute().getTravelTime().seconds() >= 0. && previousLeg.getRoute()
+									.getTravelTime()
+									.seconds() <= 24 * 3600.) {
+								arrivalTime = previousActEndTime + previousLeg.getRoute()
+										.getTravelTime()
+										.seconds();
 							} else {
 								log.warn("No meaningful activity start time and arrival time identified even though it is not the first activity...");
 							}
@@ -220,8 +224,11 @@ public class PopulationTools {
 								arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime()
 										.seconds();
 							} else {
-								if (previousLeg.getRoute().getTravelTime() >= 0. && previousLeg.getRoute().getTravelTime() <= 24 * 3600.) {
-									arrivalTime = previousActEndTime + previousLeg.getRoute().getTravelTime();
+								if (previousLeg.getRoute().getTravelTime().seconds()
+										>= 0. && previousLeg.getRoute().getTravelTime().seconds() <= 24 * 3600.) {
+									arrivalTime = previousActEndTime + previousLeg.getRoute()
+											.getTravelTime()
+											.seconds();
 								} else {
 									log.warn("No meaningful activity start time and arrival time identified even though it is not the first activity...");
 								}

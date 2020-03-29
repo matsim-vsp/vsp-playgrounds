@@ -131,9 +131,9 @@ public class ShapeReader {
 						if (leg.getMode().equals("transit_walk")) {
 							mode = "walk";
 						}
-					}	
-					travelTime = travelTime + leg.getRoute().getTravelTime();
-					movingclockTime = movingclockTime + leg.getRoute().getTravelTime();
+					}
+					travelTime = travelTime + leg.getRoute().getTravelTime().seconds();
+					movingclockTime = movingclockTime + leg.getRoute().getTravelTime().seconds();
 				}
 			}
 			// break;
