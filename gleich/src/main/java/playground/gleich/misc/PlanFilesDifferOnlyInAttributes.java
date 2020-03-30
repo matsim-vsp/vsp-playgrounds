@@ -129,7 +129,7 @@ public class PlanFilesDifferOnlyInAttributes {
 				route1.getRouteDescription().equals(route2.getRouteDescription()) &&
 				route1.getRouteType().equals(route2.getRouteType()) &&
 				route1.getStartLinkId().equals(route2.getStartLinkId()) &&
-				Double.compare(route1.getTravelTime().seconds(), route2.getTravelTime().seconds()) == 0;
+				route1.getTravelTime().equals(route2.getTravelTime());
 	}
 
 }
