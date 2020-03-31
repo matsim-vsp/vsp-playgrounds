@@ -90,7 +90,11 @@ class TravelDisutilityUtils {
 			 * yy would certainly be better to play back the full plan
 			 * yy would be even better to play back the experienced plan
 			 */
-			double typicalDuration = scenario.getConfig().planCalcScore().getActivityParams( firstAct.getType() ).getTypicalDuration() ;
+			double typicalDuration = scenario.getConfig()
+					.planCalcScore()
+					.getActivityParams(firstAct.getType())
+					.getTypicalDuration()
+					.seconds();
 			final Plan experiencedPlan = (Plan) person.getSelectedPlan().getCustomAttributes().get( PlanCalcScoreConfigGroup.EXPERIENCED_PLAN_KEY );
 			if ( experiencedPlan != null ) {
 				if ( cnt < 1 ) {
