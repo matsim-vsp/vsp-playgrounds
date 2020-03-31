@@ -62,7 +62,6 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -741,8 +740,8 @@ public final class RunBraessSimulation {
 			runName += "_" + config.strategy().getMaxAgentPlanMemorySize() + "pl";
 		
 		runName += "_stuckT" + (int)config.qsim().getStuckTime();
-		if (!Time.isUndefinedTime(config.qsim().getEndTime()))
-			runName += "_simEndT" + (int)(config.qsim().getEndTime()/24) + "h";
+		if (config.qsim().getEndTime().isDefined())
+			runName += "_simEndT" + (int)(config.qsim().getEndTime().seconds()/24) + "h";
 		
 		return runName;
 	}
