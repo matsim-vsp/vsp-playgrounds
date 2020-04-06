@@ -56,7 +56,8 @@ public final class Events2ExperiencedTripsCSV {
 	private final String sep2 = ",";
     
     public static void main(String[] args) {
-    	String pathInclRunId = "/home/gregor/tmp/Vulkaneifel/snzDrt301a/snzDrt301a";
+//    	String pathInclRunId = "/home/gregor/tmp/Vulkaneifel/snzDrt301a/snzDrt301a";
+		String pathInclRunId = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e";
         Config config = ConfigUtils.loadConfig(pathInclRunId + ".output_config.xml");
         config.network().setInputFile(pathInclRunId + ".output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunId + ".output_transitSchedule.xml.gz");
