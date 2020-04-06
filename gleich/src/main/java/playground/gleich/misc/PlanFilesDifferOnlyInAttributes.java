@@ -114,10 +114,9 @@ public class PlanFilesDifferOnlyInAttributes {
 	
 	private static boolean legEquals (Leg leg1, Leg leg2) {
 		return /* leg1.getAttributes().equals(leg2.getAttributes()) && */
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0 &&
+				leg1.getDepartureTime().equals(leg2.getDepartureTime()) &&
 				leg1.getMode().equals(leg2.getMode()) &&
-				routeEquals(leg1.getRoute(), leg2.getRoute()) &&
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0;
+				routeEquals(leg1.getRoute(), leg2.getRoute());
 	}
 	
 	/*
@@ -129,7 +128,7 @@ public class PlanFilesDifferOnlyInAttributes {
 				route1.getRouteDescription().equals(route2.getRouteDescription()) &&
 				route1.getRouteType().equals(route2.getRouteType()) &&
 				route1.getStartLinkId().equals(route2.getStartLinkId()) &&
-				Double.compare(route1.getTravelTime(), route2.getTravelTime()) == 0;
+				route1.getTravelTime().equals(route2.getTravelTime());
 	}
 
 }
