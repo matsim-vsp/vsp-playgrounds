@@ -42,7 +42,7 @@ import java.util.Set;
 // * @param inTransitVehicleFile: possible to use normal vehicle file with all lines, not only minibus
 // * @param coordRefSystem
  */
-public class CalculateMinibusOperatingCosts {
+public class CalculatePtOperatingCosts {
 	
 	private final Network network;
 	private final TransitSchedule inSchedule;
@@ -50,7 +50,7 @@ public class CalculateMinibusOperatingCosts {
 	private final String coordRefSystem;
 	private final String minibusIdentifier;
 
-	public CalculateMinibusOperatingCosts(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
+	public CalculatePtOperatingCosts(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
 		this.coordRefSystem = coordRefSystem;
 		this.minibusIdentifier = minibusIdentifier;
 		
@@ -71,9 +71,20 @@ public class CalculateMinibusOperatingCosts {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String networkFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/output_network.xml.gz";
-		String inScheduleFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/ITERS/it.1500/1500.transitScheduleScored.xml.gz";
-		String inTransitVehicleFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/ITERS/it.1500/1500.transitVehicles.xml.gz";
+		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedNetwork.xml.gz";
+		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedScheduleWoBusLinesTouchingZone.xml.gz";
+		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
+
+		String coordRefSystem = "epsg:25832";
+		String minibusIdentifier = "";
+
+		double costPerHour = 1;
+		double costPerKm = 1;
+		double costPerDayFixVeh = 1;
+
+//		String networkFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/output_network.xml.gz";
+//		String inScheduleFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/ITERS/it.1500/1500.transitScheduleScored.xml.gz";
+//		String inTransitVehicleFile = "/home/gregor/git/runs-svn/capetown-minibuses/output-minibus-wo-transit/100pct/2018-12-03_100pct_1500it/ITERS/it.1500/1500.transitVehicles.xml.gz";
 		// input files with formal transit
 //		String inScheduleFile = "/home/gregor/git/capetown/output-minibus-w-transit/2018-11-09/ITERS/it.100/100.transitSchedule.xml.gz";
 //		String inTransitVehicleFile = "/home/gregor/git/capetown/output-minibus-w-transit/2018-11-09/ITERS/it.100/100.transitVehicles.xml.gz";
@@ -81,15 +92,15 @@ public class CalculateMinibusOperatingCosts {
 //		String inScheduleFile = "/home/gregor/git/matsim/contribs/av/src/test/resources/intermodal_scenario/transitschedule.xml";
 //		String inTransitVehicleFile = "/home/gregor/git/matsim/contribs/av/src/test/resources/intermodal_scenario/transitVehicles.xml";
 
-		String coordRefSystem = "SA_Lo19";
-		String minibusIdentifier = "para_";
+//		String coordRefSystem = "SA_Lo19";
+//		String minibusIdentifier = "para_";
 		
-		double costPerHour = 15;
-		double costPerKm = 1.75;
-		double costPerDayFixVeh = 700;
+//		double costPerHour = 15;
+//		double costPerKm = 1.75;
+//		double costPerDayFixVeh = 700;
 		
 		// add vehicle types
-		CalculateMinibusOperatingCosts costCalculator = new CalculateMinibusOperatingCosts(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+		CalculatePtOperatingCosts costCalculator = new CalculatePtOperatingCosts(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
 		costCalculator.run(costPerHour, costPerKm, costPerDayFixVeh);
 	}
 	
