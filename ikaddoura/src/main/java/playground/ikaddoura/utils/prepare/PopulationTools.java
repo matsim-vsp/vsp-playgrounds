@@ -29,250 +29,260 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.utils.misc.OptionalTime;
 
 /**
-* @author ikaddoura
-*/
+ * @author ikaddoura
+ */
 
 public class PopulationTools {
 
 	private static final Logger log = Logger.getLogger(PopulationTools.class);
 
-	public static void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population, double timeCategorySize) {
-				
-		log.info("First, setting activity types according to duration (time bin size: " + timeCategorySize + ")");				
+	public static void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population,
+			double timeCategorySize) {
+
+		log.info("First, setting activity types according to duration (time bin size: " + timeCategorySize + ")");
 		log.info("Second, merging evening and morning activity if they have the same (base) type.");
 
 		for (Person person : population.getPersons().values()) {
-			
+
 			for (Plan plan : person.getPlans()) {
-					
+
 				setActivityTypesAccordingToDuration(plan, timeCategorySize);
-				mergeOvernightActivities(plan);				
+				mergeOvernightActivities(plan);
 			}
-		}		
+		}
 	}
-	
+
 	private static void mergeOvernightActivities(Plan plan) {
-		
+
 		if (plan.getPlanElements().size() > 1) {
-		
-			Activity firstActivity = (Activity) plan.getPlanElements().get(0);
-			Activity lastActivity = (Activity) plan.getPlanElements().get(plan.getPlanElements().size() - 1);
-			
+
+			Activity firstActivity = (Activity)plan.getPlanElements().get(0);
+			Activity lastActivity = (Activity)plan.getPlanElements().get(plan.getPlanElements().size() - 1);
+
 			String firstBaseActivity = firstActivity.getType().split("_")[0];
 			String lastBaseActivity = lastActivity.getType().split("_")[0];
-			
+
 			if (firstBaseActivity.equals(lastBaseActivity)) {
-				
-				double mergedDuration = Double.parseDouble(firstActivity.getType().split("_")[1]) + Double.parseDouble(lastActivity.getType().split("_")[1]);
-				
+
+				double mergedDuration = Double.parseDouble(firstActivity.getType().split("_")[1]) + Double.parseDouble(
+						lastActivity.getType().split("_")[1]);
+
 				firstActivity.setType(firstBaseActivity + "_" + mergedDuration);
 				lastActivity.setType(lastBaseActivity + "_" + mergedDuration);
 			}
-			
+
 		} else {
 			// skipping plans with just one activity
 		}
 	}
 
 	private static void setActivityTypesAccordingToDuration(Plan plan, double timeCategorySize) {
-				
+
 		Leg previousLeg = null;
 		double previousActEndTime = Double.NEGATIVE_INFINITY;
-		
+
 		for (PlanElement pE : plan.getPlanElements()) {
-			
+
 			if (pE instanceof Leg) {
-				previousLeg = (Leg) pE;
+				previousLeg = (Leg)pE;
 			}
-			
+
 			if (pE instanceof Activity) {
-			
-				Activity act = (Activity) pE;
+
+				Activity act = (Activity)pE;
 
 				double startTime = Double.NEGATIVE_INFINITY;
 				double endTime = Double.NEGATIVE_INFINITY;
-			
+
 				if (act.getStartTime().isDefined()) {
 					startTime = act.getStartTime().seconds();
 				} else {
-					
+
 					// trying to identify the activity start time via the arrival time...
 					double arrivalTime = Double.NEGATIVE_INFINITY;
 					if (previousLeg != null) {
-						if (previousLeg.getDepartureTime().seconds()
-								>= 0. && previousLeg.getDepartureTime().seconds() <= 24 * 3600. && previousLeg.getTravelTime()
-								.seconds() >= 0. && previousLeg.getTravelTime().seconds() <= 24 * 3600.) {
-							arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime()
-									.seconds();
+						OptionalTime travelTime = PopulationUtils.decideOnTravelTimeForLeg(previousLeg);
+						OptionalTime departureTime = previousLeg.getDepartureTime();
+						if (departureTime.isDefined()
+								&& departureTime.seconds() >= 0.
+								&& departureTime.seconds() <= 24 * 3600.
+								&& travelTime.isDefined()
+								&& travelTime.seconds() >= 0.
+								&& travelTime.seconds() <= 24 * 3600.) {
+							arrivalTime = departureTime.seconds() + travelTime.seconds();
 						} else {
-							if (previousLeg.getRoute().getTravelTime().seconds() >= 0. && previousLeg.getRoute()
-									.getTravelTime()
-									.seconds() <= 24 * 3600.) {
-								arrivalTime = previousActEndTime + previousLeg.getRoute()
-										.getTravelTime()
-										.seconds();
+							if (travelTime.isDefined()
+									&& travelTime.seconds() >= 0.
+									&& travelTime.seconds() <= 24 * 3600.) {
+								arrivalTime = previousActEndTime + travelTime.seconds();
 							} else {
-								log.warn("No meaningful activity start time and arrival time identified even though it is not the first activity...");
+								log.warn(
+										"No meaningful activity start time and arrival time identified even though it is not the first activity...");
 							}
 						}
 					} else {
 						// First activity!
-						
+
 						// For the computation of activity durations: Assume the day start at 0 and end at 24 * 3600.
 						arrivalTime = 0.;
 					}
-					
+
 					startTime = arrivalTime;
 				}
-				
+
 				if (startTime < 0.) {
 					throw new RuntimeException("No meaningful start time identified. Aborting...");
 				}
-				
+
 				if (act.getEndTime().isDefined()) {
 					endTime = act.getEndTime().seconds();
 				} else {
 					// Last activity!
-					
+
 					// For the computation of activity durations: Assume the day start at 0 and end at 24 * 3600.
 					endTime = 24 * 3600.;
 				}
-				
+
 				if (endTime < 0.) {
 					throw new RuntimeException("No meaningful end time identified. Aborting...");
 				}
-						
-				int durationCategoryNr = (int) Math.round( ((endTime - startTime) / timeCategorySize) ) ;		
+
+				int durationCategoryNr = (int)Math.round(((endTime - startTime) / timeCategorySize));
 				if (durationCategoryNr <= 0) {
 					durationCategoryNr = 1;
 				}
-				
+
 				String newType = act.getType() + "_" + (durationCategoryNr * timeCategorySize);
 				act.setType(newType);
-				
+
 				previousActEndTime = endTime;
 			}
 		}
 	}
 
 	public static void removeNetworkSpecificInformation(Population population) {
-		
+
 		log.info("Removing network specific information (routes, link IDs)");
-		
+
 		for (Person person : population.getPersons().values()) {
-			
+
 			for (Plan plan : person.getPlans()) {
-				
+
 				for (PlanElement pE : plan.getPlanElements()) {
-					
+
 					if (pE instanceof Activity) {
-						Activity act = (Activity) pE;
+						Activity act = (Activity)pE;
 						act.setLinkId(null);
 					}
-					
+
 					if (pE instanceof Leg) {
-						Leg leg = (Leg) pE;
-						leg.setRoute(null);							
-					}		
+						Leg leg = (Leg)pE;
+						leg.setRoute(null);
+					}
 				}
 			}
-		}		
+		}
 	}
 
 	public static void addActivityTimesOfSelectedPlanToPersonAttributes(Population population) {
-				
+
 		log.info("Writing activity times in selected plan to person attributes.");
-		
+
 		for (Person person : population.getPersons().values()) {
 			Plan selectedPlan = person.getSelectedPlan();
 			if (selectedPlan == null) {
 				throw new RuntimeException("No selected plan. Aborting...");
 			}
-			
+
 			String actStartEndTimes = null;
-			
+
 			Leg previousLeg = null;
 			double previousActEndTime = Double.NEGATIVE_INFINITY;
-			
+
 			int pECounter = 0;
-			
+
 			for (PlanElement pE : selectedPlan.getPlanElements()) {
-				
+
 				if (pE instanceof Leg) {
-					previousLeg = (Leg) pE;
+					previousLeg = (Leg)pE;
 				}
-				
+
 				if (pE instanceof Activity) {
-				
-					Activity act = (Activity) pE;
-					
+
+					Activity act = (Activity)pE;
+
 					double startTime = Double.NEGATIVE_INFINITY;
 					double endTime = Double.NEGATIVE_INFINITY;
-				
+
 					if (act.getStartTime().isDefined()) {
 						startTime = act.getStartTime().seconds();
 					} else {
-						
+
 						// trying to identify the activity start time via the arrival time...
 						double arrivalTime = Double.NEGATIVE_INFINITY;
 						if (previousLeg != null) {
-							if (previousLeg.getDepartureTime().seconds()
-									>= 0. && previousLeg.getDepartureTime().seconds() <= 24 * 3600. && previousLeg.getTravelTime()
-									.seconds() >= 0. && previousLeg.getTravelTime().seconds() <= 24 * 3600.) {
-								arrivalTime = previousLeg.getDepartureTime().seconds() + previousLeg.getTravelTime()
-										.seconds();
+							OptionalTime travelTime = PopulationUtils.decideOnTravelTimeForLeg(previousLeg);
+							OptionalTime departureTime = previousLeg.getDepartureTime();
+							if (departureTime.isDefined()
+									&& departureTime.seconds() >= 0.
+									&& departureTime.seconds() <= 24 * 3600.
+									&& travelTime.isDefined()
+									&& travelTime.seconds() >= 0.
+									&& travelTime.seconds() <= 24 * 3600.) {
+								arrivalTime = departureTime.seconds() + travelTime.seconds();
 							} else {
-								if (previousLeg.getRoute().getTravelTime().seconds()
-										>= 0. && previousLeg.getRoute().getTravelTime().seconds() <= 24 * 3600.) {
-									arrivalTime = previousActEndTime + previousLeg.getRoute()
-											.getTravelTime()
-											.seconds();
+								if (travelTime.isDefined()
+										&& travelTime.seconds() >= 0.
+										&& travelTime.seconds() <= 24 * 3600.) {
+									arrivalTime = previousActEndTime + travelTime.seconds();
 								} else {
-									log.warn("No meaningful activity start time and arrival time identified even though it is not the first activity...");
+									log.warn(
+											"No meaningful activity start time and arrival time identified even though it is not the first activity...");
 								}
 							}
 						} else {
 							// First activity!
-							
+
 							arrivalTime = Double.NEGATIVE_INFINITY;
 						}
-						
+
 						startTime = arrivalTime;
 					}
-					
-					
+
 					if (act.getEndTime().isDefined()) {
 						endTime = act.getEndTime().seconds();
 					} else {
 						// Last activity!
-						
+
 						endTime = Double.NEGATIVE_INFINITY;
 					}
-					
+
 					previousActEndTime = endTime;
-					
+
 					// set opening and closing time for overnight activity to -Infinity
-					
+
 					if (pECounter == 0) {
 						endTime = Double.NEGATIVE_INFINITY;
-						
+
 						if (startTime >= 0.) {
 							log.warn("Start time should already be -Infinity. Setting start time to -Infinity.");
 							startTime = Double.NEGATIVE_INFINITY;
 						}
 					}
-					
+
 					if (pECounter == selectedPlan.getPlanElements().size() - 1) {
 						startTime = Double.NEGATIVE_INFINITY;
-						
+
 						if (endTime >= 0.) {
 							log.warn("End time should already be -Infinity. Setting end time to -Infinity.");
 							endTime = Double.NEGATIVE_INFINITY;
 						}
 					}
-					
+
 					if (actStartEndTimes == null) {
 						actStartEndTimes = startTime + ";" + endTime;
 					} else {
@@ -280,40 +290,40 @@ public class PopulationTools {
 					}
 
 				}
-				
+
 				pECounter++;
 			}
-			
-			person.getAttributes().putAttribute("OpeningClosingTimes", actStartEndTimes);					
 
-		}	
+			person.getAttributes().putAttribute("OpeningClosingTimes", actStartEndTimes);
+
+		}
 	}
-	
+
 	public static void analyze(Population population) {
-		
+
 		final Map<String, Integer> activityType2Counter = new HashMap<>();
-		
+
 		int personCounter = 0;
 		for (Person person : population.getPersons().values()) {
 			personCounter++;
-			for (Plan plan : person.getPlans()) {				
+			for (Plan plan : person.getPlans()) {
 				for (PlanElement pE : plan.getPlanElements()) {
 					if (pE instanceof Activity) {
-						Activity act = (Activity) pE;
-						
+						Activity act = (Activity)pE;
+
 						if (activityType2Counter.containsKey(act.getType())) {
 							activityType2Counter.put(act.getType(), activityType2Counter.get(act.getType()) + 1);
 						} else {
 							activityType2Counter.put(act.getType(), 1);
 						}
-						
+
 					}
 				}
 			}
 		}
-		
+
 		log.info("Number of persons: " + personCounter);
-		
+
 		log.info("----");
 		log.info("Activity Type; Counter");
 		for (String actType : activityType2Counter.keySet()) {
@@ -324,11 +334,11 @@ public class PopulationTools {
 
 	public static void setScoresToZero(Population population) {
 		for (Person person : population.getPersons().values()) {
-			for (Plan plan : person.getPlans()) {				
+			for (Plan plan : person.getPlans()) {
 				plan.setScore(0.);
 			}
 		}
 	}
-	
+
 }
 
