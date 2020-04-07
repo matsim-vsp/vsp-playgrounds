@@ -26,6 +26,7 @@ import org.matsim.core.mobsim.framework.MobsimDriverAgent;
 import org.matsim.core.mobsim.qsim.agents.PersonDriverAgentImpl;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 
@@ -125,7 +126,7 @@ public class GuidanceWithindayAgent implements MobsimDriverAgent {
 		delegate.setStateToAbort(now);
 	}
 
-	public Double getExpectedTravelTime() {
+	public OptionalTime getExpectedTravelTime() {
 		return delegate.getExpectedTravelTime();
 	}
 

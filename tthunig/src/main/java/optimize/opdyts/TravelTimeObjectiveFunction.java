@@ -59,7 +59,7 @@ public class TravelTimeObjectiveFunction implements ObjectiveFunction {
             totalExpectedScore += plan.getScore();
             for (PlanElement pe : plan.getPlanElements()) {
             		if (pe instanceof Leg) {
-            			totalExpectedTT += ((Leg)pe).getTravelTime();
+						totalExpectedTT += ((Leg)pe).getTravelTime().seconds();
             		}
             }
         }

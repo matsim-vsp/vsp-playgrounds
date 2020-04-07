@@ -1,16 +1,26 @@
 package playground.dziemke.analysis.mid.other;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.utils.geometry.CoordUtils;
+
 import playground.dziemke.analysis.AnalysisFileWriter;
 import playground.dziemke.analysis.AnalysisUtils;
-
-import java.util.*;
 
 public class PopulationAnalyzer {
 
@@ -89,7 +99,7 @@ public class PopulationAnalyzer {
 
                 if (planElement instanceof Leg) {
 
-                    double travelTime = ((Leg) planElement).getTravelTime() / 60;
+					double travelTime = ((Leg)planElement).getTravelTime().seconds() / 60;
                     travelTimes.add(travelTime);
                     AnalysisUtils.addToMapIntegerKeyCeiling(tripDurationMap, travelTime, config.getBinWidthDuration_min(), getWeight((Leg) planElement));
                 }
@@ -114,7 +124,7 @@ public class PopulationAnalyzer {
 
                 if (planElement instanceof Leg) {
 
-                    double departureTime_h = ((Leg) planElement).getDepartureTime() / 3600;
+					double departureTime_h = ((Leg)planElement).getDepartureTime().seconds() / 3600;
 
         		    // Note: Here, "floor" is used instead of "ceiling". A departure at 6:43 should go into the 6.a.m. bin.
                     AnalysisUtils.addToMapIntegerKeyFloor(departureTimeMap, departureTime_h, config.getBinWidthTime_h(), getWeight((Leg) planElement));
@@ -169,7 +179,7 @@ public class PopulationAnalyzer {
                     AnalysisUtils.addToMapIntegerKeyCeiling(tripDistanceBeelineMap, distanceBeeline_km, config.getBinWidthDistance_km(), getWeight((Leg) planElement));
 
                     //speed
-                    double travelTime_h = ((Leg) planElement).getTravelTime() / 3600;
+					double travelTime_h = ((Leg)planElement).getTravelTime().seconds() / 3600;
                     double speed = distanceBeeline_km / travelTime_h;
                     speeds.add(speed);
                     AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedMap, speed,
@@ -234,7 +244,7 @@ public class PopulationAnalyzer {
                             config.getBinWidthDistance_km(), getWeight((Leg) planElement));
 
                     //routedSpeed
-                    double travelTime_h = ((Leg) planElement).getTravelTime() / 3600;
+					double travelTime_h = ((Leg)planElement).getTravelTime().seconds() / 3600;
                     double routedSpeed = tripDistanceRouted_km / travelTime_h;
                     routedSpeeds.add(routedSpeed);
                     AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedRoutedMap, routedSpeed,

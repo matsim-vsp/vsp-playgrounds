@@ -158,8 +158,8 @@ public class CarrierScoringFunctionFactoryImpl_KT implements CarrierScoringFunct
                 double distanceCosts = dist*getDistanceParameter(vehicle);
                 assert distanceCosts >= 0.0 : "distanceCosts must be positive";
                 score += (-1) * distanceCosts;
-                
-                double timeCosts = leg.getTravelTime()*getTimeParameter(vehicle);
+
+				double timeCosts = leg.getTravelTime().seconds() *getTimeParameter(vehicle);
                 assert timeCosts >= 0.0 : "timeCosts must be positive";
                 score += (-1) * timeCosts;
                 

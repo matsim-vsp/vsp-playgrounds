@@ -1,18 +1,30 @@
 package playground.dziemke.analysis.generalNew;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+
 import playground.dziemke.analysis.AnalysisFileWriter;
 import playground.dziemke.analysis.AnalysisUtils;
-
-import java.io.File;
-import java.util.*;
 
 public class PopulationAnalyzer {
 
@@ -172,14 +184,14 @@ public class PopulationAnalyzer {
         Id<Link> endLinkId = trips.get(trips.size()-1).getLeg().getRoute().getEndLinkId();
 
         Leg leg = population.getFactory().createLeg(null);
-        leg.setDepartureTime(trips.get(0).getLeg().getDepartureTime());
+		leg.setDepartureTime(trips.get(0).getLeg().getDepartureTime().seconds());
         double travelTime = 0;
         String mode = null;
         NetworkRoute route = null;
 
         for (Trip trip : trips) {
 
-            travelTime += trip.getLeg().getTravelTime();
+			travelTime += trip.getLeg().getTravelTime().seconds();
             //set main trip mode
             String currentLegMode = trip.getLeg().getMode();
             if (!MINOR_MODES.contains(currentLegMode)) {

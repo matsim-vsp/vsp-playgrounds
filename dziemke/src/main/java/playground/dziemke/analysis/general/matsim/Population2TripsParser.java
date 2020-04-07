@@ -1,15 +1,26 @@
 package playground.dziemke.analysis.general.matsim;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.routes.NetworkRoute;
-import playground.dziemke.analysis.general.Trip;
 
-import java.util.*;
+import playground.dziemke.analysis.general.Trip;
 
 public class Population2TripsParser {
     public static final Logger log = Logger.getLogger(Population2TripsParser.class);
@@ -49,9 +60,9 @@ public class Population2TripsParser {
                     trip.setPersonId(currentPerson.getId());
                     trip.setTripId(getNewTripId(currentPerson.getId()));
                     trip.setActivityTypeBeforeTrip(getActivityTypeBeforeTrip(selectedPlan, i));
-                    trip.setDepartureTime_s(leg.getDepartureTime());
-                    trip.setArrivalTime_s(leg.getDepartureTime()+leg.getTravelTime());
-                    trip.setDuration_s(leg.getTravelTime());
+					trip.setDepartureTime_s(leg.getDepartureTime().seconds());
+					trip.setArrivalTime_s(leg.getDepartureTime().seconds() + leg.getTravelTime().seconds());
+					trip.setDuration_s(leg.getTravelTime().seconds());
                     trip.setActivityTypeAfterTrip(getActivityTypeAfterTrip(selectedPlan, i));
 
                     trip.setDepartureLinkId(leg.getRoute().getStartLinkId());

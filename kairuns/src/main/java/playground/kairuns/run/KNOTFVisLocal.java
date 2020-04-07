@@ -1,6 +1,7 @@
 package playground.kairuns.run;
 
-import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
+import java.io.File;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.fares.drt.DrtFaresConfigGroup;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
@@ -19,8 +20,7 @@ import org.matsim.core.utils.misc.Time;
 import org.matsim.drtSpeedUp.DrtSpeedUpConfigGroup;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import java.io.File;
-import java.util.Arrays;
+import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 
 class KNOTFVisLocal{
 
@@ -85,7 +85,7 @@ class KNOTFVisLocal{
 			}
 		}
 		for( PlanCalcScoreConfigGroup.ActivityParams params : config.planCalcScore().getActivityParams() ){
-			if ( Time.isUndefinedTime( params.getTypicalDuration() ) ) {
+			if ( Time.isUndefinedTime(params.getTypicalDuration().seconds()) ) {
 				params.setTypicalDuration( 3600. ) ;
 			}
 		}

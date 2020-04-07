@@ -119,8 +119,8 @@ public class TelematicsParkingSearchController {
             }
         });
 
-        int start = (int) (config.qsim().getStartTime());
-        int end = (int) (config.qsim().getEndTime());
+        int start = (int) (config.qsim().getStartTime()).seconds();
+        int end = (int) (config.qsim().getEndTime()).seconds();
 
         installParkingModules(controler, scenario, zones, start, end);
         controler.run();

@@ -24,7 +24,6 @@ import org.matsim.core.population.io.StreamingPopulationWriter;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.router.TransitActsRemover;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 
@@ -278,14 +277,14 @@ public class ExtractAgentsInAreaStreamReading {
 		for (PlanElement pe : plan.getPlanElements()){
 			if (pe instanceof Leg){
 				Leg leg = (Leg) pe;
-				leg.setDepartureTime(Time.getUndefinedTime());
-				leg.setTravelTime(Time.getUndefinedTime());
+				leg.setDepartureTimeUndefined();
+				leg.setTravelTimeUndefined();
 				leg.setRoute(null);
 			} else if (pe instanceof Activity){
 				Activity act =  (Activity) pe;
 				act.setLinkId(null);
 				act.setFacilityId(null);
-				act.setStartTime(Time.getUndefinedTime());
+				act.setStartTimeUndefined();
 			}
 		}
 	}
