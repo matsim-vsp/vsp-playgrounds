@@ -88,8 +88,9 @@ public class FreightAnalyseKT {
 			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
 			eventsManager.addHandler(tripHandler);
 					
-			int iteration = config.controler().getLastIteration();
-			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml";
+//			int iteration = config.controler().getLastIteration();
+//			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml";
+			String eventsFile = RUN_DIR + "output_events.xml.gz";
 			
 			log.info("Reading the event file...");
 			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
