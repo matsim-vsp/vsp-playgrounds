@@ -194,7 +194,7 @@ public class TransitLinesHeadwayBasedRemover {
 				String originalStopId = stop.getStopFacility().getId().toString().split("\\.")[0];
 				log.debug(stop.getStopFacility().getId().toString() + " " + originalStopId);
 				
-				double departureTimeAtStop = dep.getDepartureTime() + stop.getDepartureOffset();
+				double departureTimeAtStop = dep.getDepartureTime() + stop.getDepartureOffset().seconds();
 				if (!stop2departureTimes.containsKey(originalStopId)) {
 					stop2departureTimes.put(originalStopId, new ArrayList<>());
 				}

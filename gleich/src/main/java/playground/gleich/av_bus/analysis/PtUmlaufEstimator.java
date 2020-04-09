@@ -157,7 +157,7 @@ public class PtUmlaufEstimator {
 			firstStop = findStopGroup(route.getStops().get(0).getStopFacility().getId());
 			lastStop = findStopGroup(route.getStops().get(route.getStops().size() - 1).getStopFacility().getId());
 			this.departureTimeAtFirstStop = departure.getDepartureTime();
-			this.departureTimeAtLastStop = route.getStops().get(route.getStops().size() - 1).getDepartureOffset();
+			this.departureTimeAtLastStop = route.getStops().get(route.getStops().size() - 1).getDepartureOffset().seconds();
 		}
 
 		void setUmlauf(Id<Vehicle> umlauf) {

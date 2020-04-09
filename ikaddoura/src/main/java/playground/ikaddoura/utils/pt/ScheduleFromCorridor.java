@@ -36,7 +36,6 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
@@ -101,7 +100,7 @@ public class ScheduleFromCorridor {
 		setTransitLine(this.routeId2transitRoute);
 				
 		int lastStop = this.routeId2transitRoute.get(routeId1).getStops().size()-1;
-		this.routeTravelTime = this.routeId2transitRoute.get(routeId1).getStops().get(lastStop).getArrivalOffset();
+		this.routeTravelTime = this.routeId2transitRoute.get(routeId1).getStops().get(lastStop).getArrivalOffset().seconds();
 		log.info("RouteTravelTime: "+ Time.writeTime(routeTravelTime, Time.TIMEFORMAT_HHMMSS));
 	}
 

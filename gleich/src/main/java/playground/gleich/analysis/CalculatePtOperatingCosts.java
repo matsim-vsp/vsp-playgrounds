@@ -18,6 +18,9 @@
  * *********************************************************************** */
 package playground.gleich.analysis;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -31,9 +34,6 @@ import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /** 
  * 
@@ -125,10 +125,7 @@ public class CalculatePtOperatingCosts {
 				}
 				// travel time according to schedule, not exact
 //				double startTime = Double.isFinite(route.getStops().get(0).getArrivalOffset()) ? route.getStops().get(0).getArrivalOffset() : route.getStops().get(0).getDepartureOffset();
-				double endTime = Double.isFinite(route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) ? route.getStops().get(route.getStops().size() - 1).getDepartureOffset() : route.getStops().get(route.getStops().size() - 1).getArrivalOffset();
-				if (! (Double.isFinite(endTime)) ) {
-					throw new RuntimeException("no valid arrival or departure time offset at last stop of line " + line.getId() + " route " + route.getId());
-				}
+				double endTime = route.getStops().get(route.getStops().size() - 1).getDepartureOffset().or(route.getStops().get(route.getStops().size() - 1)::getArrivalOffset).seconds();
 				double travelTime = endTime; // don't subtract offset at first stop, the vehicle will depart at offset 0 anyway ?!
 				hoursDriven = hoursDriven + travelTime * route.getDepartures().size() / 3600; // travelTime is in sec
 				kmDriven = kmDriven + routeLength * route.getDepartures().size() / 1000; // routeLength is in m
