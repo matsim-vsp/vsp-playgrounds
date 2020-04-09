@@ -122,19 +122,19 @@ public class NMBValueCheck {
                                     // that means the routes stops at both of our searched stops
                                     for (Departure departure : transitRoute.getDepartures().values()) {
                                         if (departureTime + travelTime ==
-                                                departure.getDepartureTime() + alightingStop.getArrivalOffset()) {
-											if (departure.getDepartureTime() + boardingStop.getDepartureOffset()
+                                                departure.getDepartureTime() + alightingStop.getArrivalOffset().seconds()) {
+											if (departure.getDepartureTime() + boardingStop.getDepartureOffset().seconds()
                                                     < (travelTime - leg.getTravelTime().seconds()) ||
-                                                    departure.getDepartureTime() + alightingStop.getArrivalOffset()
+                                                    departure.getDepartureTime() + alightingStop.getArrivalOffset().seconds()
                                                             > travelTime) {
                                                 for (TransitRouteStop stop : transitRoute.getStops()) {
 													if (stop.getStopFacility() == startStop &&
-                                                            departure.getDepartureTime() + stop.getDepartureOffset()
+                                                            departure.getDepartureTime() + stop.getDepartureOffset().seconds()
                                                                 >= (travelTime - leg.getTravelTime().seconds())) {
                                                         boardingStop = stop;
                                                     }
                                                     if (stop.getStopFacility() == endStop &&
-                                                            departure.getDepartureTime() + stop.getArrivalOffset()
+                                                            departure.getDepartureTime() + stop.getArrivalOffset().seconds()
                                                                     <= travelTime) {
                                                         alightingStop = stop;
                                                     }
@@ -147,9 +147,9 @@ public class NMBValueCheck {
                                             System.out.println("Route departure time at pt-origin = " +
                                                     departure.getDepartureTime());
                                             System.out.println("Route departure time at boarding stop = " +
-                                                    (departure.getDepartureTime() + boardingStop.getDepartureOffset()));
+                                                    (departure.getDepartureTime() + boardingStop.getDepartureOffset().seconds()));
                                             System.out.println("Route arrival time at alighting stop = " +
-                                                    (departure.getDepartureTime() + alightingStop.getArrivalOffset()));
+                                                    (departure.getDepartureTime() + alightingStop.getArrivalOffset().seconds()));
                                             System.out.println("transitLine = " + transitLine.getId());
                                             System.out.println("transitRoute = " + transitRoute.getId());
 

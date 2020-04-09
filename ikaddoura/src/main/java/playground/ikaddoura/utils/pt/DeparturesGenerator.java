@@ -82,10 +82,10 @@ public class DeparturesGenerator {
 			routeIDs.addAll(routeId2transitRoute.keySet());
 			
 			int lastStop0 = routeId2transitRoute.get(routeIDs.get(0)).getStops().size()-1;
-			double routeTravelTime0 = routeId2transitRoute.get(routeIDs.get(0)).getStops().get(lastStop0).getArrivalOffset();
+			double routeTravelTime0 = routeId2transitRoute.get(routeIDs.get(0)).getStops().get(lastStop0).getArrivalOffset().seconds();
 			
 			int lastStop1 = routeId2transitRoute.get(routeIDs.get(1)).getStops().size()-1;
-			double routeTravelTime1 = routeId2transitRoute.get(routeIDs.get(1)).getStops().get(lastStop1).getArrivalOffset();
+			double routeTravelTime1 = routeId2transitRoute.get(routeIDs.get(1)).getStops().get(lastStop1).getArrivalOffset().seconds();
 			
 			if (routeTravelTime0 != routeTravelTime1) {
 				throw new RuntimeException("The transit routes have different travel times. So far it is expected that a transit line consists of two identical" +

@@ -16,8 +16,6 @@ import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 
-import playground.gleich.av_bus.FilePaths;
-
 public class PtVehicleOperationCostAnalysis {
 	
 	Scenario scenario;
@@ -60,8 +58,8 @@ public class PtVehicleOperationCostAnalysis {
 	private void processTransitLine(TransitLine line) {
 		for (TransitRoute route: line.getRoutes().values()) {
 			double length = calculateLength(route);
-			double time = route.getStops().get(route.getStops().size() - 1).getDepartureOffset() - 
-					route.getStops().get(0).getArrivalOffset();
+			double time = route.getStops().get(route.getStops().size() - 1).getDepartureOffset().seconds() -
+					route.getStops().get(0).getArrivalOffset().seconds();
 			int numDepartures = route.getDepartures().size();
 			double cost = length * numDepartures * costPerM + time * numDepartures * costPerS;
 			route2line.put(route.getId(), line.getId());
