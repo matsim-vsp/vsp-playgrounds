@@ -206,8 +206,9 @@ public class TripWriter {
 			//Vorbereitung: Nur Aufnehmen, wenn nicht null;
 			CarrierVehicleTypes vehicleTypes = this.handler.getVehicleTypes();
 			for (Id<VehicleType> vehicleTypeId : vehicleTypes.getVehicleTypes().keySet()){
+				log.warn("handle vehicleType:" + vehicleTypeId);
 				if (vehTypeId2TourDistances.containsKey(vehicleTypeId)) {
-					log.warn("vehicleType wurde bereits behandelt:" + vehicleTypeId.toString());
+					log.fatal("vehicleType wurde bereits behandelt:" + vehicleTypeId.toString(), new RuntimeException());
 				} else { //TODO: umschreiben, dass nur die Werte bestimmt werden... oder man die Map einmal bestimmt.
 					log.debug(vehicleTypeId + " added mit Entfernung " +  this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId));
 					Double distance = this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId);
@@ -216,17 +217,22 @@ public class TripWriter {
 					VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
 					if (distance != null) {
 						vehTypeId2TourDistances.put(vehicleTypeId, distance );
+//					} else {
+//						vehTypeId2TourDistances.put(vehicleTypeId, 0.);
 					}
 					if (travelTime != null){
 						vehTypeId2TravelTimes.put(vehicleTypeId, travelTime);
+//					}else {
+//						vehTypeId2TravelTimes.put(vehicleTypeId, 0.);
 					}
 					if (nuOfVeh != null){
 						vehTypeId2NumberOfVehicles.put(vehicleTypeId, nuOfVeh);
-					} 
+//					} else {
+//						vehTypeId2NumberOfVehicles.put(vehicleTypeId, 0);
+					}
 					if (capabilities != null){
 						vehTypId2Capabilities.put(vehicleTypeId, capabilities);
-					}
-					
+					}			
 				}
 			}
 			

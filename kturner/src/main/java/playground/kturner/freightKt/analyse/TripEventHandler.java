@@ -265,11 +265,11 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return personId2listOfTourDistances;
 	}
 
-/**
- * Calculates the travel time (excl. time for activities) of a tour for all persons (Driver) of the specified carrier.
- * @param carrierIdString
- * @return
- */
+	/**
+	 * Calculates the travel time (excl. time for activities) of a tour for all persons (Driver) of the specified carrier.
+	 * @param carrierIdString
+	 * @return
+	 */
 	public Map<Id<Person>, Double> getPersonId2TravelTimes() {
 		Map<Id<Person>,Double> personId2listOfTravelTimes = new HashMap<Id<Person>, Double>();
 		for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
@@ -284,83 +284,90 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		}
 		return personId2listOfTravelTimes;	
 	}
-	
 
-//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
-public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
-	log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
-	Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
-	for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
-		for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
-			if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
-				if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
-					double distance = personId2tripNumber2tripDistance.get(personId).get(i);
-					if (vehTypeId2TourDistances.containsKey(vehTypeId)){
-						vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
-						log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
-					} else {
-						vehTypeId2TourDistances.put(vehTypeId, distance);
-						log.debug("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
-					}
-				}
-			}else{
-				//do nothing
-			}
-		}
-	}
-	return vehTypeId2TourDistances;
-}
 
-//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
-public Map<Id<VehicleType>, Double> getVehTypId2TravelTimes(Id<VehicleType> vehTypeId) {
-	Map<Id<VehicleType>,Double> vehTypeId2TravelTimes = new HashMap<Id<VehicleType>, Double>();
-	for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
-		for(int i : personId2tripNumber2travelTime.get(personId).keySet()){
-			if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
+	public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
+		log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
+		Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
+		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
+			for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
 				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
-					if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
-						double travelTime = personId2tripNumber2travelTime.get(personId).get(i);
-						if (vehTypeId2TravelTimes.containsKey(vehTypeId)){
-							vehTypeId2TravelTimes.put(vehTypeId, vehTypeId2TravelTimes.get(vehTypeId) + travelTime);
-						} else {
-							vehTypeId2TravelTimes.put(vehTypeId, travelTime);
+					if (vehTypeId.toString().contains("frozen") == personId.toString().contains("frozen")) { //keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
+						if (vehTypeId.toString().contains("electro") == personId.toString().contains("electro")) {//keine doppelte Erfassung der "electro" bei den nicht-"electro"...
+							double distance = personId2tripNumber2tripDistance.get(personId).get(i);
+							if (vehTypeId2TourDistances.containsKey(vehTypeId)){
+								vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
+								log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							} else {
+								vehTypeId2TourDistances.put(vehTypeId, distance);
+								log.debug("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							}
 						}
 					}
+				}else{
+					//do nothing
+				}
+			}
+		}
+		return vehTypeId2TourDistances;
+	}
+
+	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
+	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimes(Id<VehicleType> vehTypeId) {
+		Map<Id<VehicleType>,Double> vehTypeId2TravelTimes = new HashMap<Id<VehicleType>, Double>();
+		for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
+			for(int i : personId2tripNumber2travelTime.get(personId).keySet()){
+				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+					if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+						if (vehTypeId.toString().contains("frozen") == personId.toString().contains("frozen")) { //keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
+							if (vehTypeId.toString().contains("electro") == personId.toString().contains("electro")) {//keine doppelte Erfassung der "electro" bei den nicht-"electro"...
+								double travelTime = personId2tripNumber2travelTime.get(personId).get(i);
+								if (vehTypeId2TravelTimes.containsKey(vehTypeId)){
+									vehTypeId2TravelTimes.put(vehTypeId, vehTypeId2TravelTimes.get(vehTypeId) + travelTime);
+								} else {
+									vehTypeId2TravelTimes.put(vehTypeId, travelTime);
+								}
+							}
+						}
+					}
+				} else {
+					//do nothing
+				}
+			}
+		}
+		return vehTypeId2TravelTimes;
+	}
+
+	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
+	public Map<Id<VehicleType>, Integer> getVehTypId2VehicleNumber(Id<VehicleType> vehTypeId) {
+		Map<Id<VehicleType>,Integer> vehTypeId2VehicleNumber = new HashMap<Id<VehicleType>, Integer>();
+		for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
+			if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+					if (vehTypeId.toString().contains("frozen") == personId.toString().contains("frozen")) { //keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
+						if (vehTypeId.toString().contains("electro") == personId.toString().contains("electro")) {//keine doppelte Erfassung der "electro" bei den nicht-"electro"...
+							if (vehTypeId2VehicleNumber.containsKey(vehTypeId)){
+								vehTypeId2VehicleNumber.put(vehTypeId, vehTypeId2VehicleNumber.get(vehTypeId) +1);
+							} else {
+								vehTypeId2VehicleNumber.put(vehTypeId, 1);
+							}
+						}
+					}
+
 				}
 			} else {
 				//do nothing
 			}
 		}
+		return vehTypeId2VehicleNumber;
 	}
-	return vehTypeId2TravelTimes;
-}
 
-//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
-public Map<Id<VehicleType>, Integer> getVehTypId2VehicleNumber(Id<VehicleType> vehTypeId) {
-	Map<Id<VehicleType>,Integer> vehTypeId2VehicleNumber = new HashMap<Id<VehicleType>, Integer>();
-	for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
-		if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
-			if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
-				if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
-					if (vehTypeId2VehicleNumber.containsKey(vehTypeId)){
-						vehTypeId2VehicleNumber.put(vehTypeId, vehTypeId2VehicleNumber.get(vehTypeId) +1);
-					} else {
-						vehTypeId2VehicleNumber.put(vehTypeId, 1);
-					}
-				}
-			}
-		} else {
-			//do nothing
-		}
+	@Override
+	public void handleEvent(PersonDepartureEvent event) {
+		// TODO Auto-generated method stub
+
 	}
-	return vehTypeId2VehicleNumber;
-}
-
-@Override
-public void handleEvent(PersonDepartureEvent event) {
-	// TODO Auto-generated method stub
-
-}
 
 
 }
