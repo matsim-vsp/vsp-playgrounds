@@ -217,18 +217,18 @@ public class TripWriter {
 					VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
 					if (distance != null) {
 						vehTypeId2TourDistances.put(vehicleTypeId, distance );
-//					} else {
-//						vehTypeId2TourDistances.put(vehicleTypeId, 0.);
+					} else {
+						vehTypeId2TourDistances.put(vehicleTypeId, 0.);
 					}
 					if (travelTime != null){
 						vehTypeId2TravelTimes.put(vehicleTypeId, travelTime);
-//					}else {
-//						vehTypeId2TravelTimes.put(vehicleTypeId, 0.);
+					}else {
+						vehTypeId2TravelTimes.put(vehicleTypeId, 0.);
 					}
 					if (nuOfVeh != null){
 						vehTypeId2NumberOfVehicles.put(vehicleTypeId, nuOfVeh);
-//					} else {
-//						vehTypeId2NumberOfVehicles.put(vehicleTypeId, 0);
+					} else {
+						vehTypeId2NumberOfVehicles.put(vehicleTypeId, 0);
 					}
 					if (capabilities != null){
 						vehTypId2Capabilities.put(vehicleTypeId, capabilities);
