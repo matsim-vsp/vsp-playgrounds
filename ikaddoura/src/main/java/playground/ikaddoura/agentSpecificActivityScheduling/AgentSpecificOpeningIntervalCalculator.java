@@ -22,6 +22,7 @@ package playground.ikaddoura.agentSpecificActivityScheduling;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.scoring.functions.OpeningIntervalCalculator;
+import org.matsim.core.utils.misc.OptionalTime;
 
 /**
 * @author ikaddoura
@@ -40,7 +41,7 @@ public class AgentSpecificOpeningIntervalCalculator implements OpeningIntervalCa
 	}
 
 	@Override
-	public double[] getOpeningInterval(Activity act) {
+	public OptionalTime[] getOpeningInterval(Activity act) {
 		
 		// identify the correct activity position in the plan
 		int activityCounter = this.actCounter.getActivityCounter(person.getId());
@@ -57,7 +58,7 @@ public class AgentSpecificOpeningIntervalCalculator implements OpeningIntervalCa
 		double openingTime = Double.valueOf(activityOpeningTimes[activityCounter * 2]) - tolerance;
 		double closingTime = Double.valueOf(activityOpeningTimes[(activityCounter * 2) + 1]) + tolerance;
 
-		return new double[]{openingTime, closingTime};
+		return new OptionalTime[]{OptionalTime.defined(openingTime), OptionalTime.defined(closingTime)};
 	}
 
 }
