@@ -52,7 +52,6 @@ import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.counts.Counts;
 import org.matsim.counts.CountsReaderMatsimV1;
 
@@ -218,7 +217,7 @@ public class CadytsDistanceBasedExample {
 					planBuilder.addTurn(HistogramBin.values()[(int) ((Math.min(v, 91000) - 89000) / 200)], 0);
 					double offset = calibrator.calcLinearPlanEffect(planBuilder.getResult());
 //					log.info("########## Offset = " + offset + " -- personId = " + personId + " -- v = " + v);
-					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId, cadytsWeightHistogram * offset, null, null));
+					afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Double.NEGATIVE_INFINITY, personId, cadytsWeightHistogram * offset, null, null));
 				});
 			});
 		});
