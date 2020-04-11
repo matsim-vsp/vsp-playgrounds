@@ -36,7 +36,6 @@ import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.scoring.functions.ModeUtilityParameters;
 import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.PtConstants;
 
 /**
@@ -50,8 +49,8 @@ public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScor
 	private boolean nextEnterVehicleIsFirstOfTrip = true ;
 	private boolean nextStartPtLegIsFirstOfTrip = true ;
 	private boolean currentLegIsPtLeg = false;
-	private double lastActivityEndTime = Time.getUndefinedTime();
-	
+	private double lastActivityEndTime = Double.NaN;
+
 	private Network network ;
 	
 	private TravelDisutility disutility ;
