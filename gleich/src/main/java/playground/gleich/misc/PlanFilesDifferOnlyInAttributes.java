@@ -105,31 +105,30 @@ public class PlanFilesDifferOnlyInAttributes {
 	private static boolean activityEquals (Activity act1, Activity act2) {
 		return /* act1.getAttributes().equals(act2.getAttributes()) && */
 				act1.getCoord().equals(act2.getCoord()) &&
-				Double.compare(act1.getEndTime(), act2.getEndTime()) == 0 &&
+				act1.getEndTime().equals(act2.getEndTime()) &&
 				(act1.getFacilityId() != null ? act1.getFacilityId().equals(act2.getFacilityId()) : act2.getFacilityId() == null) &&
 				act1.getLinkId().equals(act2.getLinkId()) &&
-				Double.compare(act1.getMaximumDuration(), act2.getMaximumDuration()) == 0 &&
-				Double.compare(act1.getStartTime(), act2.getStartTime()) == 0;
+				act1.getMaximumDuration().equals(act2.getMaximumDuration()) &&
+				act1.getStartTime().equals(act2.getStartTime());
 	}
 	
 	private static boolean legEquals (Leg leg1, Leg leg2) {
 		return /* leg1.getAttributes().equals(leg2.getAttributes()) && */
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0 &&
+				leg1.getDepartureTime().equals(leg2.getDepartureTime()) &&
 				leg1.getMode().equals(leg2.getMode()) &&
-				routeEquals(leg1.getRoute(), leg2.getRoute()) &&
-				Double.compare(leg1.getDepartureTime(), leg2.getDepartureTime()) == 0;
+				routeEquals(leg1.getRoute(), leg2.getRoute());
 	}
 	
 	/*
 	 * TODO: Look into sub-classes (ExperimentalTransitRoute, GenericRouteImpl, NetworkRoute ... )
 	 */
-	private static boolean routeEquals (Route route1, Route route2) { 
+	private static boolean routeEquals (Route route1, Route route2) {
 		return Double.compare(route1.getDistance(), route2.getDistance()) == 0 &&
 				route1.getEndLinkId().equals(route2.getEndLinkId()) &&
 				route1.getRouteDescription().equals(route2.getRouteDescription()) &&
 				route1.getRouteType().equals(route2.getRouteType()) &&
 				route1.getStartLinkId().equals(route2.getStartLinkId()) &&
-				Double.compare(route1.getTravelTime(), route2.getTravelTime()) == 0;
+				route1.getTravelTime().equals(route2.getTravelTime());
 	}
 
 }

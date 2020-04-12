@@ -1,5 +1,9 @@
 package playground.dziemke.accessibility.ptmatrix;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -14,15 +18,17 @@ import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.pt.router.FakeFacility;
 import org.matsim.pt.router.TransitRouter;
 import org.matsim.pt.router.TransitRouterConfig;
-import org.matsim.pt.router.FakeFacility;
-import org.matsim.pt.transitSchedule.api.*;
 import org.matsim.pt.router.TransitRouterImpl;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.matsim.pt.transitSchedule.api.Departure;
+import org.matsim.pt.transitSchedule.api.TransitLine;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
  * @author gabriel
@@ -78,10 +84,10 @@ public class NMBValueCheck {
             if(leg == null) {
                 throw new RuntimeException("Leg is null.");
             }
-            travelTime += leg.getTravelTime();
+			travelTime += leg.getTravelTime().seconds();
             String mode = leg.getMode();
             System.out.println("\nLegMode = " + mode);
-            System.out.println("Leg travel time = " + leg.getTravelTime());
+			System.out.println("Leg travel time = " + leg.getTravelTime().seconds());
             System.out.println("Aggregated travel time = " + travelTime);
             Route legRoute = leg.getRoute();
             if (legRoute != null) {
@@ -117,14 +123,14 @@ public class NMBValueCheck {
                                     for (Departure departure : transitRoute.getDepartures().values()) {
                                         if (departureTime + travelTime ==
                                                 departure.getDepartureTime() + alightingStop.getArrivalOffset()) {
-                                            if (departure.getDepartureTime() + boardingStop.getDepartureOffset()
-                                                    < (travelTime - leg.getTravelTime()) ||
+											if (departure.getDepartureTime() + boardingStop.getDepartureOffset()
+                                                    < (travelTime - leg.getTravelTime().seconds()) ||
                                                     departure.getDepartureTime() + alightingStop.getArrivalOffset()
                                                             > travelTime) {
                                                 for (TransitRouteStop stop : transitRoute.getStops()) {
-                                                    if (stop.getStopFacility() == startStop &&
+													if (stop.getStopFacility() == startStop &&
                                                             departure.getDepartureTime() + stop.getDepartureOffset()
-                                                                >= (travelTime - leg.getTravelTime())) {
+                                                                >= (travelTime - leg.getTravelTime().seconds())) {
                                                         boardingStop = stop;
                                                     }
                                                     if (stop.getStopFacility() == endStop &&

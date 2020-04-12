@@ -125,7 +125,7 @@ public final class FixBraessBehaviorIT{
 			controler.addControlerListener(new MarginalCongestionPricingContolerListener(controler.getScenario(), tollHandler, congestionHandler));
 		}
 					
-		TtAbstractAnalysisTool handler = new TtAnalyzeBraess();
+		TtAbstractAnalysisTool handler = new TtAnalyzeBraess(scenario);
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
@@ -136,19 +136,19 @@ public final class FixBraessBehaviorIT{
 		controler.run();		
 		
 		// get route distribution
-		int agentsOnUpperRoute = handler.getRouteUsers()[0];
-		int agentsOnMiddleRoute = handler.getRouteUsers()[1];
-		int agentsOnLowerRoute = handler.getRouteUsers()[2];
-		log.info("Route distribution: " + agentsOnUpperRoute + ", " + agentsOnMiddleRoute + ", " + agentsOnLowerRoute);
+		double agentsPCUOnUpperRoute = handler.getRouteUsers_PCU()[0];
+		double agentsPCUOnMiddleRoute = handler.getRouteUsers_PCU()[1];
+		double agentsPCUOnLowerRoute = handler.getRouteUsers_PCU()[2];
+		log.info("Route distribution: " + agentsPCUOnUpperRoute + ", " + agentsPCUOnMiddleRoute + ", " + agentsPCUOnLowerRoute);
 		
 		// get total travel time
 		double totalTT = handler.getTotalTT();
 		log.info("Total travel time: " + totalTT);
 		
 		// test both
-		Assert.assertEquals("The number of agents on the upper route has changed to previous MATSim behavior.", expectedNOAgentsOnUpperRoute, agentsOnUpperRoute);
-		Assert.assertEquals("The number of agents on the middle route has changed to previous MATSim behavior.", expectedNOAgentsOnMiddleRoute, agentsOnMiddleRoute);
-		Assert.assertEquals("The number of agents on the lower route has changed to previous MATSim behavior.", expectedNOAgentsOnLowerRoute, agentsOnLowerRoute);
+		Assert.assertEquals("The number of agents on the upper route has changed to previous MATSim behavior.", expectedNOAgentsOnUpperRoute, agentsPCUOnUpperRoute, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("The number of agents on the middle route has changed to previous MATSim behavior.", expectedNOAgentsOnMiddleRoute, agentsPCUOnMiddleRoute, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("The number of agents on the lower route has changed to previous MATSim behavior.", expectedNOAgentsOnLowerRoute, agentsPCUOnLowerRoute, MatsimTestUtils.EPSILON);
 		Assert.assertEquals("The total travel time has changed to previous MATSim behavior.", expectedTotalTT, totalTT, MatsimTestUtils.EPSILON);
 	}
 	

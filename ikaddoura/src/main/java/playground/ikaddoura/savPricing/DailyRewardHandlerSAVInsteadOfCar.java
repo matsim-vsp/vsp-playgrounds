@@ -87,7 +87,7 @@ public final class DailyRewardHandlerSAVInsteadOfCar implements PersonEntersVehi
 				if (carOwnerInBaseCase && personWithoutCarTrips(person.getSelectedPlan())) {
 					taxiUsersFormerCarUsers++;
 					totalRewardsEarnedByTaxiUsersFormerCarUsers += dailyReward;
-					this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), dailyReward ));				
+					this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), dailyReward, null, null ));				
 					
 				} else {
 					taxiUsersFormerNonCarUsers++;

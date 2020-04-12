@@ -85,7 +85,7 @@ public class MoneyEventAnalysisTest {
 		MoneyEventAnalysis moneyAnalysis = new MoneyEventAnalysis();
 
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
@@ -212,7 +212,7 @@ public class MoneyEventAnalysisTest {
 		MoneyEventAnalysis moneyAnalysis = new MoneyEventAnalysis();
 
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
@@ -327,7 +327,7 @@ public class MoneyEventAnalysisTest {
 		MoneyEventAnalysis moneyAnalysis = new MoneyEventAnalysis();
 
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
@@ -384,7 +384,7 @@ public class MoneyEventAnalysisTest {
 		MoneyEventAnalysis moneyAnalysis = new MoneyEventAnalysis();
 
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
@@ -436,7 +436,7 @@ public class MoneyEventAnalysisTest {
 		MoneyEventAnalysis moneyAnalysis = new MoneyEventAnalysis();
 
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 				
 		controler.addOverridingModule(new AbstractModule(){
 			@Override

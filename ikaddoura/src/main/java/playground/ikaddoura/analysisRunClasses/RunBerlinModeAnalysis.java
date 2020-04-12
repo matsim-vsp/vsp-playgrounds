@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.analysis.AgentAnalysisFilter;
+import org.matsim.analysis.DefaultAnalysisMainModeIdentifier;
 import org.matsim.analysis.modalSplitUserType.ModeAnalysis;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -39,21 +40,23 @@ public class RunBerlinModeAnalysis {
 
 	public static void main(String[] args) {
 		
-		final String runId = "berlin-v5.4-10pct";
-		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.4-10pct/output-berlin-v5.4-10pct/";
+		final String runId = "berlin-drt-v5.5-10pct_drt-12";
+		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/drt-open-berlin/berlin-drt-v5.5-10pct_drt-12/";
 		
 		final String outputDirectory = runDirectory + "/modal-split-analysis/";
 		
-		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
+		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(null);
-		config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
+		config.plans().setInputFile(runDirectory + "ITERS/it.450/berlin-drt-v5.5-10pct_drt-12.450.plans.xml.gz");
+		config.controler().setRunId(runId);
+		config.global().setCoordinateSystem("EPSG:31468");
 		config.vehicles().setVehiclesFile(null);
 		config.transit().setTransitScheduleFile(null);
 		config.transit().setVehiclesFile(null);
 		config.facilities().setInputFile(null);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		AgentAnalysisFilter filter = new AgentAnalysisFilter();
+		AgentAnalysisFilter filter = new AgentAnalysisFilter("A");
 		
 		filter.setSubpopulation("person");
 		
@@ -65,7 +68,7 @@ public class RunBerlinModeAnalysis {
 		
 		filter.preProcess(scenario);
 				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
+		ModeAnalysis analysis = new ModeAnalysis(scenario, filter, new DefaultAnalysisMainModeIdentifier());
 		analysis.run();
 		
 		File directory = new File(outputDirectory);

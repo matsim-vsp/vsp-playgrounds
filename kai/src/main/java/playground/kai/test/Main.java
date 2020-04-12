@@ -12,7 +12,6 @@ public class Main {
 		File inputFile = new File ( "farrago.txt" ) ;
 		File outputFile = new File( "out.txt" ) ;
 
-
 		try (
 			BufferedReader in = new BufferedReader( new FileReader( inputFile ) );
 			FileWriter out = new FileWriter( outputFile ) ;
@@ -24,7 +23,6 @@ public class Main {
 		} catch( IOException e ){
 			e.printStackTrace();
 		}
-
 
 	}
 

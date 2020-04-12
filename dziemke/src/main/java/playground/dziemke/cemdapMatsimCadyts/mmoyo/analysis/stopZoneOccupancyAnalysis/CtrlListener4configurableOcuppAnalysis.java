@@ -52,7 +52,7 @@ public class CtrlListener4configurableOcuppAnalysis implements IterationEndsList
 			controler.getConfig().addModule(ccc) ;
 		}
 		CadytsConfigGroup cptcg = (CadytsConfigGroup) controler.getConfig().getModule(CadytsConfigGroup.GROUP_NAME);
-		configurableOccupAnalyzer = new ConfigurableOccupancyAnalyzer( toTransitLineIdSet(cptcg.getCalibratedItems()) ,  cptcg.getTimeBinSize());
+		configurableOccupAnalyzer = new ConfigurableOccupancyAnalyzer( toTransitLineIdSet(cptcg.getCalibratedLines()) ,  cptcg.getTimeBinSize());
 		controler.getEvents().addHandler(configurableOccupAnalyzer);
 
 		kmzPtCountSimComparisonWritter = new KMZPtCountSimComparisonWriter(controler);

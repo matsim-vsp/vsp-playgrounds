@@ -1,5 +1,7 @@
 package playground.dziemke.analysis.generalNew;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -9,8 +11,6 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.utils.geometry.CoordUtils;
-
-import java.util.List;
 
 public class Trip {
 
@@ -174,12 +174,12 @@ public class Trip {
 
     private void calculateDepartureTime_h() {
 
-        this.departureTime_h = leg.getDepartureTime() / 3600;
+		this.departureTime_h = leg.getDepartureTime().seconds() / 3600;
     }
 
     private void calculateTravelTime_h() {
 
-        this.travelTime_h = leg.getTravelTime() / 3600;
+		this.travelTime_h = leg.getTravelTime().seconds() / 3600;
     }
 
     private void calculateBeelineDistance_km() {

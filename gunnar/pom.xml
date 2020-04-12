@@ -78,7 +78,8 @@
 		<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
 			<artifactId>java</artifactId>
-			<version>master-SNAPSHOT</version>
+<!--			<version>master-SNAPSHOT</version>-->
+			<version>2020-02-11_test05</version>
 		</dependency>
 
 		<!-- <dependency> <groupId>org.matsim.contrib</groupId> <artifactId>cadytsIntegration</artifactId> 

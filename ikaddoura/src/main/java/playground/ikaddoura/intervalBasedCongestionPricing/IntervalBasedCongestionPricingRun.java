@@ -83,8 +83,7 @@ public class IntervalBasedCongestionPricingRun {
 			log.warn("The monetary distance rate is 0. The randomized router won't work properly...");
 		}
 		
-		final RandomizingTimeDistanceTravelDisutilityFactory factory = new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config.planCalcScore());
-		factory.setSigma(3.0);
+		final RandomizingTimeDistanceTravelDisutilityFactory factory = new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config);
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
 			public void install() {

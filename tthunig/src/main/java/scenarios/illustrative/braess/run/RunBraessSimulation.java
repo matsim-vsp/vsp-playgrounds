@@ -62,7 +62,6 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -333,6 +332,7 @@ public final class RunBraessSimulation {
 
 	private static Controler prepareController(Scenario scenario) {
 		Config config = scenario.getConfig();
+		config.plansCalcRoute().setRoutingRandomness(SIGMA);
 		Controler controler = new Controler(scenario);
 	
 		switch (SIGNAL_LOGIC){
@@ -389,7 +389,7 @@ public final class RunBraessSimulation {
 					if (strategies[i].getWeight() > 0.0){ // ReRoute is used
 						final CongestionTollTimeDistanceTravelDisutilityFactory factory =
 								new CongestionTollTimeDistanceTravelDisutilityFactory(
-										new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() ),
+										new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config ),
 								tollHandler, config.planCalcScore()
 							) ;
 						factory.setSigma(SIGMA);
@@ -465,7 +465,6 @@ public final class RunBraessSimulation {
 			// toll-adjusted routing
 			
 			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-			travelDisutilityFactory.setSigma(0.);
 			
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
@@ -478,8 +477,7 @@ public final class RunBraessSimulation {
 			
 			// adapt sigma for randomized routing
 			final RandomizingTimeDistanceTravelDisutilityFactory builder =
-					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() );
-			builder.setSigma(SIGMA);
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config );
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
@@ -742,8 +740,8 @@ public final class RunBraessSimulation {
 			runName += "_" + config.strategy().getMaxAgentPlanMemorySize() + "pl";
 		
 		runName += "_stuckT" + (int)config.qsim().getStuckTime();
-		if (config.qsim().getEndTime() != Time.UNDEFINED_TIME)
-			runName += "_simEndT" + (int)(config.qsim().getEndTime()/24) + "h";
+		if (config.qsim().getEndTime().isDefined())
+			runName += "_simEndT" + (int)(config.qsim().getEndTime().seconds()/24) + "h";
 		
 		return runName;
 	}

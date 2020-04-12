@@ -72,7 +72,7 @@ public class RunExample {
 
 		// money travel disutility
 		final MoneyTimeDistanceTravelDisutilityFactory factory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()));
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()));
 		
 		factory.setSigma(sigma);
 		

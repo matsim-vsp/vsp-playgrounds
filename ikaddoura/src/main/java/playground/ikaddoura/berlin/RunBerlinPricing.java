@@ -121,7 +121,6 @@ public class RunBerlinPricing {
 			
 			// toll-adjusted routing
 			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-			travelDisutilityFactory.setSigma(0.);
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
 				public void install() {
@@ -143,7 +142,7 @@ public class RunBerlinPricing {
 			
 			final TollHandler congestionTollHandlerQBP = new TollHandler(controler.getScenario());
 			final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
-					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()),
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig()),
 					congestionTollHandlerQBP, controler.getConfig().planCalcScore()
 				);
 			factory.setSigma(0.);

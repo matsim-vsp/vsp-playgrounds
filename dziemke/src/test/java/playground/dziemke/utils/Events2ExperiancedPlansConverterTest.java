@@ -1,6 +1,9 @@
 package playground.dziemke.utils;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
@@ -85,7 +88,7 @@ public class Events2ExperiancedPlansConverterTest {
         Person person1 = experiencedPlans.getPersons().get(Id.create("1", Person.class));
         Assert.assertNotNull(person1);
         Leg firstLeg = (Leg)person1.getSelectedPlan().getPlanElements().get(1);
-        Assert.assertTrue(firstLeg.getTravelTime() == 25*60);
+		Assert.assertTrue(firstLeg.getTravelTime().seconds() == 25*60);
     }
 
     private static Population readPopulationFromFile(String populationFile) {

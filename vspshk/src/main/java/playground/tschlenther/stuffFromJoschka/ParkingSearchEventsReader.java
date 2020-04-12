@@ -28,7 +28,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.parking.parkingsearch.events.StartParkingSearchEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsReaderXMLv1;
-import org.matsim.core.events.EventsReaderXMLv1.CustomEventMapper;
+import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.matsim.vehicles.Vehicle;
 import org.xml.sax.Attributes;
@@ -52,7 +52,7 @@ public class ParkingSearchEventsReader extends MatsimXmlParser {
 		delegate = new EventsReaderXMLv1(events);
 		this.setValidating(false);
 		
-		CustomEventMapper<StartParkingSearchEvent> parkingSearchMapper = new CustomEventMapper<StartParkingSearchEvent>() {
+		MatsimEventsReader.CustomEventMapper<StartParkingSearchEvent> parkingSearchMapper = new MatsimEventsReader.CustomEventMapper<StartParkingSearchEvent>() {
 			
 			@Override
 			public StartParkingSearchEvent apply(GenericEvent event) {

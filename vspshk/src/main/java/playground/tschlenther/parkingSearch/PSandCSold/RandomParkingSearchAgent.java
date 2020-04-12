@@ -38,6 +38,7 @@ import org.matsim.core.mobsim.qsim.agents.PersonDriverAgentImpl;
 import org.matsim.core.mobsim.qsim.agents.PlanBasedDriverAgentImpl;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 
@@ -98,7 +99,7 @@ final class RandomParkingSearchAgent implements MobsimDriverAgent, MobsimPasseng
 	}
 
 	@Override
-	public final Double getExpectedTravelTime() {
+	public final OptionalTime getExpectedTravelTime() {
 		return basicAgentDelegate.getExpectedTravelTime();
 	}
 

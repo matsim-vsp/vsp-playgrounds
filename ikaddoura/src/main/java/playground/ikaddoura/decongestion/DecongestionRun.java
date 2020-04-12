@@ -165,7 +165,6 @@ public class DecongestionRun {
 		// toll-adjusted routing
 		
 		final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-		travelDisutilityFactory.setSigma(0.);
 		
 		controler.addOverridingModule(new AbstractModule(){
 			@Override

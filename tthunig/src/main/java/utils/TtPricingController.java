@@ -81,7 +81,7 @@ public class TtPricingController {
 			if (strategies[i].getStrategyName().equals(DefaultStrategy.ReRoute.toString())) {
 				if (strategies[i].getWeight() > 0.0) { // ReRoute is used
 					final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
-							new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config.planCalcScore()), tollHandler, config.planCalcScore());
+							new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, config), tollHandler, config.planCalcScore());
 					factory.setSigma(SIGMA);
 					controler.addOverridingModule(new AbstractModule() {
 						@Override
@@ -126,7 +126,6 @@ public class TtPricingController {
 			
 			// toll-adjusted routing
 			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
-			travelDisutilityFactory.setSigma(0.);
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
 				public void install() {

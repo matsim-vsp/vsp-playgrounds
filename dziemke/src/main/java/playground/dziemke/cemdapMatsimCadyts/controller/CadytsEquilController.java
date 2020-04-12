@@ -12,6 +12,7 @@ import org.matsim.contrib.cadyts.general.CadytsPlanChanger;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.ExternalMobimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -96,7 +97,7 @@ public class CadytsEquilController {
 		//config.controler().setWritePlansInterval(50);
 		//config.controler().setWriteEventsInterval(50);
 		//Set<String> snapshotFormat = Collections.emptySet();
-		Set<String> snapshotFormat = new HashSet<String>();
+		Set<ControlerConfigGroup.SnapshotFormat> snapshotFormat = new HashSet<>();
 		//snapshotFormat.add("otfvis");
 		config.controler().setSnapshotFormat(snapshotFormat);
 		

@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -33,7 +33,7 @@ PersonArrivalEventHandler {
 	public void handlePlan(Plan plan) {
 		for ( PlanElement pe : plan.getPlanElements() ) {
 			if ( pe instanceof Activity ) {
-				double endTime = ((Activity)pe).getEndTime() ;
+				double endTime = ((Activity)pe).getEndTime().seconds() ;
 				double newEndTime ;
 				if ( Math.random() < 0.5 ) {
 					newEndTime = endTime + Math.random() * 3600. ;

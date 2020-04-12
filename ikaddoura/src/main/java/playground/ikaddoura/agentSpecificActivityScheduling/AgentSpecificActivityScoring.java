@@ -91,8 +91,8 @@ public class AgentSpecificActivityScoring implements org.matsim.core.scoring.Sum
 	
 		double latestStartTime = Double.valueOf(activityOpeningTimes[activityCounter * 2]) + tolerance;
 		
-		if ((latestStartTime  >= 0) && (act.getStartTime() > latestStartTime)) {
-			tmpScore += this.parameters.marginalUtilityOfLateArrival_s * (act.getStartTime() - latestStartTime);
+		if ((latestStartTime  >= 0) && (act.getStartTime().seconds() > latestStartTime)) {
+			tmpScore += this.parameters.marginalUtilityOfLateArrival_s * (act.getStartTime().seconds() - latestStartTime);
 		}
 		
 		return tmpScore ;

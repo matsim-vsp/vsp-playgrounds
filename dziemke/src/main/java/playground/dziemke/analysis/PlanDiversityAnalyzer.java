@@ -63,7 +63,7 @@ public class PlanDiversityAnalyzer {
 				for (Integer planElementNumber=0; planElementNumber<numberOfPlanElements; planElementNumber++) {
 					PlanElement planElement = person.getPlans().get(planNumber).getPlanElements().get(planElementNumber);
 					if (planElement instanceof Activity) {
-						double endTime = ((Activity) planElement).getEndTime();
+						double endTime = ((Activity) planElement).getEndTime().seconds();
 						activityEndTimes.putAttribute(planNumber.toString(), numberOfActivities.toString(), endTime);
 						numberOfActivities++;
 					}

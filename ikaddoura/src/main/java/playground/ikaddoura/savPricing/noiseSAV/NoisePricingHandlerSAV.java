@@ -94,7 +94,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 			if (optAVParams.isChargeTollsFromSAVDriver()) {
 				// charge the driver
 				
-				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount, null, null);
 				this.events.processEvent(moneyEvent);
 				
 				PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
@@ -135,13 +135,13 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 							amountNotChargedFromPassengers = amountNotChargedFromPassengers + amount;
 							log.warn("Cumulative amount not passed to the passengers: " + amountNotChargedFromPassengers);
 						} else {
-							this.events.processEvent(new PersonMoneyEvent(event.getTime(), lastPassenger, amount));
+							this.events.processEvent(new PersonMoneyEvent(event.getTime(), lastPassenger, amount, null, null));
 						}
 					}
 				
 				} else {	
 					
-					PersonMoneyEvent moneyEventPassenger = new PersonMoneyEvent(event.getTime(), passenger, amount);
+					PersonMoneyEvent moneyEventPassenger = new PersonMoneyEvent(event.getTime(), passenger, amount, null, null);
 					this.events.processEvent(moneyEventPassenger);
 					
 					PersonLinkMoneyEvent linkMoneyEventPassenger = new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
@@ -162,7 +162,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 				
 //				log.warn("the causing agent should be the car driver: " + event.getCausingAgentId());
 				
-				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount, null, null);
 				this.events.processEvent(moneyEvent);
 				
 				PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
@@ -186,7 +186,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 
 					log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 					
-					this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
+					this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()), null, null));
 					this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
 				}
 			}

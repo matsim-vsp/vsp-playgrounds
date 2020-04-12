@@ -52,7 +52,7 @@ public class MielecDemandExtractor {
 				Leg leg = (Leg)p.getPlans().get(0).getPlanElements().get(1);
 
 				if (leg.getMode() == TransportMode.taxi) {
-					csvWriter.writeNext(p.getId() + "", (int)leg.getDepartureTime() + "", //
+					csvWriter.writeNext(p.getId() + "", (int)leg.getDepartureTime().seconds() + "", //
 							leg.getRoute().getStartLinkId() + "", leg.getRoute().getEndLinkId() + "");
 				}
 			}

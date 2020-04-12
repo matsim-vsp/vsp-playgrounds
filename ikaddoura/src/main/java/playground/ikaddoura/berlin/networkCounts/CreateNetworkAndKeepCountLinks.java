@@ -28,9 +28,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -245,13 +249,27 @@ public class CreateNetworkAndKeepCountLinks {
 	    }
 	    return allNodeIDs;
 	}
-	
+	public static final org.apache.logging.log4j.core.layout.PatternLayout DEFAULTLOG4JLAYOUT = org.apache.logging.log4j.core.layout.PatternLayout
+			.newBuilder().withPattern("%d{ISO8601} %5p %C{1}:%L %m%n").build();
+
+
 	private void initLogger(){
-		FileAppender fa = new FileAppender();
-		fa.setFile(outputDir + prefix +"_LOG_" + CreateNetworkAndKeepCountLinks.class.getSimpleName() + outnetworkPrefix + ".txt");
-		fa.setName("BerlinNetworkCreator");
-		fa.activateOptions();
-		fa.setLayout(new PatternLayout("%d{dd MMM yyyy HH:mm:ss,SSS} %-4r [%t] %-5p %c %x - %m%n"));
-	    log.addAppender(fa);
+		Appender fa = FileAppender.newBuilder()
+				.withFileName(outputDir
+						+ prefix
+						+ "_LOG_"
+						+ CreateNetworkAndKeepCountLinks.class.getSimpleName()
+						+ outnetworkPrefix
+						+ ".txt")
+				.setName("BerlinNetworkCreator")
+				.setLayout(PatternLayout.newBuilder()
+						.withPattern("%d{dd MMM yyyy HH:mm:ss,SSS} %-4r [%t] %-5p %c %x - %m%n")
+						.build())
+				.build();
+		fa.start();
+
+		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		ctx.getConfiguration().getRootLogger().addAppender(fa, Level.DEBUG, null);
+		ctx.updateLoggers();
 	}
 }

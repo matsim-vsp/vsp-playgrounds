@@ -40,8 +40,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.accessibility.gis.GridUtils;
-import org.matsim.contrib.accessibility.gis.SpatialGrid;
+import org.matsim.contrib.accessibility.GridUtils;
+import org.matsim.contrib.accessibility.SpatialGrid;
 import org.matsim.contrib.analysis.kai.DataMap;
 import org.matsim.contrib.matrixbasedptrouter.utils.BoundingBox;
 import org.matsim.core.config.Config;
@@ -147,7 +147,7 @@ public class KNPopCompare {
 					person1.getAttributes().putAttribute( "deltaScore", deltaScore ) ;
 
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord);
-					fac.getAttributes().putAttribute(GridUtils.WEIGHT, deltaScore ) ;
+					fac.getAttributes().putAttribute( GridUtils.WEIGHT, deltaScore ) ;
 				}
 				List<String> popTypes = new ArrayList<>() ;
 				{ // process money differences:
@@ -169,8 +169,9 @@ public class KNPopCompare {
 					// to which subPopType does the agent belong?
 					popTypes.add( "zz_all" ) ; 
 					
-					final String subpopAttrName = config.plans().getSubpopulationAttributeName() ;
-					final String subpopName = (String) PopulationUtils.getPersonAttribute( person1, subpopAttrName);
+//					final String subpopAttrName = config.plans().getSubpopulationAttributeName() ;
+//					final String subpopName = (String) PopulationUtils.getPersonAttribute( person1, subpopAttrName);
+					final String subpopName = PopulationUtils.getSubpopulation( person1 );
 					popTypes.add( "yy_" + subpopName ) ;
 
 					if ( payments2!=0.) { // is a toll payer

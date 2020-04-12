@@ -21,6 +21,7 @@
  */
 package scenarios.illustrative.braess.analysis;
 
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 
 import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
@@ -36,6 +37,10 @@ import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
  */
 public final class TtAnalyzeBraessWithByPass extends TtAbstractAnalysisTool {
 	
+	public TtAnalyzeBraessWithByPass(Scenario scenario) {
+		super(scenario);
+	}
+
 	@Override
 	protected int determineRoute(LinkEnterEvent linkEnterEvent) {
 		// in the braess scenario the route is unique if one gets a link enter

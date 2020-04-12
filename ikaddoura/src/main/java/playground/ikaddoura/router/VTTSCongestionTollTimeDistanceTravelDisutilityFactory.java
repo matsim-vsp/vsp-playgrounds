@@ -49,9 +49,7 @@ public final class VTTSCongestionTollTimeDistanceTravelDisutilityFactory impleme
 
 	@Override
 	public final TravelDisutility createTravelDisutility(TravelTime timeCalculator) {
-		
-		vttsTimeDistanceTravelDisutilityFactory.setSigma(sigma);
-		
+				
 		return new CongestionTollTimeDistanceTravelDisutility(
 				vttsTimeDistanceTravelDisutilityFactory.createTravelDisutility(timeCalculator),
 				this.tollHandler,

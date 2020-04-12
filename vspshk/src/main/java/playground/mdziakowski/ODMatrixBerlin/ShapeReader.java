@@ -90,8 +90,8 @@ public class ShapeReader {
 						if (!(anfang || ende)) {
 							startdistrict = inDistirct(zones, act.getCoord());
 							anfang = true;
-							clockTime = act.getEndTime();
-							movingclockTime = act.getEndTime();
+							clockTime = act.getEndTime().seconds();
+							movingclockTime = act.getEndTime().seconds();
 						} else if (anfang && !(ende)) {
 							enddistrict = inDistirct(zones, act.getCoord());
 							ende = true;
@@ -111,13 +111,13 @@ public class ShapeReader {
 							startdistrict = enddistrict;
 							travelTime = 0.0;
 							ende = false;
-							if (act.getEndTime() > 0) {
-								clockTime = act.getEndTime();
-								movingclockTime = act.getEndTime();
+							if (act.getEndTime().seconds() > 0) {
+								clockTime = act.getEndTime().seconds();
+								movingclockTime = act.getEndTime().seconds();
 							}
-							if (act.getMaximumDuration() > 0) {
-								clockTime = clockTime + act.getMaximumDuration();
-								movingclockTime = movingclockTime + act.getMaximumDuration();
+							if (act.getMaximumDuration().seconds() > 0) {
+								clockTime = clockTime + act.getMaximumDuration().seconds();
+								movingclockTime = movingclockTime + act.getMaximumDuration().seconds();
 							}
 						}
 					}
@@ -131,9 +131,9 @@ public class ShapeReader {
 						if (leg.getMode().equals("transit_walk")) {
 							mode = "walk";
 						}
-					}	
-					travelTime = travelTime + leg.getRoute().getTravelTime();
-					movingclockTime = movingclockTime + leg.getRoute().getTravelTime();
+					}
+					travelTime = travelTime + leg.getRoute().getTravelTime().seconds();
+					movingclockTime = movingclockTime + leg.getRoute().getTravelTime().seconds();
 				}
 			}
 			// break;

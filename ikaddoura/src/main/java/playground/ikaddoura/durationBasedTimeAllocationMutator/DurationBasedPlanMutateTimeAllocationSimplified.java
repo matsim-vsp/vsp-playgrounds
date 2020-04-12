@@ -58,20 +58,20 @@ public final class DurationBasedPlanMutateTimeAllocationSimplified implements Pl
 	public void run(final Plan plan) {
 		for ( Activity act : TripStructureUtils.getActivities( plan, StageActivityHandling.ExcludeStageActivities ) ) {
 			
-			if (!Time.isUndefinedTime(act.getEndTime())) {
-				act.setEndTime(mutateTime(act.getEndTime(), this.mutationRange));
+			if (!act.getEndTime().isUndefined()) {
+				act.setEndTime(mutateTime(act.getEndTime().seconds(), this.mutationRange));
 			}
 			if ( affectingDuration ) {
-				if (!Time.isUndefinedTime(act.getMaximumDuration())) {
+				if (!act.getMaximumDuration().isUndefined()) {
 					
 					double mutationRangeToBeUsed;
-					if (act.getMaximumDuration() > this.mutationRange) {
+					if (act.getMaximumDuration().seconds() > this.mutationRange) {
 						mutationRangeToBeUsed = this.mutationRange;
 					} else {
-						mutationRangeToBeUsed = act.getMaximumDuration();
+						mutationRangeToBeUsed = act.getMaximumDuration().seconds();
 					}
 					
-					act.setMaximumDuration(mutateTime(act.getMaximumDuration(), mutationRangeToBeUsed));
+					act.setMaximumDuration(mutateTime(act.getMaximumDuration().seconds(), mutationRangeToBeUsed));
 				}
 			}
 		}

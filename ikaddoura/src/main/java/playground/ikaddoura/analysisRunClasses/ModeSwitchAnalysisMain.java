@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.matsim.analysis.detailedPersonTripAnalysis.IKEventsReader;
-import org.matsim.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+import org.matsim.analysis.AgentAnalysisFilter;
+import org.matsim.analysis.TripAnalysisFilter;
+import org.matsim.analysis.detailedPersonTripAnalysis.BasicPersonTripAnalysisHandler;
 import org.matsim.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.noise.personLinkMoneyEvents.CombinedPersonLinkMoneyEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -49,16 +51,14 @@ public class ModeSwitchAnalysisMain {
     }
 
     public void analyze() throws IOException {
-    	
-		final String subpopulation = null;
-    	
+    	    	
         // 0: base case
-    	String directory0 = "/Users/ihab/Desktop/ils3a/kaddoura/snz-berlin/output/output_2019-06-03_snz-bc-1/";
-    	String runId0 = "snz-bc-1";
+    	String directory0 = "/Users/ihab/Desktop/berlin-drt-v5.5-1pct_drt-144/";
+    	String runId0 = "berlin-drt-v5.5-1pct_drt-144";
     	
 		// 1: policy case
-    	String directory1 = "/Users/ihab/Desktop/ils3a/kaddoura/snz-berlin/output/output_2019-06-11_snz-drt-3/";
-    	String runId1 = "snz-drt-3";
+    	String directory1 = "/Users/ihab/Desktop/berlin-drt-v5.5-1pct_drt-143/";
+    	String runId1 = "berlin-drt-v5.5-1pct_drt-143";
     	
     	// ################
     	
@@ -66,12 +66,12 @@ public class ModeSwitchAnalysisMain {
 	    String dir0networkFile = directory0 + runId0 + ".output_network.xml.gz";
 	    String dir0populationFile = directory0 + runId0 + ".output_plans.xml.gz";
 	    
-	    String dir1lastIterationFile = directory1 + runId0 + ".output_events.xml.gz";
+	    String dir1lastIterationFile = directory1 + runId1 + ".output_events.xml.gz";
 	    String dir1networkFile = directory1 + runId1 + ".output_network.xml.gz";
-	    String dir1populationFile = directory1 + runId1 + ".output_plans.xml.gz";	  
-		
-		String analysisOutputFolder = "modeSwitchAnalysis/";
-		File f = new File(directory1 + analysisOutputFolder);
+	    String dir1populationFile = directory1 + runId1 + ".output_plans.xml.gz";
+	    
+		String analysisOutputFolder = "/Users/ihab/Desktop/modeSwitchAnalysis/";
+		File f = new File(analysisOutputFolder);
 		f.mkdirs();
 		
 		BasicPersonTripAnalysisHandler basicHandler0;
@@ -82,14 +82,14 @@ public class ModeSwitchAnalysisMain {
 			log.info("Loading scenario0 and reading events...");
 
 			Config config = ConfigUtils.createConfig();	
-			config.network().setInputCRS("EPSG:25832");
-			config.global().setCoordinateSystem("EPSG:25832");
+			config.network().setInputCRS("EPSG:31468");
+			config.global().setCoordinateSystem("EPSG:31468");
 			config.plans().setInputFile(dir0populationFile);
 			config.network().setInputFile(dir0networkFile);
 			
 			scenario0 = ScenarioUtils.loadScenario(config);
 			
-			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk, TransportMode.access_walk, TransportMode.egress_walk};
+			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
 			final String stageActivitySubString = "interaction";
 	        
 	        basicHandler0 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
@@ -98,7 +98,7 @@ public class ModeSwitchAnalysisMain {
 			EventsManager events = EventsUtils.createEventsManager();
 			events.addHandler(basicHandler0);
 			
-			IKEventsReader reader = new IKEventsReader(events);
+			CombinedPersonLinkMoneyEventsReader reader = new CombinedPersonLinkMoneyEventsReader(events);
 			reader.readFile(dir0lastIterationFile);
 			log.info("Loading scenario0 and reading events... Done.");
 		}
@@ -107,12 +107,14 @@ public class ModeSwitchAnalysisMain {
 		{
 			log.info("Loading scenario1 and reading events...");
 			Config config = ConfigUtils.createConfig();	
+			config.network().setInputCRS("EPSG:31468");
+			config.global().setCoordinateSystem("EPSG:31468");
 			config.plans().setInputFile(dir1populationFile);
 			config.network().setInputFile(dir1networkFile);
 			
 			scenario1 = ScenarioUtils.loadScenario(config);
 	        
-			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+			final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.non_network_walk};
 			final String stageActivitySubString = "interaction";
 			
 	        basicHandler1 = new BasicPersonTripAnalysisHandler(helpLegModes, stageActivitySubString);
@@ -121,7 +123,7 @@ public class ModeSwitchAnalysisMain {
 			EventsManager events = EventsUtils.createEventsManager();
 			events.addHandler(basicHandler1);
 			
-			IKEventsReader reader = new IKEventsReader(events);
+			CombinedPersonLinkMoneyEventsReader reader = new CombinedPersonLinkMoneyEventsReader(events);
 			reader.readFile(dir1lastIterationFile);
 			
 			log.info("Loading scenario1 and reading events... Done.");
@@ -129,8 +131,19 @@ public class ModeSwitchAnalysisMain {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
-		modes.add(TransportMode.taxi);
-		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes, null);
-		modeSwitchAnalysis.analyzeByMode(null);
+		modes.add(TransportMode.drt);
+		modes.add(TransportMode.pt);
+		modes.add("drt2");
+		modes.add("bicycle");
+		modes.add(TransportMode.walk);
+		
+		AgentAnalysisFilter agentfilter = new AgentAnalysisFilter("pA");
+		agentfilter.preProcess(scenario1);
+		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes, agentfilter );
+		
+		TripAnalysisFilter tripFilter = new TripAnalysisFilter("tA");
+		tripFilter.preProcess(scenario1);
+		
+		modeSwitchAnalysis.analyzeByMode(tripFilter);
     }
 }

@@ -18,19 +18,10 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.log4j.Logger;
-import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
+import org.locationtech.jts.geom.Envelope;
+import org.matsim.contrib.accessibility.*;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
-import org.matsim.contrib.accessibility.AccessibilityModule;
-import org.matsim.contrib.accessibility.FacilityTypes;
-import org.matsim.contrib.accessibility.Labels;
-import org.matsim.contrib.accessibility.Modes4Accessibility;
-import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -41,7 +32,10 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilities;
 
-import org.locationtech.jts.geom.Envelope;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author dziemke
@@ -108,7 +102,7 @@ public class AccessibilityComputationPatna {
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION}); // TODO
 		
 		// Create densities from network
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork());
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork() );
 		
 		final Controler controler = new Controler(scenario);
 		
