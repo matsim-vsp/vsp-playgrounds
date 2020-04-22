@@ -96,13 +96,13 @@
 	<dependency>
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-main</artifactId>
-		<version>21.1</version>
+		<version>21.5</version>
 	</dependency>
 	
 	<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-epsg-hsql</artifactId>
-			<version>21.1</version>
+			<version>21.5</version>
 			<scope>runtime</scope>
 		</dependency>
 	
