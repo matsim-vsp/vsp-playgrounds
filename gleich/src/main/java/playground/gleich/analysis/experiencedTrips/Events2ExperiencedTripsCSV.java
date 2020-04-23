@@ -56,8 +56,8 @@ public final class Events2ExperiencedTripsCSV {
 	private final String sep2 = ",";
     
     public static void main(String[] args) {
-//    	String pathInclRunId = "/home/gregor/tmp/Vulkaneifel/snzDrt301a/snzDrt301a";
-		String pathInclRunId = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e";
+    	String pathInclRunId = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443";
+//		String pathInclRunId = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e";
         Config config = ConfigUtils.loadConfig(pathInclRunId + ".output_config.xml");
         config.network().setInputFile(pathInclRunId + ".output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunId + ".output_transitSchedule.xml.gz");
@@ -146,7 +146,7 @@ public final class Events2ExperiencedTripsCSV {
 	static class ExperiencedLegsExtension implements TripsAndLegsCSVWriter.CustomLegsWriterExtension {
 		@Override
 		public String[] getAdditionalLegHeader() {
-			String[] legHeader = new String[]{"isIntermodalDrtPt"};
+			String[] legHeader = new String[]{"isIntermodalDrtPt", "intermodalMode"};
 			return legHeader;
 		}
 
@@ -166,6 +166,7 @@ public final class Events2ExperiencedTripsCSV {
 			}
 			String isIntermodalDrtPt = (containsDrt && containsPt) ? "true" : "false";
 			legColumn.add(isIntermodalDrtPt);
+			legColumn.add((containsDrt && containsPt) ? "inter"+experiencedLeg.getMode() : "mono"+experiencedLeg.getMode());
 			return legColumn;
 		}
 	}
