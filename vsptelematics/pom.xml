@@ -26,7 +26,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>playground.vsptelematics.parkingSearch.GUITelematicsParkingsSearch</mainClass>
+							<mainClass>playground.vsptelematics.ha1.UE1GUI</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

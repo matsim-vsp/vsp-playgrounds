@@ -8,6 +8,7 @@ import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -18,12 +19,16 @@ public class ControllerWithOtfvis {
 	public static void main(String[] args) {
 		Config config = ConfigUtils.loadConfig( args[0]) ;
 		config.qsim().setUsingFastCapacityUpdate(false);
-		
+
+		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
+
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-		
+
+
+
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME,
 					new SignalsDataLoader(config).loadSignalsData());
