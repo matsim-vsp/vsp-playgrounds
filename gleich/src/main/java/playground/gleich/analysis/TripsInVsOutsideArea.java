@@ -1,7 +1,9 @@
 package playground.gleich.analysis;
 
 import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -15,6 +17,7 @@ import org.matsim.utils.gis.shp2matsim.ShpGeometryUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,10 +37,16 @@ public class TripsInVsOutsideArea {
         config.facilities().setInputFile(pathInclRunId + ".output_facilities.xml.gz");
 
         String shapeFile = "file:///home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
-        List<PreparedGeometry> geometries = ShpGeometryUtils.loadPreparedGeometries(new URL(shapeFile));
+        List<Geometry> geometries = ShpGeometryUtils.loadGeometries(new URL(shapeFile));
+        List<PreparedGeometry> bufferedGeometries = new ArrayList<>();
+        PreparedGeometryFactory factory = new PreparedGeometryFactory();
+
+        for (Geometry geo: geometries) {
+            bufferedGeometries.add(factory.create(geo.buffer(2000d)));
+        }
 
         TripsInVsOutsideArea runner = new TripsInVsOutsideArea(config);
-        runner.run(geometries);
+        runner.run(bufferedGeometries);
     }
 
     public TripsInVsOutsideArea(Config config) {
