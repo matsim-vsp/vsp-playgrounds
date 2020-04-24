@@ -28,6 +28,7 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -45,7 +46,9 @@ public class Controller {
 		// add config groups for adaptive signals
 		ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
-		
+
+		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
+
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
