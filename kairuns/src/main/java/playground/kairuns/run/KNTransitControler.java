@@ -35,6 +35,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -81,6 +82,8 @@ class KNTransitControler {
 
 		config.qsim().setVehicleBehavior( QSimConfigGroup.VehicleBehavior.teleport ) ;
 		//		config.otfVis().setShowTeleportedAgents(true) ;
+
+		config.plans().setHandlingOfPlansWithoutRoutingMode( PlansConfigGroup.HandlingOfPlansWithoutRoutingMode.useMainModeIdentifier );
 		
 		// ---
 		
