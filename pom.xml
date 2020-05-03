@@ -46,13 +46,17 @@
 		</repository>
 		<!--commenting following to get rid of warnings, (I think) it is related to https://matsim.atlassian.net/browse/MATSIM-783 Amit Feb'18-->
 		<!--<repository>-->
-			<!--&lt;!&ndash; Some custom-hosted dependencies on our web page, maintained by mrieser &ndash;&gt;-->
-			<!--<id>matsim-custom</id>-->
-			<!--<url>http://matsim.org/m2repo</url>-->
+		<!--&lt;!&ndash; Some custom-hosted dependencies on our web page, maintained by mrieser &ndash;&gt;-->
+		<!--<id>matsim-custom</id>-->
+		<!--<url>http://matsim.org/m2repo</url>-->
 		<!--</repository>-->
 		<repository>
 			<id>ch.sbb</id>
 			<url>https://schweizerischebundesbahnen.bintray.com/simba.mvn</url>
+		</repository>
+		<repository>
+			<id>topobyte</id>
+			<url>https://mvn.topobyte.de/</url>
 		</repository>
 	</repositories>
 	<build>
