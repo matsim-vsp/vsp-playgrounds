@@ -60,7 +60,7 @@
 		</repository>
 		<repository>
 			<id>slimjars</id>
-			<url>http://mvn.slimjars.com/com/slimjars/trove4j/</url>
+			<url>http://mvn.slimjars.com/</url>
 		</repository>
 	</repositories>
 	<build>
