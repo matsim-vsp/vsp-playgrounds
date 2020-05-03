@@ -58,6 +58,10 @@
 			<id>topobyte</id>
 			<url>https://mvn.topobyte.de/</url>
 		</repository>
+		<repository>
+			<id>slimjars</id>
+			<url>http://mvn.slimjars.com/com/slimjars/trove4j/</url>
+		</repository>
 	</repositories>
 	<build>
 		<extensions>
