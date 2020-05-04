@@ -149,12 +149,12 @@
 	</dependency>
 	
 	<dependency>
-  		<groupId>com.github.matsim-vsp</groupId>
-	    <artifactId>matsim-analysis</artifactId>
-	    <version>c0fd16d1ec</version>
+		<groupId>com.github.matsim-vsp</groupId>
+		<artifactId>matsim-analysis</artifactId>
+		<version>6f1ec32425</version>
 	</dependency>
-	
-	<dependency>
+
+	  <dependency>
 		<groupId>com.github.matsim-org</groupId>
 		<artifactId>GTFS2MATSim</artifactId>
 		<version>11.1</version>
