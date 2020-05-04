@@ -48,17 +48,24 @@ public class AgentSpecificOpeningIntervalCalculator implements OpeningIntervalCa
 		
 		// get the original start/end times from survey / initial demand which is written in the person attributes
 		String activityOpeningIntervals = (String) person.getAttributes().getAttribute("OpeningClosingTimes");
-		
+
 		if (activityOpeningIntervals == null || activityOpeningIntervals == "") {
-			throw new RuntimeException("Person " + person.getId().toString() + " doesn't have any opening / closing times in the person attributes. Aborting...");
+			throw new RuntimeException("Person "
+					+ person.getId().toString()
+					+ " doesn't have any opening / closing times in the person attributes. Aborting...");
 		}
-		
+
 		String activityOpeningTimes[] = activityOpeningIntervals.split(";");
-	
+
 		double openingTime = Double.valueOf(activityOpeningTimes[activityCounter * 2]) - tolerance;
 		double closingTime = Double.valueOf(activityOpeningTimes[(activityCounter * 2) + 1]) + tolerance;
 
-		return new OptionalTime[]{OptionalTime.defined(openingTime), OptionalTime.defined(closingTime)};
+		return new OptionalTime[] { optionalTime(openingTime), optionalTime(closingTime) };
+	}
+
+	//FIXME this should be done when creating the attributes, not when reading them
+	private OptionalTime optionalTime(double value) {
+		return value == Double.NEGATIVE_INFINITY ? OptionalTime.undefined() : OptionalTime.defined(value);
 	}
 
 }
