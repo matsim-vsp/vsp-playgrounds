@@ -58,6 +58,12 @@ public final class Events2ExperiencedTripsCSV {
     public static void main(String[] args) {
     	String pathInclRunId = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443";
 //		String pathInclRunId = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e";
+		if (args.length==1) {
+			pathInclRunId = args[0];
+		} else if (args.length>1) {
+			throw new RuntimeException(">1 args.length not implemented yet.");
+		}
+
         Config config = ConfigUtils.loadConfig(pathInclRunId + ".output_config.xml");
         config.network().setInputFile(pathInclRunId + ".output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunId + ".output_transitSchedule.xml.gz");
