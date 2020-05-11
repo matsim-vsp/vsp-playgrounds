@@ -56,23 +56,29 @@ public final class Events2ExperiencedTripsCSV {
 	private final String sep2 = ",";
     
     public static void main(String[] args) {
-    	String pathInclRunId = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443";
-//		String pathInclRunId = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e";
+//    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443.";
+		String pathInclRunIdAndDot = "/home/gregor/tmp/Vulkaneifel/snzDrt343/snzDrt343.";
+
+//		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
 		if (args.length==1) {
-			pathInclRunId = args[0];
+			pathInclRunIdAndDot = args[0];
 		} else if (args.length>1) {
 			throw new RuntimeException(">1 args.length not implemented yet.");
 		}
 
-        Config config = ConfigUtils.loadConfig(pathInclRunId + ".output_config.xml");
-        config.network().setInputFile(pathInclRunId + ".output_network.xml.gz");
-        config.transit().setTransitScheduleFile(pathInclRunId + ".output_transitSchedule.xml.gz");
-        config.plans().setInputFile(pathInclRunId + ".output_plans.xml.gz");
-		config.facilities().setInputFile(pathInclRunId + ".output_facilities.xml.gz");
-        
-        Events2ExperiencedTripsCSV runner = new Events2ExperiencedTripsCSV(config, 
-        		pathInclRunId + ".output_events.xml.gz");
-        runner.runAnalysisAndWriteResult(pathInclRunId + ".output_experiencedTrips.csv.gz", pathInclRunId + ".output_experiencedLegs.csv.gz");
+        Config config = ConfigUtils.loadConfig(pathInclRunIdAndDot + "output_config.xml");
+        config.network().setInputFile(pathInclRunIdAndDot + "output_network.xml.gz");
+        config.transit().setTransitScheduleFile(pathInclRunIdAndDot + "output_transitSchedule.xml.gz");
+        config.plans().setInputFile(pathInclRunIdAndDot + "output_plans.xml.gz");
+		config.facilities().setInputFile(pathInclRunIdAndDot + "output_facilities.xml.gz");
+		config.transit().setVehiclesFile(pathInclRunIdAndDot + "output_transitVehicles.xml.gz");
+		config.vehicles().setVehiclesFile(pathInclRunIdAndDot + "output_vehicles.xml.gz");
+        config.plans().setInputPersonAttributeFile(null);
+
+        Events2ExperiencedTripsCSV runner = new Events2ExperiencedTripsCSV(config,
+				pathInclRunIdAndDot + "output_events.xml.gz");
+        runner.runAnalysisAndWriteResult(pathInclRunIdAndDot + "output_experiencedTrips.csv.gz",
+				pathInclRunIdAndDot + "output_experiencedLegs.csv.gz");
     }
 
     public Events2ExperiencedTripsCSV(Config config, String eventsFile) {
