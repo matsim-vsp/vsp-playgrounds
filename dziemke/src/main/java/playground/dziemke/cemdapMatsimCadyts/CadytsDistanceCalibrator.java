@@ -35,7 +35,6 @@ import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.counts.Counts;
 import org.matsim.counts.CountsReaderMatsimV1;
 
@@ -210,7 +209,7 @@ public class CadytsDistanceCalibrator {
 
                 distances.forEach((personId, v) -> {
                     double displacement = Math.abs(v-distanceAverage);
-                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId, -cadytsWeightHistogram * displacement, null, null));
+                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Double.NEGATIVE_INFINITY, personId, -cadytsWeightHistogram * displacement, null, null));
                 });
             });
         });
@@ -330,7 +329,7 @@ public class CadytsDistanceCalibrator {
                     PlanBuilder<DistanceBin> planBuilder = new PlanBuilder<>();
                     planBuilder.addTurn(results.getBinFromDistance(v.intValue()), 0);
                     double offset = calibrator.calcLinearPlanEffect(planBuilder.getResult());
-                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Time.getUndefinedTime(), personId,
+                    afterMobsimEvent.getServices().getEvents().processEvent(new PersonMoneyEvent(Double.NEGATIVE_INFINITY, personId,
                             cadytsWeightHistogram * offset, null, null));
 
 

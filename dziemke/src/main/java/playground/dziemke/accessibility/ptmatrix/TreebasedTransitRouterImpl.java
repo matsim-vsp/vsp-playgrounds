@@ -39,7 +39,6 @@ import org.matsim.core.router.InitialNode;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.Facility;
 import org.matsim.pt.router.AbstractTransitRouter;
 import org.matsim.pt.router.PreparedTransitSchedule;
@@ -170,8 +169,8 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
                 if (route != null) {
                     leg = PopulationUtils.createLeg(TransportMode.pt);
                     ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
-                    double arrivalOffset = !Time.isUndefinedTime(link.getFromNode().stop.getArrivalOffset()) ? link.fromNode.stop.getArrivalOffset() : link.fromNode.stop.getDepartureOffset();
-                    double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
+                    double arrivalOffset = link.fromNode.stop.getArrivalOffset().or(link.fromNode.stop::getDepartureOffset).seconds();
+                    double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset().seconds());
                     ptRoute.setTravelTime(arrivalTime - time);
                     ptRoute.setDistance( currentDistance );
                     leg.setRoute(ptRoute);
@@ -233,10 +232,8 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
             ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
             ptRoute.setDistance( currentDistance );
             leg.setRoute(ptRoute);
-            double arrivalOffset = !Time.isUndefinedTime((prevLink).toNode.stop.getArrivalOffset()) ?
-                    (prevLink).toNode.stop.getArrivalOffset()
-                    : (prevLink).toNode.stop.getDepartureOffset();
-            double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
+            double arrivalOffset = prevLink.toNode.stop.getArrivalOffset().or(prevLink.toNode.stop::getDepartureOffset).seconds();
+            double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset().seconds());
             leg.setTravelTime(arrivalTime - time);
             ptRoute.setTravelTime( arrivalTime - time );
             legs.add(leg);

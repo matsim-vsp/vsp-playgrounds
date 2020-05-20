@@ -178,8 +178,8 @@ public class PaxCountFromEvents {
 							// write data
 							bw.write(line.getId().toString() + sep + route.getId().toString() + sep
 									+ dep.getId().toString() + sep + i + sep + stop.getStopFacility().getId().toString()
-									+ sep + Time.writeTime(dep.getDepartureTime() + stop.getArrivalOffset()) + sep
-									+ Time.writeTime(dep.getDepartureTime() + stop.getDepartureOffset()) + sep
+									+ sep + Time.writeTime(dep.getDepartureTime() + stop.getArrivalOffset().seconds()) + sep
+									+ Time.writeTime(dep.getDepartureTime() + stop.getDepartureOffset().seconds()) + sep
 									+ Time.writeTime(stopInfo.arrivalTime) + sep
 									+ Time.writeTime(stopInfo.departureTime) + sep + stopInfo.nPaxEntering + sep
 									+ stopInfo.nPaxLeaving + sep + stopInfo.nPaxInVehicle + sep

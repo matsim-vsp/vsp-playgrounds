@@ -16,7 +16,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.drtSpeedUp.DrtSpeedUpConfigGroup;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -85,7 +84,7 @@ class KNOTFVisLocal{
 			}
 		}
 		for( PlanCalcScoreConfigGroup.ActivityParams params : config.planCalcScore().getActivityParams() ){
-			if ( Time.isUndefinedTime(params.getTypicalDuration().seconds()) ) {
+			if ( params.getTypicalDuration().isUndefined() ) {
 				params.setTypicalDuration( 3600. ) ;
 			}
 		}

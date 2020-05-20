@@ -51,6 +51,7 @@ import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.builder.Signals.Configurator;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -126,7 +127,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4_1_pt;
+	private final static NetworkType NETWORK_TYPE = NetworkType.OSM;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -139,12 +140,13 @@ public class TtRunCottbusSimulation {
 		V3, // double flow capacities of all signalized links and lanes
 		V4, // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
 		V4_1, // V4 but with simplified/corrected to-links of lanes, such that it is more similar to the cten model. some lanes also had to be created newly, such that signal systems and groups also had to be adjusted.
-		V4_1_pt // V4_1 including pt links
+		V4_1_pt, // V4_1 including pt links
+		OSM // last osm version generated
 	}
-	private final static boolean LONG_LANES = true;
+	private final static boolean LONG_LANES = false;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMinesAllModes;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -191,7 +193,7 @@ public class TtRunCottbusSimulation {
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private static SignalType SIGNAL_TYPE = SignalType.MS;
+	private static SignalType SIGNAL_TYPE = SignalType.OSM_FIXED_TIME_CONTROL;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_RANDOM_GREENSPLITS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		MS_INTG0, MS_INTG0_SYLVIA, // MS with modified end times, such that zero intergreen times are used
@@ -213,7 +215,8 @@ public class TtRunCottbusSimulation {
 		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 		LAEMMER_FLEXIBLE, // version implemented by pierre schade in his thesis
 		GERSHENSON,
-		QUEUE_LEARNING
+		RL,
+		OSM_FIXED_TIME_CONTROL, OSM_LAEMMER // last osm version generated
 	}
 	
 	// parameters for specific signal control
@@ -239,7 +242,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/createNewBC/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/testOsmReader/";
 	private static String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -250,6 +253,7 @@ public class TtRunCottbusSimulation {
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
 	private static String RUNS_SVN = "../../runs-svn/cottbus/";
+	private static final String OSM_INPUT_DIR = INPUT_BASE_DIR + "osm_stand2020-04-15_2/";
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
@@ -399,7 +403,7 @@ public class TtRunCottbusSimulation {
 					controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 				}
 
-//				controler.run();
+				controler.run();
 
 				// write output for random greensplits
 				if (SIGNAL_TYPE.equals(SignalType.MS_RANDOM_GREENSPLITS)) {
@@ -468,6 +472,10 @@ public class TtRunCottbusSimulation {
 			config.transit().setVehiclesFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitVehicles.xml.gz");
 			config.transit().setTransitScheduleFile(INPUT_BASE_DIR + "Cottbus-pt/gtfs-2012/transitSchedule.xml.gz");
 			config.transit().setUseTransit(true);
+			break;
+		case OSM:
+			config.network().setInputFile(OSM_INPUT_DIR + "network.xml");
+			config.network().setLaneDefinitionsFile(OSM_INPUT_DIR + "lanes.xml");
 			break;
 		default:
 			throw new RuntimeException("Network type not specified!");
@@ -737,6 +745,9 @@ public class TtRunCottbusSimulation {
 			case V4_1_pt:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4-1.xml");
 				break;
+			case OSM:
+				signalConfigGroup.setSignalSystemFile(OSM_INPUT_DIR + "signalSystems.xml");
+				break;
 			default:
 				throw new RuntimeException("Network type not specified!");
 			}			
@@ -943,7 +954,7 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
-			case QUEUE_LEARNING:
+			case RL:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_queueLearning.xml");
 				if (NETWORK_TYPE.toString().startsWith("V4_1") || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4_1"))) {
@@ -954,6 +965,12 @@ public class TtRunCottbusSimulation {
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
+				break;
+			case OSM_FIXED_TIME_CONTROL:
+			case OSM_LAEMMER:
+				// modify control later in case of Laemmer
+				signalConfigGroup.setSignalControlFile(OSM_INPUT_DIR + "signalControl.xml");
+				signalConfigGroup.setSignalGroupsFile(OSM_INPUT_DIR + "signalGroups.xml");
 				break;
 			}
 			
@@ -1029,7 +1046,7 @@ public class TtRunCottbusSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.8);
+			strat.setWeight(0.9);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -1044,12 +1061,12 @@ public class TtRunCottbusSimulation {
 //			strat.setWeight(0.0);
 //			config.strategy().addStrategySettings(strat);
 		}
-		{
-			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultStrategy.SubtourModeChoice.toString());
-			strat.setWeight(0.1);
-			config.strategy().addStrategySettings(strat);
-		}
+//		{
+//			StrategySettings strat = new StrategySettings();
+//			strat.setStrategyName(DefaultStrategy.SubtourModeChoice.toString());
+//			strat.setWeight(0.1);
+//			config.strategy().addStrategySettings(strat);
+//		}
 
 		// choose maximal number of plans per agent. 0 means unlimited
 		if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES))
@@ -1270,6 +1287,14 @@ public class TtRunCottbusSimulation {
 			signalizer.setBoundingBox(INPUT_BASE_DIR + "shape_files/signal_systems/bounding_box.shp");
 			// note: no specific signal controller identifier - additional signals should show green all day
 			signalizer.createSignalsAndLanesForAllTurnings();
+			break;
+		case OSM_LAEMMER:
+			// use laemmer control at all signal systems
+			signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+			for (SignalSystemControllerData controllerData : signalsData.getSignalControlData().getSignalSystemControllerDataBySystemId().values()) {
+				controllerData.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+				controllerData.getSignalPlanData().clear();
+			} 
 			break;
 		default:
 			break;

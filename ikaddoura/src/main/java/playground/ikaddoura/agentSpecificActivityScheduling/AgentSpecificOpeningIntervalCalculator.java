@@ -22,6 +22,7 @@ package playground.ikaddoura.agentSpecificActivityScheduling;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.scoring.functions.OpeningIntervalCalculator;
+import org.matsim.core.utils.misc.OptionalTime;
 
 /**
 * @author ikaddoura
@@ -40,24 +41,31 @@ public class AgentSpecificOpeningIntervalCalculator implements OpeningIntervalCa
 	}
 
 	@Override
-	public double[] getOpeningInterval(Activity act) {
+	public OptionalTime[] getOpeningInterval(Activity act) {
 		
 		// identify the correct activity position in the plan
 		int activityCounter = this.actCounter.getActivityCounter(person.getId());
 		
 		// get the original start/end times from survey / initial demand which is written in the person attributes
 		String activityOpeningIntervals = (String) person.getAttributes().getAttribute("OpeningClosingTimes");
-		
+
 		if (activityOpeningIntervals == null || activityOpeningIntervals == "") {
-			throw new RuntimeException("Person " + person.getId().toString() + " doesn't have any opening / closing times in the person attributes. Aborting...");
+			throw new RuntimeException("Person "
+					+ person.getId().toString()
+					+ " doesn't have any opening / closing times in the person attributes. Aborting...");
 		}
-		
+
 		String activityOpeningTimes[] = activityOpeningIntervals.split(";");
-	
+
 		double openingTime = Double.valueOf(activityOpeningTimes[activityCounter * 2]) - tolerance;
 		double closingTime = Double.valueOf(activityOpeningTimes[(activityCounter * 2) + 1]) + tolerance;
 
-		return new double[]{openingTime, closingTime};
+		return new OptionalTime[] { optionalTime(openingTime), optionalTime(closingTime) };
+	}
+
+	//FIXME this should be done when creating the attributes, not when reading them
+	private OptionalTime optionalTime(double value) {
+		return value == Double.NEGATIVE_INFINITY ? OptionalTime.undefined() : OptionalTime.defined(value);
 	}
 
 }
