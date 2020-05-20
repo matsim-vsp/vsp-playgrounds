@@ -1,6 +1,8 @@
 package playground.dziemke.analysis;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,12 +16,13 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-
-import playground.dziemke.utils.ShapeReader;
+import org.opengis.feature.simple.SimpleFeature;
+import playground.dziemke.utils.ShapeFileUtils;
 
 
 /**
@@ -125,9 +128,9 @@ public class TripAnalyzerV1 {
 	    network = NetworkUtils.createNetwork();
 	    MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
 	    networkReader.readFile(networkFile);
-	    
-	    Map<Integer, Geometry> zoneGeometries = ShapeReader.read(planningAreaShapeFile, "NR");
-		planningAreaGeometry = zoneGeometries.get(planningAreaId);	    
+
+		Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(planningAreaShapeFile);
+		planningAreaGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, "NR", planningAreaId.toString());
 	    
 	    if (ageFilter == true) {
 	    	// TODO needs to be adapted for other analyses that are based on person-specific attributes as well

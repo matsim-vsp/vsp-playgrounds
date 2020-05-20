@@ -24,14 +24,13 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dziemke.utils.ShapeReader;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import playground.dziemke.utils.ShapeFileUtils;
 
 /**
  * @author dziemke
- * @see adapted from oneperson/DemandGeneratorOnePersonSinglePlan.java
  */
 public class HWHDemandGenerator {
 	
@@ -70,7 +69,8 @@ public class HWHDemandGenerator {
 		
 		// this shapefile is definitely in correct coordinate projection
 		// it is also used in "cemdap2matsim/single/CemdapStops2MatsimPlansConverter.java"
-		Map<Integer, Geometry> zoneGeometries = ShapeReader.read(shapeFileEvaluationArea, "NR");
+		Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(shapeFileEvaluationArea);
+		Map <String, Geometry> zoneGeometries = ShapeFileUtils.getGeometryMap(features, "NR");
 						
 		CommuterFileReader commuterFileReader = new CommuterFileReader(shapeFileMunicipalities, commuterFileIn, carShareBB,	commuterFileOut, 
 				//carShareBE, scalingFactor * socialSecurityFactor * adultsWorkersFactor * expansionFactor, planningAreaId.toString());
@@ -112,7 +112,7 @@ public class HWHDemandGenerator {
 				}
 				
 				// new
-				Geometry homeGeometry = zoneGeometries.get(homeTSZLocation);
+				Geometry homeGeometry = zoneGeometries.get(String.valueOf(homeTSZLocation));
 				
 				Id<Person> id = Id.create(source + "_" + sink + "_" + j, Person.class);
 				Person person = population.getFactory().createPerson(id);
@@ -133,7 +133,7 @@ public class HWHDemandGenerator {
 					}
 					
 					// Geometry homeGeometry = zoneGeometries.get(homeTSZLocation);
-					Geometry workGeometry = zoneGeometries.get(locationOfWork);
+					Geometry workGeometry = zoneGeometries.get(String.valueOf(locationOfWork));
 									
 					// Id id = new IdImpl(source + "_" + sink + "_" + j);
 					// Person person = population.getFactory().createPerson(id);

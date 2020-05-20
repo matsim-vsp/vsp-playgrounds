@@ -1,5 +1,7 @@
 package playground.dziemke.analysis;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
@@ -15,10 +17,12 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import playground.dziemke.utils.ShapeReader;
+import org.matsim.core.utils.gis.ShapeFileReader;
+import org.opengis.feature.simple.SimpleFeature;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import playground.dziemke.utils.ShapeFileUtils;
 
 /**
  * @author dziemke
@@ -52,8 +56,9 @@ public class CemdapPersonFileAnalyzer {
 	    String cemdapPersonFile = "D:/Workspace/data/cemdapMatsimCadyts/input/cemdap_berlin/18/persons1.dat";
 	    
 	    String shapeFileBerlin = "D:/Workspace/data/cemdapMatsimCadyts/input/shapefiles/Berlin_DHDN_GK4.shp";
-	    Map<Integer, Geometry> zoneGeometries = ShapeReader.read(shapeFileBerlin, "NR");
-	    Geometry berlinGeometry = zoneGeometries.get(planningAreaId);
+
+		Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(shapeFileBerlin);
+		Geometry berlinGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, "NR", planningAreaId.toString());
 
 		
 		// Create an EventsManager instance (MATSim infrastructure)

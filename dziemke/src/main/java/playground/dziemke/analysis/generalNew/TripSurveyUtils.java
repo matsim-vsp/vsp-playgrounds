@@ -1,13 +1,13 @@
 package playground.dziemke.analysis.generalNew;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.dziemke.analysis.general.matsim.ResidenceFilterReader;
-import playground.dziemke.analysis.general.matsim.ResidenceFilterWriter;
+import playground.dziemke.analysis.general.matsim.PopulationAttributeFilter;
 import playground.dziemke.analysis.mid.Mid2PopulationParser;
 import playground.vsp.analysis.utils.GnuplotUtils;
 
@@ -44,10 +44,13 @@ public class TripSurveyUtils {
 //        String outputDir = runDirectory + "\\..\\analysisNew_ber_dist";
         
 //        String runDirectory = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct";
-        String runDirectory = "/Users/dominik/Workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct";
-        String populationFile = runDirectory + "/berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
-        String networkFile = runDirectory + "/output-berlin-v5.2-1pct/berlin-v5.2-1pct.output_network.xml.gz";
-        String outputDir = runDirectory + "/analysisNew_ber_dist_dz";
+        //String runDirectory = "/Users/dominik/Workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct";
+        String runDirectory = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01";
+        //String populationFile = runDirectory + "/berlin-v5.2-1pct.experiencedPlans_withResidence.xml.gz";
+        String populationFile = runDirectory + "/berlin-v5.3-10pct-ctd-b-01.experiencedPlans_withResidence.xml.gz";
+        //String networkFile = runDirectory + "/output-berlin-v5.2-1pct/berlin-v5.2-1pct.output_network.xml.gz";
+        String networkFile = runDirectory + "/berlin-v5.3-10pct-ctd-b-01.output_network.xml.gz";
+        String outputDir = runDirectory + "/ber_dist";
         // --
 
 //        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -60,14 +63,15 @@ public class TripSurveyUtils {
         Scenario scenario1 = ScenarioUtils.loadScenario(config);
         Network network = scenario1.getNetwork();
 
-        ResidenceFilterReader residenceFilterReader = new ResidenceFilterReader(populationFile);
+        PopulationAttributeFilter populationAttributeFilter = new PopulationAttributeFilter(populationFile, "residence");
 //        Population population = residenceFilterReader.getWholePopulation();
-        Population population = residenceFilterReader.filter(ResidenceFilterWriter.INTERIOR_OF_AREA);
+        Population population = populationAttributeFilter.getFilteredPopulation("berlin");
 
         PopulationAnalyzer populationAnalyzer = new PopulationAnalyzer(new PopulationAnalyzerBinWidhtConfig(), population);
         populationAnalyzer.setNetwork(network);
         TripFilter tripFilter = new TripFilter();
         tripFilter.activateDist(0,100);
+        tripFilter.activateMode(TransportMode.car);
         populationAnalyzer.setTripFilter(tripFilter);
         populationAnalyzer.analyzeAndWrite(outputDir);
         

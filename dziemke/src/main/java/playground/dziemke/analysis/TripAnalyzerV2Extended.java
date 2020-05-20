@@ -1,10 +1,7 @@
 package playground.dziemke.analysis;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
@@ -18,12 +15,14 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 
-import playground.dziemke.utils.ShapeReader;
+import org.opengis.feature.simple.SimpleFeature;
+import playground.dziemke.utils.ShapeFileUtils;
 import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
@@ -34,7 +33,8 @@ public class TripAnalyzerV2Extended {
 	
 	// Parameters
 //	private static String runId = "be_124"; // <----------
-	private static String runId = "be400mt_58_v6"; // <----------
+//	private static String runId = "be400mt_58_v6"; // <----------
+	private static String runId = "berlin-v5.3-10pct-ctd-b-01";
 //	private static String iterationForAnalysis = "300";
 	private static String iterationForAnalysis = "";
 	private static final String cemdapPersonsInputFileId = "21"; // Check if this number corresponds correctly to the runId
@@ -67,11 +67,14 @@ public class TripAnalyzerV2Extended {
 	private static String gnuplotScriptName = "plot_rel_path_run.gnu";
 
 	// Input and output
-	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
-//	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
-	private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_network.xml.gz";
+//	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario/v5.3-policies/output/b-01";
+	//	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
+	//private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_network.xml.gz";
+	private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + ".output_network.xml.gz";
 //	private static String eventsFile = "../../../runs-svn/berlin_scenario_2016/" + runId + "/" + runId + ".output_events.xml.gz";
-	private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_events.xml.gz";
+	// private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_events.xml.gz";
+	private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + ".output_events.xml.gz";
 	private static String cemdapPersonsInputFile = "../../../shared-svn/projects/cemdapMatsimCadyts/scenario/cemdap_berlin/" + cemdapPersonsInputFileId + "/persons1.dat"; // TODO
 //	private static String areaShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
 	private static String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
@@ -128,8 +131,8 @@ public class TripAnalyzerV2Extended {
 		MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
 		networkReader.readFile(networkFile);
 
-		Map<Integer, Geometry> zoneGeometries = ShapeReader.read(areaShapeFile, "NR");
-		areaGeometry = zoneGeometries.get(areaId);
+		Collection<SimpleFeature> features = (new ShapeFileReader()).readFileAndInitialize(areaShapeFile);
+		areaGeometry = ShapeFileUtils.getGeometryByValueOfAttribute(features, "NR", areaId.toString());
 
 		AnalysisFileWriter writer = new AnalysisFileWriter();
 
