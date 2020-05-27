@@ -60,6 +60,7 @@ public class DrtPricingTestIT {
 	 * only taxi trips
 	 * 
 	 */
+	@Ignore
 	@Test
 	public final void test1(){
 
