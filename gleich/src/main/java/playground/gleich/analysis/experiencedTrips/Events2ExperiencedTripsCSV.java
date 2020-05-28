@@ -23,7 +23,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.matsim.analysis.TripsAndLegsCSVWriter;
@@ -39,7 +38,7 @@ import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.*;
-import org.matsim.pt.routes.ExperimentalTransitRoute;
+import org.matsim.pt.routes.TransitPassengerRoute;
 
 /**
  * 
@@ -135,9 +134,9 @@ public final class Events2ExperiencedTripsCSV {
 			// TODO: add real values
 			String transitStopsVisited = "";
 			for (Leg leg: trip.getLegsOnly()) {
-				if (leg.getRoute() instanceof ExperimentalTransitRoute) {
-					ExperimentalTransitRoute expTransitRoute = (ExperimentalTransitRoute) leg.getRoute();
-					transitStopsVisited += expTransitRoute.getAccessStopId().toString() + sep2 + expTransitRoute.getEgressStopId().toString() + sep2;
+				if (leg.getRoute() instanceof TransitPassengerRoute) {
+					TransitPassengerRoute transitPassengerRoute = (TransitPassengerRoute) leg.getRoute();
+					transitStopsVisited += transitPassengerRoute.getAccessStopId().toString() + sep2 + transitPassengerRoute.getEgressStopId().toString() + sep2;
 				}
 			}
 
