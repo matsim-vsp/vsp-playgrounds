@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.gleich.drt;
+package playground.gleich.analysis.drt;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -49,8 +49,6 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
-
-import playground.gleich.analysis.experiencedTrips.DrtEventsReader;
 
 /**
  * @author gleich
