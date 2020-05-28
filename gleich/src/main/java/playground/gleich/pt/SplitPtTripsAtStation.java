@@ -1,4 +1,4 @@
-package playground.gleich.tsukuba;
+package playground.gleich.pt;
 
 import java.util.HashSet;
 import java.util.ListIterator;

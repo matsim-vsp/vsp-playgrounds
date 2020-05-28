@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package playground.gleich.debug;
+package playground.gleich.pt;
 
 import java.util.ArrayList;
 import java.util.HashSet;

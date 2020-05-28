@@ -1,4 +1,4 @@
-package playground.gleich.misc;
+package playground.gleich.network;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;

@@ -1,4 +1,4 @@
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.pt;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -26,8 +26,6 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
-import playground.gleich.av_bus.FilePaths;
-
 // not tested
 public class PtUmlaufEstimator {
 
@@ -44,9 +42,9 @@ public class PtUmlaufEstimator {
 	private BufferedWriter bw;
 	
 	public static void main(String[] args) {
-		String scheduleFile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT;
-		String vehicleFile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT_45MPS;
-		String resultFile = FilePaths.PATH_BASE_DIRECTORY + "data/analysis/operationCost/umlaufEstimator_transitSchedule.100pct.base.csv";
+		String scheduleFile = "";
+		String vehicleFile = "";
+		String resultFile = "data/analysis/operationCost/umlaufEstimator_transitSchedule.100pct.base.csv";
 		Set<Id<TransitLine>> linesToAnalyse = new HashSet<>();
 		linesToAnalyse.add(Id.create("124-B-124", TransitLine.class));
 		linesToAnalyse.add(Id.create("133-B-133", TransitLine.class));
@@ -144,10 +142,7 @@ public class PtUmlaufEstimator {
 		private final double departureTimeAtLastStop;
 		/**
 		 * @param departure
-		 * @param line
 		 * @param route
-		 * @param arrivalTimeAtFirstStop
-		 * @param departureTimeAtLastStop
 		 */
 		DepartureOnUmlauf(Departure departure, Id<TransitLine> lineId, TransitRoute route) {
 			this.departure = departure;

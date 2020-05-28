@@ -1,4 +1,4 @@
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.pt;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

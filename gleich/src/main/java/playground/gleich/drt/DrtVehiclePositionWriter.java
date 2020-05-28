@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.gleich.av_bus.analysis.drtVehicles;
+package playground.gleich.drt;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package playground.gleich.av_bus.prepareScenario;
+package playground.gleich.misc;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +27,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.pt.router.TransitActsRemover;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 
-import playground.gleich.av_bus.FilePaths;
 import playground.gleich.utilsFromOthers.gthunig.CSVWriter;
 import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
@@ -92,22 +91,7 @@ public class ExtractAgentsInAreaStreamReading {
 					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem, simplifyOutputPlan);
 			
 		} else {
-			String inputNetworkPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT_ACCESS_LOOPS;
-			String inputPopulationPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_POPULATION_BERLIN_100PCT_UNFILTERED;
-			String studyAreaShpPath =FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_STUDY_AREA_SHP;
-			String studyAreaShpKey = FilePaths.STUDY_AREA_SHP_KEY;
-			String studyAreaShpElement = FilePaths.STUDY_AREA_SHP_ELEMENT;
-			String outputPopulationPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_POPULATION_BERLIN_100PCT_FILTERED;
-			boolean selectAgentsByRoutesThroughArea = true;
-			boolean selectAgentsByActivitiesInArea = true;
-			String outputLinksInAreaCsvPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_LINKS_ENCLOSED_IN_AREA_BERLIN_100PCT;
-			String outputLinksInAreaShpPath = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_SHP_LINKS_ENCLOSED_IN_AREA_BERLIN_100PCT;
-			String outputLinksInAreaShpCoordinateSystem = "DHDN_GK4";
-			extractor = new ExtractAgentsInAreaStreamReading(inputNetworkPath, inputPopulationPath, studyAreaShpPath, 
-					studyAreaShpKey, studyAreaShpElement, outputPopulationPath, selectAgentsByActivitiesInArea, 
-					selectAgentsByRoutesThroughArea, outputLinksInAreaCsvPath, 
-					outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem, true);
-
+			throw new RuntimeException("invalid number of args");
 		}
 		extractor.run();
 	}

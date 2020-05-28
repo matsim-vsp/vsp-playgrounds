@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.gleich.av_bus.prepareScenario;
+package playground.gleich.drt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,6 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import playground.gleich.av_bus.FilePaths;
 import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
 /**
@@ -59,11 +58,11 @@ public class CreateTaxiVehicles {
 		double operationStartTime = 0.; //t0
 		double operationEndTime = 2*24*3600.;	//t1
 		int seats = 1;
-		String networkfile = FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT_ACCESS_LOOPS;
-		String taxisFile = FilePaths.PATH_BASE_DIRECTORY + "data/input/Berlin100pct/drt/DrtVehicles.100pct.DRT_" + numberofVehicles + "_Cap" + seats + ".xml";// FilePaths.PATH_DRT_VEHICLES_20_CAP1_BERLIN__10PCT;
+		String networkfile = "";
+		String taxisFile = "data/input/Berlin100pct/drt/DrtVehicles.100pct.DRT_" + numberofVehicles + "_Cap" + seats + ".xml";
 		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
 		Random random = MatsimRandom.getLocalInstance();
-		Geometry geometryStudyArea = JbUtils.readShapeFileAndExtractGeometry(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_AV_OPERATION_AREA_SHP, FilePaths.AV_OPERATION_AREA_SHP_KEY).get(FilePaths.AV_OPERATION_AREA_SHP_ELEMENT);
+		Geometry geometryStudyArea = JbUtils.readShapeFileAndExtractGeometry("AV_OPERATION_AREA_SHP", "AV_OPERATION_AREA_SHP_KEY").get("AV_OPERATION_AREA_SHP_ELEMENT");
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkfile);
 		List<Id<Link>> linksInArea = new ArrayList<>();
 			for(Link link: scenario.getNetwork().getLinks().values()){
