@@ -175,7 +175,7 @@ public final class Events2ExperiencedTripsCSV {
 					containsPt = true;
 				}
 			}
-			String isIntermodalDrtPt = (containsDrt && containsPt) ? "true" : "false";
+			String isIntermodalDrtPt = (containsDrt && containsPt) ? "TRUE" : "FALSE";
 			legColumn.add(isIntermodalDrtPt);
 			legColumn.add((containsDrt && containsPt) ? "inter"+experiencedLeg.getMode() : "mono"+experiencedLeg.getMode());
 			return legColumn;
