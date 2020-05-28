@@ -27,7 +27,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.pt.router.TransitActsRemover;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
 
-import playground.gleich.utilsFromOthers.gthunig.CSVWriter;
 import playground.gleich.utilsFromOthers.jbischoff.JbUtils;
 
 /**
@@ -45,7 +44,6 @@ public class ExtractAgentsInAreaStreamReading {
 	private String studyAreaShpKey;
 	private String studyAreaShpElement;
 	private String outputPopulationPath;
-	private String outputLinksInAreaCsvPath;
 	private String outputLinksInAreaShpPath;
 	private String outputLinksInAreaShpCoordinateSystem;
 	private Scenario inputScenario;
@@ -118,7 +116,6 @@ public class ExtractAgentsInAreaStreamReading {
 		this.outputPopulationPath = outputPopulationPath;
 		this.selectAgentsByRoutesThroughArea = selectAgentsByRoutesThroughArea;
 		this.selectAgentsByActivitiesInArea = selectAgentsByActivitiesInArea;
-		this.outputLinksInAreaCsvPath = outputLinksInAreaCsvPath;
 		this.outputLinksInAreaShpPath = outputLinksInAreaShpPath;
 		this.outputLinksInAreaShpCoordinateSystem = outputLinksInAreaShpCoordinateSystem;
 		this.simplifyOutputPlan = simplifyOutputPlan;
@@ -173,7 +170,7 @@ public class ExtractAgentsInAreaStreamReading {
 			if(geometryStudyArea.contains(MGC.coord2Point(link.getFromNode().getCoord())) &&
 					geometryStudyArea.contains(MGC.coord2Point(link.getToNode().getCoord()))){
 				linksInArea.add(link.getId());
-				if( (!outputLinksInAreaCsvPath.equals("")) || (!outputLinksInAreaShpPath.equals("")) ){
+				if( !outputLinksInAreaShpPath.equals("") ){
 					Node fromNode = link.getFromNode();
 					Node newNetworkFromNode; 
 					if(!networkEnclosedInStudyArea.getNodes().containsKey(fromNode.getId())){
@@ -200,24 +197,6 @@ public class ExtractAgentsInAreaStreamReading {
 		if(!outputLinksInAreaShpPath.equals("")){
 			Links2ESRIShape shp = new Links2ESRIShape(networkEnclosedInStudyArea, outputLinksInAreaShpPath, outputLinksInAreaShpCoordinateSystem);
 			shp.write();
-		}
-		if (!outputLinksInAreaCsvPath.equals("")) {
-			CSVWriter linksWriter = new CSVWriter(outputLinksInAreaCsvPath, ",");
-			linksWriter.writeField("id");
-			linksWriter.writeField("fromCoordX");
-			linksWriter.writeField("fromCoordY");
-			linksWriter.writeField("toCoordX");
-			linksWriter.writeField("toCoordY");
-			linksWriter.writeNewLine();
-			for(Id<Link> link : linksInArea){
-				linksWriter.writeField(link.toString());
-				linksWriter.writeField(Double.toString(networkEnclosedInStudyArea.getLinks().get(link).getFromNode().getCoord().getX())); 
-				linksWriter.writeField(Double.toString(networkEnclosedInStudyArea.getLinks().get(link).getFromNode().getCoord().getY())); 
-				linksWriter.writeField(Double.toString(networkEnclosedInStudyArea.getLinks().get(link).getToNode().getCoord().getX())); 
-				linksWriter.writeField(Double.toString(networkEnclosedInStudyArea.getLinks().get(link).getToNode().getCoord().getY())); 
-				linksWriter.writeNewLine();
-			}
-			linksWriter.close();
 		}
 	}
 
