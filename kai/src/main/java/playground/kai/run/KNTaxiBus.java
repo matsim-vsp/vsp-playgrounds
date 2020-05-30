@@ -26,15 +26,12 @@ public final class KNTaxiBus {
 
 	public static void main(String[] args) {
 
-		Config config = ConfigUtils.loadConfig("drt_example/drtconfig_door2door.xml", new MultiModeDrtConfigGroup(),
-				new DvrpConfigGroup(), new OTFVisConfigGroup());
+		Config config = ConfigUtils.loadConfig("examples/drt_example/drtconfig_door2door.xml",
+				new MultiModeDrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
 		config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
-//		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());
-		
-		DrtConfigGroup drtConfig = ConfigUtils.addOrGetModule(config,DrtConfigGroup.class) ;
-		ConfigUtils.addOrGetModule(config,DvrpConfigGroup.class) ;
-		
+
+		DrtConfigGroup drtConfig = DrtConfigGroup.getSingleModeDrtConfig(config);
 		drtConfig.setMaxTravelTimeAlpha(10.);
 		drtConfig.setMaxTravelTimeBeta(3600.);
 		
@@ -42,7 +39,7 @@ public final class KNTaxiBus {
 
 		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, true);
 		KNTaxiBus.customizeDrtScenario(controler.getScenario());
-		controler.run() ;
+		controler.run();
 	}
 
 	private static void customizeDrtScenario(Scenario scenario) {
