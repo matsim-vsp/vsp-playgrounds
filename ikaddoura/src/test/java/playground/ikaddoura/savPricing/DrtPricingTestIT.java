@@ -24,7 +24,6 @@ package playground.ikaddoura.savPricing;
 
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
@@ -45,6 +44,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
@@ -61,7 +61,7 @@ public class DrtPricingTestIT {
 	 * only taxi trips
 	 * 
 	 */
-	@Ignore
+	//	@Ignore
 	@Test
 	public final void test1(){
 
