@@ -20,25 +20,37 @@
 package playground.gleich.analysis.experiencedTrips;
 
 import com.google.inject.Injector;
-import com.google.inject.Module;
 
+import java.net.MalformedURLException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.matsim.analysis.TripsAndLegsCSVWriter;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.ReplayEvents;
 import org.matsim.core.events.EventsManagerModule;
+import org.matsim.core.router.AnalysisMainModeIdentifier;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.*;
 import org.matsim.pt.routes.TransitPassengerRoute;
+import org.matsim.utils.gis.shp2matsim.ShpGeometryUtils;
+import playground.gleich.analysis.DefaultAnalysisModeIdentifier;
 
 /**
  * 
@@ -47,25 +59,33 @@ import org.matsim.pt.routes.TransitPassengerRoute;
  */
 public final class Events2ExperiencedTripsCSV {
 
-    private Config config;
-    private Scenario scenario;
-    private String eventsFile;
+	private Scenario scenario;
+    private final String eventsFile;
     private ExperiencedPlansService experiencedPlansService;
 	// second level separator
 	private final String sep2 = ",";
+
+	private static final Logger log = Logger.getLogger(Events2ExperiencedTripsCSV.class);
     
     public static void main(String[] args) {
 //    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443.";
-		String pathInclRunIdAndDot = "/home/gregor/tmp/Vulkaneifel/snzDrt343/snzDrt343.";
+		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrt342/snzDrt342.";
+		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
+		double bufferAroundShpFileM = 2000;
 
 //		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
-		if (args.length==1) {
+		if (args.length==3) {
 			pathInclRunIdAndDot = args[0];
-		} else if (args.length>1) {
-			throw new RuntimeException(">1 args.length not implemented yet.");
+			pathTripFilterShapeFile = args[1];
+			bufferAroundShpFileM = Double.parseDouble(args[2]);
+		} else if (args.length>3) {
+			throw new RuntimeException(">3 args.length not implemented yet.");
 		}
 
-        Config config = ConfigUtils.loadConfig(pathInclRunIdAndDot + "output_config.xml");
+//        Config config = ConfigUtils.loadConfig(pathInclRunIdAndDot + "output_config.xml"); / the proper way
+		Config config = ConfigUtils.createConfig(); // snz backport
+		config.global().setCoordinateSystem("EPSG:25832"); // snz backport
+
         config.network().setInputFile(pathInclRunIdAndDot + "output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunIdAndDot + "output_transitSchedule.xml.gz");
         config.plans().setInputFile(pathInclRunIdAndDot + "output_plans.xml.gz");
@@ -74,15 +94,17 @@ public final class Events2ExperiencedTripsCSV {
 		config.vehicles().setVehiclesFile(pathInclRunIdAndDot + "output_vehicles.xml.gz");
         config.plans().setInputPersonAttributeFile(null);
 
+        AnalysisMainModeIdentifier mainModeIdentifier = new DefaultAnalysisModeIdentifier();
+
         Events2ExperiencedTripsCSV runner = new Events2ExperiencedTripsCSV(config,
 				pathInclRunIdAndDot + "output_events.xml.gz");
         runner.runAnalysisAndWriteResult(pathInclRunIdAndDot + "output_experiencedTrips.csv.gz",
-				pathInclRunIdAndDot + "output_experiencedLegs.csv.gz");
+				pathInclRunIdAndDot + "output_experiencedLegs.csv.gz", mainModeIdentifier,
+				pathTripFilterShapeFile, bufferAroundShpFileM);
     }
 
     public Events2ExperiencedTripsCSV(Config config, String eventsFile) {
-        this.config = config;
-        this.eventsFile = eventsFile;
+		this.eventsFile = eventsFile;
         
         readEventsAndPrepareExperiencedPlansService(config);
     }
@@ -90,69 +112,101 @@ public final class Events2ExperiencedTripsCSV {
     private void readEventsAndPrepareExperiencedPlansService(Config config) {
         scenario = ScenarioUtils.loadScenario(config);
         Injector injector = org.matsim.core.controler.Injector.createInjector(config,
-                new Module[]{
-                        new ExperiencedPlansModule(),
-                        new ExperiencedPlanElementsModule(),
-                        new EventsManagerModule(),
-                        new ScenarioByInstanceModule(scenario),
-                        new org.matsim.core.controler.ReplayEvents.Module()});
-        ((EventsToLegs)injector.getInstance(EventsToLegs.class)).setTransitSchedule(scenario.getTransitSchedule());
+				new ExperiencedPlansModule(),
+				new ExperiencedPlanElementsModule(),
+				new EventsManagerModule(),
+				new ScenarioByInstanceModule(scenario),
+				new ReplayEvents.Module());
+        injector.getInstance(EventsToLegs.class).setTransitSchedule(scenario.getTransitSchedule());
         ReplayEvents replayEvents = (ReplayEvents)injector.getInstance(ReplayEvents.class);
         replayEvents.playEventsFile(eventsFile, 0);
         
         experiencedPlansService = ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class));
     }
-    
-    public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile) {
-    	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension();
+
+    public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile,
+										  AnalysisMainModeIdentifier mainModeIdentifier,
+										  String shpFile, double bufferAroundShpFileM) {
+    	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension(
+    			mainModeIdentifier, shpFile, bufferAroundShpFileM);
 		TripsAndLegsCSVWriter.CustomLegsWriterExtension customLegsWriterExtension = new ExperiencedLegsExtension();
     	 new TripsAndLegsCSVWriter(scenario, customTripsWriterExtension, customLegsWriterExtension).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile, outputExperiencedLegsFile);
     }
     
     private class ExperiencedTripsExtension implements TripsAndLegsCSVWriter.CustomTripsWriterExtension {
 
+		AnalysisMainModeIdentifier mainModeIdentifier;
+		List<PreparedGeometry> geometries;
+		double bufferAroundShpFileM;
+
+    	ExperiencedTripsExtension(AnalysisMainModeIdentifier mainModeIdentifier,
+								  String shpFile, double bufferAroundShpFileM) {
+    		this.mainModeIdentifier = mainModeIdentifier;
+			this.bufferAroundShpFileM = bufferAroundShpFileM;
+
+    		if (shpFile!=null && !shpFile.equals("")) {
+				try {
+					geometries = ShpGeometryUtils.loadPreparedGeometries(Paths.get(shpFile).toUri().toURL());
+				} catch (MalformedURLException e) {
+					log.error(e + "\nInput shape file string was: " + shpFile);
+					e.printStackTrace();
+				}
+			}
+    		if (bufferAroundShpFileM > 0.0) {
+    			PreparedGeometryFactory factory = new PreparedGeometryFactory();
+				assert geometries != null;
+				geometries = geometries.stream()
+						.map(geom -> factory.create(geom.getGeometry().buffer(bufferAroundShpFileM)))
+						.collect(Collectors.toList());
+			}
+		}
+
 		@Override
 		public String[] getAdditionalTripHeader() {
-			List<String> header = new ArrayList<>();
-			header.add("transitStopsVisited");
-			
-//			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
-//			for(String mode: monitoredModes){
-//				header.add(mode + ".InVehicleTime");
-//				header.add(mode + ".Distance");
-//				header.add(mode + ".WaitTime");
-//				header.add(mode + ".maxPerLegWaitTime");
-//				header.add(mode + ".NumberOfLegs");
-//			}
-			
-			return header.toArray(new String[0]);
+			String[] header = {"transit_stops_visited", "main_mode", "start_in_shape", "end_in_shape"};
+			return header;
 		}
 
 		@Override
 		public List<String> getAdditionalTripColumns(Trip trip) {
 			List<String> values = new ArrayList<>();
 			// TODO: add real values
-			String transitStopsVisited = "";
+			StringBuilder transitStopsVisited = new StringBuilder();
 			for (Leg leg: trip.getLegsOnly()) {
 				if (leg.getRoute() instanceof TransitPassengerRoute) {
 					TransitPassengerRoute transitPassengerRoute = (TransitPassengerRoute) leg.getRoute();
-					transitStopsVisited += transitPassengerRoute.getAccessStopId().toString() + sep2 + transitPassengerRoute.getEgressStopId().toString() + sep2;
+					transitStopsVisited.append(transitPassengerRoute.getAccessStopId().toString())
+							.append(sep2)
+							.append(transitPassengerRoute.getEgressStopId().toString())
+							.append(sep2);
 				}
 			}
-
-			values.add(transitStopsVisited);
-			
-//			Collection<String> monitoredModes = config.planCalcScore().getAllModes();
-//			for(String mode: monitoredModes){
-//				values.add(mode + ".InVehicleTime");
-//				values.add(mode + ".Distance");
-//				values.add(mode + ".WaitTime");
-//				values.add(mode + ".maxPerLegWaitTime");
-//				values.add(mode + ".NumberOfLegs");
-//			}
+			values.add(transitStopsVisited.toString());
+			values.add(mainModeIdentifier.identifyMainMode(trip.getLegsOnly()));
+			Coord fromCoord = getCoordFromActivity(trip.getOriginActivity());
+			Coord toCoord = getCoordFromActivity(trip.getDestinationActivity());
+			values.add(ShpGeometryUtils.isCoordInPreparedGeometries(fromCoord, geometries) ? "TRUE" : "FALSE");
+			values.add(ShpGeometryUtils.isCoordInPreparedGeometries(toCoord, geometries) ? "TRUE" : "FALSE");
 			return values;
 		}
     }
+
+    // copy from TripsAndLegsCSVWriter
+	private Coord getCoordFromActivity(Activity activity) {
+		if (activity.getCoord() != null) {
+			return activity.getCoord();
+		} else if (activity.getFacilityId() != null && this.scenario.getActivityFacilities().getFacilities().containsKey(activity.getFacilityId())) {
+			Coord coord = this.scenario.getActivityFacilities().getFacilities().get(activity.getFacilityId()).getCoord();
+			return coord != null ? coord : this.getCoordFromLink(activity.getLinkId());
+		} else {
+			return this.getCoordFromLink(activity.getLinkId());
+		}
+	}
+
+	// copy from TripsAndLegsCSVWriter
+	private Coord getCoordFromLink(Id<Link> linkId) {
+		return this.scenario.getNetwork().getLinks().get(linkId).getToNode().getCoord();
+	}
 
 	static class ExperiencedLegsExtension implements TripsAndLegsCSVWriter.CustomLegsWriterExtension {
 		@Override
