@@ -53,16 +53,15 @@ class KNTransitControler {
 			useOTFVis = Boolean.parseBoolean(args[1]) ;
 		}
 
-//		Config config = new Config();
-//		config.addCoreModules();
-//		new ConfigReader(config).readFile(args[0]);
-//		Config config = ConfigUtils.loadConfig(
-////				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
+		Config config;
+		if ( args == null || args.length==0 || args[0]==null ){
+			config = ConfigUtils.loadConfig(
+					"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
 //				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/config-kai-local.xml"
-//		) ;
-		
-		
-		Config config = ConfigUtils.loadConfig( args[0] ) ;
+						       );
+		} else{
+			config = ConfigUtils.loadConfig( args[0] );
+		}
 		
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue );
 		
