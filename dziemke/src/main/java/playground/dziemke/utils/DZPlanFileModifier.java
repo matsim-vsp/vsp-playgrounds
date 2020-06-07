@@ -47,8 +47,8 @@ public class DZPlanFileModifier {
 //		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/502/plans1.xml.gz";
 //		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/plans_10000.xml.gz";
 
-		String inputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5.3-10pct.plans.xml.gz";
-		String outputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5.3-10pct.plans-no-links-routes.xml.gz";
+		String inputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans.xml.gz";
+		String outputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans-no-links-routes.xml.gz";
 
 //		double selectionProbability = 0.2;
 //		double selectionProbability = 0.01;

@@ -25,8 +25,8 @@ import java.util.*;
 public class SelectiveLinkRemover {
 
     public static void main (String[] args) {
-        String networkInputFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5-network.xml.gz";
-        String networkOutputFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5-network-sec2-hundekopf.xml.gz";
+        String networkInputFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
+        String networkOutputFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network-sec-hundekopf.xml.gz";
 
         List<String> typesToBeRemoved = Arrays.asList("tertiary", "tertiary_link", "unclassified", "residential", "living_street");
 

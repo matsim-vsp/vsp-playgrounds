@@ -46,8 +46,8 @@ public class CreateFacilitiiesFileFromShapeFile {
 	private final static Logger LOG = Logger.getLogger(CreateFacilitiiesFileFromShapeFile.class);
 	
 	public static void main(String[] args) {
-		String shapeFile = "../../../shared-svn/projects/maxess/data/nairobi/land_use/nairobi_LU_2010/nairobi_LU.shp";
-		String facilitiesFile = "../../../shared-svn/projects/maxess/data/nairobi/land_use/nairobi_LU_2010/facilites.xml";
+		String shapeFile = "../nairobi/data/land_use/nairobi_LU_2010/nairobi_LU.shp";
+		String facilitiesFile = "../nairobi/data/land_use/nairobi_LU_2010/facilites_new2.xml";
 
 		String facilitiesFileDescription = "Facilities in Nairobi based on Land-Use Shapefile";
 		String inputCRS = "EPSG:21037";
