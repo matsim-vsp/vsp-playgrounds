@@ -3,6 +3,7 @@ package playground.dziemke.utils;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.ReplayEvents;
@@ -15,14 +16,31 @@ public class Events2ExperiencedPlansConverter {
 
     private Config config;
     private String eventsFile;
-    private String outputExperiancedPlansFile;
+    private String outputExperiencedPlansFile;
     private boolean activateTransitSchedule = false;
 
-    public Events2ExperiencedPlansConverter(Config config, String eventsFile, String outputExperiancedPlansFile) {
+    public static void main(String[] args) {
+        String eventsFile = "../../runs-svn/reoccupBerlin/berlin-v5.5-1pct-b-02_2/berlin-v5.5-1pct-b-02.output_events.xml.gz";
+        String inputNetworkFile  = "../../runs-svn/reoccupBerlin/berlin-v5.5-1pct-b-02_2/berlin-v5.5-1pct-b-02.output_network.xml.gz";
+
+        String outputExperiencedPlansFile = "../../runs-svn/reoccupBerlin/berlin-v5.5-1pct-b-02_2/experiencedPlans_2.xml.gz";
+
+        Config config = ConfigUtils.createConfig();
+        config.global().setCoordinateSystem("EPSG:31468");
+        config.transit().setUseTransit(true );
+        config.transit().setTransitScheduleFile("../../runs-svn/reoccupBerlin/berlin-v5.5-1pct-b-02_2/berlin-v5.5-1pct-b-02.output_transitSchedule.xml.gz");
+        config.network().setInputFile(inputNetworkFile);
+
+        Events2ExperiencedPlansConverter events2ExperiencedPlansConverter = new Events2ExperiencedPlansConverter(config, eventsFile, outputExperiencedPlansFile);
+        events2ExperiencedPlansConverter.activateTransitSchedule();
+        events2ExperiencedPlansConverter.convert();
+    }
+
+    public Events2ExperiencedPlansConverter(Config config, String eventsFile, String outputExperiencedPlansFile) {
 
         this.config = config;
         this.eventsFile = eventsFile;
-        this.outputExperiancedPlansFile = outputExperiancedPlansFile;
+        this.outputExperiencedPlansFile = outputExperiencedPlansFile;
     }
 
     public void activateTransitSchedule() {
@@ -44,6 +62,8 @@ public class Events2ExperiencedPlansConverter {
             ((EventsToLegs)injector.getInstance(EventsToLegs.class)).setTransitSchedule(scenario.getTransitSchedule());
         ReplayEvents replayEvents = (ReplayEvents)injector.getInstance(ReplayEvents.class);
         replayEvents.playEventsFile(eventsFile, 0);
-        ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class)).writeExperiencedPlans(outputExperiancedPlansFile);
+        ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class)).writeExperiencedPlans(outputExperiencedPlansFile);
+
+        //(new PopulationWriter(scenario.getPopulation(), null)).write(outputExperiencedPlansFile);
     }
 }

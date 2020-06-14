@@ -38,7 +38,7 @@ public class Events2ExperiancedPlansConverterTest {
 
             Config config = ConfigUtils.createConfig();
             config.network().setInputFile(inputNetworkFile);
-            config.plans().setInputFile(inputPlansFile);
+            //config.plans().setInputFile(inputPlansFile);
             (new Events2ExperiencedPlansConverter(config, eventsFile, outputExperiancedPlansFile)).convert();
 
             plans = readPopulationFromFile(inputPlansFile);

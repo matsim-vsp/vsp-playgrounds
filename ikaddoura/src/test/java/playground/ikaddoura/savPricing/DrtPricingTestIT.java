@@ -44,6 +44,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
@@ -60,6 +61,7 @@ public class DrtPricingTestIT {
 	 * only taxi trips
 	 * 
 	 */
+	//	@Ignore
 	@Test
 	public final void test1(){
 
