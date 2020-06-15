@@ -88,14 +88,12 @@ public class AgentSpecificActivityScoringTest {
 		
 		ActivityParams actParamsH = new ActivityParams("h");
 		actParamsH.setTypicalDuration(12 * 3600.);
-		actParamsH.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsH.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		config.planCalcScore().addActivityParams(actParamsH);
 		
 		ActivityParams actParamsW = new ActivityParams("w");
 		config.planCalcScore().addActivityParams(actParamsW);
 		actParamsW.setTypicalDuration(8 * 3600.);
-		actParamsW.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsW.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		
 		config.planCalcScore().setPerforming_utils_hr(6.);
@@ -197,14 +195,12 @@ public class AgentSpecificActivityScoringTest {
 
 		ActivityParams actParamsH = new ActivityParams("h");
 		actParamsH.setTypicalDuration(12 * 3600.);
-		actParamsH.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsH.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		config.planCalcScore().addActivityParams(actParamsH);
 		
 		ActivityParams actParamsW = new ActivityParams("w");
 		config.planCalcScore().addActivityParams(actParamsW);
 		actParamsW.setTypicalDuration(8 * 3600.);
-		actParamsW.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsW.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		
 		config.planCalcScore().setPerforming_utils_hr(6.);
@@ -309,14 +305,12 @@ public class AgentSpecificActivityScoringTest {
 		
 		ActivityParams actParamsH = new ActivityParams("h");
 		actParamsH.setTypicalDuration(12 * 3600.);
-		actParamsH.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsH.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		config.planCalcScore().addActivityParams(actParamsH);
 		
 		ActivityParams actParamsW = new ActivityParams("w");
 		config.planCalcScore().addActivityParams(actParamsW);
 		actParamsW.setTypicalDuration(8 * 3600.);
-		actParamsW.setLatestStartTime(Double.NEGATIVE_INFINITY);
 		actParamsW.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
 		
 		config.planCalcScore().setPerforming_utils_hr(0.);
