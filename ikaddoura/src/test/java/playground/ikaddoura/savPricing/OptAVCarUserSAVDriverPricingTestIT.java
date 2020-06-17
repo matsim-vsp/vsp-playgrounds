@@ -43,6 +43,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilterNullImpl;
 
@@ -100,7 +101,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -138,7 +139,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
@@ -196,7 +197,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
@@ -247,7 +248,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setWriteLinkInfoCharts(false);
 			decongestionSettings.setRunFinalAnalysis(false);
 
-			Controler controler = TaxiControlerCreator.createControlerWithSingleModeTaxi(config, otfvis);
+			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			controler.addOverridingModule(new TaxiFareModule());
