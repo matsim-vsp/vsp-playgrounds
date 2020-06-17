@@ -123,7 +123,7 @@ public final class RunBerlinTaxiScenarioA {
 		controler.addOverridingModule(new MultiModeTaxiModule());
 		controler.addOverridingModule(new DvrpModule());
 		controler.configureQSimComponents(
-				DvrpQSimComponents.activateModes(TaxiConfigGroup.getSingleModeTaxiConfig(controler.getConfig()).getMode()));
+				DvrpQSimComponents.activateAllModes(MultiModeTaxiConfigGroup.get(controler.getConfig())));
 
 		// reject taxi requests outside the service area
 		controler.addOverridingQSimModule(new AbstractDvrpModeQSimModule(TaxiConfigGroup.getSingleModeTaxiConfig(config).getMode()) {

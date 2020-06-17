@@ -27,7 +27,6 @@ import org.matsim.contrib.etaxi.run.RunETaxiBenchmark;
 import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.contrib.ev.temperature.TemperatureService;
 import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTaskType;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -45,7 +44,6 @@ public class RunEAVBenchmark {
 	}
 
 	public static Controler createControler(Config config, int runs) {
-		String mode = TaxiConfigGroup.getSingleModeTaxiConfig(config).getMode();
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		Controler controler = RunETaxiBenchmark.createControler(config, runs);
 		controler.addOverridingModule(new AbstractModule() {
@@ -54,7 +52,6 @@ public class RunEAVBenchmark {
 				bind(TemperatureService.class).toInstance(linkId -> TEMPERATURE);
 			}
 		});
-
 		return controler;
 	}
 
