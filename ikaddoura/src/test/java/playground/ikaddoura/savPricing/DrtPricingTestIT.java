@@ -86,7 +86,7 @@ public class DrtPricingTestIT {
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setSavMode(TransportMode.drt);
 
-		Controler controler1 = DrtControlerCreator.createControlerWithSingleModeDrt(config1, false);
+		Controler controler1 = DrtControlerCreator.createControler(config1, false);
 		// drt fares
 		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
@@ -131,7 +131,7 @@ public class DrtPricingTestIT {
 		optAVParams2.setChargeTollsFromSAVDriver(true);
 		optAVParams2.setSavMode(TransportMode.drt);
 
-		Controler controler2 = DrtControlerCreator.createControlerWithSingleModeDrt(config2, false);
+		Controler controler2 = DrtControlerCreator.createControler(config2, false);
 		
 		// drt fares
 		controler2.addOverridingModule(new TaxiFareModule());
@@ -172,7 +172,7 @@ public class DrtPricingTestIT {
 		optAVParams3.setChargeTollsFromCarUsers(false);
 		optAVParams3.setSavMode(TransportMode.drt);
 
-		Controler controler3 = DrtControlerCreator.createControlerWithSingleModeDrt(config3, false);
+		Controler controler3 = DrtControlerCreator.createControler(config3, false);
 		
 		// drt fares
 		controler3.addOverridingModule(new TaxiFareModule());
@@ -258,7 +258,7 @@ public class DrtPricingTestIT {
 		
 		// taxi
 
-		Controler controler1 = DrtControlerCreator.createControlerWithSingleModeDrt(config1, false);
+		Controler controler1 = DrtControlerCreator.createControler(config1, false);
 		// drt fares
 		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
@@ -307,7 +307,7 @@ public class DrtPricingTestIT {
 		decongestionSettings.setWriteLinkInfoCharts(false);
 		decongestionSettings.setRunFinalAnalysis(false);
 
-		Controler controler2 = DrtControlerCreator.createControlerWithSingleModeDrt(config2, false);
+		Controler controler2 = DrtControlerCreator.createControler(config2, false);
 		// drt fares
 		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
