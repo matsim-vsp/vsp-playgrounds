@@ -130,12 +130,14 @@
 	</module>
 
 
-	<module name="taxifare" >
-		<param name="basefare" value="0.0" />
-		<param name="dailySubscriptionFee" value="0.0" />
-		<param name="distanceFare_m" value="0.01" />
-		<param name="timeFare_h" value="0.0" />
-		<param name="mode" value="taxi" />
+	<module name="taxifares" >
+		<parameterset type="taxifare">
+			<param name="basefare" value="0.0" />
+			<param name="dailySubscriptionFee" value="0.0" />
+			<param name="distanceFare_m" value="0.01" />
+			<param name="timeFare_h" value="0.0" />
+			<param name="mode" value="taxi" />
+		</parameterset>
 	</module>
 	
 	<module name="otfvis">
