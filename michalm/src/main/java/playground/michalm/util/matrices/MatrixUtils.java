@@ -20,13 +20,17 @@
 package playground.michalm.util.matrices;
 
 import java.util.Map;
+import java.util.function.Function;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.matrices.*;
+import org.matsim.matrices.Entry;
+import org.matsim.matrices.Matrices;
+import org.matsim.matrices.Matrix;
+import org.matsim.matrices.MatsimMatricesReader;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 public class MatrixUtils {
@@ -102,7 +106,7 @@ public class MatrixUtils {
 		return Iterables.concat(matrix.getFromLocations().values());
 	}
 
-	public static Matrices aggregateMatrices(Matrices input, Function<? super String, String> keyAggregator) {
+	public static Matrices aggregateMatrices(Matrices input, Function<? super String, @Nullable String> keyAggregator) {
 		Matrices output = new Matrices();
 
 		for (Map.Entry<String, Matrix> mapEntry : input.getMatrices().entrySet()) {

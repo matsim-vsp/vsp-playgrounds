@@ -68,21 +68,13 @@ public class DefaultActivityCreator implements ODDemandGenerator.ActivityCreator
 		return activity;
 	}
 
-	public static final GeometryProvider DEFAULT_GEOMETRY_PROVIDER = new GeometryProvider() {
-		public Geometry getGeometry(Zone zone, String actType) {
-			return zone.getMultiPolygon();
-		}
-	};
+	public static final GeometryProvider DEFAULT_GEOMETRY_PROVIDER = (zone, actType) -> zone.getMultiPolygon();
 
 	public interface GeometryProvider {
 		Geometry getGeometry(Zone zone, String actType);
 	}
 
-	public static final PointAcceptor DEFAULT_POINT_ACCEPTOR = new PointAcceptor() {
-		public boolean acceptPoint(Zone zone, String actType, Point point) {
-			return true;
-		}
-	};
+	public static final PointAcceptor DEFAULT_POINT_ACCEPTOR = (zone, actType, point) -> true;
 
 	public interface PointAcceptor {
 		boolean acceptPoint(Zone zone, String actType, Point point);

@@ -19,17 +19,20 @@
 
 package playground.michalm.util.matrices;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 
-import org.matsim.matrices.*;
-
-import com.google.common.base.*;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.matsim.matrices.Entry;
+import org.matsim.matrices.Matrix;
 
 public class MatricesTxtWriter {
 	private final Map<String, Matrix> matrices;
 	private String keyHeader = "key";
-	private Function<String, String> formatter = Functions.identity();
+	private Function<String, @Nullable String> formatter = s -> s;
 
 	public static MatricesTxtWriter createForSingleMatrix(Matrix matrix) {
 		MatricesTxtWriter writer = new MatricesTxtWriter(Collections.singletonMap("", matrix));
@@ -43,14 +46,14 @@ public class MatricesTxtWriter {
 
 	/**
 	 * to skip displaying the key column, set keyHeader to null
-	 * 
+	 *
 	 * @param keyHeader
 	 */
 	public void setKeyHeader(String keyHeader) {
 		this.keyHeader = keyHeader;
 	}
 
-	public void setKeyFormatter(Function<String, String> formatter) {
+	public void setKeyFormatter(Function<String, @Nullable String> formatter) {
 		this.formatter = formatter;
 	}
 
