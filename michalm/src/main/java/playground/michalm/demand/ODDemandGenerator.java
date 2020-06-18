@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.util.random.RandomUtils;
 import org.matsim.contrib.util.random.UniformRandom;
+import org.matsim.contrib.zone.Zone;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.matrices.Entry;
 import org.matsim.matrices.Matrix;
@@ -37,6 +38,12 @@ import org.matsim.matrices.Matrix;
 import playground.michalm.util.matrices.MatrixUtils;
 
 public class ODDemandGenerator<L> {
+
+	ODDemandGenerator<Zone> createDefault(Scenario scenario, Function<String, Zone> locationProvider,
+			boolean addEmptyRoute) {
+		return new ODDemandGenerator<>(scenario, locationProvider, addEmptyRoute, new DefaultActivityCreator(scenario),
+				new DefaultPersonCreator(scenario));
+	}
 
 	public interface PersonCreator<L> {
 		Person createPerson(Plan plan, L fromLocation, L toLocation);
@@ -49,18 +56,13 @@ public class ODDemandGenerator<L> {
 	private final UniformRandom uniform = RandomUtils.getGlobalUniform();
 
 	private final Scenario scenario;
-	private final ActivityCreator activityCreator;
-	private final PersonCreator personCreator;
+	private final ActivityCreator<L> activityCreator;
+	private final PersonCreator<L> personCreator;
 	private final Function<String, L> locationProvider;
 	private final boolean addEmptyRoute;
 
-	public ODDemandGenerator(Scenario scenario, Function<String, L> locationProvider, boolean addEmptyRoute) {
-		this(scenario, locationProvider, addEmptyRoute, new DefaultActivityCreator(scenario),
-				new DefaultPersonCreator(scenario));
-	}
-
 	public ODDemandGenerator(Scenario scenario, Function<String, L> locationProvider, boolean addEmptyRoute,
-			ActivityCreator activityCreator, PersonCreator personCreator) {
+			ActivityCreator<L> activityCreator, PersonCreator<L> personCreator) {
 		this.scenario = scenario;
 		this.locationProvider = locationProvider;
 		this.addEmptyRoute = addEmptyRoute;
@@ -108,16 +110,16 @@ public class ODDemandGenerator<L> {
 
 	public void generateMultiplePeriods(Matrix matrix, String fromActivityType, String toActivityType, String mode,
 			double startTime, double duration, double[] flowCoeffs) {
-		for (int i = 0; i < flowCoeffs.length; i++) {
-			generateSinglePeriod(matrix, fromActivityType, toActivityType, mode, startTime, duration, flowCoeffs[i]);
+		for (double flowCoeff : flowCoeffs) {
+			generateSinglePeriod(matrix, fromActivityType, toActivityType, mode, startTime, duration, flowCoeff);
 			startTime += duration;
 		}
 	}
 
 	public void generateMultiplePeriods(Matrix[] matrices, String fromActivityType, String toActivityType, String mode,
 			double startTime, double duration, double flowCoeffs) {
-		for (int i = 0; i < matrices.length; i++) {
-			generateSinglePeriod(matrices[i], fromActivityType, toActivityType, mode, startTime, duration, flowCoeffs);
+		for (Matrix matrix : matrices) {
+			generateSinglePeriod(matrix, fromActivityType, toActivityType, mode, startTime, duration, flowCoeffs);
 			startTime += duration;
 		}
 	}

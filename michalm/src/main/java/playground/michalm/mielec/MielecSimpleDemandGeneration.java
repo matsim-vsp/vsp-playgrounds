@@ -61,9 +61,10 @@ public class MielecSimpleDemandGeneration {
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		Map<Id<Zone>, Zone> zones = Zones.readZones(zonesXmlFile, zonesShpFile);
 
-		ODDemandGenerator.ActivityCreator ac = new DefaultActivityCreator(scenario);
+		ODDemandGenerator.ActivityCreator<Zone> ac = new DefaultActivityCreator(scenario);
 		PersonCreatorWithRandomTaxiMode pc = new PersonCreatorWithRandomTaxiMode(scenario, taxiProbability);
-		ODDemandGenerator dg = new ODDemandGenerator(scenario, zones::get, true, ac, pc);
+		ODDemandGenerator<Zone> dg = new ODDemandGenerator<>(scenario, id -> zones.get(Id.create(id, Zone.class)), true,
+				ac, pc);
 
 		double[][] matrix = Array2DReader.getDoubleArray(odMatrixFile, zones.size());
 		Matrix afternoonODMatrix = MatrixUtils.createSparseMatrix("afternoon", zones.keySet(), matrix);
