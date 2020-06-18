@@ -55,7 +55,7 @@ public class DefaultActivityCreator implements ODDemandGenerator.ActivityCreator
 	@Override
 	public Activity createActivity(Zone zone, String actType) {
 		Geometry geometry = geometryProvider.getGeometry(zone, actType);
-		Point p = null;
+		Point p;
 		do {
 			p = RandomPointUtils.getRandomPointInGeometry(geometry);
 		} while (!pointAcceptor.acceptPoint(zone, actType, p));
