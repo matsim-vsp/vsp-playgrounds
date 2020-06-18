@@ -85,7 +85,7 @@ public class Array2DReader {
 		return rows.toArray((Object[])Array.newInstance(clazz, rows.size()));
 	}
 
-	public static interface Strategy {
+	public interface Strategy {
 		Class<?> getComponentType();
 
 		void addToRow(Object row, int col, String element);
