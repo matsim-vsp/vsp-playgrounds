@@ -44,7 +44,6 @@ public class DefaultPersonCreator implements ODDemandGenerator.PersonCreator<Zon
 	@Override
 	public Person createPerson(Plan plan, Zone fromZone, Zone toZone) {
 		String strId = String.format(idFormat + "_%s_%s", currentAgentId++, fromZone.getId(), toZone.getId());
-		Person person = pf.createPerson(Id.create(strId, Person.class));
-		return person;
+		return pf.createPerson(Id.create(strId, Person.class));
 	}
 }
