@@ -52,12 +52,10 @@ public class SubNetworkCreator {
 		List<Link> allLinks = new ArrayList<>(network.getLinks().values());
 
 		Geometry polygonGeometry = PolygonBasedFilter.readPolygonGeometry(polygonFile);
-		Iterable<? extends Link> outerLinks = PolygonBasedFilter.filterLinksOutsidePolygon(allLinks, polygonGeometry,
-				false);
-
-		for (Link link : outerLinks) {
-			network.removeLink(link.getId());
-		}
+		// includeBorderLinks must be negated
+		allLinks.stream()
+				.filter(link -> !PolygonBasedFilter.isLinkInsidePolygon(link, polygonGeometry, true))
+				.forEach(link -> network.removeLink(link.getId()));
 
 		new NetworkCleaner().run(network);
 		new NetworkWriter(network).write(subNetworkFile);

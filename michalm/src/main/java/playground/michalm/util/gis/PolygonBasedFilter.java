@@ -28,8 +28,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.google.common.collect.Iterables;
-
 public class PolygonBasedFilter {
 	public static boolean isLinkInsidePolygon(Link link, Geometry polygonGeometry, boolean includeBorderLinks) {
 		Point fromPoint = MGC.coord2Point(link.getFromNode().getCoord());
@@ -46,29 +44,8 @@ public class PolygonBasedFilter {
 		return polygonGeometry.contains(toPoint);
 	}
 
-	public static Iterable<? extends Link> filterLinksInsidePolygon(Iterable<? extends Link> links,
-			Geometry polygonGeometry, boolean includeBorderLinks) {
-		return Iterables.filter(links, link -> isLinkInsidePolygon(link, polygonGeometry, includeBorderLinks));
-	}
-
-	public static Iterable<? extends Link> filterLinksOutsidePolygon(Iterable<? extends Link> links,
-			Geometry polygonGeometry, boolean includeBorderLinks) {
-		// includeBorderLinks must be negated
-		return Iterables.filter(links, link -> !isLinkInsidePolygon(link, polygonGeometry, !includeBorderLinks));
-	}
-
 	public static boolean isFeatureInsidePolygon(SimpleFeature feature, final Geometry polygonGeometry) {
 		return polygonGeometry.contains((Geometry)feature.getDefaultGeometry());
-	}
-
-	public static Iterable<? extends SimpleFeature> filterFeaturesInsidePolygon(
-			Iterable<? extends SimpleFeature> features, Geometry polygonGeometry) {
-		return Iterables.filter(features, f -> isFeatureInsidePolygon(f, polygonGeometry));
-	}
-
-	public static Iterable<? extends SimpleFeature> filterFeaturesOutsidePolygon(
-			Iterable<? extends SimpleFeature> features, Geometry polygonGeometry) {
-		return Iterables.filter(features, f -> !isFeatureInsidePolygon(f, polygonGeometry));
 	}
 
 	public static Geometry readPolygonGeometry(String file) {
