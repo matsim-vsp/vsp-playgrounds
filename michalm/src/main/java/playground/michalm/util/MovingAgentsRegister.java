@@ -19,18 +19,24 @@
 
 package playground.michalm.util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.*;
+import org.matsim.api.core.v01.events.PersonArrivalEvent;
+import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
+import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.events.handler.EventHandler;
 
 public class MovingAgentsRegister
 		implements EventHandler, PersonDepartureEventHandler, PersonStuckEventHandler, PersonArrivalEventHandler {
-	private Map<Id<Person>, PersonDepartureEvent> movingAgentsMap = new HashMap<>();
+	private final Map<Id<Person>, PersonDepartureEvent> movingAgentsMap = new HashMap<>();
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
