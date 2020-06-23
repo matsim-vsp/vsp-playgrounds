@@ -253,7 +253,7 @@ public class TtRunCottbusSimulation {
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final NetworkType BTU_BASE_NET = NetworkType.V4_1;
 	private static String RUNS_SVN = "../../runs-svn/cottbus/";
-	private static final String OSM_INPUT_DIR = INPUT_BASE_DIR + "osm_stand2020-04-15_2/";
+	private static final String OSM_INPUT_DIR = INPUT_BASE_DIR + "osm_stand2020-05-07/";
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
@@ -693,7 +693,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(1000);
+		config.controler().setLastIteration(0);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
