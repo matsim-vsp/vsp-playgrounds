@@ -47,7 +47,7 @@ public final class AssignmentEmulatingQLaneNetworkFactory implements QNetworkFac
 
 		final NetsimEngineContext context = new NetsimEngineContext(events, network.getEffectiveCellSize(), agentCounter1, snapshotInfoBuilder, qsimConfig, mobsimTimer1, linkWidthCalculator ) ;
 
-		nodeBuilder = new QNodeImpl.Builder( netsimEngine, context );
+		nodeBuilder = new QNodeImpl.Builder( netsimEngine, context, scenario.getConfig().qsim() );
 
 		linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
 		linkBuilder.setLaneFactory(new LaneFactory() {
