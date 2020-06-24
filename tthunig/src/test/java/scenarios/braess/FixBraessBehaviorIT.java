@@ -68,22 +68,22 @@ public final class FixBraessBehaviorIT{
 	
     @Test
 	public void testBraessWoPricing() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 35, 1941, 24, 3928399);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 35, 1943, 22, 3934518);
 	}
 
     @Test
 	public void testV3() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 690, 668, 642, 2778328);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 685, 640, 675, 2602353);
 	}
 
 	@Test
 	public void testV8() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 878, 303, 819, 2080747);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 904, 259, 837, 1935119);
 	}
 
 	@Test
 	public void testV9() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 881, 277, 842, 2003426);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 896, 245, 859, 1866679);
 	}
 	
 	private void fixRouteDistributionAndTT(RunBraessSimulation.PricingType pricingType, int expectedNOAgentsOnUpperRoute,

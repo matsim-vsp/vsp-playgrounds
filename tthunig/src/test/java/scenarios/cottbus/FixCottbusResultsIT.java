@@ -59,17 +59,17 @@ public class FixCottbusResultsIT {
 	
 	@Test
 	public void testBC(){		
-		fixResults(NetworkType.V1, PopulationType.WoMines, SignalType.MS, 65281540.0);
+		fixResults(NetworkType.V1, PopulationType.WoMines, SignalType.MS, 6523408.0);
 	}
 
 	@Test
 	public void testBCContinuedFreeRouteChoice(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1088907.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1068388.0);
 	}
 	
 	@Test
 	public void testBCContinuedFixedRouteSet(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1068391.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1088905.0);
 	}	
 	
 	private void fixResults(NetworkType netType, PopulationType popType, SignalType signalType, double expectedTotalTt) {
