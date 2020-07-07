@@ -19,8 +19,6 @@
 
 package playground.michalm.audiAV.flowPaper;
 
-import static org.matsim.contrib.taxi.schedule.TaxiTaskTypes.DEFAULT_TAXI_TYPES;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -55,8 +53,7 @@ public class RecalcStatsAudiAVFlowPaper {
 					TaxiStatsCalculator calculator = new TaxiStatsCalculator(fleet.getVehicles().values());
 					String prefix = path + id + "/ITERS/it.50/" + id + ".50.";
 
-					new TaxiStatsWriter(calculator.getTaxiStats(), DEFAULT_TAXI_TYPES).write(
-							prefix + "hourly_stats_new_stats.txt");
+					new TaxiStatsWriter(calculator.getTaxiStats()).write(prefix + "hourly_stats_new_stats.txt");
 					new TaxiHistogramsWriter(calculator.getTaxiStats()).write(
 							prefix + "hourly_histograms_new_stats.txt");
 				});
