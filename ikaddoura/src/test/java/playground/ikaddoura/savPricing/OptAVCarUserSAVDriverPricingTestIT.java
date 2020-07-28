@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -74,7 +75,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFareConfigGroup(),
+					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.plansCalcRoute().setRoutingRandomness(0.);
@@ -126,7 +127,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFareConfigGroup(),
+					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup(),
 					new NoiseConfigGroup());
 			
@@ -170,7 +171,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFareConfigGroup(),
+					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.plansCalcRoute().setRoutingRandomness(0.);
@@ -221,7 +222,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFareConfigGroup(),
+					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-SAV");

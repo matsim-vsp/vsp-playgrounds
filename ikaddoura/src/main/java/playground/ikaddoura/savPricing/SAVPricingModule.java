@@ -29,6 +29,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+
+import com.google.inject.Inject;
+
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
@@ -55,6 +58,7 @@ public class SAVPricingModule extends AbstractModule {
 	private final Scenario scenario;
 	private final String privateCarMode;
 	
+	@Inject
 	public SAVPricingModule(Scenario scenario, String privateCarMode) {
 		this.scenario = scenario;
 		this.privateCarMode = privateCarMode;

@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -72,7 +73,7 @@ public class OptAVModeChoiceTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -127,7 +128,7 @@ public class OptAVModeChoiceTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -206,7 +207,7 @@ public class OptAVModeChoiceTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -262,7 +263,7 @@ public class OptAVModeChoiceTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);

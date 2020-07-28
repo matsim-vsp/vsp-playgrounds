@@ -24,6 +24,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.AccessEgressType;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
@@ -141,7 +142,7 @@ public class RunOpenBerlinScenario {
 		config.subtourModeChoice().setProbaForRandomSingleTripMode(probaForRandomSingleTripMode);
 		
 		if (useVSPdefaults) {
-			config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+			config.plansCalcRoute().setAccessEgressType(AccessEgressType.accessEgressModeToLink);
 			config.qsim().setUsingTravelTimeCheckInTeleportation(true);
 			config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
 		}

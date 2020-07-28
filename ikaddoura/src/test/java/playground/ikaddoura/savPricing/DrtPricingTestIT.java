@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
@@ -75,7 +76,7 @@ public class DrtPricingTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -117,7 +118,7 @@ public class DrtPricingTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -156,7 +157,7 @@ public class DrtPricingTestIT {
 		Config config3 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		
@@ -244,7 +245,7 @@ public class DrtPricingTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		
@@ -284,7 +285,7 @@ public class DrtPricingTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFareConfigGroup(),
+				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup());
 		
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c");

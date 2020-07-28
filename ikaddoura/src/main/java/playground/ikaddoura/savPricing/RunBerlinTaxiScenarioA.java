@@ -39,6 +39,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.population.algorithms.PermissibleModesCalculator;
+import org.matsim.core.population.algorithms.PermissibleModesCalculatorImpl;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
@@ -181,9 +183,10 @@ public final class RunBerlinTaxiScenarioA {
 						final String[] chainBasedModes = {modeToReplaceCarTripsInBrandenburg, "bicycle"};
 
 						final Builder builder = new Builder(new RandomPlanSelector<>());
+						PermissibleModesCalculator permissibleModeCalculator = new PermissibleModesCalculatorImpl(config);
+						sc.getConfig().subtourModeChoice().setChainBasedModes(chainBasedModes);
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
-								.global().getNumberOfThreads(), availableModes, chainBasedModes, false,
-								0.5, tripRouterProvider));
+								.global(), sc.getConfig().subtourModeChoice(), permissibleModeCalculator));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}

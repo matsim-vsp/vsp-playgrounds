@@ -28,7 +28,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.noise.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.MergeNoiseCSVFile.OutputFormat;
-import org.matsim.contrib.noise.NoiseAllocationApproach;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.NoiseOfflineCalculation;
 import org.matsim.contrib.noise.ProcessNoiseImmissions;
@@ -248,7 +247,7 @@ public class NoiseOfflineCalculationBerlinDZ {
 		tunnelLinkIDs.add(Id.create("96568", Link.class));
 		tunnelLinkIDs.add(Id.create("15490", Link.class));
 		
-		noiseParameters.setNoiseAllocationApproach(NoiseAllocationApproach.MarginalCost);
+		noiseParameters.setNoiseAllocationApproach(org.matsim.contrib.noise.NoiseConfigGroup.NoiseAllocationApproach.MarginalCost);
 		
 		noiseParameters.setTimeBinSizeNoiseComputation(timeBinSize);
 		

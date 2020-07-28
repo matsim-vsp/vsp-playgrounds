@@ -43,6 +43,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.population.algorithms.PermissibleModesCalculator;
+import org.matsim.core.population.algorithms.PermissibleModesCalculatorImpl;
 import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
@@ -197,11 +199,11 @@ public final class RunBerlinDrtScenarioA {
 										+ " - available modes: "
 										+ availableModes.toString());
 								final String[] chainBasedModes = { modeToReplaceCarTripsInBrandenburg, "bicycle" };
-
+								sc.getConfig().subtourModeChoice().setChainBasedModes(chainBasedModes);
 								final Builder builder = new Builder(new RandomPlanSelector<>());
+								PermissibleModesCalculator permissibleMode = new PermissibleModesCalculatorImpl(config);
 								builder.addStrategyModule(
-										new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(),
-												availableModes, chainBasedModes, false, 0.5, tripRouterProvider));
+										new SubtourModeChoice(sc.getConfig().global(), sc.getConfig().subtourModeChoice(), permissibleMode));
 								builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 								return builder.build();
 							}

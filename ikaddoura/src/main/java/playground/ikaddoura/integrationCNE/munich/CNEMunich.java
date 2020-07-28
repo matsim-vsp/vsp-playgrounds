@@ -41,8 +41,8 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.MergeNoiseCSVFile;
-import org.matsim.contrib.noise.NoiseAllocationApproach;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseConfigGroup.NoiseAllocationApproach;
 import org.matsim.contrib.noise.ProcessNoiseImmissions;
 import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
 import org.matsim.core.config.Config;
@@ -51,12 +51,13 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.population.algorithms.PermissibleModesCalculator;
+import org.matsim.core.population.algorithms.PermissibleModesCalculatorImpl;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -175,9 +176,11 @@ public class CNEMunich {
 						@Inject Scenario sc;
 						@Override public PlanStrategy get() {
 							final Builder builder = new Builder(new RandomPlanSelector<>());
-							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false,
-									0.0, //value 0.0 for backward compatibility.
-									tripRouterProvider));
+							sc.getConfig().subtourModeChoice().setChainBasedModes(chainBasedModes);
+							sc.getConfig().subtourModeChoice().setModes(availableModes);
+							
+							PermissibleModesCalculator permissibleModesCalculator = new PermissibleModesCalculatorImpl(config);
+							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global(), sc.getConfig().subtourModeChoice(), permissibleModesCalculator));
 							builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 							return builder.build();
 						}
