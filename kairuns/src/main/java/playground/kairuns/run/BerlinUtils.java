@@ -38,6 +38,7 @@ import org.matsim.contrib.noise.NoiseOfflineCalculation;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.AccessEgressType;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
@@ -288,7 +289,7 @@ final class BerlinUtils {
 			stratSets.setWeight(0.1);
 			config.strategy().addStrategySettings(stratSets);
 			if ( !equil ) {
-				config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+				config.plansCalcRoute().setAccessEgressType(AccessEgressType.accessEgressModeToLink);
 			}
 		}
 		if ( modeChoice ) {
