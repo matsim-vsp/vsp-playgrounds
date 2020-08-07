@@ -78,7 +78,7 @@ public class SelectiveLinkRemover {
         networkCleaner.run(scenario.getNetwork());
 
         // Add pt back into the other network
-        // Note: Customized attribute are not considered here
+        // Note: Customized attributes are not considered here
         NetworkFactory factory = scenario.getNetwork().getFactory();
         for (Node node : ptScenario.getNetwork().getNodes().values()) {
             Node node2 = factory.createNode(node.getId(), node.getCoord());
