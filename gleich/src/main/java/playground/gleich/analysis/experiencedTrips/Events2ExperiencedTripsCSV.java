@@ -68,18 +68,19 @@ public final class Events2ExperiencedTripsCSV {
 	private static final Logger log = Logger.getLogger(Events2ExperiencedTripsCSV.class);
     
     public static void main(String[] args) {
-    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrtO443g/snzDrtO443g.";
+    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrtO442x/snzDrtO442x.";
 //		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrt342/snzDrt342.";
 //		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrtO321g/snzDrtO321g.";
 		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/gladbeck.shp";
 //		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
-		double bufferAroundShpFileM = 2000;
+//		double bufferAroundShpFileM = 2000;
+		int bufferAroundShpFileM = 0;
 
 //		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
 		if (args.length==3) {
 			pathInclRunIdAndDot = args[0];
 			pathTripFilterShapeFile = args[1];
-			bufferAroundShpFileM = Double.parseDouble(args[2]);
+			bufferAroundShpFileM = Integer.parseInt(args[2]);
 		} else if (args.length>3) {
 			throw new RuntimeException(">3 args.length not implemented yet.");
 		}
@@ -100,7 +101,7 @@ public final class Events2ExperiencedTripsCSV {
 
         Events2ExperiencedTripsCSV runner = new Events2ExperiencedTripsCSV(config,
 				pathInclRunIdAndDot + "output_events.xml.gz");
-        runner.runAnalysisAndWriteResult(pathInclRunIdAndDot + "output_experiencedTrips.csv.gz",
+        runner.runAnalysisAndWriteResult(pathInclRunIdAndDot + "output_experiencedTrips_buffer" + bufferAroundShpFileM + "m.csv.gz",
 				pathInclRunIdAndDot + "output_experiencedLegs.csv.gz", mainModeIdentifier,
 				pathTripFilterShapeFile, bufferAroundShpFileM);
     }
