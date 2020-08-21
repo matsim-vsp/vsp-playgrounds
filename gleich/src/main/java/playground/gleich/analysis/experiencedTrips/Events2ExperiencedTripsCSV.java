@@ -25,11 +25,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.apache.log4j.Logger;
-import org.locationtech.jts.geom.prep.PreparedGeometry;
-import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.matsim.analysis.TripsAndLegsCSVWriter;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -48,6 +48,7 @@ import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.*;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.pt.routes.TransitPassengerRoute;
 import org.matsim.utils.gis.shp2matsim.ShpGeometryUtils;
 import playground.gleich.analysis.DefaultAnalysisModeIdentifier;
@@ -68,16 +69,16 @@ public final class Events2ExperiencedTripsCSV {
 	private static final Logger log = Logger.getLogger(Events2ExperiencedTripsCSV.class);
     
     public static void main(String[] args) {
-//    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrt443/snzDrt443.";
-		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrt342/snzDrt342.";
-		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
-		double bufferAroundShpFileM = 2000;
+    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrtO442x/snzDrtO442x.";
+//		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrt342/snzDrt342.";
+//		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrtO321g/snzDrtO321g.";
+		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/gladbeck.shp";
+//		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
 //		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
-		if (args.length==3) {
+		if (args.length==2) {
 			pathInclRunIdAndDot = args[0];
 			pathTripFilterShapeFile = args[1];
-			bufferAroundShpFileM = Double.parseDouble(args[2]);
 		} else if (args.length>3) {
 			throw new RuntimeException(">3 args.length not implemented yet.");
 		}
@@ -100,7 +101,7 @@ public final class Events2ExperiencedTripsCSV {
 				pathInclRunIdAndDot + "output_events.xml.gz");
         runner.runAnalysisAndWriteResult(pathInclRunIdAndDot + "output_experiencedTrips.csv.gz",
 				pathInclRunIdAndDot + "output_experiencedLegs.csv.gz", mainModeIdentifier,
-				pathTripFilterShapeFile, bufferAroundShpFileM);
+				pathTripFilterShapeFile);
     }
 
     public Events2ExperiencedTripsCSV(Config config, String eventsFile) {
@@ -126,44 +127,36 @@ public final class Events2ExperiencedTripsCSV {
 
     public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile,
 										  AnalysisMainModeIdentifier mainModeIdentifier,
-										  String shpFile, double bufferAroundShpFileM) {
+										  String shpFile) {
     	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension(
-    			mainModeIdentifier, shpFile, bufferAroundShpFileM);
+    			mainModeIdentifier, shpFile);
 		TripsAndLegsCSVWriter.CustomLegsWriterExtension customLegsWriterExtension = new ExperiencedLegsExtension();
     	 new TripsAndLegsCSVWriter(scenario, customTripsWriterExtension, customLegsWriterExtension).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile, outputExperiencedLegsFile);
+    	 log.info("Done writing " + outputExperiencedTripsFile + " and " + outputExperiencedLegsFile);
     }
     
     private class ExperiencedTripsExtension implements TripsAndLegsCSVWriter.CustomTripsWriterExtension {
 
 		AnalysisMainModeIdentifier mainModeIdentifier;
-		List<PreparedGeometry> geometries;
-		double bufferAroundShpFileM;
+		List<Geometry> geometries;
 
     	ExperiencedTripsExtension(AnalysisMainModeIdentifier mainModeIdentifier,
-								  String shpFile, double bufferAroundShpFileM) {
+								  String shpFile) {
     		this.mainModeIdentifier = mainModeIdentifier;
-			this.bufferAroundShpFileM = bufferAroundShpFileM;
 
     		if (shpFile!=null && !shpFile.equals("")) {
 				try {
-					geometries = ShpGeometryUtils.loadPreparedGeometries(Paths.get(shpFile).toUri().toURL());
+					geometries = ShpGeometryUtils.loadGeometries(Paths.get(shpFile).toUri().toURL());
 				} catch (MalformedURLException e) {
 					log.error(e + "\nInput shape file string was: " + shpFile);
 					e.printStackTrace();
 				}
 			}
-    		if (bufferAroundShpFileM > 0.0) {
-    			PreparedGeometryFactory factory = new PreparedGeometryFactory();
-				assert geometries != null;
-				geometries = geometries.stream()
-						.map(geom -> factory.create(geom.getGeometry().buffer(bufferAroundShpFileM)))
-						.collect(Collectors.toList());
-			}
 		}
 
 		@Override
 		public String[] getAdditionalTripHeader() {
-			String[] header = {"transit_stops_visited", "main_mode", "start_in_shape", "end_in_shape"};
+			String[] header = {"transit_stops_visited", "main_mode", "start_dist_to_shape", "end_dist_to_shape"};
 			return header;
 		}
 
@@ -185,8 +178,8 @@ public final class Events2ExperiencedTripsCSV {
 			values.add(mainModeIdentifier.identifyMainMode(trip.getLegsOnly()));
 			Coord fromCoord = getCoordFromActivity(trip.getOriginActivity());
 			Coord toCoord = getCoordFromActivity(trip.getDestinationActivity());
-			values.add(ShpGeometryUtils.isCoordInPreparedGeometries(fromCoord, geometries) ? "TRUE" : "FALSE");
-			values.add(ShpGeometryUtils.isCoordInPreparedGeometries(toCoord, geometries) ? "TRUE" : "FALSE");
+			values.add(getMinDistanceFromGeometries(fromCoord, geometries));
+			values.add(getMinDistanceFromGeometries(toCoord, geometries));
 			return values;
 		}
     }
@@ -234,5 +227,12 @@ public final class Events2ExperiencedTripsCSV {
 			legColumn.add((containsDrt && containsPt) ? "inter"+experiencedLeg.getMode() : "mono"+experiencedLeg.getMode());
 			return legColumn;
 		}
+	}
+
+	private String getMinDistanceFromGeometries(Coord coord, List<Geometry> geometries) {
+    	// distance method unavailable for PreparedGeometry, only available for Geometry
+		Point point = MGC.coord2Point(coord);
+		Optional<Double> minimumDistance = geometries.stream().map(g -> g.distance(point)).min(Double::compareTo);
+		return minimumDistance.isPresent() ? minimumDistance.get().toString() : "NA";
 	}
 }
