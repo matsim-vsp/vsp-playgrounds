@@ -19,7 +19,7 @@
 
 package playground.michalm.drt.run;
 
-import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
+import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -43,7 +43,7 @@ public class RunSharedRebalancableETaxiMielec {
 		DrtConfigGroup drtCfg = DrtConfigGroup.getSingleModeDrtConfig(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
 
-		MinCostFlowRebalancingParams rebalancingParams = drtCfg.getMinCostFlowRebalancing().get();
+		RebalancingParams rebalancingParams = drtCfg.getRebalancingParams().get();
 		rebalancingParams.setInterval(600);
 		rebalancingParams.setCellSize(500);
 
