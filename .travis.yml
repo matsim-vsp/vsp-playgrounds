@@ -1,6 +1,5 @@
 language: java
 jdk: openjdk11
-#dist: trusty
 #addons:
 #  apt:
 #    packages:
