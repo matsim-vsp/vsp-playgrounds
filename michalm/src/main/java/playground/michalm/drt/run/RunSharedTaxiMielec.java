@@ -19,6 +19,7 @@
 
 package playground.michalm.drt.run;
 
+import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystemParams;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
@@ -42,9 +43,12 @@ public class RunSharedTaxiMielec {
 		DrtConfigGroup drtCfg = DrtConfigGroup.getSingleModeDrtConfig(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
 
+		DrtZonalSystemParams zonalSystemParams = drtCfg.getZonalSystemParams().get();
+		zonalSystemParams.setCellSize(500.0);
+		zonalSystemParams.setZonesGeneration(DrtZonalSystemParams.ZoneGeneration.GridFromNetwork);
+
 		RebalancingParams rebalancingParams = drtCfg.getRebalancingParams().get();
 		rebalancingParams.setInterval(600);
-		rebalancingParams.setCellSize(500);
 
 		config.controler().setLastIteration(1);
 		config.controler().setWriteEventsInterval(1);
