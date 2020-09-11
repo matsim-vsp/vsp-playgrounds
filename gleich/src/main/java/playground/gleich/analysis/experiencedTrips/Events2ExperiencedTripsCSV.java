@@ -128,22 +128,17 @@ public final class Events2ExperiencedTripsCSV {
     public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile,
 										  AnalysisMainModeIdentifier mainModeIdentifier,
 										  String shpFile) {
-    	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension(
-    			mainModeIdentifier, shpFile);
+    	TripsAndLegsCSVWriter.CustomTripsWriterExtension customTripsWriterExtension = new ExperiencedTripsExtension(shpFile);
 		TripsAndLegsCSVWriter.CustomLegsWriterExtension customLegsWriterExtension = new ExperiencedLegsExtension();
-    	 new TripsAndLegsCSVWriter(scenario, customTripsWriterExtension, customLegsWriterExtension).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile, outputExperiencedLegsFile);
+    	 new TripsAndLegsCSVWriter(scenario, customTripsWriterExtension, customLegsWriterExtension, mainModeIdentifier).write(experiencedPlansService.getExperiencedPlans(), outputExperiencedTripsFile, outputExperiencedLegsFile);
     	 log.info("Done writing " + outputExperiencedTripsFile + " and " + outputExperiencedLegsFile);
     }
     
     private class ExperiencedTripsExtension implements TripsAndLegsCSVWriter.CustomTripsWriterExtension {
 
-		AnalysisMainModeIdentifier mainModeIdentifier;
 		List<Geometry> geometries;
 
-    	ExperiencedTripsExtension(AnalysisMainModeIdentifier mainModeIdentifier,
-								  String shpFile) {
-    		this.mainModeIdentifier = mainModeIdentifier;
-
+    	ExperiencedTripsExtension(String shpFile) {
     		if (shpFile!=null && !shpFile.equals("")) {
 				try {
 					geometries = ShpGeometryUtils.loadGeometries(Paths.get(shpFile).toUri().toURL());
@@ -156,7 +151,7 @@ public final class Events2ExperiencedTripsCSV {
 
 		@Override
 		public String[] getAdditionalTripHeader() {
-			String[] header = {"transit_stops_visited", "main_mode", "start_dist_to_shape", "end_dist_to_shape"};
+			String[] header = {"transit_stops_visited", "start_dist_to_shape", "end_dist_to_shape"};
 			return header;
 		}
 
@@ -175,7 +170,6 @@ public final class Events2ExperiencedTripsCSV {
 				}
 			}
 			values.add(transitStopsVisited.toString());
-			values.add(mainModeIdentifier.identifyMainMode(trip.getLegsOnly()));
 			Coord fromCoord = getCoordFromActivity(trip.getOriginActivity());
 			Coord toCoord = getCoordFromActivity(trip.getDestinationActivity());
 			values.add(getMinDistanceFromGeometries(fromCoord, geometries));
