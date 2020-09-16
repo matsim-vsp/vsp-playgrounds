@@ -23,7 +23,11 @@ import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -162,12 +166,12 @@ public class CalculatePtOperatingCostsFromEvents {
 		System.out.println("totalCost: " + totalCost);
 	}
 
-	private class VehKmInShapeEventHandler implements LinkEnterEventHandler {
+	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 		private final Network network;
 		private final TransitSchedule inSchedule;
 		private final Vehicles inTransiVehicles;
 
-		private Map<Id<Vehicle>, Double> veh2firstLinkEnterEventTime = new HashMap<>();
+		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2timeInArea = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2distanceInArea = new HashMap<>();
 
@@ -176,9 +180,23 @@ public class CalculatePtOperatingCostsFromEvents {
 			this.inSchedule = inSchedule;
 			this.inTransiVehicles = inTransitVehicles;
 		}
-// TODO: Fzg die auf dem Link enden??? -> LinkLeaveEvent? kein LinkLeaveEvent? Was dann?
+
+		// vehicle starts service at VehicleEntersTrafficEvent
 		@Override
-		public void handleEvent(LinkEnterEvent linkEnterEvent) {
+		public void handleEvent(VehicleEntersTrafficEvent vehicleEntersTrafficEvent) {
+			if (inTransiVehicles.getVehicles().containsKey(vehicleEntersTrafficEvent.getVehicleId())) {
+				// it's a transit vehicle, do something
+				Object attributeIsInShape = network.getLinks().get(vehicleEntersTrafficEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
+				String attrValue = attributeIsInShape == null ? null : attributeIsInShape.toString();
+				if (attributeValueIsInShapeFile.equals(attrValue)) {
+					// vehicle starts service in area
+					veh2enterServiceInAreaEventTime.put(vehicleEntersTrafficEvent.getVehicleId(), vehicleEntersTrafficEvent.getTime());
+				}
+			}
+		}
+
+		@Override
+		public void handleEvent (LinkEnterEvent linkEnterEvent) {
 			if (inTransiVehicles.getVehicles().containsKey(linkEnterEvent.getVehicleId())) {
 				// it's a transit vehicle, do something
 				Object attributeIsInShape = network.getLinks().get(linkEnterEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
@@ -188,20 +206,33 @@ public class CalculatePtOperatingCostsFromEvents {
 					veh2distanceInArea.put(linkEnterEvent.getVehicleId(),
 							veh2distanceInArea.getOrDefault(linkEnterEvent.getVehicleId(), 0.0) +
 									network.getLinks().get(linkEnterEvent.getLinkId()).getLength());
-					if (! veh2firstLinkEnterEventTime.containsKey(linkEnterEvent.getVehicleId())) {
-						// add vehicle start time if not monitored yet
-						veh2firstLinkEnterEventTime.put(linkEnterEvent.getVehicleId(), linkEnterEvent.getTime());
+					if (! veh2enterServiceInAreaEventTime.containsKey(linkEnterEvent.getVehicleId())) {
+						// vehicle was not monitored yet and entered area now
+						veh2enterServiceInAreaEventTime.put(linkEnterEvent.getVehicleId(), linkEnterEvent.getTime());
 					}
 				} else {
 					// either vehicle was already outside the area before (do nothing) or this is the first link outside the area
-					if (veh2firstLinkEnterEventTime.containsKey(linkEnterEvent.getVehicleId())) {
+					if (veh2enterServiceInAreaEventTime.containsKey(linkEnterEvent.getVehicleId())) {
 						// vehicle was in the area before: save time travelled in area and remove from monitored vehicles
 						veh2timeInArea.put(linkEnterEvent.getVehicleId(),
 								veh2timeInArea.getOrDefault(linkEnterEvent.getVehicleId(), 0.0) +
-										linkEnterEvent.getTime() - veh2firstLinkEnterEventTime.get(linkEnterEvent.getVehicleId()));
-						veh2firstLinkEnterEventTime.remove(linkEnterEvent.getVehicleId());
+										linkEnterEvent.getTime() - veh2enterServiceInAreaEventTime.get(linkEnterEvent.getVehicleId()));
+						veh2enterServiceInAreaEventTime.remove(linkEnterEvent.getVehicleId());
 					}
 				}
+			}
+		}
+
+		// vehicle ends service at VehicleLeavesTrafficEvent
+		@Override
+		public void handleEvent(VehicleLeavesTrafficEvent vehicleLeavesTrafficEvent) {
+			// either vehicle was already outside the area before (do nothing) or this is the first link outside the area
+			if (veh2enterServiceInAreaEventTime.containsKey(vehicleLeavesTrafficEvent.getVehicleId())) {
+				// vehicle was in the area before: save time travelled in area and remove from monitored vehicles
+				veh2timeInArea.put(vehicleLeavesTrafficEvent.getVehicleId(),
+						veh2timeInArea.getOrDefault(vehicleLeavesTrafficEvent.getVehicleId(), 0.0) +
+								vehicleLeavesTrafficEvent.getTime() - veh2enterServiceInAreaEventTime.get(vehicleLeavesTrafficEvent.getVehicleId()));
+				veh2enterServiceInAreaEventTime.remove(vehicleLeavesTrafficEvent.getVehicleId());
 			}
 		}
 
@@ -212,7 +243,6 @@ public class CalculatePtOperatingCostsFromEvents {
 		private Map<Id<Vehicle>, Double> getVeh2distanceInArea() {
 			return veh2distanceInArea;
 		}
-
 	}
 
 	private void attributeNetwork(String shapeFile) {
