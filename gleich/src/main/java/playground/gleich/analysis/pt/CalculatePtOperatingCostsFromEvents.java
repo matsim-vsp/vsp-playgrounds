@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.gleich.analysis.pt;
 
+import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -57,6 +58,7 @@ public class CalculatePtOperatingCostsFromEvents {
 	private final String minibusIdentifier;
 	private final String attributeNameIsInShapeFile = "isInShapeFile";
 	private final String attributeValueIsInShapeFile = "TRUE";
+	private final static Logger log = Logger.getLogger(CalculatePtOperatingCostsFromEvents.class);
 
 	public CalculatePtOperatingCostsFromEvents(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
 		this.coordRefSystem = coordRefSystem;
@@ -80,11 +82,15 @@ public class CalculatePtOperatingCostsFromEvents {
 	 */
 	public static void main(String[] args) {
 		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedNetwork.xml.gz";
-//		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedSchedule.xml.gz";
-//		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
-		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
-		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
-		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
+
+		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedSchedule.xml.gz";
+		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
+ 		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-BC/Vu-BC.output_events.xml.gz";
+
+//		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
+//		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
+//		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
+
 		String shapeFile = "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
 //		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v0/optimizedNetwork.xml.gz";
@@ -126,18 +132,20 @@ public class CalculatePtOperatingCostsFromEvents {
 		double hoursDriven = 0.0;
 		double kmDriven = 0.0;
 		int numVehUsed = 0;
-		Set<Id<Vehicle>> vehIds = new HashSet<>();
 
 		attributeNetwork(shapeFile);
 		//DEBUG
-//		new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		new NetworkWriter(network).write("attributedNetwork.xml.gz");
 
 		EventsManager events = EventsUtils.createEventsManager();
 
 		VehKmInShapeEventHandler eventHandler = new VehKmInShapeEventHandler(network,
 				inSchedule, inTransitVehicles);
 		events.addHandler(eventHandler);
-		new MatsimEventsReader(events).readFile(eventsFile);
+		events.initProcessing();
+		MatsimEventsReader eventsReader = new MatsimEventsReader(events);
+		eventsReader.readFile(eventsFile);
+		events.finishProcessing();
 		
 		// a vehicle could be used on multiple lines, so calculate according to that
 		Map<Id<Vehicle>, Double> veh2timeInArea = eventHandler.getVeh2timeInArea();

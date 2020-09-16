@@ -10,45 +10,36 @@
 	<artifactId>gleich</artifactId>
 	<name>gleich</name>
 
+	<properties>
+		<!-- release> -->
+		<matsim.version>13.0-SNAPSHOT</matsim.version>
+		<!--weekly "release":-->
+		<!-- <matsim.version>13.0-2020w24-SNAPSHOT</matsim.version>  -->
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>av</artifactId>
-			<version>13.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>dvrp</artifactId>
-			<version>13.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>minibus</artifactId>
-			<version>13.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>vsp</artifactId>
-			<version>13.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
-
-		<!-- <dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>jbischoff</artifactId>
-			<version>13.0-SNAPSHOT</version>
-		</dependency>-->
-		<!-- <dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>vsp</artifactId>
-			<version>13.0-SNAPSHOT</version>
-		</dependency> -->
-
-		<!-- vspshk playground only necessary for Gabriel's CSVWriter -->
-		<!-- <dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>vspshk</artifactId>
-			<version>13.0-SNAPSHOT</version>
-		</dependency>-->
-
 	</dependencies>
 </project>
