@@ -22,14 +22,11 @@ import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -87,13 +84,15 @@ public class CalculatePtOperatingCostsFromEvents {
 	public static void main(String[] args) {
 		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedNetwork.xml.gz";
 
-		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedSchedule.xml.gz";
-		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
- 		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-BC/Vu-BC.output_events.xml.gz";
+//		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedSchedule.xml.gz";
+//		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
+// 		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-BC/Vu-BC.output_events.xml.gz";
+//		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-1/Vu-DRT-1.output_events.xml.gz";
+//		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-2/Vu-DRT-2.output_events.xml.gz";
 
-//		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
-//		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
-//		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
+		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
+		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
+		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
 
 		String shapeFile = "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
@@ -154,19 +153,25 @@ public class CalculatePtOperatingCostsFromEvents {
 		// a vehicle could be used on multiple lines, so calculate according to that
 		Map<Id<Vehicle>, Double> veh2timeInArea = eventHandler.getVeh2timeInArea();
 		Map<Id<Vehicle>, Double> veh2distanceInArea = eventHandler.getVeh2distanceInArea();
+		Map<Id<Vehicle>, Double> veh2paxDistanceInArea = eventHandler.getVeh2paxDistanceInArea();
 
 		hoursDriven = veh2timeInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 3600; // s -> h
 		kmDriven = veh2distanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
 		numVehUsed = veh2distanceInArea.size();
+
+		double pkm = veh2paxDistanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
 		
 		double totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
 		System.out.println("hoursDriven: " + hoursDriven + " -> cost " + hoursDriven * costPerHour);
 		System.out.println("kmDriven: " + kmDriven + " -> cost " + kmDriven * costPerKm + " ; km per veh per day: " + kmDriven / numVehUsed);
 		System.out.println("numVehUsed: " + numVehUsed + " -> cost " + numVehUsed * costPerDayFixVeh);
 		System.out.println("totalCost: " + totalCost);
+		System.out.println("pkm: " + pkm);
 	}
 
-	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+			VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
+			TransitDriverStartsEventHandler {
 		private final Network network;
 		private final TransitSchedule inSchedule;
 		private final Vehicles inTransiVehicles;
@@ -174,6 +179,9 @@ public class CalculatePtOperatingCostsFromEvents {
 		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2timeInArea = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2distanceInArea = new HashMap<>();
+		private Map<Id<Vehicle>, Double> veh2paxDistanceInArea = new HashMap<>();
+		private Map<Id<Vehicle>, Integer> veh2currentPax = new HashMap<>();
+		private Set<Id<Person>> transitDriverIds = new HashSet<>();
 
 		public VehKmInShapeEventHandler(Network network, TransitSchedule inSchedule, Vehicles inTransitVehicles) {
 			this.network = network;
@@ -206,6 +214,9 @@ public class CalculatePtOperatingCostsFromEvents {
 					veh2distanceInArea.put(linkEnterEvent.getVehicleId(),
 							veh2distanceInArea.getOrDefault(linkEnterEvent.getVehicleId(), 0.0) +
 									network.getLinks().get(linkEnterEvent.getLinkId()).getLength());
+					veh2paxDistanceInArea.put(linkEnterEvent.getVehicleId(),
+							veh2paxDistanceInArea.getOrDefault(linkEnterEvent.getVehicleId(), 0.0) +
+									network.getLinks().get(linkEnterEvent.getLinkId()).getLength() * veh2currentPax.get(linkEnterEvent.getVehicleId()));
 					if (! veh2enterServiceInAreaEventTime.containsKey(linkEnterEvent.getVehicleId())) {
 						// vehicle was not monitored yet and entered area now
 						veh2enterServiceInAreaEventTime.put(linkEnterEvent.getVehicleId(), linkEnterEvent.getTime());
@@ -236,6 +247,32 @@ public class CalculatePtOperatingCostsFromEvents {
 			}
 		}
 
+		// collect transit driver ids
+		@Override
+		public void handleEvent(TransitDriverStartsEvent transitDriverStartsEvent) {
+			transitDriverIds.add(transitDriverStartsEvent.getDriverId());
+			veh2currentPax.put(transitDriverStartsEvent.getVehicleId(), 0);
+		}
+
+		// count all
+		@Override
+		public void handleEvent(PersonEntersVehicleEvent personEntersVehicleEvent) {
+			if (inTransiVehicles.getVehicles().containsKey(personEntersVehicleEvent.getVehicleId()) &&
+					! transitDriverIds.contains(personEntersVehicleEvent.getPersonId())) {
+				veh2currentPax.put(personEntersVehicleEvent.getVehicleId(),
+						veh2currentPax.get(personEntersVehicleEvent.getVehicleId()) + 1);
+			}
+		}
+
+		@Override
+		public void handleEvent(PersonLeavesVehicleEvent personLeavesVehicleEvent) {
+			if (veh2currentPax.containsKey(personLeavesVehicleEvent.getVehicleId()) &&
+					! transitDriverIds.contains(personLeavesVehicleEvent.getPersonId())) {
+				veh2currentPax.put(personLeavesVehicleEvent.getVehicleId(),
+						veh2currentPax.get(personLeavesVehicleEvent.getVehicleId()) - 1);
+			}
+		}
+
 		private Map<Id<Vehicle>, Double> getVeh2timeInArea() {
 			return veh2timeInArea;
 		}
@@ -243,6 +280,11 @@ public class CalculatePtOperatingCostsFromEvents {
 		private Map<Id<Vehicle>, Double> getVeh2distanceInArea() {
 			return veh2distanceInArea;
 		}
+
+		private Map<Id<Vehicle>, Double> getVeh2paxDistanceInArea() {
+			return veh2paxDistanceInArea;
+		}
+
 	}
 
 	private void attributeNetwork(String shapeFile) {
@@ -256,6 +298,8 @@ public class CalculatePtOperatingCostsFromEvents {
 		network.getLinks().values().stream().forEach(link -> link.getAttributes().putAttribute(attributeNameIsInShapeFile,
 				ShpGeometryUtils.isCoordInPreparedGeometries(link.getFromNode().getCoord(), preparedGeometries) ?
 						attributeValueIsInShapeFile : "FALSE"));
+//		network.getLinks().values().stream().forEach(link -> link.getAttributes().putAttribute(attributeNameIsInShapeFile,
+//				attributeValueIsInShapeFile));
 
 	}
 
