@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.GenericEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.parking.parkingsearch.events.StartParkingSearchEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -51,25 +50,20 @@ public class ParkingSearchEventsReader extends MatsimXmlParser {
 	public ParkingSearchEventsReader(EventsManager events) {
 		delegate = new EventsReaderXMLv1(events);
 		this.setValidating(false);
-		
-		MatsimEventsReader.CustomEventMapper<StartParkingSearchEvent> parkingSearchMapper = new MatsimEventsReader.CustomEventMapper<StartParkingSearchEvent>() {
-			
-			@Override
-			public StartParkingSearchEvent apply(GenericEvent event) {
-				
-				Map<String, String> attributes = event.getAttributes();
-				
-				Double time = Double.parseDouble(attributes.get(StartParkingSearchEvent.ATTRIBUTE_TIME));
-				Id<Link> linkId = Id.createLinkId(attributes.get(StartParkingSearchEvent.ATTRIBUTE_LINK));
-				Id<Vehicle> vid = Id.createVehicleId(attributes.get(StartParkingSearchEvent.ATTRIBUTE_VEHICLE));
-				
-				return new StartParkingSearchEvent(time, vid, linkId);
-			}
+
+		MatsimEventsReader.CustomEventMapper parkingSearchMapper = event -> {
+
+			Map<String, String> attributes = event.getAttributes();
+
+			Double time = Double.parseDouble(attributes.get(StartParkingSearchEvent.ATTRIBUTE_TIME));
+			Id<Link> linkId = Id.createLinkId(attributes.get(StartParkingSearchEvent.ATTRIBUTE_LINK));
+			Id<Vehicle> vid = Id.createVehicleId(attributes.get(StartParkingSearchEvent.ATTRIBUTE_VEHICLE));
+
+			return new StartParkingSearchEvent(time, vid, linkId);
 		};
-		
+
 		delegate.addCustomEventMapper(StartParkingSearchEvent.EVENT_TYPE, parkingSearchMapper);
-		
-	
+
 	}
 
 	@Override
