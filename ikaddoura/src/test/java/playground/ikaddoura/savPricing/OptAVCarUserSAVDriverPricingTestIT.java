@@ -28,9 +28,6 @@ import org.junit.Test;
 import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -75,7 +72,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.plansCalcRoute().setRoutingRandomness(0.);
@@ -106,8 +102,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
-			controler.addOverridingModule(new TaxiFareModule());
-			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
 			handler3 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
@@ -127,7 +121,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup(),
 					new NoiseConfigGroup());
 			
@@ -144,8 +137,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
-			controler.addOverridingModule(new TaxiFareModule());
-			
 			handler1 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
 			controler.getEvents().addHandler(handler1);
 			
@@ -171,7 +162,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.plansCalcRoute().setRoutingRandomness(0.);
@@ -206,8 +196,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			handler2 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
 			controler.getEvents().addHandler(handler2);
 			
-			controler.addOverridingModule(new TaxiFareModule());
-			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 			controler.run();
@@ -222,7 +210,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Config config = ConfigUtils.loadConfig(configFile,
 					new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 					new DvrpConfigGroup(),
-					new TaxiFaresConfigGroup(),
 					new OTFVisConfigGroup());
 			
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-SAV");
@@ -251,8 +238,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
-			
-			controler.addOverridingModule(new TaxiFareModule());
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
