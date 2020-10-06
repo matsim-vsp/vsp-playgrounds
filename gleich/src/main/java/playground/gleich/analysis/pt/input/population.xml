@@ -19,4 +19,19 @@
 		</plan>
 	</person>
 
+	<person id="1">
+		<plan selected="yes">
+			<activity type="h" x="1000.0" y="1000.0" end_time="08:00:00" >
+			</activity>
+			<leg mode="pt">
+			</leg>
+			<activity type="w" x="4000.0" y="3000.0" end_time="16:00:00" >
+			</activity>
+			<leg mode="pt">
+			</leg>
+			<activity type="h" x="1000.0" y="1000.0" >
+			</activity>
+		</plan>
+	</person>
+
 </population>
