@@ -59,7 +59,17 @@ public class CalculatePtOperatingCostsFromEvents {
 	private final String minibusIdentifier;
 	private final String attributeNameIsInShapeFile = "isInShapeFile";
 	private final String attributeValueIsInShapeFile = "TRUE";
+
+
+	double hoursDriven = 0.0;
+	double kmDriven = 0.0;
+	int numVehUsed = 0;
+	double pkm = 0.0;
+	double totalCost = 0.0;
+
 	private final static Logger log = Logger.getLogger(CalculatePtOperatingCostsFromEvents.class);
+
+
 
 	public CalculatePtOperatingCostsFromEvents(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
 		this.coordRefSystem = coordRefSystem;
@@ -132,9 +142,6 @@ public class CalculatePtOperatingCostsFromEvents {
 	}
 	
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
-		double hoursDriven = 0.0;
-		double kmDriven = 0.0;
-		int numVehUsed = 0;
 
 		attributeNetwork(shapeFile);
 		//DEBUG
@@ -149,7 +156,7 @@ public class CalculatePtOperatingCostsFromEvents {
 		MatsimEventsReader eventsReader = new MatsimEventsReader(events);
 		eventsReader.readFile(eventsFile);
 		events.finishProcessing();
-		
+
 		// a vehicle could be used on multiple lines, so calculate according to that
 		Map<Id<Vehicle>, Double> veh2timeInArea = eventHandler.getVeh2timeInArea();
 		Map<Id<Vehicle>, Double> veh2distanceInArea = eventHandler.getVeh2distanceInArea();
@@ -159,9 +166,9 @@ public class CalculatePtOperatingCostsFromEvents {
 		kmDriven = veh2distanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
 		numVehUsed = veh2distanceInArea.size();
 
-		double pkm = veh2paxDistanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
-		
-		double totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
+		pkm = veh2paxDistanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
+
+		totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
 		System.out.println("hoursDriven: " + hoursDriven + " -> cost " + hoursDriven * costPerHour);
 		System.out.println("kmDriven: " + kmDriven + " -> cost " + kmDriven * costPerKm + " ; km per veh per day: " + kmDriven / numVehUsed);
 		System.out.println("numVehUsed: " + numVehUsed + " -> cost " + numVehUsed * costPerDayFixVeh);
