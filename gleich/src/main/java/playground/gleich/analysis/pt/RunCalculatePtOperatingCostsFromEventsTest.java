@@ -2,7 +2,10 @@ package playground.gleich.analysis.pt;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -12,25 +15,30 @@ import org.matsim.core.scenario.ScenarioUtils;
 public class RunCalculatePtOperatingCostsFromEventsTest {
 
 
-    public static void main(String[] args) {
-        Config config = ConfigUtils.loadConfig("C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\input\\config.xml");
-        config.controler().setOutputDirectory("C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output");
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        Scenario scenario = ScenarioUtils.loadScenario(config) ;
-        Controler controler = new Controler(scenario);
-        controler.run();
-    }
-
-
-
     @Test
     public void testOnePlan() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
-        String networkFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_network.xml.gz";
-        String inScheduleFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_transitSchedule.xml.gz";
-        String inTransitVehicleFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_transitVehicles.xml.gz";
-        String eventsFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\input\\events_oneAgent.xml.gz";
-        String shapeFile = "C:\\Users\\jakob\\Desktop\\box3\\box3.shp";
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person = makePerson(8 * 3600.0,
+                new Coord(1000.0, 1000.0),
+                new Coord(4000.0, 3000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
 
 
         String coordRefSystem = "epsg:3857";
@@ -43,13 +51,13 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(370.0, costCalculator.kmDriven,0.);
-        Assert.assertEquals(2.0, costCalculator.numVehUsed,0.);
-        Assert.assertEquals(null, 4.9, costCalculator.pkm,0.);
+        Assert.assertEquals(370.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
+        Assert.assertEquals(2.5, costCalculator.getPkm(),0.);
 
 
-        // h--> (45) --> 56 --> 66 --> w --> (66) --> 65 --> h,
-        //              2400 +  100 +                2400       =  4900 = 4.9 pkm
+        // h--> (45) --> 56 --> 66 --> w
+        //              2400 +  100 +        = 2.5 pkm
 
 
         // Link 44 --> 45 --> 56 --> 66
@@ -63,11 +71,36 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testTwoPlans() {
 
-        String networkFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_network.xml.gz";
-        String inScheduleFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_transitSchedule.xml.gz";
-        String inTransitVehicleFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\output\\output_transitVehicles.xml.gz";
-        String eventsFile = "C:\\Users\\jakob\\projects\\vsp-playgrounds\\gleich\\src\\main\\java\\playground\\gleich\\analysis\\pt\\input\\events_twoAgents.xml.gz";
-        String shapeFile = "C:\\Users\\jakob\\Desktop\\box3\\box3.shp";
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person0 = makePerson(8 * 3600.0,
+                new Coord(1000.0, 1000.0),
+                new Coord(4000.0, 3000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        Person person1 = makePerson(8 * 3600.0,
+                new Coord(1000.0, 1000.0),
+                new Coord(4000.0, 3000.0),
+                "1",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person0);
+        scenario.getPopulation().addPerson(person1);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
 
 
         String coordRefSystem = "epsg:3857";
@@ -80,10 +113,30 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(370.0, costCalculator.kmDriven, 0.);
-        Assert.assertEquals(2.0, costCalculator.numVehUsed, 0.);
-        Assert.assertEquals(null, 9.8, costCalculator.pkm, 0.);
+        Assert.assertEquals(370.0, costCalculator.getKmDriven(), 0.);
+        Assert.assertEquals(2.0, costCalculator.getNumVehUsed(), 0.);
+        Assert.assertEquals(null, 5.0, costCalculator.getPkm(), 0.);
 
+    }
+
+    private Person makePerson(double depTime, Coord homeCoord, Coord workCoord, String pId, PopulationFactory pf) {
+        Id<Person> personId = Id.createPersonId(pId);
+        Person person = pf.createPerson(personId);
+        Plan plan = pf.createPlan();
+        Activity activity1 = pf.createActivityFromCoord("h", homeCoord);
+        activity1.setEndTime(depTime);
+        plan.addActivity(activity1);
+        plan.addLeg(pf.createLeg("pt"));
+        Activity activity2 = pf.createActivityFromCoord("w", workCoord);
+        activity2.setEndTime(16*3600.0);
+        plan.addActivity(activity2);
+//        plan.addLeg(pf.createLeg("pt"));
+//        Activity activity3 = pf.createActivityFromCoord("h", homeCoord);
+//        activity3.setEndTimeUndefined();
+//        plan.addActivity(activity3);
+
+        person.addPlan(plan);
+        return person;
     }
 
 

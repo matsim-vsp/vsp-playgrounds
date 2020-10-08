@@ -61,12 +61,12 @@ public class CalculatePtOperatingCostsFromEvents {
 	private final String attributeValueIsInShapeFile = "TRUE";
 
 
-	double hoursDriven = 0.0;
-	double kmDriven = 0.0;
-	int numVehUsed = 0;
-	double pkm = 0.0;
-	double totalCost = 0.0;
+    private double hoursDriven = 0.0;
 
+    private double kmDriven = 0.0;
+    private int numVehUsed = 0;
+    private double pkm = 0.0;
+    private double totalCost = 0.0;
 	private final static Logger log = Logger.getLogger(CalculatePtOperatingCostsFromEvents.class);
 
 
@@ -74,7 +74,7 @@ public class CalculatePtOperatingCostsFromEvents {
 	public CalculatePtOperatingCostsFromEvents(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
 		this.coordRefSystem = coordRefSystem;
 		this.minibusIdentifier = minibusIdentifier;
-		
+
 		// read files
 		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(netFile);
@@ -82,10 +82,30 @@ public class CalculatePtOperatingCostsFromEvents {
 		config.transit().setVehiclesFile(inTransitVehicleFile);
 		config.global().setCoordinateSystem(coordRefSystem); // coordinate reference system should be irrelevant, no need to make it configurable
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		this.network = scenario.getNetwork(); 
+		this.network = scenario.getNetwork();
 		this.inSchedule = scenario.getTransitSchedule();
 		this.inTransitVehicles = scenario.getTransitVehicles();
 	}
+
+    public double getHoursDriven() {
+        return hoursDriven;
+    }
+
+    public double getKmDriven() {
+        return kmDriven;
+    }
+
+    public int getNumVehUsed() {
+        return numVehUsed;
+    }
+
+    public double getPkm() {
+        return pkm;
+    }
+
+    public double getTotalCost() {
+        return totalCost;
+    }
 
 	/**
 	 * Example for usage + convenience
@@ -131,16 +151,16 @@ public class CalculatePtOperatingCostsFromEvents {
 
 //		String coordRefSystem = "SA_Lo19";
 //		String minibusIdentifier = "para_";
-		
+
 //		double costPerHour = 15;
 //		double costPerKm = 1.75;
 //		double costPerDayFixVeh = 700;
-		
+
 		// add vehicle types
 		CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
 		costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 	}
-	
+
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
 
 		attributeNetwork(shapeFile);
@@ -175,12 +195,12 @@ public class CalculatePtOperatingCostsFromEvents {
 		System.out.println("totalCost: " + totalCost);
 		System.out.println("pkm: " + pkm);
 	}
-
-	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+    private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
 			VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
 			TransitDriverStartsEventHandler {
-		private final Network network;
-		private final TransitSchedule inSchedule;
+
+        private final Network network;
+        private final TransitSchedule inSchedule;
 		private final Vehicles inTransiVehicles;
 
 		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
