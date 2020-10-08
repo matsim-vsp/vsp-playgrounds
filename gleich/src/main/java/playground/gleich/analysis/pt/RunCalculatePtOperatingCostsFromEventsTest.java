@@ -56,8 +56,8 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
      * and the following calculates the kmDriven
      * (44) --> (45) --> 56 --> 66
      *        <-- 54 <-- 65 <--/
-     * 50 * (2400 + 100 + 2400 + 1200) / 1000 = 305 km
-     * 305 km / 2 trains = 185 km/veh/day
+     * 5 * (2400 + 100 + 2400 + 1200) / 1000 = 30.5 km
+     * 30.5 km / 2 trains = 15.25 km/veh/day
      * Note: (xx) --> link is not counted
      */
 
@@ -69,7 +69,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(30.5, costCalculator.getKmDriven(),0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
     }
 
@@ -81,7 +81,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testKmDrivenWithPopulation() {
 
-        Person person = makePerson(8 * 3600.0,
+        Person person = makePerson(6 * 3600.0,
                 new Coord(1050.0, 1050.0),
                 new Coord(4000.0, 3000.0),
                 "0",
@@ -95,7 +95,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(30.5, costCalculator.getKmDriven(),0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
 
     }
@@ -109,7 +109,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testOutsideZone() {
 
-        Person person = makePerson(8 * 3600.0,
+        Person person = makePerson(6 * 3600.0,
                 new Coord(1050.0, 1050.0),
                 new Coord(4000.0, 1000.0),
                 "0",
@@ -123,7 +123,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(0., costCalculator.getPkm(),0.); // 0.0 pkm
+        Assert.assertEquals(0., costCalculator.getPkm(),0.);
     }
 
 
@@ -139,7 +139,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testEnterNodeOutsideZone() {
 
-        Person person = makePerson(8 * 3600.0,
+        Person person = makePerson(6 * 3600.0,
                 new Coord(1000.0, 3000.0),
                 new Coord(4000.0, 3000.0),
                 "0",
@@ -152,10 +152,6 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
 
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
-
-
-        // h--> (44) --> (45) --> 56 --> 66 --> w
-        //                       2400 +  100 +     = 2.5 pkm
 
         Assert.assertEquals(2.5, costCalculator.getPkm(),0.);
     }
@@ -172,7 +168,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testEnterNodeWithinZone() {
 
-        Person person = makePerson(8 * 3600.0,
+        Person person = makePerson(6 * 3600.0,
                 new Coord(4000.0, 3000.0),
                 new Coord(1000.0, 3000.0),
                 "0",
@@ -186,8 +182,6 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
-        Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
         Assert.assertEquals(3.6, costCalculator.getPkm(),0.);
     }
 
@@ -203,7 +197,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testWithTransfer() {
 
-        Person person = makePerson(8 * 3600.0,
+        Person person = makePerson(6 * 3600.0,
                 new Coord(1050.0, 1050.0),
                 new Coord(4000.0, 3000.0),
                 "0",
@@ -237,18 +231,18 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
     @Test
     public void testThreeAgents() {
 
-        Person person0 = makePerson(8 * 3600.0,
+        Person person0 = makePerson(6 * 3600.0,
                 new Coord(1000.0, 1000.0),
                 new Coord(4000.0, 3000.0),
                 "0",
                 scenario.getPopulation().getFactory());
 
-        Person person1 = makePerson(8 * 3600.0,
+        Person person1 = makePerson(6 * 3600.0,
                 new Coord(4000.0, 3000.0),
                 new Coord(1000.0, 3000.0),
                 "1",
                 scenario.getPopulation().getFactory());
-        Person person2 = makePerson(8 * 3600.0,
+        Person person2 = makePerson(6 * 3600.0,
                 new Coord(1000.0, 3000.0),
                 new Coord(4000.0, 3000.0),
                 "2",
