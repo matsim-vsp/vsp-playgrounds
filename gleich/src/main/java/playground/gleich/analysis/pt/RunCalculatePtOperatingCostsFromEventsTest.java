@@ -15,8 +15,46 @@ import org.matsim.core.scenario.ScenarioUtils;
 public class RunCalculatePtOperatingCostsFromEventsTest {
 
 
+
+    // Link (44) --> (45) --> 56 --> 66
+    //         <-- 54 <-- 65 <--/
+    // 50 * (2400 + 100 + 2400 + 1200) / 1000 = 305 km
+    // 305 km / 2 trains = 185 km/veh/day
+
     @Test
-    public void testOnePlan() {
+    public void testKmDrivenEmptyPopulation() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
+
+        String coordRefSystem = "epsg:3857";
+        String minibusIdentifier = "";
+
+        double costPerHour = 1;
+        double costPerKm = 1;
+        double costPerDayFixVeh = 1;
+
+        CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+        costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
+
+        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
+    }
+
+    @Test
+    public void testKmDrivenWithPopulation() {
         Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
         config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -24,7 +62,7 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         Scenario scenario = ScenarioUtils.loadScenario(config) ;
 
         Person person = makePerson(8 * 3600.0,
-                new Coord(1000.0, 1000.0),
+                new Coord(1050.0, 1050.0),
                 new Coord(4000.0, 3000.0),
                 "0",
                 scenario.getPopulation().getFactory());
@@ -51,19 +89,184 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(370.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
-        Assert.assertEquals(2.5, costCalculator.getPkm(),0.);
 
+    }
+
+
+
+    @Test
+    public void testOutsideZone() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person = makePerson(8 * 3600.0,
+                new Coord(1050.0, 1050.0),
+                new Coord(4000.0, 1000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
+
+        String coordRefSystem = "epsg:3857";
+        String minibusIdentifier = "";
+
+        double costPerHour = 1;
+        double costPerKm = 1;
+        double costPerDayFixVeh = 1;
+
+        CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+        costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
+
+        Assert.assertEquals(0., costCalculator.getPkm(),0.); // 0.0 pkm
+    }
+
+
+    @Test
+    public void testEnterNodeOutsideZone() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person = makePerson(8 * 3600.0,
+                new Coord(1000.0, 3000.0),
+                new Coord(4000.0, 3000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
+
+        String coordRefSystem = "epsg:3857";
+        String minibusIdentifier = "";
+
+        double costPerHour = 1;
+        double costPerKm = 1;
+        double costPerDayFixVeh = 1;
+
+        CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+        costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
+
+
+        // h--> (44) --> (45) --> 56 --> 66 --> w
+        //                       2400 +  100 +     = 2.5 pkm
+
+        Assert.assertEquals(2.5, costCalculator.getPkm(),0.);
+    }
+
+    @Test
+    public void testEnterNodeWithinZone() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person = makePerson(8 * 3600.0,
+                new Coord(4000.0, 3000.0),
+                new Coord(1000.0, 3000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
+
+        String coordRefSystem = "epsg:3857";
+        String minibusIdentifier = "";
+
+        double costPerHour = 1;
+        double costPerKm = 1;
+        double costPerDayFixVeh = 1;
+
+        CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+        costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
+
+        Assert.assertEquals(305.0, costCalculator.getKmDriven(),0.);
+        Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
+
+        //  h--> (66) --> 65 --> 54 --> (44) --> w
+        //               2400 + 1200                = 3.6 pkm
+
+        Assert.assertEquals(3.6, costCalculator.getPkm(),0.);
+    }
+
+
+    @Test
+    public void testWithTransfer() {
+        Config config = ConfigUtils.loadConfig("src/main/java/playground/gleich/analysis/pt/input/config.xml");
+        config.controler().setOutputDirectory("src/main/java/playground/gleich/analysis/pt/output");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+        Person person = makePerson(8 * 3600.0,
+                new Coord(1050.0, 1050.0),
+                new Coord(4000.0, 3000.0),
+                "0",
+                scenario.getPopulation().getFactory());
+
+        scenario.getPopulation().addPerson(person);
+
+        Controler controler = new Controler(scenario);
+        controler.run();
+
+        String networkFile = "src/main/java/playground/gleich/analysis/pt/output/output_network.xml.gz";
+        String inScheduleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitSchedule.xml.gz";
+        String inTransitVehicleFile = "src/main/java/playground/gleich/analysis/pt/output/output_transitVehicles.xml.gz";
+        String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
+        String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
+
+
+        String coordRefSystem = "epsg:3857";
+        String minibusIdentifier = "";
+
+        double costPerHour = 1;
+        double costPerKm = 1;
+        double costPerDayFixVeh = 1;
+
+        CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
+        costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
         // h--> (45) --> 56 --> 66 --> w
         //              2400 +  100 +        = 2.5 pkm
 
+        Assert.assertEquals(2.5, costCalculator.getPkm(),0.);
 
-        // Link 44 --> 45 --> 56 --> 66
-        //         <-- 54 <-- 65 <--/
-        // 50 * (100 + 1200 + 2400 + 100 + 2400 + 1200) / 1000 = 370 km
-        // 370 km / 2 trains = 185 km/veh/day
+
 
 
     }
@@ -101,8 +304,6 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         String eventsFile = "src/main/java/playground/gleich/analysis/pt/output/output_events.xml.gz";
         String shapeFile = "src/main/java/playground/gleich/analysis/pt/input/boxShapeFile/box.shp";
 
-
-
         String coordRefSystem = "epsg:3857";
         String minibusIdentifier = "";
 
@@ -113,9 +314,9 @@ public class RunCalculatePtOperatingCostsFromEventsTest {
         CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
         costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 
-        Assert.assertEquals(370.0, costCalculator.getKmDriven(), 0.);
+        Assert.assertEquals(305.0, costCalculator.getKmDriven(), 0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(), 0.);
-        Assert.assertEquals(null, 5.0, costCalculator.getPkm(), 0.);
+        Assert.assertEquals(5.0, costCalculator.getPkm(), 0.);
 
     }
 
