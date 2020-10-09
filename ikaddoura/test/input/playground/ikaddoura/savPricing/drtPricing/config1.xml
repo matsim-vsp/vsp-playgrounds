@@ -165,19 +165,15 @@
 			<param name="vehiclesFile" value="taxis.xml"/>
 			<!-- Writes out detailed DRT customer stats in each iteration. True by default. -->
 			<param name="writeDetailedCustomerStats" value="true"/>
+			<parameterset type="drtfare">
+				<param name="basefare" value="0.0"/>
+				<param name="dailySubscriptionFee" value="0.0"/>
+				<param name="distanceFare_m" value="0.01"/>
+				<param name="timeFare_h" value="0.0"/>
+			</parameterset>
 		</parameterset>
 	</module>
-		
-	<module name="taxifares" >
-		<parameterset type="taxifare">
-			<param name="basefare" value="0.0" />
-			<param name="dailySubscriptionFee" value="0.0" />
-			<param name="distanceFare_m" value="0.01" />
-			<param name="timeFare_h" value="0.0" />
-			<param name="mode" value="drt" />
-		</parameterset>
-	</module>
-	
+
 	<module name="otfvis">
 		<param name="coloringScheme" value="taxicab" />
 		<param name="drawNonMovingItems" value="true" />
