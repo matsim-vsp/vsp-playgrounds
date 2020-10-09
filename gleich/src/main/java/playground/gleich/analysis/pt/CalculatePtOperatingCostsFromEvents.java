@@ -59,12 +59,22 @@ public class CalculatePtOperatingCostsFromEvents {
 	private final String minibusIdentifier;
 	private final String attributeNameIsInShapeFile = "isInShapeFile";
 	private final String attributeValueIsInShapeFile = "TRUE";
+
+
+    private double hoursDriven = 0.0;
+
+    private double kmDriven = 0.0;
+    private int numVehUsed = 0;
+    private double pkm = 0.0;
+    private double totalCost = 0.0;
 	private final static Logger log = Logger.getLogger(CalculatePtOperatingCostsFromEvents.class);
+
+
 
 	public CalculatePtOperatingCostsFromEvents(String netFile, String inScheduleFile, String inTransitVehicleFile, String coordRefSystem, String minibusIdentifier) {
 		this.coordRefSystem = coordRefSystem;
 		this.minibusIdentifier = minibusIdentifier;
-		
+
 		// read files
 		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(netFile);
@@ -72,10 +82,30 @@ public class CalculatePtOperatingCostsFromEvents {
 		config.transit().setVehiclesFile(inTransitVehicleFile);
 		config.global().setCoordinateSystem(coordRefSystem); // coordinate reference system should be irrelevant, no need to make it configurable
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		this.network = scenario.getNetwork(); 
+		this.network = scenario.getNetwork();
 		this.inSchedule = scenario.getTransitSchedule();
 		this.inTransitVehicles = scenario.getTransitVehicles();
 	}
+
+    public double getHoursDriven() {
+        return hoursDriven;
+    }
+
+    public double getKmDriven() {
+        return kmDriven;
+    }
+
+    public int getNumVehUsed() {
+        return numVehUsed;
+    }
+
+    public double getPkm() {
+        return pkm;
+    }
+
+    public double getTotalCost() {
+        return totalCost;
+    }
 
 	/**
 	 * Example for usage + convenience
@@ -121,20 +151,17 @@ public class CalculatePtOperatingCostsFromEvents {
 
 //		String coordRefSystem = "SA_Lo19";
 //		String minibusIdentifier = "para_";
-		
+
 //		double costPerHour = 15;
 //		double costPerKm = 1.75;
 //		double costPerDayFixVeh = 700;
-		
+
 		// add vehicle types
 		CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
 		costCalculator.run(eventsFile, shapeFile, costPerHour, costPerKm, costPerDayFixVeh);
 	}
-	
+
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
-		double hoursDriven = 0.0;
-		double kmDriven = 0.0;
-		int numVehUsed = 0;
 
 		attributeNetwork(shapeFile);
 		//DEBUG
@@ -149,7 +176,7 @@ public class CalculatePtOperatingCostsFromEvents {
 		MatsimEventsReader eventsReader = new MatsimEventsReader(events);
 		eventsReader.readFile(eventsFile);
 		events.finishProcessing();
-		
+
 		// a vehicle could be used on multiple lines, so calculate according to that
 		Map<Id<Vehicle>, Double> veh2timeInArea = eventHandler.getVeh2timeInArea();
 		Map<Id<Vehicle>, Double> veh2distanceInArea = eventHandler.getVeh2distanceInArea();
@@ -159,21 +186,21 @@ public class CalculatePtOperatingCostsFromEvents {
 		kmDriven = veh2distanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
 		numVehUsed = veh2distanceInArea.size();
 
-		double pkm = veh2paxDistanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
-		
-		double totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
+		pkm = veh2paxDistanceInArea.values().stream().collect(Collectors.summingDouble(Double::doubleValue)) / 1000; // m -> km
+
+		totalCost = hoursDriven * costPerHour + kmDriven * costPerKm + numVehUsed * costPerDayFixVeh;
 		System.out.println("hoursDriven: " + hoursDriven + " -> cost " + hoursDriven * costPerHour);
 		System.out.println("kmDriven: " + kmDriven + " -> cost " + kmDriven * costPerKm + " ; km per veh per day: " + kmDriven / numVehUsed);
 		System.out.println("numVehUsed: " + numVehUsed + " -> cost " + numVehUsed * costPerDayFixVeh);
 		System.out.println("totalCost: " + totalCost);
 		System.out.println("pkm: " + pkm);
 	}
-
-	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+    private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
 			VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
 			TransitDriverStartsEventHandler {
-		private final Network network;
-		private final TransitSchedule inSchedule;
+
+        private final Network network;
+        private final TransitSchedule inSchedule;
 		private final Vehicles inTransiVehicles;
 
 		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
