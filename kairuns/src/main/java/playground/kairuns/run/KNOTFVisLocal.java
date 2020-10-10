@@ -3,7 +3,6 @@ package playground.kairuns.run;
 import java.io.File;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.av.robotaxi.fares.drt.DrtFaresConfigGroup;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -89,7 +88,6 @@ class KNOTFVisLocal{
 			}
 		}
 		DrtSpeedUpConfigGroup dsu = ConfigUtils.addOrGetModule( config, DrtSpeedUpConfigGroup.class );
-		DrtFaresConfigGroup df = ConfigUtils.addOrGetModule( config, DrtFaresConfigGroup.class );
 		DvrpConfigGroup dvrp = ConfigUtils.addOrGetModule( config, DvrpConfigGroup.class );
 		MultiModeDrtConfigGroup mmdrt = ConfigUtils.addOrGetModule( config, MultiModeDrtConfigGroup.class );
 		SwissRailRaptorConfigGroup srr = ConfigUtils.addOrGetModule( config, SwissRailRaptorConfigGroup.class );
