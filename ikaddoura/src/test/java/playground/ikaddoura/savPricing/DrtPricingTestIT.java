@@ -30,12 +30,12 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.fare.TaxiFareParams;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -57,8 +57,7 @@ public class DrtPricingTestIT {
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 
 	/**
-	 * only taxi trips
-	 * 
+	 * only DRT trips
 	 */
 	//	@Ignore
 	@Test
@@ -143,7 +142,7 @@ public class DrtPricingTestIT {
 		// run
         controler2.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler2.run();
-		
+
 		// ##################################################################
 		// noise pricing + high km-based cost
 		// ##################################################################
@@ -153,7 +152,8 @@ public class DrtPricingTestIT {
 
 		config3.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n-with-operating-costs");
 		config3.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
-		ConfigUtils.addOrGetModule(config3, TaxiFareParams.class).setDistanceFare_m(0.02);
+
+		DrtConfigGroup.getSingleModeDrtConfig(config3).getDrtFareParams().get().setDistanceFare_m(0.02);
 
 		SAVPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, SAVPricingConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
@@ -216,9 +216,9 @@ public class DrtPricingTestIT {
 		// the demand on the long and low-noise-cost route should go down in case of noise + operating cost pricing (n-with-operating-costs)
 		Assert.assertEquals(true, getNoiseSensitiveRouteDemand(handler3) > getNoiseSensitiveRouteDemand(handler2));
 	}
-	
+
 	/**
-	 * car + taxi trips
+	 * car + DRT trips
 	 */
 	@Test
 	public final void test2(){
@@ -233,28 +233,29 @@ public class DrtPricingTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new OTFVisConfigGroup(),
-				new NoiseConfigGroup());
-		
+				new OTFVisConfigGroup(), new NoiseConfigGroup());
+
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc2");
 		config1.travelTimeCalculator().setTraveltimeBinSize(900);
-		
+
 		final SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setSavMode(TransportMode.drt);
-		
-		// taxi
+
+		// DRT
 
 		Controler controler1 = DrtControlerCreator.createControler(config1, false);
 		// drt fares
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
-		
+
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
 		controler1.getEvents().addHandler(handler1);
-		
+
 		controler1.getConfig().controler().setCreateGraphs(false);
-        controler1.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		controler1.getConfig()
+				.controler()
+				.setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 		controler1.addOverridingModule( new AbstractModule(){
 			@Override public void install(){
