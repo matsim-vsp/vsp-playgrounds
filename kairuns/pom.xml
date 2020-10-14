@@ -57,9 +57,9 @@
 		  <version>13.0-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
-		  <groupId>com.github.matsim-vsp</groupId>
-		  <artifactId>drt-speed-up</artifactId>
-		  <version>1dfb20495f</version>
+		  <groupId>org.matsim.contrib</groupId>
+		  <artifactId>drt</artifactId>
+		  <version>13.0-SNAPSHOT</version>
 	  </dependency>
   </dependencies>
 </project>
