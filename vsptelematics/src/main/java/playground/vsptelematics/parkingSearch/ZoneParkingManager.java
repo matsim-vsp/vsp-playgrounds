@@ -3,43 +3,38 @@
  */
 package playground.vsptelematics.parkingSearch;
 
-import com.google.inject.Inject;
-import org.matsim.api.core.v01.Coord;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.manager.FacilityBasedParkingManager;
-import org.matsim.contrib.util.LinkProvider;
-import org.matsim.contrib.util.PartialSort;
-import org.matsim.contrib.util.StraightLineKnnFinder;
-import org.matsim.contrib.util.distance.DistanceUtils;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.vehicles.Vehicle;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.inject.Inject;
 
 /**
  * @author tschlenther
- *
  */
 public class ZoneParkingManager extends FacilityBasedParkingManager {
 
-	private HashMap<String,HashSet<Id<Link>>> linksOfZone;
-	private HashMap<String,Double> totalCapOfZone;
-	private HashMap<String,Double> occupationOfZone;
-	
+	private final HashMap<String, HashSet<Id<Link>>> linksOfZone;
+	private final HashMap<String, Double> totalCapOfZone;
+	private final HashMap<String, Double> occupationOfZone;
+
 	private final static String mierendorffLinks = "C:/Users/Work/Bachelor Arbeit/input/GridNet/Zonen/Zielzone.txt";
 	private final static String klausenerLinks = "C:/Users/Work/Bachelor Arbeit/input/GridNet/Zonen/Homezone.txt";
-	
+
 	private List<String> zones;
-	
+
 	/**
 	 * @param scenario
 	 */
