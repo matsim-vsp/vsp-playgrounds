@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.matsim.vsp</groupId>
     <artifactId>vsp-playgrounds</artifactId>
@@ -6,6 +7,6 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-  <artifactId>_template</artifactId>
-  <name>_template</name>
+  <artifactId>lu</artifactId>
+  <name>lu</name>
 </project>
