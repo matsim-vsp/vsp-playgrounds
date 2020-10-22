@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.analysis.zonal.DrtZone;
@@ -27,12 +28,14 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 public class ExtensiveInsertionSerachWithZonalConstraints extends ExtensiveInsertionSearch {
 
 	private final DrtZonalSystem drtZonalSystem;
-
+	private static final Logger log = Logger.getLogger(ExtensiveInsertionSerachWithZonalConstraints.class);
+	
 	public ExtensiveInsertionSerachWithZonalConstraints(DetourPathCalculator detourPathCalculator,
 			DrtConfigGroup drtCfg, MobsimTimer timer, ForkJoinPool forkJoinPool, PenaltyCalculator penaltyCalculator,
 			DrtZonalSystem drtZonalSystem) {
 		super(detourPathCalculator, drtCfg, timer, forkJoinPool, penaltyCalculator);
 		this.drtZonalSystem = drtZonalSystem;
+		log.info("Extensive Insertion Search with Zonal Constraints is installed");
 	}
 
 	@Override
