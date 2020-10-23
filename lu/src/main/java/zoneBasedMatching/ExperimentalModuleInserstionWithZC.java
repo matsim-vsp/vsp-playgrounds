@@ -5,6 +5,7 @@ import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.optimizer.QSimScopeForkJoinPoolHolder;
 import org.matsim.contrib.drt.optimizer.insertion.DetourPathCalculator;
 import org.matsim.contrib.drt.optimizer.insertion.DrtInsertionSearch;
+import org.matsim.contrib.drt.optimizer.insertion.ExtensiveInsertionSearch;
 import org.matsim.contrib.drt.optimizer.insertion.InsertionCostCalculator;
 import org.matsim.contrib.drt.optimizer.insertion.MultiInsertionDetourPathCalculator;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -21,23 +22,25 @@ import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 
-public class ExperimentalModuleExtensiveInserstionWithZC extends AbstractDvrpModeQSimModule {
+public class ExperimentalModuleInserstionWithZC extends AbstractDvrpModeQSimModule {
 
 	private final DrtConfigGroup drtCfg;
 
-	public ExperimentalModuleExtensiveInserstionWithZC(DrtConfigGroup drtCfg) {
+	public ExperimentalModuleInserstionWithZC(DrtConfigGroup drtCfg) {
 		super(drtCfg.getMode());
 		this.drtCfg = drtCfg;
 	}
 
 	@Override
 	protected void configureQSim() {
+		bindModal(ExtensiveInsertionSearch.class).toProvider(modalProvider(
+				getter -> new ExtensiveInsertionSearch(getter.getModal(DetourPathCalculator.class), drtCfg,
+						getter.get(MobsimTimer.class), getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool(),
+						getter.getModal(InsertionCostCalculator.PenaltyCalculator.class))));
+
 		bindModal(new TypeLiteral<DrtInsertionSearch<OneToManyPathSearch.PathData>>() {
-		}).toProvider(modalProvider(getter -> new ExtensiveInsertionSerachWithZonalConstraints(
-				getter.getModal(DetourPathCalculator.class), drtCfg, getter.get(MobsimTimer.class),
-				getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool(),
-				getter.getModal(InsertionCostCalculator.PenaltyCalculator.class),
-				getter.getModal(DrtZonalSystem.class))));
+		}).toProvider(modalProvider(getter -> new InsertionSerachWithZonalConstraints(
+				getter.getModal(ExtensiveInsertionSearch.class), getter.getModal(DrtZonalSystem.class))));
 
 		addModalComponent(MultiInsertionDetourPathCalculator.class, new ModalProviders.AbstractProvider<>(getMode()) {
 			@Inject

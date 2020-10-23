@@ -4,40 +4,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.analysis.zonal.DrtZone;
 import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
-import org.matsim.contrib.drt.optimizer.insertion.DetourPathCalculator;
-import org.matsim.contrib.drt.optimizer.insertion.ExtensiveInsertionSearch;
-import org.matsim.contrib.drt.optimizer.insertion.InsertionCostCalculator.PenaltyCalculator;
+import org.matsim.contrib.drt.optimizer.insertion.DrtInsertionSearch;
 import org.matsim.contrib.drt.optimizer.insertion.InsertionWithDetourData;
 import org.matsim.contrib.drt.passenger.DrtRequest;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.schedule.DrtDriveTask;
 import org.matsim.contrib.drt.schedule.DrtStayTask;
 import org.matsim.contrib.drt.schedule.DrtTaskType;
 import org.matsim.contrib.drt.scheduler.EmptyVehicleRelocator;
 import org.matsim.contrib.dvrp.path.OneToManyPathSearch.PathData;
 import org.matsim.contrib.dvrp.schedule.Task;
-import org.matsim.core.mobsim.framework.MobsimTimer;
 
-public class ExtensiveInsertionSerachWithZonalConstraints extends ExtensiveInsertionSearch {
+public class InsertionSerachWithZonalConstraints implements DrtInsertionSearch<PathData> {
 
 	private final DrtZonalSystem drtZonalSystem;
-	private static final Logger log = Logger.getLogger(ExtensiveInsertionSerachWithZonalConstraints.class);
-	
-	public ExtensiveInsertionSerachWithZonalConstraints(DetourPathCalculator detourPathCalculator,
-			DrtConfigGroup drtCfg, MobsimTimer timer, ForkJoinPool forkJoinPool, PenaltyCalculator penaltyCalculator,
-			DrtZonalSystem drtZonalSystem) {
-		super(detourPathCalculator, drtCfg, timer, forkJoinPool, penaltyCalculator);
-		this.drtZonalSystem = drtZonalSystem;
-		log.info("Extensive Insertion Search with Zonal Constraints is installed");
-	}
+	private final DrtInsertionSearch<PathData> drtInsertionSearch;
 
+	public InsertionSerachWithZonalConstraints(DrtInsertionSearch<PathData> drtInsertionSearch,
+			DrtZonalSystem drtZonalSystem) {
+		this.drtZonalSystem = drtZonalSystem;
+		this.drtInsertionSearch = drtInsertionSearch;
+	}
+	
 	@Override
 	public Optional<InsertionWithDetourData<PathData>> findBestInsertion(DrtRequest drtRequest,
 			Collection<Entry> vEntries) {
@@ -71,7 +63,7 @@ public class ExtensiveInsertionSerachWithZonalConstraints extends ExtensiveInser
 			}
 
 		}
-		return calculate(drtRequest, filteredVEntries);
+		return drtInsertionSearch.findBestInsertion(drtRequest, filteredVEntries);
 	}
 
 	private boolean considerVehicleOrNot(Link vehicleLink, Link requestLink) {

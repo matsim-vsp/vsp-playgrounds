@@ -15,9 +15,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import zoneBasedMatching.ExperimentalModuleExtensiveInserstionWithZC;
+import zoneBasedMatching.ExperimentalModuleInserstionWithZC;
 
-public class RunZonalMatching {
+public class RunZonalMatchingTest {
 	public static void main(String[] args) {
 		if (args.length == 0) {
 			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\Mielec\\mielec_drt_config.xml" };
@@ -43,7 +43,7 @@ public class RunZonalMatching {
 		
 		// Adding in experimental module manually
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
-			controler.addOverridingQSimModule(new ExperimentalModuleExtensiveInserstionWithZC(drtCfg));
+			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
 		}
 		
 		controler.run();
