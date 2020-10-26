@@ -29,7 +29,7 @@ public class InsertionSerachWithZonalConstraints implements DrtInsertionSearch<P
 		this.drtZonalSystem = drtZonalSystem;
 		this.drtInsertionSearch = drtInsertionSearch;
 	}
-	
+
 	@Override
 	public Optional<InsertionWithDetourData<PathData>> findBestInsertion(DrtRequest drtRequest,
 			Collection<Entry> vEntries) {
@@ -69,6 +69,12 @@ public class InsertionSerachWithZonalConstraints implements DrtInsertionSearch<P
 	private boolean considerVehicleOrNot(Link vehicleLink, Link requestLink) {
 		DrtZone vehicleZone = drtZonalSystem.getZoneForLinkId(vehicleLink.getId());
 		DrtZone requestZone = drtZonalSystem.getZoneForLinkId(requestLink.getId());
+
+		// In case some request or vehicle is outside the drt zonal system (e.g. initial
+		// location, near boundary)
+		if (vehicleZone == null || requestZone == null) {
+			return true;
+		}
 		if (vehicleZone.equals(requestZone)) {
 			return true;
 		}
