@@ -9,7 +9,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.controler.Controler;
 import org.matsim.run.drt.RunDrtOpenBerlinScenario;
 
-import zoneBasedMatching.ExperimentalModuleInserstionWithZC;
+import unitCapacityMatching.UnitCapcityZonalRequestInserterModule;
 
 public class RunDrtOpenBerlinScenarioWithExpModules {
 
@@ -30,10 +30,11 @@ public class RunDrtOpenBerlinScenarioWithExpModules {
 		Controler controler = RunDrtOpenBerlinScenario.prepareControler(scenario);
 
 		MultiModeDrtConfigGroup multiModeDrtConfig = MultiModeDrtConfigGroup.get(config);
-		
+
 		// Adding in the experimental module
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
-			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
+//			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
+			controler.addOverridingQSimModule(new UnitCapcityZonalRequestInserterModule(drtCfg));
 		}
 
 		controler.run();

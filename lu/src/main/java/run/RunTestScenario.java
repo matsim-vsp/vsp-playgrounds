@@ -17,7 +17,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import zoneBasedMatching.ExperimentalModuleInserstionWithZC;
 
-public class RunZonalMatchingTest {
+public class RunTestScenario {
 	public static void main(String[] args) {
 		if (args.length == 0) {
 			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\Mielec\\mielec_drt_config.xml" };
