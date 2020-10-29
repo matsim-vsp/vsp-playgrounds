@@ -1,4 +1,4 @@
-package unitCapacityMatching;
+package playground.lu.unitCapacityMatching;
 
 import java.util.ArrayList;
 import java.util.Collection;

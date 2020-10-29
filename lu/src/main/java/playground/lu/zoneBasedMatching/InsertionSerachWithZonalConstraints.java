@@ -1,4 +1,4 @@
-package zoneBasedMatching;
+package playground.lu.zoneBasedMatching;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package unitCapacityMatching;
+package playground.lu.unitCapacityMatching;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -14,7 +14,6 @@ import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.passenger.DrtRequest;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
-import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestScheduledEvent;
@@ -66,9 +65,9 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 		while (reqIter.hasNext()) {
 			DrtRequest request = reqIter.next();
 			DrtZone requestZone = zonalSystem.getZoneForLinkId(request.getFromLink().getId());
-			DvrpVehicle selectedVehicle = vehicleSelector.selectVehicleForRequest(request,
+			Entry selectedVehicleEntry = vehicleSelector.selectVehicleEntryForRequest(request,
 					disposableVehicleEntriesPerZone.get(requestZone), mobsimTimer.getTimeOfDay());
-			if (selectedVehicle == null) {
+			if (selectedVehicleEntry == null) {
 				if (timeOfTheDay > request.getSubmissionTime() + drtCfg.getMaxWaitTime()) {
 					eventsManager.processEvent(
 							new PassengerRequestRejectedEvent(mobsimTimer.getTimeOfDay(), drtCfg.getMode(),
@@ -81,10 +80,11 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 							+ request.getPassengerId() + " at this moment. Will try agian at next time step");
 				}
 			} else {
-				vData.updateEntry(selectedVehicle);
-				eventsManager.processEvent(new PassengerRequestScheduledEvent(mobsimTimer.getTimeOfDay(),
-						drtCfg.getMode(), request.getId(), request.getPassengerId(), selectedVehicle.getId(),
-						request.getPickupTask().getEndTime(), request.getDropoffTask().getBeginTime()));
+				vData.updateEntry(selectedVehicleEntry.vehicle);
+				eventsManager
+						.processEvent(new PassengerRequestScheduledEvent(mobsimTimer.getTimeOfDay(), drtCfg.getMode(),
+								request.getId(), request.getPassengerId(), selectedVehicleEntry.vehicle.getId(),
+								request.getPickupTask().getEndTime(), request.getDropoffTask().getBeginTime()));
 			}
 			reqIter.remove();
 		}

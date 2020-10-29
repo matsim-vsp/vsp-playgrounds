@@ -1,4 +1,4 @@
-package zoneBasedMatching;
+package playground.lu.zoneBasedMatching;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
