@@ -37,6 +37,16 @@ public class ShortestPickupTimeVehicleSelector implements VehicleSelector {
 	@Override
 	public Entry selectVehicleEntryForRequest(DrtRequest request, Collection<Entry> vehicleEntries,
 			double timeOfTheDay) {
+		if (vehicleEntries == null) {
+			// No disposable vehicle in the zone at all
+			return null;
+		}
+
+		if (vehicleEntries.isEmpty()) {
+			// All disposable vehicles in the zone are used by other requests
+			return null;
+		}
+
 		Link requestLink = request.getFromLink();
 		double shortestTimeDistance = LARGE_NUMBER;
 		Entry selectedVehicleEntry = null;
@@ -58,7 +68,8 @@ public class ShortestPickupTimeVehicleSelector implements VehicleSelector {
 			// Driving vehicle (DRIVE)
 			if (currentTask instanceof DrtDriveTask) {
 				TaskType currentTaskType = currentTask.getTaskType();
-				if (currentTaskType.equals(EmptyVehicleRelocator.RELOCATE_VEHICLE_TASK_TYPE)) {
+				if (currentTaskType.equals(EmptyVehicleRelocator.RELOCATE_VEHICLE_TASK_TYPE)
+						&& currentTask.getTaskIdx() == vehicle.getSchedule().getTaskCount() - 2) {
 					// Case 2: Rebalancing Vehicle
 					Link vehicleLink = vEntry.start.link;
 					timeDistance = vehicleAssignmentTools.calculateTravelTime(vehicleLink, requestLink, timeOfTheDay);
@@ -82,7 +93,6 @@ public class ShortestPickupTimeVehicleSelector implements VehicleSelector {
 				diversionRequired = diversionRequiredForThisVehicle;
 			}
 		}
-
 		vehicleAssignmentTools.assignRequestToVehicle(selectedVehicleEntry, request, diversionRequired, timeOfTheDay);
 
 		return selectedVehicleEntry;

@@ -75,18 +75,21 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 					log.debug("No suitable vehicle found for drt request " + request + " from passenger id="
 							+ request.getPassengerId() + " fromLinkId=" + request.getFromLink().getId()
 							+ " after max wait time has passed. Therefore the reuest is rejected!");
+					reqIter.remove();
 				} else {
 					log.debug("No suitable vehicle found for drt request " + request + " from passenger id="
 							+ request.getPassengerId() + " at this moment. Will try agian at next time step");
 				}
 			} else {
 				vData.updateEntry(selectedVehicleEntry.vehicle);
+				disposableVehicleEntriesPerZone.get(requestZone).remove(selectedVehicleEntry);
 				eventsManager
 						.processEvent(new PassengerRequestScheduledEvent(mobsimTimer.getTimeOfDay(), drtCfg.getMode(),
 								request.getId(), request.getPassengerId(), selectedVehicleEntry.vehicle.getId(),
 								request.getPickupTask().getEndTime(), request.getDropoffTask().getBeginTime()));
+				reqIter.remove();
 			}
-			reqIter.remove();
+			
 		}
 	}
 

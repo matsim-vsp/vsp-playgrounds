@@ -44,21 +44,44 @@ public class VehicleAssignmentTools {
 			Task beforePickupTask;
 			LinkTimePair diversion = ((OnlineDriveTaskTracker) currentTask.getTaskTracker()).getDiversionPoint();
 
-			// Remove the final stay task
-			schedule.removeLastTask();
+			schedule.removeLastTask(); // Remove the old final stay task
 
-			if (diversion != null) { // divert vehicle
-				beforePickupTask = currentTask;
-				VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(vehicleEntry.start.link,
-						request.getFromLink(), vehicleEntry.start.time, leastCostPathCalculator, travelTime);
-				((OnlineDriveTaskTracker) beforePickupTask.getTaskTracker()).divertPath(vrpPath);
-			} else { // too late for diversion
+			if (diversion != null) {
+				// Vehicle is divertable, divert the vehicle
+				// First, stop the vehicle
+				VrpPathWithTravelData zeroLengthPath = VrpPaths.createZeroLengthPath(vehicleEntry.start.link,
+						vehicleEntry.start.time);
+				((OnlineDriveTaskTracker) currentTask.getTaskTracker()).divertPath(zeroLengthPath);
+				currentTask.setEndTime(zeroLengthPath.getArrivalTime());
+				// Then add a drive task to the request
+				VrpPathWithTravelData driveToRequestPath = VrpPaths.calcAndCreatePath(vehicleEntry.start.link,
+						request.getFromLink(), currentTask.getEndTime(), leastCostPathCalculator, travelTime);
+				beforePickupTask = taskFactory.createDriveTask(vehicle, driveToRequestPath, DrtDriveTask.TYPE);
+
+//				// Debug start
+//				System.err.println("time = " + timeOfTheDay);
+//				System.err.println("Current task index is " + currentTask.getTaskIdx());
+//				System.err.println("Current task will end at " + currentTask.getEndTime());
+//				System.err.println("Before pick up will start at " + beforePickupTask.getBeginTime());
+//				System.err.println("schedule size is " + schedule.getTaskCount());
+//				System.err.println("vehicle id is " + vehicle.getId().toString());
+//				int difference = schedule.getTaskCount() - currentTask.getTaskIdx() - 1;
+//				for (int i = 0; i < difference; i++) {
+//					System.err.println(schedule.getTasks().get(currentTask.getTaskIdx() + i + 1).getTaskType().name());
+//				}
+//				System.err.println("==================================================================");
+//				// Debug end
+
+				schedule.addTask(beforePickupTask);
+			} else { // too late for diversion (vehicle already on the final link of the original
+						// path)
 				if (request.getFromLink() != vehicleEntry.start.link) { // add a new drive task
 					VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(vehicleEntry.start.link,
 							request.getFromLink(), vehicleEntry.start.time, leastCostPathCalculator, travelTime);
 					beforePickupTask = taskFactory.createDriveTask(vehicleEntry.vehicle, vrpPath, DrtDriveTask.TYPE);
-					schedule.addTask(currentTask.getTaskIdx() + 1, beforePickupTask);
-				} else { // no need for a new drive task
+					schedule.addTask(beforePickupTask);
+				} else { // .... and the original path's destination happens to be the request from link.
+							// No need to add any task
 					beforePickupTask = currentTask;
 				}
 			}
@@ -68,6 +91,22 @@ public class VehicleAssignmentTools {
 			DrtStopTask pickUpStopTask = taskFactory.createStopTask(vehicle, scheduledPickUpTime,
 					Math.max(scheduledPickUpTime + stopDuration, request.getEarliestStartTime()),
 					request.getFromLink());
+
+//			// Debug start
+//			System.err.println("time = " + timeOfTheDay);
+//			System.err.println("Current task index is " + currentTask.getTaskIdx());
+//			System.err.println("Before pick up task index is " + beforePickupTask.getTaskIdx());
+//			System.err.println("Before pick up task is " + beforePickupTask.getTaskType().name());
+//			System.err.println("This task will end at " + beforePickupTask.getEndTime());
+//			System.err.println("schedule size is " + schedule.getTaskCount());
+//			System.err.println("vehicle id is " + vehicle.getId().toString());
+//			int difference = schedule.getTaskCount() - beforePickupTask.getTaskIdx() - 1;
+//			for (int i = 0; i < difference; i++) {
+//				System.err.println(schedule.getTasks().get(beforePickupTask.getTaskIdx() + i + 1).getTaskType().name());
+//			}
+//			System.err.println("==================================================================");
+//			// Debug end
+
 			schedule.addTask(pickUpStopTask);
 			pickUpStopTask.addPickupRequest(request);
 			request.setPickupTask(pickUpStopTask);
@@ -92,7 +131,7 @@ public class VehicleAssignmentTools {
 			dropOffStopTask.addDropoffRequest(request);
 			request.setDropoffTask(dropOffStopTask);
 
-			// Step 5. Append new final stay task to the end
+			// Step 5. Add new final stay task to the end
 			double newStayTaskStartTime = dropOffStopTask.getEndTime();
 			DrtStayTask newFinalStayTask = taskFactory.createStayTask(vehicle, newStayTaskStartTime,
 					vehicle.getServiceEndTime(), dropOffStopTask.getLink());
@@ -100,12 +139,11 @@ public class VehicleAssignmentTools {
 
 		} else {
 			// Adding new request to the end of the current schedule
-			// Step 1. Set end time to the final stay task to timeOfTheDay + 1 (i.e. next
-			// second)
+			// Step 1. Set end time to the final stay task to timeOfTheDay
 			Schedule schedule = vehicle.getSchedule();
 			int finalTaskIndex = schedule.getTaskCount() - 1;
 			DrtStayTask finalStayTask = (DrtStayTask) schedule.getTasks().get(finalTaskIndex);
-			double stayTaskEndTime = timeOfTheDay + 1;
+			double stayTaskEndTime = timeOfTheDay;
 			finalStayTask.setEndTime(stayTaskEndTime);
 
 			// Step 2. Append Drive Task to the end, if the final stay task is not the

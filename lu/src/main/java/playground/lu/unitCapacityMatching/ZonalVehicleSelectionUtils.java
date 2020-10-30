@@ -35,7 +35,6 @@ public class ZonalVehicleSelectionUtils {
 			DrtZone zone = zonalSystem.getZoneForLinkId(finalStayTask.getLink().getId());
 			disposableVehicleEntriesPerZone.computeIfAbsent(zone, z -> new ArrayList<>()).add(vEntry);
 		}
-		
 		return disposableVehicleEntriesPerZone;
 	}
 

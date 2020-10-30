@@ -17,7 +17,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.lu.unitCapacityMatching.UnitCapcityZonalRequestInserterModule;
 
-public class RunTestScenario {
+public class RunTestingScenario {
 	public static void main(String[] args) {
 		if (args.length == 0) {
 			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\Mielec\\mielec_drt_config.xml" };
