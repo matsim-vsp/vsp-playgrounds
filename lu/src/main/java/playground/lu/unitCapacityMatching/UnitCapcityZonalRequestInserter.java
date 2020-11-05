@@ -28,6 +28,7 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 	private final EventsManager eventsManager;
 	private final MobsimTimer mobsimTimer;
 	private final DrtZonalSystem zonalSystem;
+	private final double maxWaitTime;
 
 	private static final String NO_SUITABLE_VEHICLE_FOUND_CAUSE = "no_suitable_vehicle_found";
 
@@ -46,6 +47,7 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 		this.vehicleSelector = vehicleSelector;
 		this.vehicleDataEntryFactory = vehicleDataEntryFactory;
 		this.forkJoinPool = forkJoinPool;
+		maxWaitTime = drtCfg.getMaxWaitTime();
 	}
 
 	@Override
@@ -59,16 +61,27 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 				vehicleDataEntryFactory, forkJoinPool);
 
 		Map<DrtZone, List<Entry>> disposableVehicleEntriesPerZone = ZonalVehicleSelectionUtils
-				.groupDisposableVehicleEntriesPerZone(zonalSystem, vData.getEntries(), timeOfTheDay);
+				.groupDisposableVehicleEntriesPerZone(zonalSystem, vData.getEntries(), timeOfTheDay, maxWaitTime);
 
 		Iterator<DrtRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {
 			DrtRequest request = reqIter.next();
 			DrtZone requestZone = zonalSystem.getZoneForLinkId(request.getFromLink().getId());
+			if (requestZone == null) {
+				eventsManager.processEvent(
+						new PassengerRequestRejectedEvent(mobsimTimer.getTimeOfDay(), drtCfg.getMode(),
+								request.getId(), request.getPassengerId(), NO_SUITABLE_VEHICLE_FOUND_CAUSE));
+				log.debug("No suitable vehicle found for drt request " + request + " from passenger id="
+						+ request.getPassengerId() + " fromLinkId=" + request.getFromLink().getId()
+						+ " because the request is outside the DRT zonal system");
+				reqIter.remove();
+				continue;
+			}
+			
 			Entry selectedVehicleEntry = vehicleSelector.selectVehicleEntryForRequest(request,
 					disposableVehicleEntriesPerZone.get(requestZone), mobsimTimer.getTimeOfDay());
 			if (selectedVehicleEntry == null) {
-				if (timeOfTheDay > request.getSubmissionTime() + drtCfg.getMaxWaitTime()) {
+				if (timeOfTheDay > request.getSubmissionTime() + maxWaitTime) {
 					eventsManager.processEvent(
 							new PassengerRequestRejectedEvent(mobsimTimer.getTimeOfDay(), drtCfg.getMode(),
 									request.getId(), request.getPassengerId(), NO_SUITABLE_VEHICLE_FOUND_CAUSE));
@@ -89,7 +102,7 @@ public class UnitCapcityZonalRequestInserter implements UnplannedRequestInserter
 								request.getPickupTask().getEndTime(), request.getDropoffTask().getBeginTime()));
 				reqIter.remove();
 			}
-			
+
 		}
 	}
 

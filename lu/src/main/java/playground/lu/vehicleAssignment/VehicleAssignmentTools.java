@@ -57,22 +57,8 @@ public class VehicleAssignmentTools {
 				VrpPathWithTravelData driveToRequestPath = VrpPaths.calcAndCreatePath(vehicleEntry.start.link,
 						request.getFromLink(), currentTask.getEndTime(), leastCostPathCalculator, travelTime);
 				beforePickupTask = taskFactory.createDriveTask(vehicle, driveToRequestPath, DrtDriveTask.TYPE);
-
-//				// Debug start
-//				System.err.println("time = " + timeOfTheDay);
-//				System.err.println("Current task index is " + currentTask.getTaskIdx());
-//				System.err.println("Current task will end at " + currentTask.getEndTime());
-//				System.err.println("Before pick up will start at " + beforePickupTask.getBeginTime());
-//				System.err.println("schedule size is " + schedule.getTaskCount());
-//				System.err.println("vehicle id is " + vehicle.getId().toString());
-//				int difference = schedule.getTaskCount() - currentTask.getTaskIdx() - 1;
-//				for (int i = 0; i < difference; i++) {
-//					System.err.println(schedule.getTasks().get(currentTask.getTaskIdx() + i + 1).getTaskType().name());
-//				}
-//				System.err.println("==================================================================");
-//				// Debug end
-
 				schedule.addTask(beforePickupTask);
+				
 			} else { // too late for diversion (vehicle already on the final link of the original
 						// path)
 				if (request.getFromLink() != vehicleEntry.start.link) { // add a new drive task
@@ -91,21 +77,6 @@ public class VehicleAssignmentTools {
 			DrtStopTask pickUpStopTask = taskFactory.createStopTask(vehicle, scheduledPickUpTime,
 					Math.max(scheduledPickUpTime + stopDuration, request.getEarliestStartTime()),
 					request.getFromLink());
-
-//			// Debug start
-//			System.err.println("time = " + timeOfTheDay);
-//			System.err.println("Current task index is " + currentTask.getTaskIdx());
-//			System.err.println("Before pick up task index is " + beforePickupTask.getTaskIdx());
-//			System.err.println("Before pick up task is " + beforePickupTask.getTaskType().name());
-//			System.err.println("This task will end at " + beforePickupTask.getEndTime());
-//			System.err.println("schedule size is " + schedule.getTaskCount());
-//			System.err.println("vehicle id is " + vehicle.getId().toString());
-//			int difference = schedule.getTaskCount() - beforePickupTask.getTaskIdx() - 1;
-//			for (int i = 0; i < difference; i++) {
-//				System.err.println(schedule.getTasks().get(beforePickupTask.getTaskIdx() + i + 1).getTaskType().name());
-//			}
-//			System.err.println("==================================================================");
-//			// Debug end
 
 			schedule.addTask(pickUpStopTask);
 			pickUpStopTask.addPickupRequest(request);
