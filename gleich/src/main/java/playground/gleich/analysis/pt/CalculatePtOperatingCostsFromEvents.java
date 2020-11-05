@@ -195,13 +195,13 @@ public class CalculatePtOperatingCostsFromEvents {
 		System.out.println("totalCost: " + totalCost);
 		System.out.println("pkm: " + pkm);
 	}
-    private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
 			VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
 			TransitDriverStartsEventHandler {
 
         private final Network network;
         private final TransitSchedule inSchedule;
-		private final Vehicles inTransiVehicles;
+		private final Vehicles inTransitVehicles;
 
 		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2timeInArea = new HashMap<>();
@@ -213,13 +213,13 @@ public class CalculatePtOperatingCostsFromEvents {
 		public VehKmInShapeEventHandler(Network network, TransitSchedule inSchedule, Vehicles inTransitVehicles) {
 			this.network = network;
 			this.inSchedule = inSchedule;
-			this.inTransiVehicles = inTransitVehicles;
+			this.inTransitVehicles = inTransitVehicles;
 		}
 
 		// vehicle starts service at VehicleEntersTrafficEvent
 		@Override
 		public void handleEvent(VehicleEntersTrafficEvent vehicleEntersTrafficEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(vehicleEntersTrafficEvent.getVehicleId())) {
+			if (inTransitVehicles.getVehicles().containsKey(vehicleEntersTrafficEvent.getVehicleId())) {
 				// it's a transit vehicle, do something
 				Object attributeIsInShape = network.getLinks().get(vehicleEntersTrafficEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
 				String attrValue = attributeIsInShape == null ? null : attributeIsInShape.toString();
@@ -232,7 +232,7 @@ public class CalculatePtOperatingCostsFromEvents {
 
 		@Override
 		public void handleEvent (LinkEnterEvent linkEnterEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(linkEnterEvent.getVehicleId())) {
+			if (inTransitVehicles.getVehicles().containsKey(linkEnterEvent.getVehicleId())) {
 				// it's a transit vehicle, do something
 				Object attributeIsInShape = network.getLinks().get(linkEnterEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
 				String attrValue = attributeIsInShape == null ? null : attributeIsInShape.toString();
@@ -284,7 +284,7 @@ public class CalculatePtOperatingCostsFromEvents {
 		// count all
 		@Override
 		public void handleEvent(PersonEntersVehicleEvent personEntersVehicleEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(personEntersVehicleEvent.getVehicleId()) &&
+			if (inTransitVehicles.getVehicles().containsKey(personEntersVehicleEvent.getVehicleId()) &&
 					! transitDriverIds.contains(personEntersVehicleEvent.getPersonId())) {
 				veh2currentPax.put(personEntersVehicleEvent.getVehicleId(),
 						veh2currentPax.get(personEntersVehicleEvent.getVehicleId()) + 1);
