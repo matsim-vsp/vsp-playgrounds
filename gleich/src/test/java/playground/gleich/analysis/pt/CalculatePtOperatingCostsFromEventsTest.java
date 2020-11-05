@@ -84,8 +84,8 @@ public class CalculatePtOperatingCostsFromEventsTest {
 
         Assert.assertEquals(12.2, costCalculator.getKmDriven(),0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
-        Assert.assertEquals(1010., costCalculator.getHoursDriven() * 3600, 5.);
-        Assert.assertEquals(12.2 * 1. + 2 * 1. + 1010. / 3600, costCalculator.getTotalCost(), 5 / 3600.);
+        Assert.assertEquals(1010., costCalculator.getHoursDriven() * 3600, MatsimTestUtils.EPSILON);
+        Assert.assertEquals(12.2 * 1. + 2 * 1. + 1010. / 3600, costCalculator.getTotalCost(), MatsimTestUtils.EPSILON);
 
     }
 
@@ -114,8 +114,8 @@ public class CalculatePtOperatingCostsFromEventsTest {
 
         Assert.assertEquals(12.2, costCalculator.getKmDriven(),0.);
         Assert.assertEquals(2.0, costCalculator.getNumVehUsed(),0.);
-        Assert.assertEquals(1010., costCalculator.getHoursDriven() * 3600, 5.);
-        Assert.assertEquals(12.2 * 1. + 2 * 1. + 1010. / 3600, costCalculator.getTotalCost(), 5 / 3600.);
+        Assert.assertEquals(1010., costCalculator.getHoursDriven() * 3600, 4.);
+        Assert.assertEquals(12.2 * 1. + 2 * 1. + 1010. / 3600, costCalculator.getTotalCost(), 4 / 3600.);
 
     }
 
@@ -126,7 +126,7 @@ public class CalculatePtOperatingCostsFromEventsTest {
      */
 
     @Test
-    public void testOutsideZone() {
+    public void testPkmOutsideZone() {
 
         Person person = makePerson(6 * 3600.0 - 5 * 60,
                 new Coord(1050.0, 1050.0),
@@ -156,7 +156,7 @@ public class CalculatePtOperatingCostsFromEventsTest {
      * Note: (xx) --> link is not counted
      */
     @Test
-    public void testEnterNodeOutsideZone() {
+    public void testPkmEnterNodeOutsideZone() {
 
         Person person = makePerson(6 * 3600.0 - 5 * 60,
                 new Coord(1000.0, 3000.0),
@@ -185,7 +185,7 @@ public class CalculatePtOperatingCostsFromEventsTest {
      * Note: (xx) --> link is not counted
      */
     @Test
-    public void testEnterNodeWithinZone() {
+    public void testPkmEnterNodeWithinZone() {
 
         Person person = makePerson(6 * 3600.0 - 5 * 60,
                 new Coord(4000.0, 3000.0),
@@ -214,7 +214,7 @@ public class CalculatePtOperatingCostsFromEventsTest {
      * Note: (xx) --> link is not counted
      */
     @Test
-    public void testWithTransfer() {
+    public void testPkmWithTransfer() {
 
         Person person = makePerson(6 * 3600.0 - 5 * 60,
                 new Coord(1050.0, 1050.0),
@@ -246,7 +246,7 @@ public class CalculatePtOperatingCostsFromEventsTest {
      * Note: (xx) --> link is not counted
      */
     @Test
-    public void testThreeAgents() {
+    public void testPkmThreeAgents() {
 
         Person person0 = makePerson(6 * 3600.0 - 5 * 60,
                 new Coord(1000.0, 1000.0),
