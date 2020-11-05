@@ -25,8 +25,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -137,8 +135,6 @@ public final class RunBerlinTaxiScenarioA {
 		});
 
 		// taxi fares
-        controler.addOverridingModule(new TaxiFareModule());
-
 		if (dailyRewardTaxiInsteadOfPrivateCar != 0.) {
 			// rewards for no longer owning a car
 			controler.addOverridingModule(new AbstractModule() {
@@ -219,7 +215,6 @@ public final class RunBerlinTaxiScenarioA {
 		List<ConfigGroup> drtModules = new ArrayList<>();
 		drtModules.add(new DvrpConfigGroup());
 		drtModules.add(new MultiModeTaxiConfigGroup());
-		drtModules.add(new TaxiFaresConfigGroup());
 
 		List<ConfigGroup> modules = new ArrayList<>();
 		for (ConfigGroup module : drtModules) {

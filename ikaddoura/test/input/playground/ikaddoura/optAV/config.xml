@@ -164,31 +164,28 @@
 				dvrp_vehicles_v1.dtd -->
 			<param name="taxisFile" value="taxis.xml"/>
 
-			<!-- If true, time profiles of vehicle statuses (i.e. current task type)
-				and the number of unplanned requests -->
-			<param name="timeProfiles" value="true"/>
+		<!-- If true, time profiles of vehicle statuses (i.e. current task type)
+			and the number of unplanned requests -->
+		<param name="timeProfiles" value="true"/>
 
-			<!-- If true, vehicles can be diverted during empty trips. Requires online
-				tracking. -->
-			<param name="vehicleDiversion" value="false"/>
+		<!-- If true, vehicles can be diverted during empty trips. Requires online
+			tracking. -->
+		<param name="vehicleDiversion" value="false"/>
 
-			<parameterset type="RuleBasedTaxiOptimizer"/>
-		</parameterset>
-	</module>
-	
-	<module name="taxifares" >
+		<parameterset type="RuleBasedTaxiOptimizer"/>
+
 		<parameterset type="taxifare">
 			<!-- Basefare per Trip (fare = positive value) -->
-			<param name="basefare" value="0.0" />
+			<param name="basefare" value="0.0"/>
 
 			<!-- Daily subscription fee (fee = positive value) -->
-			<param name="dailySubscriptionFee" value="0.0" />
+			<param name="dailySubscriptionFee" value="0.0"/>
 
 			<!-- taxi fare per meter (fee = positive value) -->
-			<param name="distanceFare_m" value="0.01" />
+			<param name="distanceFare_m" value="0.01"/>
 
 			<!-- taxi fare per hour (fee = positive value) -->
-			<param name="timeFare_h" value="0.0" />
+			<param name="timeFare_h" value="0.0"/>
 		</parameterset>
 	</module>
 	

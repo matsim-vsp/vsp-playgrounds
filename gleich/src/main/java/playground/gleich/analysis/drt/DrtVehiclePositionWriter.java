@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.drt.util.DrtEventsReaders;
 import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
 import org.matsim.contrib.dvrp.fleet.FleetReader;
 import org.matsim.contrib.dvrp.fleet.FleetSpecificationImpl;
@@ -86,7 +87,7 @@ public class DrtVehiclePositionWriter
 		DrtVehiclePositionWriter eventHandler = new DrtVehiclePositionWriter(scenario.getNetwork(),
 				new URL("file://" + drtVehicleFile), outputDirectoryString, 15 * 60);
 		events.addHandler(eventHandler);
-		new DrtEventsReader(events).readFile(EventsFile);
+		DrtEventsReaders.createEventsReader(events).readFile(EventsFile);
 	}
 
 	/**

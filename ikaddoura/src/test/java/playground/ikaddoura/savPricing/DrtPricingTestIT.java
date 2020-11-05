@@ -29,15 +29,13 @@ import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
+import org.matsim.contrib.taxi.fare.TaxiFareParams;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -76,7 +74,6 @@ public class DrtPricingTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -89,14 +86,14 @@ public class DrtPricingTestIT {
 
 		Controler controler1 = DrtControlerCreator.createControler(config1, false);
 		// drt fares
-		controler1.addOverridingModule(new TaxiFareModule());
-		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
+		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
 
-		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
-		
+		if (otfvis)
+			controler1.addOverridingModule(new OTFVisLiveModule());
+
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
 		controler1.getEvents().addHandler(handler1);
-		
+
 		controler1.getConfig().controler().setCreateGraphs(false);
 
 		// run
@@ -118,7 +115,6 @@ public class DrtPricingTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -135,8 +131,6 @@ public class DrtPricingTestIT {
 		Controler controler2 = DrtControlerCreator.createControler(config2, false);
 		
 		// drt fares
-		controler2.addOverridingModule(new TaxiFareModule());
-
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
@@ -154,17 +148,13 @@ public class DrtPricingTestIT {
 		// noise pricing + high km-based cost
 		// ##################################################################
 
-		Config config3 = ConfigUtils.loadConfig(configFile,
-				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
-				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
-				new OTFVisConfigGroup(),
-				new NoiseConfigGroup());
-		
+		Config config3 = ConfigUtils.loadConfig(configFile, new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
+				new DvrpConfigGroup(), new OTFVisConfigGroup(), new NoiseConfigGroup());
+
 		config3.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n-with-operating-costs");
 		config3.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
-		ConfigUtils.addOrGetModule(config3, TaxiFareConfigGroup.class).setDistanceFare_m(0.02);
-		
+		ConfigUtils.addOrGetModule(config3, TaxiFareParams.class).setDistanceFare_m(0.02);
+
 		SAVPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, SAVPricingConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
 		optAVParams3.setAccountForCongestion(false);
@@ -176,8 +166,6 @@ public class DrtPricingTestIT {
 		Controler controler3 = DrtControlerCreator.createControler(config3, false);
 		
 		// drt fares
-		controler3.addOverridingModule(new TaxiFareModule());
-
 		controler3.addOverridingModule(new SAVPricingModule(controler3.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler3.addOverridingModule(new OTFVisLiveModule());
@@ -245,7 +233,6 @@ public class DrtPricingTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		
@@ -261,7 +248,6 @@ public class DrtPricingTestIT {
 
 		Controler controler1 = DrtControlerCreator.createControler(config1, false);
 		// drt fares
-		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
 		
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
@@ -285,7 +271,6 @@ public class DrtPricingTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeDrtConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup());
 		
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c");
@@ -310,7 +295,6 @@ public class DrtPricingTestIT {
 
 		Controler controler2 = DrtControlerCreator.createControler(config2, false);
 		// drt fares
-		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());

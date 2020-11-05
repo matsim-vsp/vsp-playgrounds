@@ -26,8 +26,6 @@ import org.apache.log4j.Logger;
 import org.matsim.analysis.ScoreStats;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.fares.drt.DrtFareModule;
-import org.matsim.contrib.av.robotaxi.fares.drt.DrtFaresConfigGroup;
 import org.matsim.contrib.drt.routing.DrtRoute;
 import org.matsim.contrib.drt.routing.DrtRouteFactory;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -149,9 +147,6 @@ public final class RunBerlinDrtScenarioA {
 					}
 				});
 
-		// Add drt-specific fare module
-		controler.addOverridingModule(new DrtFareModule());
-
 		if (dailyRewardDrtInsteadOfPrivateCar != 0.) {
 			// rewards for no longer owning a car
 			controler.addOverridingModule(new AbstractModule() {
@@ -240,7 +235,6 @@ public final class RunBerlinDrtScenarioA {
 		List<ConfigGroup> drtModules = new ArrayList<>();
 		drtModules.add(new DvrpConfigGroup());
 		drtModules.add(new MultiModeDrtConfigGroup());
-		drtModules.add(new DrtFaresConfigGroup());
 
 		List<ConfigGroup> modules = new ArrayList<>();
 		for (ConfigGroup module : drtModules) {

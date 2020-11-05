@@ -144,22 +144,20 @@
 			<param name="vehicleDiversion" value="false"/>
 
 			<parameterset type="RuleBasedTaxiOptimizer"/>
-		</parameterset>
-	</module>
-	
-	<module name="taxifares" >
-		<parameterset type="taxifare">
-			<!-- Basefare per Trip (fare = positive value) -->
-			<param name="basefare" value="0.0" />
 
-			<!-- Daily subscription fee (fee = positive value) -->
-			<param name="dailySubscriptionFee" value="0.0" />
+			<parameterset type="taxifare">
+				<!-- Basefare per Trip (fare = positive value) -->
+				<param name="basefare" value="0.0"/>
 
-			<!-- taxi fare per meter (fee = positive value) -->
-			<param name="distanceFare_m" value="0.01" />
+				<!-- Daily subscription fee (fee = positive value) -->
+				<param name="dailySubscriptionFee" value="0.0"/>
 
-			<!-- taxi fare per hour (fee = positive value) -->
-			<param name="timeFare_h" value="0.0" />
+				<!-- taxi fare per meter (fee = positive value) -->
+				<param name="distanceFare_m" value="0.01"/>
+
+				<!-- taxi fare per hour (fee = positive value) -->
+				<param name="timeFare_h" value="0.0"/>
+			</parameterset>
 		</parameterset>
 	</module>
 	

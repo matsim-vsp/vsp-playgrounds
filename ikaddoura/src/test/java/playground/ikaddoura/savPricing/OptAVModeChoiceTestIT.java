@@ -28,9 +28,6 @@ import org.junit.Test;
 import org.matsim.analysis.linkDemand.LinkDemandEventHandler;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFaresConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -73,7 +70,6 @@ public class OptAVModeChoiceTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -89,8 +85,7 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 		
 		// taxi fares
-		controler1.addOverridingModule(new TaxiFareModule());
-		
+
 		// rewards for no longer owning a car
 		controler1.addOverridingModule(new AbstractModule() {
 			@Override
@@ -128,7 +123,6 @@ public class OptAVModeChoiceTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -143,9 +137,6 @@ public class OptAVModeChoiceTestIT {
 		Controler controler2 = TaxiControlerCreator.createControler(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
-		// taxi fares
-		controler2.addOverridingModule(new TaxiFareModule());
-		
 		// rewards for no longer owning a car
 		controler2.addOverridingModule(new AbstractModule() {
 			@Override
@@ -207,7 +198,6 @@ public class OptAVModeChoiceTestIT {
 		Config config1 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -223,9 +213,6 @@ public class OptAVModeChoiceTestIT {
 		Controler controler1 = TaxiControlerCreator.createControler(config1, otfvis);
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 
-		// taxi fares
-		controler1.addOverridingModule(new TaxiFareModule());
-		
 		// rewards for no longer owning a car
 		controler1.addOverridingModule(new AbstractModule() {
 			@Override
@@ -263,7 +250,6 @@ public class OptAVModeChoiceTestIT {
 		Config config2 = ConfigUtils.loadConfig(configFile,
 				new SAVPricingConfigGroup(), new MultiModeTaxiConfigGroup(),
 				new DvrpConfigGroup(),
-				new TaxiFaresConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
 		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
@@ -279,9 +265,6 @@ public class OptAVModeChoiceTestIT {
 		Controler controler2 = TaxiControlerCreator.createControler(config2, otfvis);
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
-		// taxi fares
-		controler2.addOverridingModule(new TaxiFareModule());
-		
 		// rewards for no longer owning a car
 		controler2.addOverridingModule(new AbstractModule() {
 			@Override

@@ -22,9 +22,11 @@ package playground.ikaddoura.savPricing;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.taxi.fare.TaxiFareParams;
+import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -108,15 +110,20 @@ public class SAVPricingModule extends AbstractModule {
 		}
 		
 		if (savOptimizerModeParams != null) {
-			TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
+			MultiModeTaxiConfigGroup multiModeTaxiConfigGroup = ConfigUtils.addOrGetModule(this.getConfig(),
+					MultiModeTaxiConfigGroup.class);
+			TaxiConfigGroup taxiConfigGroup = TaxiConfigGroup.getSingleModeTaxiConfig(getConfig());
+			TaxiFareParams taxiFareParams = taxiConfigGroup.getTaxiFareParams().get();
+
 			if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
+				log.warn(
+						"The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
 			}
-			
+
 			if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
 				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
 			}
-			
+
 			if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
 				log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
 			}

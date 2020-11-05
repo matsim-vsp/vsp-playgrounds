@@ -35,6 +35,7 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -65,15 +66,17 @@ public final class Events2ExperiencedTripsCSV {
     private ExperiencedPlansService experiencedPlansService;
 	// second level separator
 	private final String sep2 = ",";
+	private static String pathInclRunIdAndDot = "";
 
 	private static final Logger log = Logger.getLogger(Events2ExperiencedTripsCSV.class);
     
     public static void main(String[] args) {
-    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrtO442x/snzDrtO442x.";
-//		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrt342/snzDrt342.";
+//    	String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-gladbeck/output-snzDrtO442x/snzDrtO442x.";
+//		pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/u19-runs/output_Vu-DRT-u19-pt-6/Vu-DRT-u19-pt-6.";
+		pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-9/Vu-DRT-9.";
 //		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrtO321g/snzDrtO321g.";
-		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/gladbeck.shp";
-//		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
+//		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/gladbeck.shp";
+		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
 //		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
 		if (args.length==2) {
@@ -123,6 +126,7 @@ public final class Events2ExperiencedTripsCSV {
         replayEvents.playEventsFile(eventsFile, 0);
         
         experiencedPlansService = ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class));
+        experiencedPlansService.writeExperiencedPlans(pathInclRunIdAndDot + "output_experienced_plans.xml.gz");
     }
 
     public void runAnalysisAndWriteResult(String outputExperiencedTripsFile, String outputExperiencedLegsFile,

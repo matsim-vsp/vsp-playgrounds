@@ -23,16 +23,17 @@ import java.util.Map;
 
 import org.matsim.contrib.drt.analysis.zonal.DrtZone;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy.Relocation;
-import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.AggregatedMinCostRelocationCalculator;
-import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.RelocationCalculator;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.AggregatedMinCostRelocationCalculator.DrtZoneVehicleSurplus;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.ZonalRelocationCalculator;
 import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 
 /**
  * @author michalm
  */
-public class SemiDisaggregatedMinCostRelocationCalculator implements RelocationCalculator {
+public class SemiDisaggregatedMinCostZonalRelocationCalculator implements ZonalRelocationCalculator {
 	@Override
-	public List<Relocation> calcRelocations(List<AggregatedMinCostRelocationCalculator.DrtZoneVehicleSurplus> list, Map<DrtZone, List<DvrpVehicle>> map) {
+	public List<Relocation> calcRelocations(List<DrtZoneVehicleSurplus> vehicleSurpluses,
+			Map<DrtZone, List<DvrpVehicle>> rebalancableVehiclesPerZone) {
 
 		// The idea is to expand each supply node 's' into a sub-tree 't' consisting of edges (each of capacity 1)
 		// going from 's' to each rebalancable vehicle located in the zone represented by 's',
