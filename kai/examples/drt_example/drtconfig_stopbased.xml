@@ -4,7 +4,6 @@
 
 	<module name="drt">
 
-		<!--cell size-->
 		<!-- If true, the startLink is changed to last link in the current schedule, so the taxi starts the next day at the link where it stopped operating the day before. False by default. -->
 		<param name="changeStartLinkToLastLinkInSchedule" value="false"/>
 		<!-- Defines the slope of the maxTravelTime estimation function (optimisation constraint), i.e. maxTravelTimeAlpha * estimated_drt_travel_time + maxTravelTimeBeta. Alpha should not be smaller than 1. -->

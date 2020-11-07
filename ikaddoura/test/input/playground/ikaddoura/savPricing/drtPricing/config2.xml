@@ -100,7 +100,6 @@
 
 	<module name="dvrp">
 	</module>
-	<!--cell size-->
 
 	<module name="multiModeDrt">
 		<parameterset type="drt">
