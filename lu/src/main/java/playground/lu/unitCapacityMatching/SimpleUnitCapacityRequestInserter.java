@@ -50,7 +50,7 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 		this.vehicleAssignmentTools = vehicleAssignmentTools;
 
 		maxWaitTime = drtCfg.getMaxWaitTime();
-		maxEuclideanDistance = maxWaitTime * drtCfg.getEstimatedDrtSpeed();
+		maxEuclideanDistance = 3000;
 
 	}
 
