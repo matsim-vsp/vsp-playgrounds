@@ -1,6 +1,7 @@
 package playground.lu.vehicleAssignment;
 
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
 import org.matsim.contrib.drt.passenger.DrtRequest;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -16,7 +17,9 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.dvrp.schedule.Task;
 import org.matsim.contrib.dvrp.tracker.OnlineDriveTaskTracker;
 import org.matsim.contrib.dvrp.util.LinkTimePair;
+import org.matsim.core.router.FastAStarEuclideanFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
 public class VehicleAssignmentTools {
@@ -25,12 +28,13 @@ public class VehicleAssignmentTools {
 	private final DrtTaskFactory taskFactory;
 	private final double stopDuration;
 
-	public VehicleAssignmentTools(LeastCostPathCalculator leastCostPathCalculator, TravelTime travelTime,
-			DrtTaskFactory taskFactory, DrtConfigGroup drtCfg) {
-		this.leastCostPathCalculator = leastCostPathCalculator;
+	public VehicleAssignmentTools(TravelTime travelTime, DrtTaskFactory taskFactory, DrtConfigGroup drtCfg,
+			Network network, TravelDisutility travelDisutility) {
 		this.travelTime = travelTime;
 		this.taskFactory = taskFactory;
 		stopDuration = drtCfg.getStopDuration();
+		leastCostPathCalculator = new FastAStarEuclideanFactory().createPathCalculator(network, travelDisutility,
+				travelTime);
 	}
 
 	public void assignRequestToVehicle(Entry vehicleEntry, DrtRequest request, boolean diversionRequired,
@@ -58,7 +62,7 @@ public class VehicleAssignmentTools {
 						request.getFromLink(), currentTask.getEndTime(), leastCostPathCalculator, travelTime);
 				beforePickupTask = taskFactory.createDriveTask(vehicle, driveToRequestPath, DrtDriveTask.TYPE);
 				schedule.addTask(beforePickupTask);
-				
+
 			} else { // too late for diversion (vehicle already on the final link of the original
 						// path)
 				if (request.getFromLink() != vehicleEntry.start.link) { // add a new drive task
@@ -109,59 +113,64 @@ public class VehicleAssignmentTools {
 			schedule.addTask(newFinalStayTask);
 
 		} else {
-			// Adding new request to the end of the current schedule
-			// Step 1. Set end time to the final stay task to timeOfTheDay
-			Schedule schedule = vehicle.getSchedule();
-			int finalTaskIndex = schedule.getTaskCount() - 1;
-			DrtStayTask finalStayTask = (DrtStayTask) schedule.getTasks().get(finalTaskIndex);
-			double stayTaskEndTime = timeOfTheDay;
-			finalStayTask.setEndTime(stayTaskEndTime);
-
-			// Step 2. Append Drive Task to the end, if the final stay task is not the
-			// departure link of the request
-			double scheduledPickUpTime = stayTaskEndTime;
-			if (finalStayTask.getLink() != request.getFromLink()) {
-				VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(finalStayTask.getLink(),
-						request.getFromLink(), stayTaskEndTime, leastCostPathCalculator, travelTime);
-				DrtDriveTask driveToPassengerTask = taskFactory.createDriveTask(vehicle, vrpPath, DrtDriveTask.TYPE);
-				schedule.addTask(driveToPassengerTask);
-				scheduledPickUpTime = driveToPassengerTask.getEndTime();
-			}
-
-			// Step 3. Append Stop task (pick up) to the end
-			DrtStopTask pickUpStopTask = taskFactory.createStopTask(vehicle, scheduledPickUpTime,
-					Math.max(scheduledPickUpTime + stopDuration, request.getEarliestStartTime()),
-					request.getFromLink());
-			schedule.addTask(pickUpStopTask);
-			pickUpStopTask.addPickupRequest(request);
-			request.setPickupTask(pickUpStopTask);
-
-			// Step 4. Append drive task to the end, if the departure link and arrival link
-			// of the request is no the same
-			double departureTime = pickUpStopTask.getEndTime();
-			double scheduledArrivalTime = departureTime;
-			if (request.getFromLink() != request.getToLink()) {
-				VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(request.getFromLink(), request.getToLink(),
-						departureTime, leastCostPathCalculator, travelTime);
-				DrtDriveTask driveCustomerToDestinationTask = taskFactory.createDriveTask(vehicle, vrpPath,
-						DrtDriveTask.TYPE);
-				schedule.addTask(driveCustomerToDestinationTask);
-				scheduledArrivalTime = driveCustomerToDestinationTask.getEndTime();
-			}
-
-			// Step 5. Append Stop task (drop off) to the end
-			DrtStopTask dropOffStopTask = taskFactory.createStopTask(vehicle, scheduledArrivalTime,
-					scheduledArrivalTime + stopDuration, request.getToLink());
-			schedule.addTask(dropOffStopTask);
-			dropOffStopTask.addDropoffRequest(request);
-			request.setDropoffTask(dropOffStopTask);
-
-			// Step 6. Append new final stay task to the end
-			double newStayTaskStartTime = dropOffStopTask.getEndTime();
-			DrtStayTask newFinalStayTask = taskFactory.createStayTask(vehicle, newStayTaskStartTime,
-					vehicle.getServiceEndTime(), dropOffStopTask.getLink());
-			schedule.addTask(newFinalStayTask);
+			// TODO bug spotted: for non-idling vehicle, it should be assigned in a
+			// different way
+			assignIdlingVehicleToRequest(vehicle, request, timeOfTheDay);
 		}
+	}
+
+	public void assignIdlingVehicleToRequest(DvrpVehicle vehicle, DrtRequest request, double timeOfTheDay) {
+		// Adding new request to the end of the current schedule
+		// Step 1. Set end time to the final stay task to timeOfTheDay
+		Schedule schedule = vehicle.getSchedule();
+		int finalTaskIndex = schedule.getTaskCount() - 1;
+		DrtStayTask finalStayTask = (DrtStayTask) schedule.getTasks().get(finalTaskIndex);
+		double stayTaskEndTime = timeOfTheDay;
+		finalStayTask.setEndTime(stayTaskEndTime);
+
+		// Step 2. Append Drive Task to the end, if the final stay task is not the
+		// departure link of the request
+		double scheduledPickUpTime = stayTaskEndTime;
+		if (finalStayTask.getLink() != request.getFromLink()) {
+			VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(finalStayTask.getLink(), request.getFromLink(),
+					stayTaskEndTime, leastCostPathCalculator, travelTime);
+			DrtDriveTask driveToPassengerTask = taskFactory.createDriveTask(vehicle, vrpPath, DrtDriveTask.TYPE);
+			schedule.addTask(driveToPassengerTask);
+			scheduledPickUpTime = driveToPassengerTask.getEndTime();
+		}
+
+		// Step 3. Append Stop task (pick up) to the end
+		DrtStopTask pickUpStopTask = taskFactory.createStopTask(vehicle, scheduledPickUpTime,
+				Math.max(scheduledPickUpTime + stopDuration, request.getEarliestStartTime()), request.getFromLink());
+		schedule.addTask(pickUpStopTask);
+		pickUpStopTask.addPickupRequest(request);
+		request.setPickupTask(pickUpStopTask);
+
+		// Step 4. Append drive task to the end, if the departure link and arrival link
+		// of the request is no the same
+		double departureTime = pickUpStopTask.getEndTime();
+		double scheduledArrivalTime = departureTime;
+		if (request.getFromLink() != request.getToLink()) {
+			VrpPathWithTravelData vrpPath = VrpPaths.calcAndCreatePath(request.getFromLink(), request.getToLink(),
+					departureTime, leastCostPathCalculator, travelTime);
+			DrtDriveTask driveCustomerToDestinationTask = taskFactory.createDriveTask(vehicle, vrpPath,
+					DrtDriveTask.TYPE);
+			schedule.addTask(driveCustomerToDestinationTask);
+			scheduledArrivalTime = driveCustomerToDestinationTask.getEndTime();
+		}
+
+		// Step 5. Append Stop task (drop off) to the end
+		DrtStopTask dropOffStopTask = taskFactory.createStopTask(vehicle, scheduledArrivalTime,
+				scheduledArrivalTime + stopDuration, request.getToLink());
+		schedule.addTask(dropOffStopTask);
+		dropOffStopTask.addDropoffRequest(request);
+		request.setDropoffTask(dropOffStopTask);
+
+		// Step 6. Append new final stay task to the end
+		double newStayTaskStartTime = dropOffStopTask.getEndTime();
+		DrtStayTask newFinalStayTask = taskFactory.createStayTask(vehicle, newStayTaskStartTime,
+				vehicle.getServiceEndTime(), dropOffStopTask.getLink());
+		schedule.addTask(newFinalStayTask);
 	}
 
 	public double calculateTimeDistanceForBusyVehicle(DvrpVehicle vehicle, Link requestLink, double timeOfTheDay) {

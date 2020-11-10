@@ -3,11 +3,11 @@ package playground.lu.drtAnalysis;
 public class DrtTrip {
 	private final String requestId;
 	private double submissionTime;
-	private Double acceptedTime = null;
-	private Double rejectedTime = null;
-	private Double scheduledPickUpTime = null;
-	private Double actualPickUpTime = null;
-	private Double dropOffTime = null;
+	private double acceptedTime = -1;
+	private double rejectedTime = -1;
+	private double scheduledPickUpTime = -1;
+	private double actualPickUpTime = -1;
+	private double dropOffTime = -1;
 
 	private String fromLinkId;
 	private String toLinkId;
@@ -97,11 +97,11 @@ public class DrtTrip {
 		return requestAccepted;
 	}
 
-	public Double getWaitTime() {
-		if (requestAccepted && actualPickUpTime != null) {
+	public double getWaitTime() {
+		if (requestAccepted && actualPickUpTime != -1) {
 			return actualPickUpTime - submissionTime;
 		}
-		return null;
+		return -1;
 	}
 
 }

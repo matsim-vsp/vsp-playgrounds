@@ -15,8 +15,6 @@ import org.matsim.contrib.drt.scheduler.EmptyVehicleRelocator;
 import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
 import org.matsim.contrib.dvrp.schedule.Task;
 import org.matsim.contrib.dvrp.schedule.Task.TaskType;
-import org.matsim.core.router.FastAStarEuclideanFactory;
-import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
@@ -24,14 +22,11 @@ import playground.lu.vehicleAssignment.VehicleAssignmentTools;
 
 public class ShortestPickupTimeVehicleSelector implements VehicleSelector {
 	private final static double LARGE_NUMBER = 100000;
-	private final LeastCostPathCalculator leastCostPathCalculator;
 	private final VehicleAssignmentTools vehicleAssignmentTools;
 
 	public ShortestPickupTimeVehicleSelector(Network network, TravelTime travelTime, TravelDisutility travelDisutility,
 			DrtTaskFactory taskFactory, DrtConfigGroup drtCfg) {
-		this.leastCostPathCalculator = new FastAStarEuclideanFactory().createPathCalculator(network, travelDisutility,
-				travelTime);
-		vehicleAssignmentTools = new VehicleAssignmentTools(leastCostPathCalculator, travelTime, taskFactory, drtCfg);
+		vehicleAssignmentTools = new VehicleAssignmentTools(travelTime, taskFactory, drtCfg, network, travelDisutility);
 	}
 
 	@Override

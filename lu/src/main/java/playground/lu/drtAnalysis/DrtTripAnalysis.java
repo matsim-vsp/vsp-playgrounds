@@ -5,24 +5,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.matsim.contrib.drt.util.DrtEventsReaders;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.ParallelEventsManager;
 
 public class DrtTripAnalysis {
 	private final int eventsQueueSize = 1048576 * 32;
-	private final String eventsFile = "C:\\Users\\cluac\\MATSimScenarios\\Mielec\\output\\latest\\output_events.xml.gz";
 
 	public static void main(String[] args) throws IOException {
+		String eventsFile = args[0];
 		DrtTripAnalysis drtTripAnalysis = new DrtTripAnalysis();
-		drtTripAnalysis.run();
+		drtTripAnalysis.run(eventsFile);
 	}
-	
-	public void run() throws IOException {
+
+	public void run(String eventsFile) throws IOException {
 		ParallelEventsManager eventManager = new ParallelEventsManager(false, eventsQueueSize);
 		DrtTripsEventHandler drtTripsEventHandler = new DrtTripsEventHandler();
 		eventManager.addHandler(drtTripsEventHandler);
 		eventManager.initProcessing();
-		new MatsimEventsReader(eventManager).readFile(eventsFile);
+
+		MatsimEventsReader matsimEventsReader = DrtEventsReaders.createEventsReader(eventManager);
+		matsimEventsReader.readFile(eventsFile);
 
 		List<DrtTrip> drtTrips = drtTripsEventHandler.getDrtTrips();
 		System.out.println("There are " + drtTrips.size() + " DRT trips");
@@ -32,8 +35,7 @@ public class DrtTripAnalysis {
 
 	private void writeResultIntoCSVFile(List<DrtTrip> drtTrips) throws IOException {
 		System.out.println("Writing CSV File now");
-		FileWriter csvWriter = new FileWriter(
-				"C:\\Users\\cluac\\MATSimScenarios\\Berlin\\drtTripAnalysis\\testing\\testing.csv");
+		FileWriter csvWriter = new FileWriter("./output/DRTTripsAnalysis/drtTrips.csv");
 		csvWriter.append("Request ID");
 		csvWriter.append(",");
 		csvWriter.append("Submission Time");
@@ -65,10 +67,11 @@ public class DrtTripAnalysis {
 			elements.add(drtTrip.getPickUpTime().toString());
 			elements.add(drtTrip.getPickUpTime().toString());
 			elements.add(drtTrip.getDropOffTime().toString());
-			elements.add(drtTrip.getWaitTime().toString());
+			elements.add(Double.toString(drtTrip.getWaitTime()));
 			elements.add(drtTrip.getRejectedTime().toString());
 
 			csvWriter.append(String.join(",", elements));
+			csvWriter.append("\n");
 		}
 
 		csvWriter.flush();

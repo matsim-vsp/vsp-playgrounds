@@ -15,7 +15,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.lu.unitCapacityMatching.UnitCapcityZonalRequestInserterModule;
+import playground.lu.unitCapacityMatching.SimpleUnitCapacityRequestInserterModule;
 
 public class RunTestingScenario {
 	public static void main(String[] args) {
@@ -40,7 +40,8 @@ public class RunTestingScenario {
 		// Adding in experimental module manually
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
 //			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
-			controler.addOverridingQSimModule(new UnitCapcityZonalRequestInserterModule(drtCfg));
+//			controler.addOverridingQSimModule(new UnitCapcityZonalRequestInserterModule(drtCfg));
+			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg));
 		}
 
 		controler.run();
