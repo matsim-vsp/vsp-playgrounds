@@ -10,7 +10,7 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.ParallelEventsManager;
 
 public class DrtTripAnalysis {
-	private final int eventsQueueSize = 1048576 * 32;
+	private final int eventsQueueSize = 1200000 * 32;
 
 	public static void main(String[] args) throws IOException {
 		String eventsFile = args[0];
@@ -23,7 +23,7 @@ public class DrtTripAnalysis {
 		DrtTripsEventHandler drtTripsEventHandler = new DrtTripsEventHandler();
 		eventManager.addHandler(drtTripsEventHandler);
 		eventManager.initProcessing();
-
+		
 		MatsimEventsReader matsimEventsReader = DrtEventsReaders.createEventsReader(eventManager);
 		matsimEventsReader.readFile(eventsFile);
 

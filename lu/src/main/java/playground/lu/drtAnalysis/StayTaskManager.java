@@ -62,7 +62,7 @@ public class StayTaskManager implements ActivityStartEventHandler, ActivityEndEv
 		public Id<Link> getLinkId() {
 			return linkId;
 		}
-
+		
 	}
 
 	@Override
@@ -100,6 +100,10 @@ public class StayTaskManager implements ActivityStartEventHandler, ActivityEndEv
 
 	public List<StayTaskDataEntry> getStayTaskDataEntriesList() {
 		return stayTaskDataEntriesList;
+	}
+	
+	public Map<Id<Person>, StayTaskDataEntry> getStartedSatyTasksMap() {
+		return startedSatyTasksMap;
 	}
 
 }

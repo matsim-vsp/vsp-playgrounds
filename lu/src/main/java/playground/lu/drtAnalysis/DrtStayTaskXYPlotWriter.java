@@ -3,6 +3,7 @@ package playground.lu.drtAnalysis;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.matsim.api.core.v01.Scenario;
@@ -18,6 +19,7 @@ import playground.lu.drtAnalysis.StayTaskManager.StayTaskDataEntry;
 
 public class DrtStayTaskXYPlotWriter {
 	private final int eventsQueueSize = 1048576 * 32;
+	private final double endTime = 30 * 3600;
 
 	public static void main(String[] args) throws IOException {
 		String eventsFile = args[0];
@@ -43,6 +45,12 @@ public class DrtStayTaskXYPlotWriter {
 		matsimEventsReader.readFile(eventsFile);
 
 		List<StayTaskDataEntry> stayTaskDataEntries = stayTaskManager.getStayTaskDataEntriesList();
+		// Adding in the final stay tasks (which ends after the dvrpTaskEnded event)
+		Collection<StayTaskDataEntry> finalStayTasksEntries = stayTaskManager.getStartedSatyTasksMap().values();
+		for (StayTaskDataEntry stayTaskDataEntry : finalStayTasksEntries) {
+			stayTaskDataEntry.setEndTime(endTime);
+			stayTaskDataEntries.add(stayTaskDataEntry);
+		}
 		System.out.println("there are " + stayTaskDataEntries.size() + " stay tasks in total");
 		writeResultIntoCSVFile(stayTaskDataEntries, network, outputFile);
 	}
