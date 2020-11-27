@@ -1,7 +1,6 @@
 package playground.lu.unitCapacityMatching;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.schedule.DrtTaskFactory;
@@ -35,8 +34,7 @@ public class SimpleUnitCapacityRequestInserterModule extends AbstractDvrpModeQSi
 		bindModal(UnplannedRequestInserter.class)
 				.toProvider(modalProvider(getter -> new SimpleUnitCapacityRequestInserter(drtCfg,
 						getter.getModal(Fleet.class), getter.get(EventsManager.class), getter.get(MobsimTimer.class),
-						getter.getModal(DrtZonalSystem.class), getter.getModal(DrtScheduleInquiry.class),
-						getter.getModal(VehicleAssignmentTools.class))))
+						getter.getModal(DrtScheduleInquiry.class), getter.getModal(VehicleAssignmentTools.class))))
 				.asEagerSingleton();
 
 		bindModal(VehicleAssignmentTools.class).toProvider(new ModalProviders.AbstractProvider<>(drtCfg.getMode()) {
