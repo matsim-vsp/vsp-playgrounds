@@ -48,8 +48,8 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 
 		// TODO if this matching algorithm is implemented, read these parameters from
 		// the config file
-		maxEuclideanDistance = 3000;
-		patientienceTime = 300;
+		maxEuclideanDistance = 3000000;
+		patientienceTime = 108000;
 	}
 
 	@Override
@@ -91,8 +91,7 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 				// Remove the request and the vehicle from their respective collections
 				idleVehicles.remove(selectedVehicle);
 				reqIter.remove();
-
-			} else if (timeOfDay > request.getSubmissionTime() + patientienceTime) {
+			} else if (timeOfDay > request.getSubmissionTime() + patientienceTime || timeOfDay >= 108000) {
 				eventsManager.processEvent(new PassengerRequestRejectedEvent(timeOfDay, drtCfg.getMode(),
 						request.getId(), request.getPassengerId(), NO_SUITABLE_VEHICLE_FOUND_CAUSE));
 				log.debug("No suitable vehicle found for drt request " + request + " from passenger id="
