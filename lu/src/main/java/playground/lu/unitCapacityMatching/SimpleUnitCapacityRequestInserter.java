@@ -48,7 +48,7 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 
 		// TODO if this matching algorithm is implemented, read these parameters from
 		// the config file
-		maxEuclideanDistance = 3000000;
+		maxEuclideanDistance = 3000;
 		patientienceTime = 108000;
 	}
 
