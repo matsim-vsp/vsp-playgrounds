@@ -1,5 +1,6 @@
 package playground.lu.unitCapacityMatching;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
+import org.matsim.contrib.drt.analysis.zonal.DrtZone;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.passenger.DrtRequest;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -33,22 +36,26 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 	private final double patientienceTime;
 	private final DrtScheduleInquiry scheduleInquiry;
 	private final VehicleAssignmentTools vehicleAssignmentTools;
+	private final DrtZonalSystem zonalSystem;
+	private final double largeNumber = 10000000;
 
 	private static final String NO_SUITABLE_VEHICLE_FOUND_CAUSE = "no_suitable_vehicle_found";
 
 	public SimpleUnitCapacityRequestInserter(DrtConfigGroup drtCfg, Fleet fleet, EventsManager eventsManager,
 			MobsimTimer mobsimTimer, DrtScheduleInquiry drtScheduleInquiry,
-			VehicleAssignmentTools vehicleAssignmentTools) {
+			VehicleAssignmentTools vehicleAssignmentTools, DrtZonalSystem zonalSystem) {
 		this.drtCfg = drtCfg;
 		this.fleet = fleet;
 		this.eventsManager = eventsManager;
 		this.mobsimTimer = mobsimTimer;
 		this.scheduleInquiry = drtScheduleInquiry;
 		this.vehicleAssignmentTools = vehicleAssignmentTools;
+		this.zonalSystem = zonalSystem;
 
 		// TODO if this matching algorithm is implemented, read these parameters from
 		// the config file
 		maxEuclideanDistance = 3000;
+//		maxEuclideanDistance = 1000000;  // i.e. no max distance restriction for matching
 		patientienceTime = 108000;
 	}
 
@@ -65,11 +72,29 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 		Iterator<DrtRequest> reqIter = unplannedRequests.iterator();
 
 		while (reqIter.hasNext() && !idleVehicles.isEmpty()) {
-			double shortestDistance = maxEuclideanDistance;
-			DvrpVehicle selectedVehicle = null;
-
 			DrtRequest request = reqIter.next();
 			Link requestLink = request.getFromLink();
+			DrtZone requestZone = zonalSystem.getZoneForLinkId(requestLink.getId());
+
+			// Vehicle within the same zone or vehicle within certain distance are feasible
+			// for the request (this setting avoid matching a request to a very far away
+			// vehicle. This may reduce the overall waiting time, as it is likely that a
+			// rebalancing vehicle will arrive soon)
+			// TODO perhaps rewrite this into a shorter format?
+			List<DvrpVehicle> feasibleVehicles = new ArrayList<>();
+			for (DvrpVehicle vehicle : idleVehicles) {
+				Link vehicleLink = ((DrtStayTask) vehicle.getSchedule().getCurrentTask()).getLink();
+				DrtZone vehicleZone = zonalSystem.getZoneForLinkId(vehicleLink.getId());
+				double euclideanDistance = NetworkUtils.getEuclideanDistance(requestLink.getCoord(),
+						vehicleLink.getCoord());
+				if (euclideanDistance <= maxEuclideanDistance || requestZone == vehicleZone) {
+					feasibleVehicles.add(vehicle);
+				}
+			}
+
+			// Find the closest vehicles from the feasible vehicle list
+			double shortestDistance = largeNumber;
+			DvrpVehicle selectedVehicle = null;
 			for (DvrpVehicle vehicle : idleVehicles) {
 				Link vehicleLink = ((DrtStayTask) vehicle.getSchedule().getCurrentTask()).getLink();
 				double euclideanDistance = NetworkUtils.getEuclideanDistance(requestLink.getCoord(),

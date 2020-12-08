@@ -15,7 +15,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.lu.modifiedPlusOne.ModifiedPlueOneInstallationModule;
+import playground.lu.targetLinkSelection.PredeterminedLinkSelectionModule;
 import playground.lu.unitCapacityMatching.SimpleUnitCapacityRequestInserterModule;
 
 public class RunVulkaneifelScenario {
@@ -38,11 +38,12 @@ public class RunVulkaneifelScenario {
 		controler.addOverridingModule(new DvrpModule());
 		controler.addOverridingModule(new MultiModeDrtModule());
 		controler.configureQSimComponents(DvrpQSimComponents.activateAllModes(multiModeDrtConfig));
-
+		
 		// Adding in experimental module manually
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
 			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg));
-			controler.addOverridingQSimModule(new ModifiedPlueOneInstallationModule(drtCfg));
+//			controler.addOverridingQSimModule(new ModifiedPlueOneInstallationModule(drtCfg));
+			controler.addOverridingModule(new PredeterminedLinkSelectionModule(drtCfg));
 		}
 
 		controler.run();
