@@ -90,7 +90,7 @@ public class MySumScoringFunction implements ScoringFunction {
 
 	@Override
 	public double getScore() {
-		return delegate.getScore() ;
+		return delegate.getScore();
 	}
 
 	public void addScoringFunction(BasicScoring scoringFunction) {
@@ -98,4 +98,8 @@ public class MySumScoringFunction implements ScoringFunction {
 		pDelegate.addScoringFunction(scoringFunction);
 	}
 
+	@Override
+	public void addScore(double amount) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
 }

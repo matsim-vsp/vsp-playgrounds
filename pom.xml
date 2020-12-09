@@ -161,11 +161,10 @@
 		<module>kai</module>
 		<module>kairuns</module>
 		<module>kturner</module>
+		<module>lu</module>
 		<module>michalm</module>
-		<!--<module>org.matsim.santiago</module>-->
 		<module>stockholm</module>
 		<module>tthunig</module>
-		<!--<module>vsp</module>-->
 		<module>vspshk</module>
 		<module>vsptelematics</module>
 	</modules>
@@ -174,7 +173,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

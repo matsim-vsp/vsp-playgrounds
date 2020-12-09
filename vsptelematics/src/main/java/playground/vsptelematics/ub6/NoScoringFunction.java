@@ -74,6 +74,11 @@ public class NoScoringFunction implements ScoringFunction {
 
 	}
 
+	@Override
+	public void addScore(double amount) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
 	/**
 	 * @see org.matsim.core.scoring.ScoringFunction#finish()
 	 */

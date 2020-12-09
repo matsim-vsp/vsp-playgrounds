@@ -23,8 +23,9 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.taxi.fare.TaxiFareParams;
 import org.matsim.contrib.taxi.run.MultiModeTaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.ConfigUtils;
@@ -46,10 +47,9 @@ import playground.ikaddoura.savPricing.noiseSAV.NoiseComputationModuleSAV;
  * Idea:
  * (1) Adjusts the sav (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer' / 'drt_optimizer')
  * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi/drt'), i.e. waiting for or traveling with an SAV.
- * 
- * 
-* @author ikaddoura
-*/
+ *
+ * @author ikaddoura
+ */
 
 public class SAVPricingModule extends AbstractModule {
 	public static final String TAXI_OPTIMIZER = "taxi_optimizer";
@@ -59,19 +59,20 @@ public class SAVPricingModule extends AbstractModule {
 
 	private final Scenario scenario;
 	private final String privateCarMode;
-	
+
 	@Inject
 	public SAVPricingModule(Scenario scenario, String privateCarMode) {
 		this.scenario = scenario;
 		this.privateCarMode = privateCarMode;
 	}
-		
+
 	private final boolean useDefaultTravelDisutilityInTheCaseWithoutPricing = true;
-	
+
 	@Override
 	public void install() {
-		
-		SAVPricingConfigGroup savPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), SAVPricingConfigGroup.class);		
+
+		SAVPricingConfigGroup savPricingParams = ConfigUtils.addOrGetModule(this.getConfig(),
+				SAVPricingConfigGroup.class);
 
 		String savMode = savPricingParams.getSavMode();
 		String savOptimizerMode;
@@ -82,38 +83,53 @@ public class SAVPricingModule extends AbstractModule {
 		} else {
 			throw new RuntimeException("Unknown sav mode. Aborting...");
 		}
-		
+
 		// #############################
 		// consistency check
 		// #############################
-		
+
 		ModeParams savModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(savMode) != null) {
 			savModeParams = this.getConfig().planCalcScore().getModes().get(savMode);
 		} else {
 			throw new RuntimeException("There is no 'taxi/sav' mode in the planCalcScore config group.");
 		}
-		
+
 		if (savModeParams.getMonetaryDistanceRate() != 0.) {
 			log.warn("The monetary distance rate for 'taxi/sav' should be zero. The fare is considered somewhere else.");
 		}
-		
+
 		if (savModeParams.getMarginalUtilityOfDistance() != 0.) {
 			log.warn("The marginal utility of distance for 'taxi/sav' should be zero.");
 		}
-		
+
 		ModeParams savOptimizerModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
 			savOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
 		} else {
 			log.warn("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Will only allow the default travel disutility.");
 		}
-		
+
 		if (savOptimizerModeParams != null) {
-			MultiModeTaxiConfigGroup multiModeTaxiConfigGroup = ConfigUtils.addOrGetModule(this.getConfig(),
-					MultiModeTaxiConfigGroup.class);
-			TaxiConfigGroup taxiConfigGroup = TaxiConfigGroup.getSingleModeTaxiConfig(getConfig());
-			TaxiFareParams taxiFareParams = taxiConfigGroup.getTaxiFareParams().get();
+			//			MultiModeTaxiConfigGroup multiModeTaxiConfigGroup = ConfigUtils.addOrGetModule(this.getConfig(),
+			//					MultiModeTaxiConfigGroup.class);
+			//			TaxiConfigGroup taxiConfigGroup = TaxiConfigGroup.getSingleModeTaxiConfig(getConfig());
+			//			TaxiFareParams taxiFareParams = taxiConfigGroup.getTaxiFareParams().get();
+
+			final double distanceFare_m;
+			if (MultiModeDrtConfigGroup.get(getConfig()) != null) {
+				distanceFare_m = DrtConfigGroup.getSingleModeDrtConfig(getConfig())
+						.getDrtFareParams()
+						.get()
+						.getDistanceFare_m();
+			} else if (MultiModeTaxiConfigGroup.get(getConfig()) != null) {
+				distanceFare_m = TaxiConfigGroup.getSingleModeTaxiConfig(getConfig())
+						.getTaxiFareParams()
+						.get()
+						.getDistanceFare_m();
+			} else {
+				distanceFare_m = Double.NaN;
+			}
 
 			if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
 				log.warn(
@@ -127,35 +143,38 @@ public class SAVPricingModule extends AbstractModule {
 			if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
 				log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
 			}
-			
-			if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
-				log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
-						+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
+
+			if (savOptimizerModeParams.getMarginalUtilityOfTraveling()
+					!= savModeParams.getMarginalUtilityOfTraveling()) {
+				log.warn(
+						"The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
+								+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");
 			}
-			
-			if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
-				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
-						+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
-						+ " It may make sense to charge a slighlty higher fare...");
+
+			if (savOptimizerModeParams.getMonetaryDistanceRate() != (distanceFare_m * (-1))) {
+				log.warn(
+						"Distance-based cost in plansCalcScore config group and drt/taxi fare params for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
+								+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
+								+ " It may make sense to charge a slighlty higher fare...");
 			}
 		}
-						
+
 		// #############################
 		// passenger-vehicle tracking
 		// #############################
-				
+
 		SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(savMode);
 		this.bind(SAVPassengerTracker.class).toInstance(tracker);
 		addEventHandlerBinding().toInstance(tracker);
-				
+
 		// #############################
         // noise and congestion pricing
         // #############################
-		
+
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
 
 		if (savPricingParams.isAccountForNoise()) {
-						
+
 			if (savPricingParams.isChargeSAVTollsFromPassengers() || savPricingParams.isChargeTollsFromCarUsers() || savPricingParams.isChargeTollsFromSAVDriver()) {
 				noiseParams.setInternalizeNoiseDamages(true);
 			} else {
@@ -165,11 +184,11 @@ public class SAVPricingModule extends AbstractModule {
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
-		
+
 		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
-				
+
 		if (savPricingParams.isAccountForCongestion()) {
-									
+
 			if (savPricingParams.isChargeSAVTollsFromPassengers() || savPricingParams.isChargeTollsFromCarUsers() || savPricingParams.isChargeTollsFromSAVDriver()) {
 				decongestionParams.setEnableDecongestionPricing(true);
 			} else {
@@ -179,24 +198,24 @@ public class SAVPricingModule extends AbstractModule {
 		} else {
 			decongestionParams.setEnableDecongestionPricing(false);
 		}
-		
-        // #############################
+
+		// #############################
         // travel disutility
         // #############################
-		               
+
 		// sav_optimizer
-		
+
 		if (savPricingParams.isChargeTollsFromSAVDriver()) {
-			
+
 			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the sav optimizer.");
 			if (savOptimizerModeParams == null) throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
 			install(new SAVMoneyTravelDisutilityModule(savMode,
 					new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
-		
+
 		} else {
-			
+
 			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the sav optimizer.");
-			
+
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
 				log.info("Using the default travel disutility for the SAV optimizer.");
 			} else {
@@ -205,43 +224,44 @@ public class SAVPricingModule extends AbstractModule {
 						new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
 			}
 		}
-		
+
 		// car user
-				
+
 		if (savPricingParams.isChargeTollsFromCarUsers()) {
-						
+
 			log.info("Charge tolls from private car users. Modify the default travel disutility of private car users.");
 
-			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-        			new MoneyTimeDistanceTravelDisutilityFactory(
-        				new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig())
-        			);
-        		install(new MoneyTravelDisutilityModule(privateCarMode, dvrpTravelDisutilityFactory));
-			
-		} else {	
-			
-			log.info("Tolls are not charged from private car users. No need to modify the default travel disutility of private car users.");
-			
+			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
+					new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig()));
+			install(new MoneyTravelDisutilityModule(privateCarMode, dvrpTravelDisutilityFactory));
+
+		} else {
+
+			log.info(
+					"Tolls are not charged from private car users. No need to modify the default travel disutility of private car users.");
+
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
 				log.info("Using the default travel disutility for private car users.");
 			} else {
-				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig()); 
+				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(
+						privateCarMode, this.getConfig());
 				this.addTravelDisutilityFactoryBinding(privateCarMode).toInstance(defaultTravelDisutilityFactory);
 			}
 		}
-		
+
 		// account for vehicle type (sav vs. car)
-		if ((savPricingParams.isChargeTollsFromCarUsers() == false && savPricingParams.isChargeTollsFromSAVDriver() == true) 
-				|| (savPricingParams.isChargeTollsFromCarUsers() == true && savPricingParams.isChargeTollsFromSAVDriver() == false))  {
-			
+		if ((savPricingParams.isChargeTollsFromCarUsers() == false
+				&& savPricingParams.isChargeTollsFromSAVDriver() == true)
+				|| (savPricingParams.isChargeTollsFromCarUsers() == true
+				&& savPricingParams.isChargeTollsFromSAVDriver() == false)) {
+
 			log.info("Using an agent filter which differentiates between sav vehicles and other vehicles...");
 			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
 		} else {
 			log.info("Not binding any agent filter. "
 					+ "The computation of average toll payments does not differentiate between sav and a normal car.");
 		}
-				
+
 	}
 }
 

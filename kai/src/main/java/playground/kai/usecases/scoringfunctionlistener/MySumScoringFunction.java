@@ -130,14 +130,17 @@ public final class MySumScoringFunction implements ScoringFunction {
 		}
 
 		if (scoringFunction instanceof MoneyScoring) {
-			moneyScoringFunctions.add((MoneyScoring) scoringFunction);
+			moneyScoringFunctions.add((MoneyScoring)scoringFunction);
 		}
 
-		if (scoringFunction instanceof ArbitraryEventScoring ) {
-			this.arbtraryEventScoringFunctions.add((ArbitraryEventScoring) scoringFunction) ;
+		if (scoringFunction instanceof ArbitraryEventScoring) {
+			this.arbtraryEventScoringFunctions.add((ArbitraryEventScoring)scoringFunction);
 		}
 
 	}
 
-
+	@Override
+	public void addScore(double amount) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
 }
