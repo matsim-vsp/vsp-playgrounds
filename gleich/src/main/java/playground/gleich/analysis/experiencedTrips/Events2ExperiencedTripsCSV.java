@@ -98,7 +98,7 @@ public final class Events2ExperiencedTripsCSV {
 		config.facilities().setInputFile(pathInclRunIdAndDot + "output_facilities.xml.gz");
 		config.transit().setVehiclesFile(pathInclRunIdAndDot + "output_transitVehicles.xml.gz");
 		config.vehicles().setVehiclesFile(pathInclRunIdAndDot + "output_vehicles.xml.gz");
-        config.plans().setInputPersonAttributeFile(null);
+		config.plans().setInputPersonAttributeFile(null);
 
         AnalysisMainModeIdentifier mainModeIdentifier = new DefaultAnalysisModeIdentifier();
 
@@ -124,10 +124,10 @@ public final class Events2ExperiencedTripsCSV {
 				new ScenarioByInstanceModule(scenario),
 				new ReplayEvents.Module());
         injector.getInstance(EventsToLegs.class).setTransitSchedule(scenario.getTransitSchedule());
-        ReplayEvents replayEvents = (ReplayEvents)injector.getInstance(ReplayEvents.class);
+        ReplayEvents replayEvents = injector.getInstance(ReplayEvents.class);
         replayEvents.playEventsFile(eventsFile, 0, true);
         
-        experiencedPlansService = ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class));
+        experiencedPlansService = injector.getInstance(ExperiencedPlansService.class);
         experiencedPlansService.writeExperiencedPlans(pathInclRunIdAndDot + "output_experienced_plans.xml.gz");
     }
 
@@ -157,8 +157,7 @@ public final class Events2ExperiencedTripsCSV {
 
 		@Override
 		public String[] getAdditionalTripHeader() {
-			String[] header = {"transit_stops_visited", "start_dist_to_shape", "end_dist_to_shape"};
-			return header;
+			return new String[]{"transit_stops_visited", "start_dist_to_shape", "end_dist_to_shape"};
 		}
 
 		@Override
@@ -204,8 +203,7 @@ public final class Events2ExperiencedTripsCSV {
 	static class ExperiencedLegsExtension implements TripsAndLegsCSVWriter.CustomLegsWriterExtension {
 		@Override
 		public String[] getAdditionalLegHeader() {
-			String[] legHeader = new String[]{"isIntermodalDrtPt", "intermodalMode"};
-			return legHeader;
+			return new String[]{"isIntermodalDrtPt", "intermodalMode"};
 		}
 
 		@Override
