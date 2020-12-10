@@ -77,18 +77,20 @@ public final class Events2ExperiencedTripsCSV {
 //		String pathInclRunIdAndDot = "/home/gregor/git/runs-svn/avoev/snz-vulkaneifel/output-snzDrtO321g/snzDrtO321g.";
 //		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/gladbeck.shp";
 		String pathTripFilterShapeFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
+		String coordinateReferenceSystem = "EPSG:25832";
 
 //		String pathInclRunIdAndDot = "/home/gregor/tmp/open-berlin-intermodal/Z155e/Z155e.";
-		if (args.length==2) {
+		if (args.length==3) {
 			pathInclRunIdAndDot = args[0];
 			pathTripFilterShapeFile = args[1];
+			coordinateReferenceSystem = args[2];
 		} else if (args.length>3) {
 			throw new RuntimeException(">3 args.length not implemented yet.");
 		}
 
 //        Config config = ConfigUtils.loadConfig(pathInclRunIdAndDot + "output_config.xml"); / the proper way
 		Config config = ConfigUtils.createConfig(); // snz backport
-		config.global().setCoordinateSystem("EPSG:25832"); // snz backport
+		config.global().setCoordinateSystem(coordinateReferenceSystem); // snz backport
 
         config.network().setInputFile(pathInclRunIdAndDot + "output_network.xml.gz");
         config.transit().setTransitScheduleFile(pathInclRunIdAndDot + "output_transitSchedule.xml.gz");
@@ -96,7 +98,7 @@ public final class Events2ExperiencedTripsCSV {
 		config.facilities().setInputFile(pathInclRunIdAndDot + "output_facilities.xml.gz");
 		config.transit().setVehiclesFile(pathInclRunIdAndDot + "output_transitVehicles.xml.gz");
 		config.vehicles().setVehiclesFile(pathInclRunIdAndDot + "output_vehicles.xml.gz");
-        config.plans().setInputPersonAttributeFile(null);
+		config.plans().setInputPersonAttributeFile(null);
 
         AnalysisMainModeIdentifier mainModeIdentifier = new DefaultAnalysisModeIdentifier();
 
@@ -122,10 +124,10 @@ public final class Events2ExperiencedTripsCSV {
 				new ScenarioByInstanceModule(scenario),
 				new ReplayEvents.Module());
         injector.getInstance(EventsToLegs.class).setTransitSchedule(scenario.getTransitSchedule());
-        ReplayEvents replayEvents = (ReplayEvents)injector.getInstance(ReplayEvents.class);
-        replayEvents.playEventsFile(eventsFile, 0);
+        ReplayEvents replayEvents = injector.getInstance(ReplayEvents.class);
+        replayEvents.playEventsFile(eventsFile, 0, true);
         
-        experiencedPlansService = ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class));
+        experiencedPlansService = injector.getInstance(ExperiencedPlansService.class);
         experiencedPlansService.writeExperiencedPlans(pathInclRunIdAndDot + "output_experienced_plans.xml.gz");
     }
 
@@ -155,8 +157,7 @@ public final class Events2ExperiencedTripsCSV {
 
 		@Override
 		public String[] getAdditionalTripHeader() {
-			String[] header = {"transit_stops_visited", "start_dist_to_shape", "end_dist_to_shape"};
-			return header;
+			return new String[]{"transit_stops_visited", "start_dist_to_shape", "end_dist_to_shape"};
 		}
 
 		@Override
@@ -202,8 +203,7 @@ public final class Events2ExperiencedTripsCSV {
 	static class ExperiencedLegsExtension implements TripsAndLegsCSVWriter.CustomLegsWriterExtension {
 		@Override
 		public String[] getAdditionalLegHeader() {
-			String[] legHeader = new String[]{"isIntermodalDrtPt", "intermodalMode"};
-			return legHeader;
+			return new String[]{"isIntermodalDrtPt", "intermodalMode"};
 		}
 
 		@Override
