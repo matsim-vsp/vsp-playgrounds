@@ -41,7 +41,7 @@ public class RunTestingScenario {
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
 //			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
 //			controler.addOverridingQSimModule(new UnitCapcityZonalRequestInserterModule(drtCfg));
-			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg));
+			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg, 100000));
 		}
 
 		controler.run();

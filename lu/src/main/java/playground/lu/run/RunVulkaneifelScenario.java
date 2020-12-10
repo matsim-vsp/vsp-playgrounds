@@ -38,14 +38,14 @@ public class RunVulkaneifelScenario {
 		controler.addOverridingModule(new DvrpModule());
 		controler.addOverridingModule(new MultiModeDrtModule());
 		controler.configureQSimComponents(DvrpQSimComponents.activateAllModes(multiModeDrtConfig));
-		
+
 		// Adding in experimental module manually
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
-			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg));
+			double maxEuclideanDistance = 100000;
+			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg, maxEuclideanDistance));
 //			controler.addOverridingQSimModule(new ModifiedPlueOneInstallationModule(drtCfg));
 			controler.addOverridingModule(new PredeterminedLinkSelectionModule(drtCfg));
 		}
-
 		controler.run();
 	}
 }

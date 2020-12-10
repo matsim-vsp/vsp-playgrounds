@@ -24,10 +24,12 @@ import playground.lu.vehicleAssignment.VehicleAssignmentTools;
 public class SimpleUnitCapacityRequestInserterModule extends AbstractDvrpModeQSimModule {
 
 	private final DrtConfigGroup drtCfg;
+	private final double maxEuclideanDistance;
 
-	public SimpleUnitCapacityRequestInserterModule(DrtConfigGroup drtCfg) {
+	public SimpleUnitCapacityRequestInserterModule(DrtConfigGroup drtCfg, double maxEuclideanDistance) {
 		super(drtCfg.getMode());
 		this.drtCfg = drtCfg;
+		this.maxEuclideanDistance = maxEuclideanDistance;
 	}
 
 	@Override
@@ -36,7 +38,7 @@ public class SimpleUnitCapacityRequestInserterModule extends AbstractDvrpModeQSi
 				.toProvider(modalProvider(getter -> new SimpleUnitCapacityRequestInserter(drtCfg,
 						getter.getModal(Fleet.class), getter.get(EventsManager.class), getter.get(MobsimTimer.class),
 						getter.getModal(DrtScheduleInquiry.class), getter.getModal(VehicleAssignmentTools.class),
-						getter.getModal(DrtZonalSystem.class))))
+						getter.getModal(DrtZonalSystem.class), maxEuclideanDistance)))
 				.asEagerSingleton();
 
 		bindModal(VehicleAssignmentTools.class).toProvider(new ModalProviders.AbstractProvider<>(drtCfg.getMode()) {

@@ -43,7 +43,7 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 
 	public SimpleUnitCapacityRequestInserter(DrtConfigGroup drtCfg, Fleet fleet, EventsManager eventsManager,
 			MobsimTimer mobsimTimer, DrtScheduleInquiry drtScheduleInquiry,
-			VehicleAssignmentTools vehicleAssignmentTools, DrtZonalSystem zonalSystem) {
+			VehicleAssignmentTools vehicleAssignmentTools, DrtZonalSystem zonalSystem, double maxEuclideanDistance) {
 		this.drtCfg = drtCfg;
 		this.fleet = fleet;
 		this.eventsManager = eventsManager;
@@ -54,8 +54,8 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 
 		// TODO if this matching algorithm is implemented, read these parameters from
 		// the config file
-		maxEuclideanDistance = 3000;
-//		maxEuclideanDistance = 1000000;  // i.e. no max distance restriction for matching
+//		maxEuclideanDistance = 3000;
+		this.maxEuclideanDistance = maxEuclideanDistance;
 		patientienceTime = 108000;
 	}
 
