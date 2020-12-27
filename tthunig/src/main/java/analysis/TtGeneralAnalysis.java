@@ -364,7 +364,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	private void cleanDelayRatioMap(){
 		// look for the maximum delay
 		Iterator<Double> iterator = delayRatioMap.keySet().iterator();
-		double max = iterator.next();
+		double max = iterator.hasNext()? iterator.next() : -1;
 		while (iterator.hasNext()) {
 			max = iterator.next();
 		}
