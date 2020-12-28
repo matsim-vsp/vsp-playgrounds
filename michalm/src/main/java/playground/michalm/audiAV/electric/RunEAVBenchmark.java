@@ -59,7 +59,7 @@ public class RunEAVBenchmark {
 	private static boolean isServingCustomer(DvrpVehicle vehicle) {
 		Schedule schedule = vehicle.getSchedule();
 		if (schedule.getStatus() == ScheduleStatus.STARTED) {
-			switch (TaxiTaskBaseType.getBaseType(schedule.getCurrentTask())) {
+			switch (TaxiTaskBaseType.getBaseTypeOrElseThrow(schedule.getCurrentTask())) {
 				case PICKUP:
 				case OCCUPIED_DRIVE:
 				case DROPOFF:
