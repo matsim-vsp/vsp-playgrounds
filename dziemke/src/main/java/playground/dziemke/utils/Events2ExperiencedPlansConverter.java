@@ -3,7 +3,6 @@ package playground.dziemke.utils;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.ReplayEvents;

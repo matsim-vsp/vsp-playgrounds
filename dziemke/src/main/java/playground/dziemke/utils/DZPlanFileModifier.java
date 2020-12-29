@@ -47,12 +47,16 @@ public class DZPlanFileModifier {
 //		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/502/plans1.xml.gz";
 //		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/plans_10000.xml.gz";
 
-		String inputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans.xml.gz";
-		String outputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans-no-links-routes.xml.gz";
+//		String inputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans.xml.gz";
+//		String outputPlansFile = "../../public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-10pct.plans-no-links-routes.xml.gz";
+
+		String inputPlansFile = "../../shared-svn/projects/snf-big-data/data/scenario/zh-metro_10pct/population_10pct_plans_initial-coords.xml.gz";
+		String outputPlansFile = "../../shared-svn/projects/snf-big-data/data/scenario/zh-metro_10pct/population_10pct_plans_initial-coords_car-share.xml.gz";
 
 //		double selectionProbability = 0.2;
 //		double selectionProbability = 0.01;
-		double selectionProbability = 1;
+//		double selectionProbability = 1;
+		double selectionProbability = 0.35;
 //		boolean onlyTransferSelectedPlan = true;
 		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
