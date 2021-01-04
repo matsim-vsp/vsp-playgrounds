@@ -163,9 +163,11 @@ public class CalculatePtOperatingCostsFromEvents {
 
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
 
-		attributeNetwork(shapeFile);
-		//DEBUG
-		new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		if (shapeFile != null && !shapeFile.equals("") && !shapeFile.equals("null")) {
+			attributeNetwork(shapeFile);
+			//DEBUG
+			new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		}
 
 		EventsManager events = EventsUtils.createEventsManager();
 
