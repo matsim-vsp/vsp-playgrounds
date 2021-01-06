@@ -122,9 +122,9 @@ public class CalculatePtOperatingCostsFromEvents {
 
 		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
 		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
-		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
+		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-34/Vu-DRT-34.output_events.xml.gz";
 
-		String shapeFile = "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
+		String shapeFile = null;// "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
 //		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v0/optimizedNetwork.xml.gz";
 //		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/optimizedSchedule_nonSB-bus-split-at-hubs.xml.gz";
@@ -163,9 +163,14 @@ public class CalculatePtOperatingCostsFromEvents {
 
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
 
-		attributeNetwork(shapeFile);
-		//DEBUG
-		new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		if (shapeFile != null && !shapeFile.equals("") && !shapeFile.equals("null")) {
+			attributeNetwork(shapeFile);
+			//DEBUG
+			new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		} else {
+			network.getLinks().values().stream().forEach(link -> link.getAttributes().putAttribute(attributeNameIsInShapeFile,
+					attributeValueIsInShapeFile));
+		}
 
 		EventsManager events = EventsUtils.createEventsManager();
 
