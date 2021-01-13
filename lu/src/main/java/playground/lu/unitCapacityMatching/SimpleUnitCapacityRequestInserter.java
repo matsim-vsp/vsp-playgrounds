@@ -52,8 +52,6 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 		this.vehicleAssignmentTools = vehicleAssignmentTools;
 		this.zonalSystem = zonalSystem;
 
-		// TODO if this matching algorithm is implemented, read these parameters from
-		// the config file
 //		maxEuclideanDistance = 3000;
 		this.maxEuclideanDistance = maxEuclideanDistance;
 		patientienceTime = 108000;

@@ -32,6 +32,13 @@ public class RebalanceStudyUtils {
 		rebalancingParams.addParameterSet(feedforwardRebalancingStrategyParams);
 	}
 	
+	public static void preparePureFeedforwardStrategy(RebalancingParams rebalancingParams) {
+		FeedforwardRebalancingStrategyParams feedforwardRebalancingStrategyParams = new FeedforwardRebalancingStrategyParams();
+		feedforwardRebalancingStrategyParams.setFeedbackSwitch(false);
+		feedforwardRebalancingStrategyParams.setFeedforwardSignalLead(300);
+		rebalancingParams.addParameterSet(feedforwardRebalancingStrategyParams);
+	}
+	
 	public static void prepareMinCostFlowStrategy(RebalancingParams rebalancingParams) {
 		MinCostFlowRebalancingStrategyParams minCostFlowRebalancingStrategyParams = new MinCostFlowRebalancingStrategyParams();
 		minCostFlowRebalancingStrategyParams.setRebalancingTargetCalculatorType(

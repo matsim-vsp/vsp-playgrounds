@@ -21,16 +21,27 @@ public class DrtStayTaskXYPlotWriter {
 	private final int eventsQueueSize = 1048576 * 32;
 	private final double endTime = 30 * 3600;
 
+	private final String eventsFile;
+	private final String networkFile;
+	private final String outputPath;
+
+	public DrtStayTaskXYPlotWriter(String eventsFile, String netowrkFile, String outputPath) {
+		this.eventsFile = eventsFile;
+		this.networkFile = netowrkFile;
+		this.outputPath = outputPath;
+	}
+	
 	public static void main(String[] args) throws IOException {
 		String eventsFile = args[0];
 		String networkFile = args[1];
-		String outputFile = args[2];
+		String outputPath = args[2];
 
-		DrtStayTaskXYPlotWriter drtStayTaskXYPlotWriter = new DrtStayTaskXYPlotWriter();
-		drtStayTaskXYPlotWriter.run(eventsFile, networkFile, outputFile);
+		DrtStayTaskXYPlotWriter drtStayTaskXYPlotWriter = new DrtStayTaskXYPlotWriter(eventsFile, networkFile,
+				outputPath);
+		drtStayTaskXYPlotWriter.run();
 	}
-
-	public void run(String eventsFile, String networkFile, String outputFile) throws IOException {
+	
+	public void run() throws IOException {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		Network network = scenario.getNetwork();
@@ -52,7 +63,7 @@ public class DrtStayTaskXYPlotWriter {
 			stayTaskDataEntries.add(stayTaskDataEntry);
 		}
 		System.out.println("there are " + stayTaskDataEntries.size() + " stay tasks in total");
-		writeResultIntoCSVFile(stayTaskDataEntries, network, outputFile);
+		writeResultIntoCSVFile(stayTaskDataEntries, network, outputPath);
 	}
 
 	private void writeResultIntoCSVFile(List<StayTaskDataEntry> stayTaskDataEntries, Network network, String outputFile)
@@ -74,8 +85,8 @@ public class DrtStayTaskXYPlotWriter {
 		csvWriter.append("\n");
 
 		for (StayTaskDataEntry stayTaskDataEntry : stayTaskDataEntries) {
-			double X = network.getLinks().get(stayTaskDataEntry.getLinkId()).getCoord().getX();
-			double Y = network.getLinks().get(stayTaskDataEntry.getLinkId()).getCoord().getY();
+			double X = network.getLinks().get(stayTaskDataEntry.getLinkId()).getToNode().getCoord().getX();
+			double Y = network.getLinks().get(stayTaskDataEntry.getLinkId()).getToNode().getCoord().getY();
 			List<String> elements = new ArrayList<>();
 
 			elements.add(stayTaskDataEntry.getStayTaskId());
