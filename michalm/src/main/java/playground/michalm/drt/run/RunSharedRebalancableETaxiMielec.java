@@ -28,7 +28,6 @@ import org.matsim.contrib.edrt.run.RunEDrtScenario;
 import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 public class RunSharedRebalancableETaxiMielec {
@@ -55,8 +54,6 @@ public class RunSharedRebalancableETaxiMielec {
 		config.controler().setWriteEventsInterval(1);
 		config.controler().setOutputDirectory("d:/temp/mielec-rebalancing/electric");
 
-		Controler controler = RunEDrtScenario.createControler(config, otfvis);
-
-		controler.run();
+		RunEDrtScenario.run(config, otfvis);
 	}
 }

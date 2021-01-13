@@ -122,9 +122,9 @@ public class CalculatePtOperatingCostsFromEvents {
 
 		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
 		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
-		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-3/Vu-DRT-3.output_events.xml.gz";
+		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-34/Vu-DRT-34.output_events.xml.gz";
 
-		String shapeFile = "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
+		String shapeFile = null;// "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
 //		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v0/optimizedNetwork.xml.gz";
 //		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v1/optimizedSchedule_nonSB-bus-split-at-hubs.xml.gz";
@@ -163,9 +163,14 @@ public class CalculatePtOperatingCostsFromEvents {
 
 	public void run(String eventsFile, String shapeFile, double costPerHour, double costPerKm, double costPerDayFixVeh) {
 
-		attributeNetwork(shapeFile);
-		//DEBUG
-		new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		if (shapeFile != null && !shapeFile.equals("") && !shapeFile.equals("null")) {
+			attributeNetwork(shapeFile);
+			//DEBUG
+			new NetworkWriter(network).write("attributedNetwork.xml.gz");
+		} else {
+			network.getLinks().values().stream().forEach(link -> link.getAttributes().putAttribute(attributeNameIsInShapeFile,
+					attributeValueIsInShapeFile));
+		}
 
 		EventsManager events = EventsUtils.createEventsManager();
 
@@ -195,13 +200,13 @@ public class CalculatePtOperatingCostsFromEvents {
 		System.out.println("totalCost: " + totalCost);
 		System.out.println("pkm: " + pkm);
 	}
-    private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+	private class VehKmInShapeEventHandler implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
 			VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler,
 			TransitDriverStartsEventHandler {
 
         private final Network network;
         private final TransitSchedule inSchedule;
-		private final Vehicles inTransiVehicles;
+		private final Vehicles inTransitVehicles;
 
 		private Map<Id<Vehicle>, Double> veh2enterServiceInAreaEventTime = new HashMap<>();
 		private Map<Id<Vehicle>, Double> veh2timeInArea = new HashMap<>();
@@ -213,13 +218,13 @@ public class CalculatePtOperatingCostsFromEvents {
 		public VehKmInShapeEventHandler(Network network, TransitSchedule inSchedule, Vehicles inTransitVehicles) {
 			this.network = network;
 			this.inSchedule = inSchedule;
-			this.inTransiVehicles = inTransitVehicles;
+			this.inTransitVehicles = inTransitVehicles;
 		}
 
 		// vehicle starts service at VehicleEntersTrafficEvent
 		@Override
 		public void handleEvent(VehicleEntersTrafficEvent vehicleEntersTrafficEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(vehicleEntersTrafficEvent.getVehicleId())) {
+			if (inTransitVehicles.getVehicles().containsKey(vehicleEntersTrafficEvent.getVehicleId())) {
 				// it's a transit vehicle, do something
 				Object attributeIsInShape = network.getLinks().get(vehicleEntersTrafficEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
 				String attrValue = attributeIsInShape == null ? null : attributeIsInShape.toString();
@@ -232,7 +237,7 @@ public class CalculatePtOperatingCostsFromEvents {
 
 		@Override
 		public void handleEvent (LinkEnterEvent linkEnterEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(linkEnterEvent.getVehicleId())) {
+			if (inTransitVehicles.getVehicles().containsKey(linkEnterEvent.getVehicleId())) {
 				// it's a transit vehicle, do something
 				Object attributeIsInShape = network.getLinks().get(linkEnterEvent.getLinkId()).getAttributes().getAttribute(attributeNameIsInShapeFile);
 				String attrValue = attributeIsInShape == null ? null : attributeIsInShape.toString();
@@ -284,7 +289,7 @@ public class CalculatePtOperatingCostsFromEvents {
 		// count all
 		@Override
 		public void handleEvent(PersonEntersVehicleEvent personEntersVehicleEvent) {
-			if (inTransiVehicles.getVehicles().containsKey(personEntersVehicleEvent.getVehicleId()) &&
+			if (inTransitVehicles.getVehicles().containsKey(personEntersVehicleEvent.getVehicleId()) &&
 					! transitDriverIds.contains(personEntersVehicleEvent.getPersonId())) {
 				veh2currentPax.put(personEntersVehicleEvent.getVehicleId(),
 						veh2currentPax.get(personEntersVehicleEvent.getVehicleId()) + 1);

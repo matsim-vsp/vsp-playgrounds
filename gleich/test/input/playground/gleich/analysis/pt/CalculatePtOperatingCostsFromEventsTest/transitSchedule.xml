@@ -29,9 +29,6 @@
 			<departures>
 				<departure id="01" departureTime="06:00:00" vehicleRefId="tr_1" />
 				<departure id="02" departureTime="06:15:00" vehicleRefId="tr_2" />
-				<departure id="03" departureTime="06:30:00" vehicleRefId="tr_1" />
-				<departure id="04" departureTime="06:40:00" vehicleRefId="tr_2" />
-				<departure id="05" departureTime="06:50:00" vehicleRefId="tr_1" />
 			</departures>
 		</transitRoute>
 		<transitRoute id="3to1">
@@ -50,9 +47,6 @@
 			<departures>
 				<departure id="01" departureTime="06:00:00" vehicleRefId="tr_2" />
 				<departure id="02" departureTime="06:15:00" vehicleRefId="tr_1" />
-				<departure id="03" departureTime="06:30:00" vehicleRefId="tr_2" />
-				<departure id="04" departureTime="06:40:00" vehicleRefId="tr_1" />
-				<departure id="05" departureTime="06:50:00" vehicleRefId="tr_2" />
 			</departures>
 		</transitRoute>
 	</transitLine>
@@ -73,9 +67,6 @@
 			<departures>
 				<departure id="01" departureTime="06:00:00" vehicleRefId="tr_3" />
 				<departure id="02" departureTime="06:15:00" vehicleRefId="tr_4" />
-				<departure id="03" departureTime="06:30:00" vehicleRefId="tr_3" />
-				<departure id="04" departureTime="06:40:00" vehicleRefId="tr_4" />
-				<departure id="05" departureTime="06:50:00" vehicleRefId="tr_3" />
 			</departures>
 		</transitRoute>
 		<transitRoute id="6to4">
@@ -94,9 +85,6 @@
 			<departures>
 				<departure id="01" departureTime="06:00:00" vehicleRefId="tr_4" />
 				<departure id="02" departureTime="06:15:00" vehicleRefId="tr_3" />
-				<departure id="03" departureTime="06:30:00" vehicleRefId="tr_4" />
-				<departure id="04" departureTime="06:40:00" vehicleRefId="tr_3" />
-				<departure id="05" departureTime="06:50:00" vehicleRefId="tr_4" />
 			</departures>
 		</transitRoute>
 	</transitLine>
