@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
-import org.matsim.contrib.drt.analysis.zonal.DrtZone;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.passenger.DrtRequest;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -23,38 +21,37 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.network.NetworkUtils;
 
-import playground.lu.vehicleAssignment.VehicleAssignmentTools;
+import playground.lu.vehicleScheduling.VehicleAssignmentTools;
 
 public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInserter {
 	private static final Logger log = Logger.getLogger(SimpleUnitCapacityRequestInserter.class);
 
 	private final DrtConfigGroup drtCfg;
-	private final Fleet fleet;
+	protected final Fleet fleet;
 	private final EventsManager eventsManager;
-	private final MobsimTimer mobsimTimer;
+	protected final MobsimTimer mobsimTimer;
 	private final double maxEuclideanDistance;
 	private final double patientienceTime;
 	private final DrtScheduleInquiry scheduleInquiry;
 	private final VehicleAssignmentTools vehicleAssignmentTools;
-	private final DrtZonalSystem zonalSystem;
+//	private final DrtZonalSystem zonalSystem;
 	private final double largeNumber = 10000000;
 
 	private static final String NO_SUITABLE_VEHICLE_FOUND_CAUSE = "no_suitable_vehicle_found";
 
 	public SimpleUnitCapacityRequestInserter(DrtConfigGroup drtCfg, Fleet fleet, EventsManager eventsManager,
 			MobsimTimer mobsimTimer, DrtScheduleInquiry drtScheduleInquiry,
-			VehicleAssignmentTools vehicleAssignmentTools, DrtZonalSystem zonalSystem, double maxEuclideanDistance) {
+			VehicleAssignmentTools vehicleAssignmentTools, double maxEuclideanDistance) {
 		this.drtCfg = drtCfg;
 		this.fleet = fleet;
 		this.eventsManager = eventsManager;
 		this.mobsimTimer = mobsimTimer;
 		this.scheduleInquiry = drtScheduleInquiry;
 		this.vehicleAssignmentTools = vehicleAssignmentTools;
-		this.zonalSystem = zonalSystem;
+//		this.zonalSystem = zonalSystem;
 
-//		maxEuclideanDistance = 3000;
 		this.maxEuclideanDistance = maxEuclideanDistance;
-		patientienceTime = 108000;
+		patientienceTime = largeNumber;
 	}
 
 	@Override
@@ -72,7 +69,7 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 		while (reqIter.hasNext() && !idleVehicles.isEmpty()) {
 			DrtRequest request = reqIter.next();
 			Link requestLink = request.getFromLink();
-			DrtZone requestZone = zonalSystem.getZoneForLinkId(requestLink.getId());
+//			DrtZone requestZone = zonalSystem.getZoneForLinkId(requestLink.getId());
 
 			// Vehicle within the same zone or vehicle within certain distance are feasible
 			// for the request (this setting avoid matching a request to a very far away
@@ -82,10 +79,13 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 			List<DvrpVehicle> feasibleVehicles = new ArrayList<>();
 			for (DvrpVehicle vehicle : idleVehicles) {
 				Link vehicleLink = ((DrtStayTask) vehicle.getSchedule().getCurrentTask()).getLink();
-				DrtZone vehicleZone = zonalSystem.getZoneForLinkId(vehicleLink.getId());
+//				DrtZone vehicleZone = zonalSystem.getZoneForLinkId(vehicleLink.getId());
 				double euclideanDistance = NetworkUtils.getEuclideanDistance(requestLink.getCoord(),
 						vehicleLink.getCoord());
-				if (euclideanDistance <= maxEuclideanDistance || requestZone == vehicleZone) {
+//				if (euclideanDistance <= maxEuclideanDistance || requestZone == vehicleZone) {
+//					feasibleVehicles.add(vehicle);
+//				}
+				if (euclideanDistance <= maxEuclideanDistance) {
 					feasibleVehicles.add(vehicle);
 				}
 			}

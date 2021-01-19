@@ -1,7 +1,6 @@
 package playground.lu.unitCapacityMatching;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.schedule.DrtTaskFactory;
@@ -19,7 +18,7 @@ import org.matsim.core.router.util.TravelTime;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import playground.lu.vehicleAssignment.VehicleAssignmentTools;
+import playground.lu.vehicleScheduling.VehicleAssignmentTools;
 
 public class SimpleUnitCapacityRequestInserterModule extends AbstractDvrpModeQSimModule {
 
@@ -38,7 +37,7 @@ public class SimpleUnitCapacityRequestInserterModule extends AbstractDvrpModeQSi
 				.toProvider(modalProvider(getter -> new SimpleUnitCapacityRequestInserter(drtCfg,
 						getter.getModal(Fleet.class), getter.get(EventsManager.class), getter.get(MobsimTimer.class),
 						getter.getModal(DrtScheduleInquiry.class), getter.getModal(VehicleAssignmentTools.class),
-						getter.getModal(DrtZonalSystem.class), maxEuclideanDistance)))
+						maxEuclideanDistance)))
 				.asEagerSingleton();
 
 		bindModal(VehicleAssignmentTools.class).toProvider(new ModalProviders.AbstractProvider<>(drtCfg.getMode()) {

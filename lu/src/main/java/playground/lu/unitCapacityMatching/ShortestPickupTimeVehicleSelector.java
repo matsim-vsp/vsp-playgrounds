@@ -18,7 +18,7 @@ import org.matsim.contrib.dvrp.schedule.Task.TaskType;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
-import playground.lu.vehicleAssignment.VehicleAssignmentTools;
+import playground.lu.vehicleScheduling.VehicleAssignmentTools;
 
 public class ShortestPickupTimeVehicleSelector implements VehicleSelector {
 	private final static double LARGE_NUMBER = 100000;
