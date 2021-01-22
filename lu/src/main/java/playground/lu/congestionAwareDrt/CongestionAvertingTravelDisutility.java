@@ -24,8 +24,8 @@ public class CongestionAvertingTravelDisutility
 		VehicleLeavesTrafficEventHandler, VehicleEntersTrafficEventHandler {
 	private final Map<Id<Link>, MutableInt> linksOccupationMap = new HashMap<>();
 
-	private final double discountFactor = 0.8;
-	private final double penaltyFacotr = 2.0;
+	private final double discountFactor = 0.7;
+	private final double penaltyFacotr = 4.0;
 	private final double vehicleLength = 7.5;
 
 	public CongestionAvertingTravelDisutility() {
@@ -34,16 +34,19 @@ public class CongestionAvertingTravelDisutility
 
 	@Override
 	public double getLinkTravelDisutility(Link link, double time, Person person, Vehicle vehicle) {
+		System.out.println("There are " + linksOccupationMap.keySet().size() + " entries in link Occupation Map");
+		//Always zero!!!!!!
+		
 		double freeFlowTravelTIme = link.getLength() / link.getFreespeed();
-//		if (linksOccupationMap.containsKey(link.getId())) {
-//			double criticalValue = (link.getLength() * link.getNumberOfLanes() / vehicleLength) * discountFactor;
-//			int occupation = linksOccupationMap.get(link.getId()).intValue();
-//			if (occupation < criticalValue) {
-//				return freeFlowTravelTIme;
-//			}
-//			double slope = 1 / link.getFlowCapacityPerSec() * penaltyFacotr;
-//			return freeFlowTravelTIme + (occupation - criticalValue) * slope;
-//		}
+		if (linksOccupationMap.containsKey(link.getId())) {
+			double criticalValue = (link.getLength() * link.getNumberOfLanes() / vehicleLength) * discountFactor;
+			int occupation = linksOccupationMap.get(link.getId()).intValue();
+			if (occupation < criticalValue) {
+				return freeFlowTravelTIme;
+			}
+			double slope = 1 / link.getFlowCapacityPerSec() * penaltyFacotr;
+			return freeFlowTravelTIme + (occupation - criticalValue) * slope;
+		}
 		return freeFlowTravelTIme;
 	}
 
@@ -56,6 +59,15 @@ public class CongestionAvertingTravelDisutility
 	public void handleEvent(LinkEnterEvent event) {
 		linksOccupationMap.putIfAbsent(event.getLinkId(), new MutableInt());
 		linksOccupationMap.get(event.getLinkId()).increment();
+		if (event.getLinkId().toString().equals("147")) {
+			System.out.println("number of vehicles at link 147 = "
+					+ linksOccupationMap.get(Id.create(147, Link.class)).intValue()); // TODO
+			// delete
+			System.out.println("*** number of vehicles at link 147 = "
+					+ linksOccupationMap.getOrDefault(Id.create(147, Link.class), new MutableInt()).intValue());
+		}
+		System.out.println("There are " + linksOccupationMap.keySet().size() + " entries in link Occupation Map");
+		// The output from this part is normal!
 	}
 
 	@Override
@@ -77,6 +89,11 @@ public class CongestionAvertingTravelDisutility
 	@Override
 	public void handleEvent(VehicleLeavesTrafficEvent event) {
 		linksOccupationMap.get(event.getLinkId()).decrement();
+	}
+
+	// TODO delete this
+	public Map<Id<Link>, MutableInt> getLinkOccupationMap() {
+		return linksOccupationMap; //This one is always emtpy!!!!!!
 	}
 
 }

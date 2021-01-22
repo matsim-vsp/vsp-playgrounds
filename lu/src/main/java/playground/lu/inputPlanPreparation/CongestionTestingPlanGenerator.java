@@ -38,10 +38,10 @@ public class CongestionTestingPlanGenerator {
 			Person dummyPerson = populationFactory
 					.createPerson(Id.create("dummy_person_" + Integer.toString(i), Person.class));
 			Plan dummyPlan = populationFactory.createPlan();
-			Activity act0 = populationFactory.createActivityFromLinkId("dummy", Id.create("74", Link.class));
+			Activity act0 = populationFactory.createActivityFromLinkId("dummy", Id.create("23", Link.class));
 			act0.setEndTime(21600 + rnd.nextInt(3600));
 			Leg leg = populationFactory.createLeg("drt");
-			Activity act1 = populationFactory.createActivityFromLinkId("dummy", Id.create("14", Link.class));
+			Activity act1 = populationFactory.createActivityFromLinkId("dummy", Id.create("399", Link.class));
 			dummyPlan.addActivity(act0);
 			dummyPlan.addLeg(leg);
 			dummyPlan.addActivity(act1);

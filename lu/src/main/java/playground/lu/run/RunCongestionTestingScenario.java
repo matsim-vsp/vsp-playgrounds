@@ -42,11 +42,11 @@ public class RunCongestionTestingScenario {
 		controler.configureQSimComponents(DvrpQSimComponents.activateAllModes(multiModeDrtConfig));
 
 		// Adding in experimental module manually
-//		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
-//			double matchingRange = 900000;
-//			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg, matchingRange));
-//			controler.addOverridingQSimModule(new CongestionAwareDrtModule(drtCfg));
-//		}
+		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
+			double matchingRange = 900000;
+			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg, matchingRange));
+			controler.addOverridingQSimModule(new CongestionAwareDrtModule(drtCfg));
+		}
 		controler.run();
 
 		// Plot idle vehicles location

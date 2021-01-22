@@ -2,6 +2,8 @@ package playground.lu.congestionAwareDrt;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.optimizer.DrtOptimizer;
+import org.matsim.contrib.drt.optimizer.QSimScopeForkJoinPoolHolder;
+import org.matsim.contrib.drt.optimizer.VehicleData;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -9,15 +11,11 @@ import org.matsim.contrib.drt.scheduler.DrtScheduleInquiry;
 import org.matsim.contrib.drt.scheduler.EmptyVehicleRelocator;
 import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
-import org.matsim.contrib.dvrp.run.ModalProviders;
 import org.matsim.contrib.dvrp.schedule.ScheduleTimingUpdater;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 
@@ -40,18 +38,12 @@ public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 				.asEagerSingleton();
 
 		// Instruction for creating Vehicle re-routing Tool
-		bindModal(ReroutingStrategy.class).toProvider(new ModalProviders.AbstractProvider<>(drtCfg.getMode()) {
-			@Inject
-			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED)
-			private TravelTime travelTime;
-
-			@Override
-			public ReroutingStrategy get() {
-				Network network = getModalInstance(Network.class);
-				TravelDisutility travelDisutility = getModalInstance(CongestionAvertingTravelDisutility.class);
-				return new ReroutingStrategy(travelTime, drtCfg, network, travelDisutility);
-			}
-		}).asEagerSingleton();
+		bindModal(ReroutingStrategy.class).toProvider(modalProvider(
+				getter -> new ReroutingStrategy(getter.getNamed(TravelTime.class, DvrpTravelTimeModule.DVRP_ESTIMATED),
+						drtCfg, getter.getModal(Network.class), getter.getModal(TravelDisutility.class),
+						getter.getModal(VehicleData.EntryFactory.class),
+						getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool())))
+				.asEagerSingleton();
 
 		// Instruction for creating Congestion averting travel disutility
 		// And then add event handler binding to the disutility
@@ -62,5 +54,4 @@ public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 		// binding the travel disutility to congestion averting travel disutility
 		bindModal(TravelDisutility.class).to(CongestionAvertingTravelDisutility.class);
 	}
-
 }

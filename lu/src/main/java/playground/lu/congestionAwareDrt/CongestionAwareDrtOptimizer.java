@@ -38,7 +38,7 @@ public class CongestionAwareDrtOptimizer implements DrtOptimizer {
 	private final RequestQueue<DrtRequest> unplannedRequests;
 
 	private final ReroutingStrategy reroutingStrategy;
-	private final int rerouteInterval = 300; // TODO temporary
+	private final int rerouteInterval = 30; // TODO temporary
 
 	public CongestionAwareDrtOptimizer(DrtConfigGroup drtCfg, Fleet fleet, MobsimTimer mobsimTimer,
 			RebalancingStrategy rebalancingStrategy, DrtScheduleInquiry scheduleInquiry,
@@ -73,7 +73,7 @@ public class CongestionAwareDrtOptimizer implements DrtOptimizer {
 		}
 
 		if (e.getSimulationTime() % rerouteInterval == 0) {
-			rerouteRunningVehicles();
+			rerouteRunningVehicles(e.getSimulationTime());
 		}
 
 	}
@@ -97,8 +97,8 @@ public class CongestionAwareDrtOptimizer implements DrtOptimizer {
 		}
 	}
 
-	private void rerouteRunningVehicles() {
-		reroutingStrategy.rerouteVehicles();
+	private void rerouteRunningVehicles(double now) {
+		reroutingStrategy.rerouteVehicles(now, fleet);
 	}
 
 	@Override
