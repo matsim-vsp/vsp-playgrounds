@@ -34,8 +34,9 @@ public class CongestionAvertingTravelDisutility
 
 	@Override
 	public double getLinkTravelDisutility(Link link, double time, Person person, Vehicle vehicle) {
+		//DEBUGGING
 		System.out.println("There are " + linksOccupationMap.keySet().size() + " entries in link Occupation Map");
-		//Always zero!!!!!!
+		//Always empty map (i.e. 0 entry)!!!!!!
 		
 		double freeFlowTravelTIme = link.getLength() / link.getFreespeed();
 		if (linksOccupationMap.containsKey(link.getId())) {
@@ -59,10 +60,11 @@ public class CongestionAvertingTravelDisutility
 	public void handleEvent(LinkEnterEvent event) {
 		linksOccupationMap.putIfAbsent(event.getLinkId(), new MutableInt());
 		linksOccupationMap.get(event.getLinkId()).increment();
+		
+		// DEBUGGING
 		if (event.getLinkId().toString().equals("147")) {
 			System.out.println("number of vehicles at link 147 = "
-					+ linksOccupationMap.get(Id.create(147, Link.class)).intValue()); // TODO
-			// delete
+					+ linksOccupationMap.get(Id.create(147, Link.class)).intValue()); 
 			System.out.println("*** number of vehicles at link 147 = "
 					+ linksOccupationMap.getOrDefault(Id.create(147, Link.class), new MutableInt()).intValue());
 		}
@@ -91,7 +93,7 @@ public class CongestionAvertingTravelDisutility
 		linksOccupationMap.get(event.getLinkId()).decrement();
 	}
 
-	// TODO delete this
+	// TODO delete this DEBUGGING
 	public Map<Id<Link>, MutableInt> getLinkOccupationMap() {
 		return linksOccupationMap; //This one is always emtpy!!!!!!
 	}
