@@ -23,10 +23,14 @@ public class CongestionAvertingTravelDisutility
 		implements TravelDisutility, LinkEnterEventHandler, LinkLeaveEventHandler, MobsimScopeEventHandler,
 		VehicleLeavesTrafficEventHandler, VehicleEntersTrafficEventHandler {
 	private final Map<Id<Link>, MutableInt> linksOccupationMap = new HashMap<>();
+	private final Map<Id<Link>, Integer> previousLinksOccupationMap = new HashMap<>();
+	private final Map<Id<Link>, Integer> differenceMap = new HashMap<>();
 
-	private final double discountFactor = 0.7;
-	private final double penaltyFacotr = 4.0;
-	private final double vehicleLength = 7.5;
+	private final double discountFactor = 0.9;
+	private final double penaltyFactor = 2.0;
+
+	private final double updatePeriod = 30;
+	private final double overFlowPenaltyFactor = 50.0;
 
 	public CongestionAvertingTravelDisutility() {
 		// Currently empty
@@ -34,19 +38,25 @@ public class CongestionAvertingTravelDisutility
 
 	@Override
 	public double getLinkTravelDisutility(Link link, double time, Person person, Vehicle vehicle) {
-		//DEBUGGING
-		System.out.println("There are " + linksOccupationMap.keySet().size() + " entries in link Occupation Map");
-		//Always empty map (i.e. 0 entry)!!!!!!
-		
 		double freeFlowTravelTIme = link.getLength() / link.getFreespeed();
 		if (linksOccupationMap.containsKey(link.getId())) {
-			double criticalValue = (link.getLength() * link.getNumberOfLanes() / vehicleLength) * discountFactor;
+			// cost associate to the in flow
+			double overFlow = differenceMap.getOrDefault(link.getId(), 0) / updatePeriod - link.getFlowCapacityPerSec();
+			if (overFlow < 0) {
+				overFlow = 0;
+			}
+			double overFlowPenalty = overFlow / link.getFlowCapacityPerSec() * overFlowPenaltyFactor;
+
+			// cost associate to high occupation of the link (i.e. link is almost full)
+			double timeLength = link.getLength() / link.getFreespeed();
+			double timeInterval = 1 / link.getFlowCapacityPerSec();
+			double criticalValue = link.getNumberOfLanes() * (timeLength / timeInterval) * discountFactor;
 			int occupation = linksOccupationMap.get(link.getId()).intValue();
 			if (occupation < criticalValue) {
-				return freeFlowTravelTIme;
+				return freeFlowTravelTIme + overFlowPenalty;
 			}
-			double slope = 1 / link.getFlowCapacityPerSec() * penaltyFacotr;
-			return freeFlowTravelTIme + (occupation - criticalValue) * slope;
+			double slope = 1 / link.getFlowCapacityPerSec() * penaltyFactor;
+			return freeFlowTravelTIme + (occupation - criticalValue) * slope + overFlowPenalty;
 		}
 		return freeFlowTravelTIme;
 	}
@@ -60,16 +70,6 @@ public class CongestionAvertingTravelDisutility
 	public void handleEvent(LinkEnterEvent event) {
 		linksOccupationMap.putIfAbsent(event.getLinkId(), new MutableInt());
 		linksOccupationMap.get(event.getLinkId()).increment();
-		
-		// DEBUGGING
-		if (event.getLinkId().toString().equals("147")) {
-			System.out.println("number of vehicles at link 147 = "
-					+ linksOccupationMap.get(Id.create(147, Link.class)).intValue()); 
-			System.out.println("*** number of vehicles at link 147 = "
-					+ linksOccupationMap.getOrDefault(Id.create(147, Link.class), new MutableInt()).intValue());
-		}
-		System.out.println("There are " + linksOccupationMap.keySet().size() + " entries in link Occupation Map");
-		// The output from this part is normal!
 	}
 
 	@Override
@@ -93,9 +93,13 @@ public class CongestionAvertingTravelDisutility
 		linksOccupationMap.get(event.getLinkId()).decrement();
 	}
 
-	// TODO delete this DEBUGGING
-	public Map<Id<Link>, MutableInt> getLinkOccupationMap() {
-		return linksOccupationMap; //This one is always emtpy!!!!!!
+	public void updateInFlow() {
+		for (Id<Link> linkId : linksOccupationMap.keySet()) {
+			int difference = linksOccupationMap.get(linkId).intValue()
+					- previousLinksOccupationMap.getOrDefault(linkId, 0);
+			differenceMap.put(linkId, difference);
+			previousLinksOccupationMap.put(linkId, linksOccupationMap.get(linkId).intValue());
+		}
 	}
 
 }

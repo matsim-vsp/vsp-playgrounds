@@ -50,8 +50,8 @@ public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 		bindModal(CongestionAvertingTravelDisutility.class)
 				.toProvider(modalProvider(getter -> new CongestionAvertingTravelDisutility())).asEagerSingleton();
 		addMobsimScopeEventHandlerBinding().to(modalKey(CongestionAvertingTravelDisutility.class));
-
+		
 		// binding the travel disutility to congestion averting travel disutility
-		bindModal(TravelDisutility.class).to(CongestionAvertingTravelDisutility.class);
+		bindModal(TravelDisutility.class).to(modalKey(CongestionAvertingTravelDisutility.class));
 	}
 }

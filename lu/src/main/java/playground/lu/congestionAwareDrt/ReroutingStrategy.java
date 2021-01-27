@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -55,6 +54,11 @@ public class ReroutingStrategy {
 	}
 
 	public void rerouteVehicles(double now, Fleet fleet) {
+		// TODO maybe there is other better way to do this
+		if (travelDisutility instanceof CongestionAvertingTravelDisutility) {
+			((CongestionAvertingTravelDisutility) travelDisutility).updateInFlow();
+		}
+
 		// TODO consider move this to the DRT optimizer
 		VehicleData vData = new VehicleData(now, fleet.getVehicles().values().stream(), vehicleDataEntryFactory,
 				forkJoinPool);
@@ -67,10 +71,7 @@ public class ReroutingStrategy {
 		if (now <= 28800 && now >= 21600) {
 			Id<Link> linkId = Id.create(147, Link.class);
 			double cost = travelDisutility.getLinkTravelDisutility(network.getLinks().get(linkId), now, null, null);
-			int occupation = ((CongestionAvertingTravelDisutility) travelDisutility).getLinkOccupationMap()
-					.getOrDefault(linkId, new MutableInt()).intValue();
 			System.out.println("Disutility for traveling on link 147 at " + now + " is " + cost);
-			System.out.println("There are " + occupation + " vehicles on link 147");
 		}
 	}
 
