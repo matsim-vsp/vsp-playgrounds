@@ -1,11 +1,8 @@
 package playground.lu.inputPlanPreparation;
 
 import org.apache.log4j.Logger;
-import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -19,17 +16,17 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.lu.readShapeFile.ShapeFileReadingUtils;
-
 public class GeneratingDrtOnlyPlans {
 	private static final Logger log = Logger.getLogger(GeneratingDrtOnlyPlans.class);
 
-	private static final String INPUT_CONFIG = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\Vulkaneifel.config.xml";
-	private static final String OUTPUT_PLANS_PATH = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\plans_for_rebalance_study.xml";
-	private static final String PATH_TO_SHAPEFILE = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\ServiceArea\\vulkaneifel.shp";
+	private static final String INPUT_PLAN = "C:\\Users\\cluac\\MATSimScenarios\\Berlin\\BerlinBaseScenario\\Output\\berlin-v5.5-10pct.output_plans.xml.gz";
+	private static final String OUTPUT_PLANS_PATH = "C:\\Users\\cluac\\MATSimScenarios\\Berlin\\DrtCongestionStudy\\all-car-to-DRT.plans.xml.gz";
+//	private static final String PATH_TO_SHAPEFILE = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\ServiceArea\\vulkaneifel.shp";
 
 	public static void main(String[] args) {
-		Config config = ConfigUtils.loadConfig(INPUT_CONFIG);
+		Config config = ConfigUtils.createConfig();
+		config.global().setCoordinateSystem("EPSG:31468");
+		config.plans().setInputFile(INPUT_PLAN);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Population originalPlan = scenario.getPopulation();
 		PopulationFactory populationFactory = scenario.getPopulation().getFactory();
@@ -42,7 +39,7 @@ public class GeneratingDrtOnlyPlans {
 		for (Person person : originalPlan.getPersons().values()) {
 			for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
 				if (planElement instanceof Leg) {
-					if (((Leg) planElement).getMode().equals("drt")) {
+					if (((Leg) planElement).getMode().equals("car")) {
 						Person drtPerson = populationFactory.createPerson(
 								Id.create("dummy_person_" + Integer.toString(personCounter), Person.class));
 						Plan drtPlan = populationFactory.createPlan();
@@ -67,42 +64,42 @@ public class GeneratingDrtOnlyPlans {
 
 		// Adding walk trips (this is used to simulate daily
 		// fluctuation of the requests)
-		Geometry serviceArea = ShapeFileReadingUtils.getGeometryFromShapeFile(PATH_TO_SHAPEFILE);
-		Network network = scenario.getNetwork();
-		int additionalPersonCounter = 0;
-		for (Person person : originalPlan.getPersons().values()) {
-			for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
-				if (additionalPersonCounter >= personCounter) {
-					break;
-				}
-				if (planElement instanceof Leg) {
-					if (((Leg) planElement).getMode().equals("car") || ((Leg) planElement).getMode().equals("bike")) {
-						Id<Link> startLinkId = ((Leg) planElement).getRoute().getStartLinkId();
-						Id<Link> endLinkId = ((Leg) planElement).getRoute().getEndLinkId();
-						if (ShapeFileReadingUtils.isLinkWithinGeometry(network, startLinkId, serviceArea)
-								&& ShapeFileReadingUtils.isLinkWithinGeometry(network, endLinkId, serviceArea)) {
-							Person nonDrtPerson = populationFactory.createPerson(
-									Id.create("additional_dummy_person_" + Integer.toString(additionalPersonCounter),
-											Person.class));
-							Plan nonDrtPlan = populationFactory.createPlan();
-							Activity act0 = populationFactory.createActivityFromLinkId("dummy", startLinkId);
-							act0.setEndTime(((Leg) planElement).getDepartureTime().orElse(129600));
-							Leg leg = populationFactory.createLeg("walk");
-							Activity act1 = populationFactory.createActivityFromLinkId("dummy", endLinkId);
-							nonDrtPlan.addActivity(act0);
-							nonDrtPlan.addLeg(leg);
-							nonDrtPlan.addActivity(act1);
-							nonDrtPerson.addPlan(nonDrtPlan);
-							PopulationUtils.putPersonAttribute(nonDrtPerson, "subpopulation", "non-drt-person");
-							outputPlans.addPerson(nonDrtPerson);
-							additionalPersonCounter += 1;
-						}
-					}
-				}
-			}
-		}
-
-		log.info("There are " + additionalPersonCounter + " non DRT dummy persons (walk legs)");
+//		Geometry serviceArea = ShapeFileReadingUtils.getGeometryFromShapeFile(PATH_TO_SHAPEFILE);
+//		Network network = scenario.getNetwork();
+//		int additionalPersonCounter = 0;
+//		for (Person person : originalPlan.getPersons().values()) {
+//			for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+//				if (additionalPersonCounter >= personCounter) {
+//					break;
+//				}
+//				if (planElement instanceof Leg) {
+//					if (((Leg) planElement).getMode().equals("car") || ((Leg) planElement).getMode().equals("bike")) {
+//						Id<Link> startLinkId = ((Leg) planElement).getRoute().getStartLinkId();
+//						Id<Link> endLinkId = ((Leg) planElement).getRoute().getEndLinkId();
+//						if (ShapeFileReadingUtils.isLinkWithinGeometry(network, startLinkId, serviceArea)
+//								&& ShapeFileReadingUtils.isLinkWithinGeometry(network, endLinkId, serviceArea)) {
+//							Person nonDrtPerson = populationFactory.createPerson(
+//									Id.create("additional_dummy_person_" + Integer.toString(additionalPersonCounter),
+//											Person.class));
+//							Plan nonDrtPlan = populationFactory.createPlan();
+//							Activity act0 = populationFactory.createActivityFromLinkId("dummy", startLinkId);
+//							act0.setEndTime(((Leg) planElement).getDepartureTime().orElse(129600));
+//							Leg leg = populationFactory.createLeg("walk");
+//							Activity act1 = populationFactory.createActivityFromLinkId("dummy", endLinkId);
+//							nonDrtPlan.addActivity(act0);
+//							nonDrtPlan.addLeg(leg);
+//							nonDrtPlan.addActivity(act1);
+//							nonDrtPerson.addPlan(nonDrtPlan);
+//							PopulationUtils.putPersonAttribute(nonDrtPerson, "subpopulation", "non-drt-person");
+//							outputPlans.addPerson(nonDrtPerson);
+//							additionalPersonCounter += 1;
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		log.info("There are " + additionalPersonCounter + " non DRT dummy persons (walk legs)");
 
 		log.info("Writing population file...");
 		PopulationWriter pw = new PopulationWriter(outputPlans);

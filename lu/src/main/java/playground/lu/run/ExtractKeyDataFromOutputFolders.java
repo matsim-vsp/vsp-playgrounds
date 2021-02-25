@@ -11,7 +11,7 @@ public class ExtractKeyDataFromOutputFolders {
 			"NoRebalance" };
 	private static final String[] FLEET_SIZES = { "300", "350", "400", "450", "500", "550", "600", "650", "700" };
 	private static final String[] CRITERIA = { "meanWaitTime", "medianWaitTime", "waitTimeBelow600", "waitTimeBelow900",
-			"totalDistance", "emptyDistance" };
+			"totalDistance", "emptyDistance", "95Percentile" };
 
 	private static final String ROOT_DIRECTORY = "D:\\TU_Berlin\\Projects\\RebalancingStudy_result_new\\";
 	private static final String SUMMARY_RESULT_DIRECTORY = "D:\\TU_Berlin\\Projects\\RebalancingStudy_result_new\\SummarizedResults\\";
@@ -23,14 +23,16 @@ public class ExtractKeyDataFromOutputFolders {
 		String[][] waitTimeBelow900 = new String[5][9];
 		String[][] totalDistance = new String[5][9];
 		String[][] emptyDistance = new String[5][9];
+		String[][] percentile95 = new String[5][9];
 		
-		String[][][] statistics = new String[6][5][9];
+		String[][][] statistics = new String[7][5][9];
 		statistics[0] = meanWaitTime;
 		statistics[1] = medianWaitTime;
 		statistics[2] = waitTimeBelow600;
 		statistics[3] = waitTimeBelow900;
 		statistics[4] = totalDistance;
 		statistics[5] = emptyDistance;
+		statistics[6] = percentile95;
 
 		System.out.println("Reading data...");
 		for (int i = 0; i < REBLANCE_STRATEGIES.length; i++) {
@@ -61,6 +63,7 @@ public class ExtractKeyDataFromOutputFolders {
 				waitTimeBelow900[i][j] = waitTimeStatistics[9];
 				totalDistance[i][j] = distanceStatistics[3];
 				emptyDistance[i][j] = distanceStatistics[4];
+				percentile95[i][j] = waitTimeStatistics[5];
 			}
 		}
 		System.out.println("Data successfully read and stored");

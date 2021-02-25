@@ -3,7 +3,7 @@ package playground.lu.congestionAwareDrt;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.optimizer.DrtOptimizer;
 import org.matsim.contrib.drt.optimizer.QSimScopeForkJoinPoolHolder;
-import org.matsim.contrib.drt.optimizer.VehicleData;
+import org.matsim.contrib.drt.optimizer.VehicleEntry;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
@@ -41,7 +41,7 @@ public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 		bindModal(ReroutingStrategy.class).toProvider(modalProvider(
 				getter -> new ReroutingStrategy(getter.getNamed(TravelTime.class, DvrpTravelTimeModule.DVRP_ESTIMATED),
 						drtCfg, getter.getModal(Network.class), getter.getModal(TravelDisutility.class),
-						getter.getModal(VehicleData.EntryFactory.class),
+						getter.getModal(VehicleEntry.EntryFactory.class),
 						getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool())))
 				.asEagerSingleton();
 

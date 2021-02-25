@@ -1,14 +1,15 @@
 package playground.lu.congestionAwareDrt;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.optimizer.VehicleData;
-import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
+import org.matsim.contrib.drt.optimizer.VehicleEntry;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.schedule.DrtDriveTask;
 import org.matsim.contrib.drt.schedule.DrtStayTask;
@@ -28,8 +29,8 @@ import org.matsim.core.router.util.TravelTime;
 
 public class ReroutingStrategy {
 	private final double proportionToReroute = 0.3;
-	private final Random rnd = new Random();
-	private final VehicleData.EntryFactory vehicleDataEntryFactory;
+	private final Random rnd = new Random(1234);
+	private final VehicleEntry.EntryFactory vehicleEntryFactory;
 	private final ForkJoinPool forkJoinPool;
 
 	private final LeastCostPathCalculator leastCostPathCalculator;
@@ -40,13 +41,13 @@ public class ReroutingStrategy {
 	private final Network network;
 
 	public ReroutingStrategy(TravelTime travelTime, DrtConfigGroup drtCfg, Network network,
-			TravelDisutility travelDisutility, VehicleData.EntryFactory vehicleDataEntryFactory,
+			TravelDisutility travelDisutility, VehicleEntry.EntryFactory vehicleEntryFactory,
 			ForkJoinPool forkJoinPool) {
 		this.travelTime = travelTime;
 		this.stopDuration = drtCfg.getStopDuration();
 		this.leastCostPathCalculator = new FastAStarEuclideanFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
-		this.vehicleDataEntryFactory = vehicleDataEntryFactory;
+		this.vehicleEntryFactory = vehicleEntryFactory;
 		this.forkJoinPool = forkJoinPool;
 		this.travelDisutility = travelDisutility;
 		this.network = network;
@@ -60,9 +61,14 @@ public class ReroutingStrategy {
 		}
 
 		// TODO consider move this to the DRT optimizer
-		VehicleData vData = new VehicleData(now, fleet.getVehicles().values().stream(), vehicleDataEntryFactory,
-				forkJoinPool);
-		for (Entry vEntry : vData.getEntries()) {
+		var vehicleEntries = forkJoinPool.submit(() -> fleet.getVehicles()
+				.values()
+				.parallelStream()
+				.map(v -> vehicleEntryFactory.create(v, now))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toMap(e -> e.vehicle.getId(), e -> e))).join();
+		
+		for (VehicleEntry vEntry : vehicleEntries.values()) {
 			if (rnd.nextDouble() < proportionToReroute) {
 				rerouteVehicle(vEntry);
 			}
@@ -75,7 +81,7 @@ public class ReroutingStrategy {
 		}
 	}
 
-	private void rerouteVehicle(Entry vEntry) {
+	private void rerouteVehicle(VehicleEntry vEntry) {
 		DvrpVehicle vehicle = vEntry.vehicle;
 		Schedule schedule = vehicle.getSchedule();
 		if (schedule.getStatus() == ScheduleStatus.STARTED) {

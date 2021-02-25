@@ -9,8 +9,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.controler.Controler;
 import org.matsim.run.drt.RunDrtOpenBerlinScenario;
 
-import playground.lu.unitCapacityMatching.UnitCapcityZonalRequestInserterModule;
-
 public class RunDrtOpenBerlinScenarioWithExpModules {
 
 	private static final Logger log = Logger.getLogger(RunDrtOpenBerlinScenarioWithExpModules.class);
@@ -34,7 +32,6 @@ public class RunDrtOpenBerlinScenarioWithExpModules {
 		// Adding in the experimental module
 		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
 //			controler.addOverridingQSimModule(new ExperimentalModuleInserstionWithZC(drtCfg));
-			controler.addOverridingQSimModule(new UnitCapcityZonalRequestInserterModule(drtCfg));
 		}
 
 		controler.run();

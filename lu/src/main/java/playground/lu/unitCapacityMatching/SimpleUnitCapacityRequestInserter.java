@@ -34,7 +34,6 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 	private final double patientienceTime;
 	private final DrtScheduleInquiry scheduleInquiry;
 	private final VehicleAssignmentTools vehicleAssignmentTools;
-//	private final DrtZonalSystem zonalSystem;
 	private final double largeNumber = 10000000;
 
 	private static final String NO_SUITABLE_VEHICLE_FOUND_CAUSE = "no_suitable_vehicle_found";
@@ -109,7 +108,8 @@ public class SimpleUnitCapacityRequestInserter implements UnplannedRequestInsert
 				// Notify MATSim that a request is scheduled
 				eventsManager.processEvent(new PassengerRequestScheduledEvent(timeOfDay, drtCfg.getMode(),
 						request.getId(), request.getPassengerId(), selectedVehicle.getId(),
-						request.getPickupTask().getEndTime(), request.getDropoffTask().getBeginTime()));
+						vehicleAssignmentTools.getScheduledDepartureTime(),
+						vehicleAssignmentTools.getScheduledArrivalTime()));
 
 				// Remove the request and the vehicle from their respective collections
 				idleVehicles.remove(selectedVehicle);
