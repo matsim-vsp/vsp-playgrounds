@@ -60,6 +60,10 @@ public class ShapeFileReadingUtils {
 		return isCoordWithinGeometry(link.getToNode().getCoord(), geometry);
 	}
 
+	public static boolean isLinkWithinGeometry(Link link, Geometry geometry) {
+		return isCoordWithinGeometry(link.getToNode().getCoord(), geometry);
+	}
+
 	public static boolean isCoordWithinGeometry(Coord coord, Geometry geometry) {
 		Point point = MGC.coord2Point(coord);
 		if (point.within(geometry)) {

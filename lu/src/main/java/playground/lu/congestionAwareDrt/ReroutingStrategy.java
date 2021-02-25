@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.optimizer.VehicleEntry;
@@ -37,7 +36,7 @@ public class ReroutingStrategy {
 	private final TravelTime travelTime;
 	private final double stopDuration;
 
-	private final TravelDisutility travelDisutility; // TODO delete after testing
+	private final TravelDisutility travelDisutility;
 	private final Network network;
 
 	public ReroutingStrategy(TravelTime travelTime, DrtConfigGroup drtCfg, Network network,
@@ -73,12 +72,13 @@ public class ReroutingStrategy {
 				rerouteVehicle(vEntry);
 			}
 		}
-
-		if (now <= 28800 && now >= 21600) {
-			Id<Link> linkId = Id.create(147, Link.class);
-			double cost = travelDisutility.getLinkTravelDisutility(network.getLinks().get(linkId), now, null, null);
-			System.out.println("Disutility for traveling on link 147 at " + now + " is " + cost);
-		}
+		
+		// Debug part
+//		if (now <= 28800 && now >= 21600) {
+//			Id<Link> linkId = Id.create(147, Link.class);
+//			double cost = travelDisutility.getLinkTravelDisutility(network.getLinks().get(linkId), now, null, null);
+//			System.out.println("Disutility for traveling on link 147 at " + now + " is " + cost);
+//		}
 	}
 
 	private void rerouteVehicle(VehicleEntry vEntry) {

@@ -22,7 +22,7 @@ import playground.lu.congestionAwareDrt.CongestionAwareDrtModule;
 public class RunCongestionTestingScenario {
 	public static void main(String[] args) throws IOException {
 		if (args.length == 0) {
-			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\CongestionTesting\\config.xml" };
+			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\TestingScenario\\config.xml" };
 		}
 
 		Config config = ConfigUtils.loadConfig(args[0], new MultiModeDrtConfigGroup(), new DvrpConfigGroup());

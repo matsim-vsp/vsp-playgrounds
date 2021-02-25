@@ -1,0 +1,119 @@
+package playground.lu.congestionAwareDrt.berlin;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.apache.log4j.Logger;
+import org.locationtech.jts.geom.Geometry;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicle;
+import org.matsim.contrib.dvrp.fleet.DvrpVehicleSpecification;
+import org.matsim.contrib.dvrp.fleet.FleetWriter;
+import org.matsim.contrib.dvrp.fleet.ImmutableDvrpVehicleSpecification;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
+
+import playground.lu.readShapeFile.ShapeFileReadingUtils;
+
+public class PrepareArtificialBerlinScenario {
+	private static final Logger log = Logger.getLogger(PrepareArtificialBerlinScenario.class);
+
+	private static final int NUM_OF_TRIPS = 100000;
+	private static final int NUM_OF_VEHICLES = 10000;
+	private static final int[] TIME_WINDOW = { 21600, 32400 };
+	private final static Random RND = new Random(1234);
+
+	private static final String SHAPEFILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
+			+ "Berlin\\shp-berlin-hundekopf-areas\\berlin_hundekopf.shp";
+	private static final String NETWORK_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
+			+ "Berlin\\network.xml.gz";
+	private static final String OUTPUT_PLAN_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
+			+ "Berlin\\plans.xml";
+	private static final String OUTPUT_VEHICLE_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
+			+ "Berlin\\vehicles.xml";
+
+	public static void main(String[] args) {
+		Config config = ConfigUtils.createConfig();
+		config.global().setCoordinateSystem("EPSG:31468");
+		config.network().setInputFile(NETWORK_FILE);
+		Scenario scenario = ScenarioUtils.loadScenario(config);
+		PopulationFactory populationFactory = scenario.getPopulation().getFactory();
+		Network network = scenario.getNetwork();
+
+		// Extracting links within the dog head area
+		log.info("Loading shapefile...");
+		List<Link> linksInBerlinRing = new ArrayList<>();
+		Geometry hundekopf = ShapeFileReadingUtils.getGeometryFromShapeFile(SHAPEFILE);
+
+		log.info("Shapefile successfully loaded");
+		log.info("Begin extracting links within the Berlin Ring...");
+		for (Link link : network.getLinks().values()) {
+			if (ShapeFileReadingUtils.isLinkWithinGeometry(link, hundekopf) && link.getAllowedModes().contains("car")) {
+				linksInBerlinRing.add(link);
+			}
+		}
+		int numOfLinks = linksInBerlinRing.size();
+		int timeWindowLength = TIME_WINDOW[1] - TIME_WINDOW[0];
+
+		log.info("There are in total " + numOfLinks + " links within the Berlin Ring");
+		log.info("Begin generating DRT population...");
+
+		// Create population file
+		Population population = scenario.getPopulation();
+		int counter = 0;
+		while (counter < NUM_OF_TRIPS) {
+			Person person = populationFactory
+					.createPerson(Id.create("dummy_person_" + Integer.toString(counter), Person.class));
+			Plan plan = populationFactory.createPlan();
+			Link departureLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
+			Link arrivalLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
+			double departureTime = TIME_WINDOW[0] + RND.nextInt(timeWindowLength);
+
+			Activity act0 = populationFactory.createActivityFromLinkId("dummy", departureLink.getId());
+			act0.setEndTime(departureTime);
+			Leg leg = populationFactory.createLeg("drt");
+			Activity act1 = populationFactory.createActivityFromLinkId("dummy", arrivalLink.getId());
+
+			plan.addActivity(act0);
+			plan.addLeg(leg);
+			plan.addActivity(act1);
+
+			person.addPlan(plan);
+			population.addPerson(person);
+
+			counter += 1;
+			if (counter % 1000 == 0) {
+				log.info("plan generation in progress: " + counter + " trips added");
+			}
+		}
+
+		log.info("Writing population file...");
+		PopulationWriter pw = new PopulationWriter(population);
+		pw.write(OUTPUT_PLAN_FILE);
+		
+		
+		log.info("Writing vehicle file...");
+		// Creating vehicle file
+		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();
+		for (int i = 0; i < NUM_OF_VEHICLES; i++) {
+			Link startLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
+			vehicles.add(ImmutableDvrpVehicleSpecification.newBuilder()
+					.id(Id.create("drt_" + Integer.toString(i), DvrpVehicle.class)).startLinkId(startLink.getId())
+					.capacity(1).serviceBeginTime(Math.round(1)).serviceEndTime(Math.round(30 * 3600)).build());
+		}
+		new FleetWriter(vehicles.stream()).write(OUTPUT_VEHICLE_FILE);
+	}
+
+}
