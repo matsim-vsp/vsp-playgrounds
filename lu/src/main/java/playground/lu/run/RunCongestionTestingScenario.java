@@ -22,7 +22,15 @@ import playground.lu.congestionAwareDrt.CongestionAwareDrtModule;
 public class RunCongestionTestingScenario {
 	public static void main(String[] args) throws IOException {
 		if (args.length == 0) {
-			args = new String[] { "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\TestingScenario\\config.xml" };
+			args = new String[] {
+					"C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\TestingScenario\\config.xml" };
+		}
+
+		boolean useOnlineRouter = true;
+		if (args.length == 2) {
+			if (args[1].equals("false")) {
+				useOnlineRouter = false;
+			}
 		}
 
 		Config config = ConfigUtils.loadConfig(args[0], new MultiModeDrtConfigGroup(), new DvrpConfigGroup());
@@ -40,13 +48,10 @@ public class RunCongestionTestingScenario {
 		controler.configureQSimComponents(DvrpQSimComponents.activateAllModes(multiModeDrtConfig));
 
 		// Adding in experimental module manually
-		for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
-			// When using the Reroute + Real Time Traffic Info, enable this line
-			controler.addOverridingQSimModule(new CongestionAwareDrtModule(drtCfg));
-			// When using DVRP online travel time estimator, CHANGE THE VALUE TRAVEL TIME
-			// ESTIMATIOn BETA TO a large number
-			
-//			controler.addOverridingQSimModule(new SimpleUnitCapacityRequestInserterModule(drtCfg, 1000000));
+		if (useOnlineRouter) {
+			for (DrtConfigGroup drtCfg : multiModeDrtConfig.getModalElements()) {
+				controler.addOverridingQSimModule(new CongestionAwareDrtModule(drtCfg, config));
+			}
 		}
 		controler.run();
 

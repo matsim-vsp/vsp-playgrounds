@@ -15,6 +15,7 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.Config;
 import org.matsim.core.events.MobsimScopeEventHandler;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.vehicles.Vehicle;
@@ -22,6 +23,8 @@ import org.matsim.vehicles.Vehicle;
 public class CongestionAvertingTravelDisutility
 		implements TravelDisutility, LinkEnterEventHandler, LinkLeaveEventHandler, MobsimScopeEventHandler,
 		VehicleLeavesTrafficEventHandler, VehicleEntersTrafficEventHandler {
+	private final Config config;
+
 	private final Map<Id<Link>, MutableInt> linksOccupationMap = new HashMap<>();
 	private final Map<Id<Link>, Integer> previousLinksOccupationMap = new HashMap<>();
 	private final Map<Id<Link>, Integer> differenceMap = new HashMap<>();
@@ -32,8 +35,8 @@ public class CongestionAvertingTravelDisutility
 	private final double updatePeriod = 30;
 	private final double overFlowPenaltyFactor = 50.0;
 
-	public CongestionAvertingTravelDisutility() {
-		// Currently empty
+	public CongestionAvertingTravelDisutility(Config config) {
+		this.config = config;
 	}
 
 	@Override
@@ -41,21 +44,22 @@ public class CongestionAvertingTravelDisutility
 		double freeFlowTravelTIme = link.getLength() / link.getFreespeed();
 		if (linksOccupationMap.containsKey(link.getId())) {
 			// cost associate to the in flow
-			double overFlow = differenceMap.getOrDefault(link.getId(), 0) / updatePeriod - link.getFlowCapacityPerSec();
+			double flowCapacityPerSec = link.getFlowCapacityPerSec() * config.qsim().getFlowCapFactor();
+			double overFlow = differenceMap.getOrDefault(link.getId(), 0) / updatePeriod - flowCapacityPerSec;
 			if (overFlow < 0) {
 				overFlow = 0;
 			}
-			double overFlowPenalty = overFlow / link.getFlowCapacityPerSec() * overFlowPenaltyFactor;
+			double overFlowPenalty = overFlow / flowCapacityPerSec * overFlowPenaltyFactor;
 
 			// cost associate to high occupation of the link (i.e. link is almost full)
 			double timeLength = link.getLength() / link.getFreespeed();
-			double timeInterval = 1 / link.getFlowCapacityPerSec();
+			double timeInterval = 1 / flowCapacityPerSec;
 			double criticalValue = link.getNumberOfLanes() * (timeLength / timeInterval) * discountFactor;
 			int occupation = linksOccupationMap.get(link.getId()).intValue();
 			if (occupation < criticalValue) {
 				return freeFlowTravelTIme + overFlowPenalty;
 			}
-			double slope = 1 / link.getFlowCapacityPerSec() * penaltyFactor;
+			double slope = 1 / flowCapacityPerSec * penaltyFactor;
 			return freeFlowTravelTIme + (occupation - criticalValue) * slope + overFlowPenalty;
 		}
 		return freeFlowTravelTIme;

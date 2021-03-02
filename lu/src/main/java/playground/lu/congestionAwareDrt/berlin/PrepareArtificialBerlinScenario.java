@@ -30,17 +30,19 @@ import playground.lu.readShapeFile.ShapeFileReadingUtils;
 public class PrepareArtificialBerlinScenario {
 	private static final Logger log = Logger.getLogger(PrepareArtificialBerlinScenario.class);
 
-	private static final int NUM_OF_TRIPS = 100000;
+	private static final int NUM_OF_TRIPS = 50000;
 	private static final int NUM_OF_VEHICLES = 10000;
 	private static final int[] TIME_WINDOW = { 21600, 32400 };
 	private final static Random RND = new Random(1234);
 
 	private static final String SHAPEFILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\shp-berlin-hundekopf-areas\\berlin_hundekopf.shp";
+			+ "Berlin\\shp-berlin-hundekopf-areas\\berlin-hundekopf.shp";
 	private static final String NETWORK_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
 			+ "Berlin\\network.xml.gz";
 	private static final String OUTPUT_PLAN_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
 			+ "Berlin\\plans.xml";
+	private static final String BASE_CASE_PLAN_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
+			+ "Berlin\\base-case.plans.xml";
 	private static final String OUTPUT_VEHICLE_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
 			+ "Berlin\\vehicles.xml";
 
@@ -49,7 +51,9 @@ public class PrepareArtificialBerlinScenario {
 		config.global().setCoordinateSystem("EPSG:31468");
 		config.network().setInputFile(NETWORK_FILE);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
+		Scenario scenario2 = ScenarioUtils.loadScenario(config);
 		PopulationFactory populationFactory = scenario.getPopulation().getFactory();
+		PopulationFactory populationFactory2 = scenario2.getPopulation().getFactory();
 		Network network = scenario.getNetwork();
 
 		// Extracting links within the dog head area
@@ -72,11 +76,16 @@ public class PrepareArtificialBerlinScenario {
 
 		// Create population file
 		Population population = scenario.getPopulation();
+		Population baseCasePopulation = scenario2.getPopulation();
 		int counter = 0;
 		while (counter < NUM_OF_TRIPS) {
 			Person person = populationFactory
 					.createPerson(Id.create("dummy_person_" + Integer.toString(counter), Person.class));
+			Person person2 = populationFactory2
+					.createPerson(Id.create("dummy_person_" + Integer.toString(counter), Person.class));
+
 			Plan plan = populationFactory.createPlan();
+			Plan plan2 = populationFactory2.createPlan();
 			Link departureLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
 			Link arrivalLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
 			double departureTime = TIME_WINDOW[0] + RND.nextInt(timeWindowLength);
@@ -84,14 +93,20 @@ public class PrepareArtificialBerlinScenario {
 			Activity act0 = populationFactory.createActivityFromLinkId("dummy", departureLink.getId());
 			act0.setEndTime(departureTime);
 			Leg leg = populationFactory.createLeg("drt");
+			Leg leg2 = populationFactory2.createLeg("car");
 			Activity act1 = populationFactory.createActivityFromLinkId("dummy", arrivalLink.getId());
 
 			plan.addActivity(act0);
 			plan.addLeg(leg);
 			plan.addActivity(act1);
-
 			person.addPlan(plan);
 			population.addPerson(person);
+
+			plan2.addActivity(act0);
+			plan2.addLeg(leg2);
+			plan2.addActivity(act1);
+			person2.addPlan(plan2);
+			baseCasePopulation.addPerson(person2);
 
 			counter += 1;
 			if (counter % 1000 == 0) {
@@ -102,8 +117,10 @@ public class PrepareArtificialBerlinScenario {
 		log.info("Writing population file...");
 		PopulationWriter pw = new PopulationWriter(population);
 		pw.write(OUTPUT_PLAN_FILE);
-		
-		
+
+		PopulationWriter pw2 = new PopulationWriter(baseCasePopulation);
+		pw2.write(BASE_CASE_PLAN_FILE);
+
 		log.info("Writing vehicle file...");
 		// Creating vehicle file
 		List<DvrpVehicleSpecification> vehicles = new ArrayList<>();

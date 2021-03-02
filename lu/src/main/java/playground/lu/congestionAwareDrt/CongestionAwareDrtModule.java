@@ -13,6 +13,7 @@ import org.matsim.contrib.dvrp.fleet.Fleet;
 import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.schedule.ScheduleTimingUpdater;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
+import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -20,10 +21,12 @@ import org.matsim.core.router.util.TravelTime;
 public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 
 	private final DrtConfigGroup drtCfg;
+	private final Config config;
 
-	public CongestionAwareDrtModule(DrtConfigGroup drtCfg) {
+	public CongestionAwareDrtModule(DrtConfigGroup drtCfg, Config config) {
 		super(drtCfg.getMode());
 		this.drtCfg = drtCfg;
+		this.config = config;
 	}
 
 	@Override
@@ -48,9 +51,9 @@ public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 		// Instruction for creating Congestion averting travel disutility
 		// And then add event handler binding to the disutility
 		bindModal(CongestionAvertingTravelDisutility.class)
-				.toProvider(modalProvider(getter -> new CongestionAvertingTravelDisutility())).asEagerSingleton();
+				.toProvider(modalProvider(getter -> new CongestionAvertingTravelDisutility(config))).asEagerSingleton();
 		addMobsimScopeEventHandlerBinding().to(modalKey(CongestionAvertingTravelDisutility.class));
-		
+
 		// binding the travel disutility to congestion averting travel disutility
 		bindModal(TravelDisutility.class).to(modalKey(CongestionAvertingTravelDisutility.class));
 	}

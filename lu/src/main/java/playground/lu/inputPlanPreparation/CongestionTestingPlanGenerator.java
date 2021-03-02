@@ -20,8 +20,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 public class CongestionTestingPlanGenerator {
 	private static final Logger log = Logger.getLogger(CongestionTestingPlanGenerator.class);
 
-	private final static String INPUT_CONFIG_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionTesting\\config.xml";
-	private final static String OUTPUT_PATH = "C:\\Users\\cluac\\MATSimScenarios\\CongestionTesting\\plans.xml";
+	private final static String INPUT_CONFIG_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\TestingScenario\\config.xml";
+	private final static String OUTPUT_PATH = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\TestingScenario\\reference.plans.xml";
 	private final static int NUMBER_OF_TRIPS = 1000;
 
 	public static void main(String[] args) {
@@ -40,7 +40,7 @@ public class CongestionTestingPlanGenerator {
 			Plan dummyPlan = populationFactory.createPlan();
 			Activity act0 = populationFactory.createActivityFromLinkId("dummy", Id.create("23", Link.class));
 			act0.setEndTime(21600 + rnd.nextInt(3600));
-			Leg leg = populationFactory.createLeg("drt");
+			Leg leg = populationFactory.createLeg("car");
 			Activity act1 = populationFactory.createActivityFromLinkId("dummy", Id.create("399", Link.class));
 			dummyPlan.addActivity(act0);
 			dummyPlan.addLeg(leg);
