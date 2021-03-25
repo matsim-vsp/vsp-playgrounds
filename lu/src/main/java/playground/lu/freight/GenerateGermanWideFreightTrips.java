@@ -248,10 +248,7 @@ public class GenerateGermanWideFreightTrips {
 
 	private static boolean isCoordWithinGeometry(Coord coord, Geometry geometry) {
 		Point point = MGC.coord2Point(coord);
-		if (point.within(geometry)) {
-			return true;
-		}
-		return false;
+		return point.within(geometry);
 	}
 
 	private static void generateFreightPlan(Network network, Id<Link> fromLinkId, Id<Link> toLinkId, int numOfTrucks,
@@ -264,7 +261,7 @@ public class GenerateGermanWideFreightTrips {
 		int generated = 0;
 		while (generated < numOfTrucks) {
 			Person freightPerson = populationFactory.createPerson(
-					Id.create("freight_" + Integer.toString(totalGeneratedPersons.intValue()), Person.class));
+					Id.create("freight_" + totalGeneratedPersons.intValue(), Person.class));
 			freightPerson.getAttributes().putAttribute("subpopulation", "freight");
 			freightPerson.getAttributes().putAttribute("type_of_good", goodType);
 
