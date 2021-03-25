@@ -51,18 +51,38 @@ public class GenerateGermanWideFreightTrips {
 	private static final String FREIGHT_DATA = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries"
 			+ "/de/freight/original_data/ketten-2010.csv";
 	private static final String LOOKUP_TABLE = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries"
-			+ "/de/freight/original_data/NUTS-BVWP-lookup-table.csv";
+			+ "/de/freight/original_data/lookup-table.csv";
 
-	private static final double AVERAGE_CAPACITY_OF_TRUCK = 16 * 365 * 100000;
-	// 16 ton , 365 days per year, scale to 11% (1/0.01 = 100)
+	private static final double AVERAGE_CAPACITY_OF_TRUCK = 16 * 365; // 16 ton , 365 days per year
 	private static final Random RND = new Random(4711);
 
 	public static void main(String[] args) throws IOException {
 		if (args.length == 0) {
 			args = new String[] {
-					"C:\\Users\\cluac\\MATSimScenarios\\Freight-Germany\\testing-german-long-distance-freight.xml" };
+					"C:\\Users\\cluac\\MATSimScenarios\\Freight-Germany\\testing-german-long-distance-freight.xml.gz",
+					"test" };
 		}
 		String outputPath = args[0];
+		String scale = args[1];
+		double scalingFactor;
+
+		switch (scale) {
+			case "1pct":
+				scalingFactor = 100;
+				break;
+			case "10pct":
+				scalingFactor = 10;
+				break;
+			case "25pct":
+				scalingFactor = 4;
+				break;
+			case "test":
+				scalingFactor = 100000;
+				break;
+			default:
+				throw new IllegalArgumentException("Please input scaling factor correctly: 1pct, 10pct, 25pct or test");
+		}
+		double trucksLoad = AVERAGE_CAPACITY_OF_TRUCK * scalingFactor;
 
 		// Load config, scenario and network
 		Config config = ConfigUtils.createConfig();
@@ -121,8 +141,8 @@ public class GenerateGermanWideFreightTrips {
 			reader.readLine(); // Skip first line
 			String line = reader.readLine();
 			while (line != null) {
-				String nutsId = line.split(",")[1];
-				String zoneId = line.split(",")[2];
+				String nutsId = line.split(";")[3];
+				String zoneId = line.split(";")[0];
 				lookUpTable.put(zoneId, nutsId);
 				line = reader.readLine();
 			}
@@ -173,7 +193,7 @@ public class GenerateGermanWideFreightTrips {
 
 				if (relevantRegionIds.contains(originVL) && relevantRegionIds.contains(destinationVL)
 						&& modeVL.equals("2") && !tonVL.equals("0")) {
-					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonVL) / AVERAGE_CAPACITY_OF_TRUCK) + 1);
+					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonVL) / trucksLoad) + 1);
 
 					List<Id<Link>> linksInOrigin = regionLinksMap.get(lookUpTableCore.get(originVL));
 					Id<Link> fromLinkId = linksInOrigin.get(RND.nextInt(linksInOrigin.size()));
@@ -187,7 +207,7 @@ public class GenerateGermanWideFreightTrips {
 
 				if (relevantRegionIds.contains(originHL) && relevantRegionIds.contains(destinationHL)
 						&& modeHL.equals("2") && !tonHL.equals("0")) {
-					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonHL) / AVERAGE_CAPACITY_OF_TRUCK) + 1);
+					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonHL) / trucksLoad) + 1);
 
 					List<Id<Link>> linksInOrigin = regionLinksMap.get(lookUpTableCore.get(originHL));
 					Id<Link> fromLinkId = linksInOrigin.get(RND.nextInt(linksInOrigin.size()));
@@ -201,7 +221,7 @@ public class GenerateGermanWideFreightTrips {
 
 				if (relevantRegionIds.contains(originNL) && relevantRegionIds.contains(destinationNL)
 						&& modeNL.equals("2") && !tonNL.equals("0")) {
-					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonNL) / AVERAGE_CAPACITY_OF_TRUCK) + 1);
+					int numOfTrucks = (int) (Math.floor(Double.parseDouble(tonNL) / trucksLoad) + 1);
 
 					List<Id<Link>> linksInOrigin = regionLinksMap.get(lookUpTableCore.get(originNL));
 					Id<Link> fromLinkId = linksInOrigin.get(RND.nextInt(linksInOrigin.size()));
