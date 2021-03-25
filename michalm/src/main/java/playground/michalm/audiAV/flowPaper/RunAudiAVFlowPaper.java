@@ -39,7 +39,8 @@ public class RunAudiAVFlowPaper {
 		final Controler controler = TaxiControlerCreator.createControler(config, false);
 
 		// to speed up computations
-		final TravelTime initialTT = TravelTimeUtils.createTravelTimesFromEvents(controler.getScenario(), inputEvents);
+		final TravelTime initialTT = TravelTimeUtils.createTravelTimesFromEvents(controler.getScenario().getNetwork(),
+				config, inputEvents);
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
