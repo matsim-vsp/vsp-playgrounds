@@ -91,8 +91,9 @@ public class TtRunBerlinWithSignals {
 
 	public static void main(String[] args) {
 //		runWithRandomPop();
-//		runWithOpenBerlinPop();
-		runOpenBerlinV54FromInput(args[0]);
+		runWithOpenBerlinPop();
+//		runOpenBerlinV54FromInput(args[0]);
+//		runOpenBerlinV55FromInput(args[0]);
 	}
 	
 	private static void runOpenBerlinV54FromInput(String configFileName) {
@@ -227,7 +228,7 @@ public class TtRunBerlinWithSignals {
 		for (Node node : scenario.getNetwork().getNodes().values()) {
 			node.setCoord(transformation.transform(node.getCoord()));
 		}
-		new NetworkWriter(scenario.getNetwork()).write(inputFileDir + dirNameOsmData + "/networkGK4.xml"); 
+//		new NetworkWriter(scenario.getNetwork()).write(inputFileDir + dirNameOsmData + "/networkGK4.xml"); 
 
 		combineOsmSignalNetworkWithOpenBerlinPtNetwork(scenario, inputFileDirOpenBerlin);
 		removeAllNonPtNetworkInfoFromPlans(scenario);
