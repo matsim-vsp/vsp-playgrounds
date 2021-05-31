@@ -17,9 +17,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 public class GenerateDrtVehiclesCongestionTest {
-	private static final int FLEET_SIZE = 500;
-	private static final String OUTPUT_FILE_NAME = "C:\\Users\\cluac\\MATSimScenarios\\CongestionTesting\\vehicles_500.xml";
-	private static final String CONFIG_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionTesting\\config.xml";
+	private static final int FLEET_SIZE = 2000;
+	private static final String OUTPUT_FILE_NAME = "/Users/luchengqi/Documents/MATSimScenarios/Mielec/vehicles-2000.xml";
+	private static final String CONFIG_FILE = "/Users/luchengqi/Documents/MATSimScenarios/Mielec/config.xml";
 	private static final Random RND = new Random();
 
 	public static void main(String[] args) {

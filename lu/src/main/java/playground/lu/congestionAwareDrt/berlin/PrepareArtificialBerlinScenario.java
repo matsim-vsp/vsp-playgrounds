@@ -30,21 +30,21 @@ import playground.lu.readShapeFile.ShapeFileReadingUtils;
 public class PrepareArtificialBerlinScenario {
 	private static final Logger log = Logger.getLogger(PrepareArtificialBerlinScenario.class);
 
-	private static final int NUM_OF_TRIPS = 50000;
-	private static final int NUM_OF_VEHICLES = 10000;
+	private static final int NUM_OF_TRIPS = 100000;
+	private static final int NUM_OF_VEHICLES = 30000;
 	private static final int[] TIME_WINDOW = { 21600, 32400 };
 	private final static Random RND = new Random(1234);
 
-	private static final String SHAPEFILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\shp-berlin-hundekopf-areas\\berlin-hundekopf.shp";
-	private static final String NETWORK_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\network.xml.gz";
-	private static final String OUTPUT_PLAN_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\plans.xml";
-	private static final String BASE_CASE_PLAN_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\base-case.plans.xml";
-	private static final String OUTPUT_VEHICLE_FILE = "C:\\Users\\cluac\\MATSimScenarios\\CongestionAwareDrt\\"
-			+ "Berlin\\vehicles.xml";
+	private static final String SHAPEFILE = "/Users/luchengqi/Documents/MATSimScenarios/Berlin/Congestion-Aware-DRT" +
+			"/OriginalData/Shapefiles/berlin-hundekopf.shp";
+	private static final String NETWORK_FILE = "/Users/luchengqi/Documents/MATSimScenarios/Berlin" +
+			"/Congestion-Aware-DRT/berlin-v5.5-network.xml.gz";
+	private static final String OUTPUT_PLAN_FILE = "/Users/luchengqi/Documents/MATSimScenarios/Berlin" +
+			"/Congestion-Aware-DRT/drt.plans.xml";
+	private static final String BASE_CASE_PLAN_FILE = "/Users/luchengqi/Documents/MATSimScenarios/Berlin" +
+			"/Congestion-Aware-DRT/base-case.plans.xml";
+	private static final String OUTPUT_VEHICLE_FILE = "/Users/luchengqi/Documents/MATSimScenarios/Berlin" +
+			"/Congestion-Aware-DRT/vehicles.xml";
 
 	public static void main(String[] args) {
 		Config config = ConfigUtils.createConfig();
@@ -79,6 +79,13 @@ public class PrepareArtificialBerlinScenario {
 		Population baseCasePopulation = scenario2.getPopulation();
 		int counter = 0;
 		while (counter < NUM_OF_TRIPS) {
+			Link departureLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
+			Link arrivalLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
+			if (departureLink.getId().toString().equals(arrivalLink.getId().toString())){
+				continue;
+			}
+			double departureTime = TIME_WINDOW[0] + RND.nextInt(timeWindowLength);
+
 			Person person = populationFactory
 					.createPerson(Id.create("dummy_person_" + Integer.toString(counter), Person.class));
 			Person person2 = populationFactory2
@@ -86,15 +93,14 @@ public class PrepareArtificialBerlinScenario {
 
 			Plan plan = populationFactory.createPlan();
 			Plan plan2 = populationFactory2.createPlan();
-			Link departureLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
-			Link arrivalLink = linksInBerlinRing.get(RND.nextInt(numOfLinks));
-			double departureTime = TIME_WINDOW[0] + RND.nextInt(timeWindowLength);
 
 			Activity act0 = populationFactory.createActivityFromLinkId("dummy", departureLink.getId());
+			act0.setStartTime(0);
 			act0.setEndTime(departureTime);
 			Leg leg = populationFactory.createLeg("drt");
 			Leg leg2 = populationFactory2.createLeg("car");
 			Activity act1 = populationFactory.createActivityFromLinkId("dummy", arrivalLink.getId());
+			act1.setEndTime(43200);
 
 			plan.addActivity(act0);
 			plan.addLeg(leg);

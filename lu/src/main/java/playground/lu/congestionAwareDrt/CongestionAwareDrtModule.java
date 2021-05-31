@@ -20,41 +20,58 @@ import org.matsim.core.router.util.TravelTime;
 
 public class CongestionAwareDrtModule extends AbstractDvrpModeQSimModule {
 
-	private final DrtConfigGroup drtCfg;
-	private final Config config;
+    private final DrtConfigGroup drtCfg;
+    private final Config config;
+    private final double discountFactor;
+    private final double penaltyFactor;
+    private final double overflowFactor;
 
-	public CongestionAwareDrtModule(DrtConfigGroup drtCfg, Config config) {
-		super(drtCfg.getMode());
-		this.drtCfg = drtCfg;
-		this.config = config;
-	}
+    public CongestionAwareDrtModule(DrtConfigGroup drtCfg, Config config) {
+        super(drtCfg.getMode());
+        this.drtCfg = drtCfg;
+        this.config = config;
+        this.discountFactor = 0.9;
+        this.penaltyFactor = 2.0;
+        this.overflowFactor = 2.0;
+    }
 
-	@Override
-	protected void configureQSim() {
-		// Binding the Drt Optimizer to Congestion Aware Optimizer
-		bindModal(DrtOptimizer.class)
-				.toProvider(modalProvider(getter -> new CongestionAwareDrtOptimizer(drtCfg,
-						getter.getModal(Fleet.class), getter.get(MobsimTimer.class),
-						getter.getModal(RebalancingStrategy.class), getter.getModal(DrtScheduleInquiry.class),
-						getter.getModal(ScheduleTimingUpdater.class), getter.getModal(EmptyVehicleRelocator.class),
-						getter.getModal(UnplannedRequestInserter.class), getter.getModal(ReroutingStrategy.class))))
-				.asEagerSingleton();
+    public CongestionAwareDrtModule(DrtConfigGroup drtCfg, Config config,
+                                    double discountFactor, double penaltyFactor, double overflowFactor) {
+        super(drtCfg.getMode());
+        this.drtCfg = drtCfg;
+        this.config = config;
+        this.penaltyFactor = penaltyFactor;
+        this.overflowFactor = overflowFactor;
+        this.discountFactor = discountFactor;
+    }
 
-		// Instruction for creating Vehicle re-routing Tool
-		bindModal(ReroutingStrategy.class).toProvider(modalProvider(
-				getter -> new ReroutingStrategy(getter.getNamed(TravelTime.class, DvrpTravelTimeModule.DVRP_ESTIMATED),
-						drtCfg, getter.getModal(Network.class), getter.getModal(TravelDisutility.class),
-						getter.getModal(VehicleEntry.EntryFactory.class),
-						getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool())))
-				.asEagerSingleton();
+    @Override
+    protected void configureQSim() {
+        // Binding the Drt Optimizer to Congestion Aware Optimizer
+        bindModal(DrtOptimizer.class)
+                .toProvider(modalProvider(getter -> new CongestionAwareDrtOptimizer(drtCfg,
+                        getter.getModal(Fleet.class), getter.get(MobsimTimer.class),
+                        getter.getModal(RebalancingStrategy.class), getter.getModal(DrtScheduleInquiry.class),
+                        getter.getModal(ScheduleTimingUpdater.class), getter.getModal(EmptyVehicleRelocator.class),
+                        getter.getModal(UnplannedRequestInserter.class), getter.getModal(ReroutingStrategy.class))))
+                .asEagerSingleton();
 
-		// Instruction for creating Congestion averting travel disutility
-		// And then add event handler binding to the disutility
-		bindModal(CongestionAvertingTravelDisutility.class)
-				.toProvider(modalProvider(getter -> new CongestionAvertingTravelDisutility(config))).asEagerSingleton();
-		addMobsimScopeEventHandlerBinding().to(modalKey(CongestionAvertingTravelDisutility.class));
+        // Instruction for creating Vehicle re-routing Tool
+        bindModal(ReroutingStrategy.class).toProvider(modalProvider(
+                getter -> new ReroutingStrategy(getter.getNamed(TravelTime.class, DvrpTravelTimeModule.DVRP_ESTIMATED),
+                        drtCfg, getter.getModal(Network.class), getter.getModal(TravelDisutility.class),
+                        getter.getModal(VehicleEntry.EntryFactory.class),
+                        getter.getModal(QSimScopeForkJoinPoolHolder.class).getPool())))
+                .asEagerSingleton();
 
-		// binding the travel disutility to congestion averting travel disutility
-		bindModal(TravelDisutility.class).to(modalKey(CongestionAvertingTravelDisutility.class));
-	}
+        // Instruction for creating Congestion averting travel disutility
+        // And then add event handler binding to the disutility
+        bindModal(CongestionAvertingTravelDisutility.class)
+                .toProvider(modalProvider(getter -> new CongestionAvertingTravelDisutility(config, discountFactor,
+                        penaltyFactor, overflowFactor))).asEagerSingleton();
+        addMobsimScopeEventHandlerBinding().to(modalKey(CongestionAvertingTravelDisutility.class));
+
+        // binding the travel disutility to congestion averting travel disutility
+        bindModal(TravelDisutility.class).to(modalKey(CongestionAvertingTravelDisutility.class));
+    }
 }
