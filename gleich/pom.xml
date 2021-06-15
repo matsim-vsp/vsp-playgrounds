@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.matsim.vsp</groupId>
 		<artifactId>vsp-playgrounds</artifactId>
-		<version>13.0-SNAPSHOT</version>
+		<version>14.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
@@ -12,7 +12,7 @@
 
 	<properties>
 		<!-- release> -->
-		<matsim.version>13.0-SNAPSHOT</matsim.version>
+		<matsim.version>14.0-SNAPSHOT</matsim.version>
 		<!--weekly "release":-->
 		<!-- <matsim.version>13.0-2020w24-SNAPSHOT</matsim.version>  -->
 		<maven.compiler.source>11</maven.compiler.source>
