@@ -41,20 +41,21 @@ class InAndOutputDirectories {
 	static Logger log = Logger.getLogger(InAndOutputDirectories.class);
 
 	public static void main(String[] args) throws IOException {
-//		String relativ = new File(".").getCanonicalPath(); //gibt den Pfad an. --> Note: In this Case it is [git-location]\project folder, here e.g. Z:\git\playgrounds\kturner
-//		String ordner = "\\TestordnerKMT";
-//		File absolut = new File(relativ + ordner); 	//if / or \\ makes no difference
+		String relativ = new File(".").getCanonicalPath(); //gibt den Pfad an. --> Note: In this Case it is [git-location]\project folder, here e.g. Z:\git\playgrounds\kturner
+		String ordner = "\\TestordnerKMT";
+		System.out.println("Der realtive Pfad ist folgender: " + relativ.toString());
+		File absolut = new File(relativ + ordner); 	//if / or \\ makes no difference
 //		absolut.mkdirs();									//Create folder an all missing folders
-//		
-//		System.out.println("Der Absolute Pfad ist folgender: " + absolut.toString());
-//		
+
+		System.out.println("Der Absolute Pfad ist folgender: " + absolut.toString());
+
 //		FileWriter fw1 = new FileWriter(absolut + "/ausgabeKMT_1.txt");
 //		FileWriter fw2 = new FileWriter("./TestordnerKMT/ausgabeKMT_2.txt");
-//				
+//
 //	    writeTestDataToFile(fw1);
 //	    writeTestDataToFile(fw2);
 	    
-	    copyInputFilesToOutputDirectory();
+//	    copyInputFilesToOutputDirectory();
 	    
 	    System.out.println("done");    
 	    
