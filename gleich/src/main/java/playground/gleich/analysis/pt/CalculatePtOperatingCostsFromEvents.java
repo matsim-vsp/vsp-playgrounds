@@ -112,7 +112,7 @@ public class CalculatePtOperatingCostsFromEvents {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedNetwork.xml.gz";
+//		String networkFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedNetwork.xml.gz";
 
 //		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedSchedule.xml.gz";
 //		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/optimizedVehicles.xml.gz";
@@ -120,9 +120,9 @@ public class CalculatePtOperatingCostsFromEvents {
 //		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-1/Vu-DRT-1.output_events.xml.gz";
 //		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-2/Vu-DRT-2.output_events.xml.gz";
 
-		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
-		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
-		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-34/Vu-DRT-34.output_events.xml.gz";
+//		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedSchedule_all-buses-split.xml.gz";
+//		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v1/optimizedVehicles_all-buses-split.xml.gz";
+//		String eventsFile = "../runs-svn/avoev/snz-vulkaneifel/output-Vu-DRT-34/Vu-DRT-34.output_events.xml.gz";
 
 		String shapeFile = null;// "../shared-svn/projects/avoev/matsim-input-files/vulkaneifel/v0/vulkaneifel.shp";
 
@@ -132,7 +132,7 @@ public class CalculatePtOperatingCostsFromEvents {
 //		String inScheduleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v0/optimizedSchedule.xml.gz";
 //		String inTransitVehicleFile = "/home/gregor/git/shared-svn/projects/avoev/matsim-input-files/gladbeck_umland/v0/optimizedVehicles.xml.gz";
 
-		String coordRefSystem = "epsg:25832";
+//		String coordRefSystem = "epsg:25832";
 		String minibusIdentifier = "";
 
 		double costPerHour = 1;
@@ -155,6 +155,16 @@ public class CalculatePtOperatingCostsFromEvents {
 //		double costPerHour = 15;
 //		double costPerKm = 1.75;
 //		double costPerDayFixVeh = 700;
+
+		String networkFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
+		String inScheduleFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-schedule.xml.gz";
+		String inTransitVehicleFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-transit-vehicles.xml.gz";
+		final String inNetworkFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.5-10pct/input/berlin-v5.5-network.xml.gz";
+
+
+
+		String eventsFile = "../runs-svn/avoev/open-berlin/output-i501/i501.output_events.xml.gz";
+		String coordRefSystem = "epsg:31468";
 
 		// add vehicle types
 		CalculatePtOperatingCostsFromEvents costCalculator = new CalculatePtOperatingCostsFromEvents(networkFile, inScheduleFile, inTransitVehicleFile, coordRefSystem, minibusIdentifier);
