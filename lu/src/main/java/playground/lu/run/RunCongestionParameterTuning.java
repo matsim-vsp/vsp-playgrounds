@@ -18,17 +18,22 @@ import playground.lu.congestionAwareDrt.CongestionAwareDrtModule;
 
 public class RunCongestionParameterTuning {
     public static void main(String[] args) {
-//        double[] discountFactors = {0.75, 0.8, 0.85, 0.9, 0.95, 1.0};
-//        double[] penaltyFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
-//        double[] overFlowFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
-
-        // Single run
-        double[] discountFactors = {0.7, 0.65};
+        double[] discountFactors = {0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0};
         double[] penaltyFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
         double[] overFlowFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
 
+        // Single run
+//        double[] discountFactors = {0.7, 0.65};
+//        double[] penaltyFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
+//        double[] overFlowFactors = {1.0, 1.5, 2.0, 2.5, 3.0};
+
         String configPath = "/Users/luchengqi/Documents/MATSimScenarios/Mielec/config.xml";
         String outputPathCommonPart = "/Users/luchengqi/Documents/MATSimScenarios/Mielec/output/parameterTuning/";
+
+        if (args.length != 0) {
+            configPath = args[0];
+            outputPathCommonPart = args[1];
+        }
 
 
         for (double discountFactor : discountFactors) {

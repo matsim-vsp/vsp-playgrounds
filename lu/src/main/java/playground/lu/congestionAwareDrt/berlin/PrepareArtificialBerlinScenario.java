@@ -30,7 +30,7 @@ import playground.lu.readShapeFile.ShapeFileReadingUtils;
 public class PrepareArtificialBerlinScenario {
 	private static final Logger log = Logger.getLogger(PrepareArtificialBerlinScenario.class);
 
-	private static final int NUM_OF_TRIPS = 100000;
+	private static final int NUM_OF_TRIPS = 75000;
 	private static final int NUM_OF_VEHICLES = 30000;
 	private static final int[] TIME_WINDOW = { 21600, 32400 };
 	private final static Random RND = new Random(1234);
@@ -100,7 +100,6 @@ public class PrepareArtificialBerlinScenario {
 			Leg leg = populationFactory.createLeg("drt");
 			Leg leg2 = populationFactory2.createLeg("car");
 			Activity act1 = populationFactory.createActivityFromLinkId("dummy", arrivalLink.getId());
-			act1.setEndTime(43200);
 
 			plan.addActivity(act0);
 			plan.addLeg(leg);

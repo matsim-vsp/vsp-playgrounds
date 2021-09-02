@@ -30,20 +30,4 @@ public class ZonalAvailabilityModule extends AbstractDvrpModeModule {
 		addControlerListenerBinding().to(modalKey(ZonalAvailabilityResultWriter.class));
 	}
 
-//	@Override
-//	public void install() {
-//		bindModal(ZonalAvailabilityHandler2.class)
-//				.toProvider(modalProvider(getter -> new ZonalAvailabilityHandler2(getter.getModal(DrtZonalSystem.class),
-//						getter.getModal(DrtZoneTargetLinkSelector.class), getter.getModal(Network.class))))
-//				.asEagerSingleton();
-//		bindModal(ZonalAvailabilityResultWriter.class).toProvider(modalProvider(
-//				getter -> new ZonalAvailabilityResultWriter(getter.getModal(ZonalAvailabilityHandler2.class))))
-//				.asEagerSingleton();
-//
-//		addEventHandlerBinding().to(modalKey(ZonalAvailabilityHandler2.class));
-//		addMobsimListenerBinding().to(modalKey(ZonalAvailabilityHandler2.class));
-//		addControlerListenerBinding().to(modalKey(ZonalAvailabilityResultWriter.class));
-//
-//	}
-
 }

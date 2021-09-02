@@ -19,12 +19,11 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.lu.readShapeFile.ShapeFileReadingUtils;
 
-public class GenerateDrtVehiclesVulkaneifel {
-	private static final String INPUT_CONFIG = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\Vulkaneifel.config.xml";
-	private static final int[] FLEET_SIZES = { 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850,
-			900, 950, 1000 };
-	private static final String VEHICLE_FILE_NAME_HEADING = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\drtVehicles\\snz-vulkaneifel-random-";
-	private static final String PATH_TO_SERVICEAREA = "C:\\Users\\cluac\\MATSimScenarios\\Vulkaneifel\\ServiceArea\\vulkaneifel.shp";
+public class GenerateDrtVehiclesInCertainArea {
+	private static final String INPUT_CONFIG = "/Users/luchengqi/Desktop/Homework2-package/Task3-Cottbus/config.xml";
+	private static final int[] FLEET_SIZES = { 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600 };
+	private static final String VEHICLE_FILE_NAME_HEADING = "/Users/luchengqi/Desktop/Homework2-package/Task3-Cottbus/drt-vehicles/fleet-size-";
+	private static final String PATH_TO_SERVICEAREA = "/Users/luchengqi/Documents/MATSimScenarios/Cottbus/shapeFiles/cottbus.shp";
 
 	private static final Random RND = new Random();
 
@@ -51,12 +50,12 @@ public class GenerateDrtVehiclesVulkaneifel {
 			while (counter < fleetSize) {
 				Link startLink = linksWithinServiceArea.get(RND.nextInt(numOfLinks));
 				vehicles.add(ImmutableDvrpVehicleSpecification.newBuilder()
-						.id(Id.create("drt" + counter, DvrpVehicle.class)).startLinkId(startLink.getId()).capacity(4)
-						.serviceBeginTime(Math.round(1)).serviceEndTime(Math.round(33 * 3600)).build());
+						.id(Id.create("taxi" + counter, DvrpVehicle.class)).startLinkId(startLink.getId()).capacity(8)
+						.serviceBeginTime(Math.round(1)).serviceEndTime(Math.round(24 * 3600)).build());
 				counter += 1;
 			}
-			String fileNameBase = VEHICLE_FILE_NAME_HEADING + Integer.toString(fleetSize) + "vehicles-4seats";
-			new FleetWriter(vehicles.stream()).write(fileNameBase + ".xml.gz");
+			String fileNameBase = VEHICLE_FILE_NAME_HEADING + Integer.toString(fleetSize);
+			new FleetWriter(vehicles.stream()).write(fileNameBase + ".xml");
 		}
 	}
 }
