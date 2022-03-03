@@ -127,7 +127,7 @@ public class SrV2PlansAndEventsConverter {
 				ActivityEndEvent activityEndEvent = new ActivityEndEvent(departureTime_s, personId, departureLinkId, null, activityTypeEndingActivity);
 				events.add(activityEndEvent);
 				// TODO make mode adjustable
-				PersonDepartureEvent personDepartureEvent = new PersonDepartureEvent(departureTime_s, personId, departureLinkId, "car");
+				PersonDepartureEvent personDepartureEvent = new PersonDepartureEvent(departureTime_s, personId, departureLinkId, "car", null);
 				events.add(personDepartureEvent);
 				
 				double arrivalTime_s = trip.getArrivalTime_s();

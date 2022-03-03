@@ -59,7 +59,7 @@ public class EmissionOfflineMaryland {
         ecg.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);
         ecg.setAverageColdEmissionFactorsFile(averageFleetColdEmissionFactorsFile);
         
-        ecg.setUsingDetailedEmissionCalculation(isUsingDetailedEmissionCalculation);
+        ecg.setUsingDetailedEmissionCalculationStringSetter(isUsingDetailedEmissionCalculation);
         ecg.setDetailedWarmEmissionFactorsFile(detailedWarmEmissionFactorsFile);
         ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
 		

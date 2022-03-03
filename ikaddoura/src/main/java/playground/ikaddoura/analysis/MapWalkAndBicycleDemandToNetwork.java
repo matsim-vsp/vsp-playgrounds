@@ -111,7 +111,7 @@ public class MapWalkAndBicycleDemandToNetwork {
 							
 							double departureTime = trip.getOriginActivity().getEndTime().seconds();
 							
-							List<? extends PlanElement> result = tripRouter.calcRoute(mainMode, fromFacility, toFacility, departureTime, person);
+							List<? extends PlanElement> result = tripRouter.calcRoute(mainMode, fromFacility, toFacility, departureTime, person, null);
 							
 							for (PlanElement pE : result) {
 								if (pE instanceof Leg) {

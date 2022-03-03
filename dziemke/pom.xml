@@ -9,23 +9,12 @@
   <artifactId>dziemke</artifactId>
   <name>dziemke</name>
   <repositories>
-  	<!-- For OpenTripPlanner -->
-  	<!-- <repository>
-   	 	<id>Conveyal</id>
-   	 	<name>Conveyal Maven Repository</name>
-   	 	<url>http://maven.conveyal.com/</url> 
- 	</repository> -->
  	<repository>
 		<id>jitpack.io</id>
 		<url>https://jitpack.io</url>
 	</repository>
   </repositories>
   <dependencies>
- 	<!-- <dependency>
-  		<groupId>org.opentripplanner</groupId>
-  		<artifactId>otp</artifactId>
-  		<version>0.19.0</version>
-	</dependency>  -->
 	  <dependency>
 		  <groupId>org.matsim.contrib</groupId>
 		  <artifactId>otfvis</artifactId>
@@ -67,9 +56,9 @@
 		<scope>compile</scope>
 	</dependency>
 	<dependency>
-		<groupId>com.github.mobitopp</groupId>
+		<groupId>com.github.kit-ifv</groupId>
 		<artifactId>actitopp</artifactId>
-		<version>master-SNAPSHOT</version>
+		<version>1.52</version>
 	</dependency>
 	  <dependency>
 		  <groupId>com.googlecode.json-simple</groupId>

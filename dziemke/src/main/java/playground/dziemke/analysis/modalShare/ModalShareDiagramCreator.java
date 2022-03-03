@@ -2,6 +2,7 @@ package playground.dziemke.analysis.modalShare;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -12,8 +13,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-
-import com.google.common.collect.Lists;
 
 import playground.dziemke.analysis.Trip;
 import playground.dziemke.analysis.TripHandler;
@@ -167,7 +166,9 @@ public class ModalShareDiagramCreator {
         CSVWriter writer = new CSVWriter(path, "\t");
 
         String line = "binNumbers";
-        List<ModeTuple> reverseConsideredModes = Lists.reverse(consideredModes);
+
+        List<ModeTuple> reverseConsideredModes = new ArrayList<>(consideredModes);
+        Collections.reverse(reverseConsideredModes);
         for (ModeTuple mode : reverseConsideredModes)
             line += "\t" + mode.identifier;
         writer.writeLine(line);
