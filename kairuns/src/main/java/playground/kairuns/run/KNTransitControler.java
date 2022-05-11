@@ -57,7 +57,8 @@ class KNTransitControler {
 		if ( args == null || args.length==0 || args[0]==null ){
 			config = ConfigUtils.loadConfig(
 //					"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
-				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/config-kai-local.xml"
+//				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/config-kai-local.xml"
+				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/m2_schedule_delay/config-kai-local.xml"
 						       );
 		} else{
 			config = ConfigUtils.loadConfig( args[0] );

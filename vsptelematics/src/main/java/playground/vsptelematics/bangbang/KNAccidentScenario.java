@@ -69,7 +69,7 @@ public class KNAccidentScenario {
 	private static final Logger log = Logger.getLogger(KNAccidentScenario.class) ;
 
 	enum RunType {base, manualDetour, bangbang, withinDayRerouting, day2day }
-	private static final RunType runType = RunType.manualDetour ;
+	private static final RunType runType = RunType.manualDetour;
 
 	@SuppressWarnings("unused")
 	private static final String KEEP_LAST_EXECUTED = "keepLastExecuted" ;

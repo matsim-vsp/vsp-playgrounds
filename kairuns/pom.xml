@@ -1,65 +1,144 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>org.matsim.vsp</groupId>
-    <artifactId>vsp-playgrounds</artifactId>
-      <version>14.0-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-  <artifactId>kairuns</artifactId>
-  <name>kairuns</name>
+	<parent>
+		<groupId>org.matsim.vsp</groupId>
+		<artifactId>vsp-playgrounds</artifactId>
+		<version>13.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+	<artifactId>kairuns</artifactId>
+	<name>kairuns</name>
+	<description>kairuns</description>
+
+	<properties>
+		<!-- release> -->
+		<matsim.version>14.0</matsim.version>
+	</properties>
+
 	<repositories>
-
-		<!-- Repository for MATSim releases (MATSim is not on Maven central) -->
+		<!--Note that in general repositories are not transitive, so they need to be repeated at every level where needed.-->
 		<repository>
-			<id>matsim</id>
-			<url>https://dl.bintray.com/matsim/matsim</url>
-		</repository>
-
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-
-		<repository>
+			<!-- Geotools is not on Maven central -->
 			<id>osgeo</id>
-			<name>OSGeo Release Repository</name>
+			<name>Geotools repository</name>
+			<!-- <url>http://download.osgeo.org/webdav/geotools</url> -->
 			<url>https://repo.osgeo.org/repository/release/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
 		</repository>
-
 		<repository>
-			<!-- Required for MATSim snaphots -->
-			<id>ojo-snapshots</id>
-			<url>http://oss.jfrog.org/libs-snapshot</url>
+			<!-- Repository for MATSim (MATSim is not on Maven central, releases and snapshots) -->
+			<id>matsim</id>
+			<url>https://repo.matsim.org/repository/matsim</url>
 		</repository>
-
+		<!-- for dependencies of osm-network-reader -->
+		<repository>
+			<id>topobyte</id>
+			<url>https://mvn.topobyte.de</url>
+		</repository>
+		<!-- for dependencies of osm-network-reader -->
+		<repository>
+			<id>slimjars</id>
+			<url>https://mvn.slimjars.com</url>
+		</repository>
 	</repositories>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.matsim.contrib</groupId>
-  		<artifactId>analysis</artifactId>
-		<version>14.0-SNAPSHOT</version>
-  	</dependency>
-	  <dependency>
-		  <groupId>org.matsim.contrib</groupId>
-		  <artifactId>noise</artifactId>
-		  <version>14.0-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-		  <groupId>org.matsim.contrib</groupId>
-		  <artifactId>otfvis</artifactId>
-		  <version>14.0-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-		  <groupId>org.matsim.contrib</groupId>
-		  <artifactId>drt</artifactId>
-		  <version>14.0-SNAPSHOT</version>
-	  </dependency>
-  </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>playground.vsptelematics.ha1.UE1GUI</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.2</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>roadpricing</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>otfvis</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>signals</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>parking</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>drt</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>noise</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+
+		<!--	i needed the following three dependencies to let the simulation of parking search run completely when using the GUI on my machine..-->
+		<!--	(although, i was using java8...)-->
+		<!--	however, this might be unnecessary when using java8. cut out if problems occur. tschlenther, june 2019-->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<!-- JAXB needs javax.activation module (jdk9) -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>javax.activation-api</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+	</dependencies>
 </project>

@@ -174,7 +174,12 @@ public class TelematicsParkingSearchController {
                 public void install() {
                     bind(TravelDisutilityFactory.class).annotatedWith(DvrpModes.mode(TransportMode.car))
                             .toInstance(TimeAsTravelDisutility::new);
-                    install(new DvrpModeRoutingModule(TransportMode.car, new AStarEuclideanFactory()));
+
+                    if ( true ) {
+                        throw new RuntimeException( "following line commented out since it did not compile.  kai, apr'22" );
+                    }
+
+//                    install(new DvrpModeRoutingModule(TransportMode.car, new AStarEuclideanFactory()));
 
                     bind(Network.class).annotatedWith(Names.named(DvrpGlobalRoutingNetworkProvider.DVRP_ROUTING))
                             .to(Network.class)
